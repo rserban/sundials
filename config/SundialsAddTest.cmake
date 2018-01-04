@@ -69,10 +69,8 @@ MACRO(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
   # command line arguments for the test runner script
   SET(TEST_ARGS
-    "--verbose"
-    "--testname=${NAME}"
+    "--testname=${NAME}" 
     "--executablename=$<TARGET_FILE:${EXECUTABLE}>"
-    "--outputdir=${CMAKE_BINARY_DIR}/Testing/output"
     )
 
   # only check the return value, do not diff the output and answer files
@@ -134,7 +132,28 @@ MACRO(SUNDIALS_ADD_TEST NAME EXECUTABLE)
   # all tests are added during development and only unlabeled tests when released
   IF((${SUNDIALS_DEVTESTS} OR "${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL "")
       AND NOT "${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL "exclude")
-    ADD_TEST(NAME ${NAME} COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS})
+
+    ADD_TEST(NAME ${NAME}
+      COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS}
+      "--outputdir=${CMAKE_BINARY_DIR}/Testing/output"
+      "--verbose")
+
+    IF(MEMORYCHECK_COMMAND)
+
+      # add memcheck target for this example
+      ADD_CUSTOM_TARGET(memcheck_${NAME}
+        COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS}
+        "--outputdir=${CMAKE_BINARY_DIR}/Testing/test_memcheck"
+        "--memcheck=${MEMORYCHECK_COMMAND}"
+        COMMENT "Running memcheck on ${NAME}"
+        WORKING_DIRECTORY ${TEST_MEMCHECK_DIR}
+        VERBATIM)
+      
+      # make test_memcheck depend on this example
+      ADD_DEPENDENCIES(test_memcheck memcheck_${NAME})
+
+    ENDIF()
+
   ENDIF()
 
 ENDMACRO()
@@ -173,7 +192,8 @@ MACRO(SUNDIALS_ADD_TEST_INSTALL SOLVER EXECUTABLE)
   ADD_CUSTOM_TARGET(${SOLVER}_test_install
     COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS}
     COMMENT "Running ${SOLVER} installation tests"
-    WORKING_DIRECTORY ${TEST_INSTALL_DIR}/${SOLVER})
+    WORKING_DIRECTORY ${TEST_INSTALL_DIR}/${SOLVER}
+    VERBATIM)
 
   # make test_install depend on solver_test_install
   ADD_DEPENDENCIES(test_install ${SOLVER}_test_install)

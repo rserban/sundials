@@ -1164,6 +1164,17 @@ IF(EXAMPLES_ENABLED)
   # enable regression testing with 'make test'
   IF(TESTRUNNER)
     INCLUDE(CTest)
+
+    # create test_memcheck target to run tests with valgrind
+    ADD_CUSTOM_TARGET(test_memcheck)
+
+    # create directory for test_memcheck output
+    SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
+
+    IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
+      FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
+    ENDIF()
+
   ENDIF()
 
   # Add SUNDIALS examples

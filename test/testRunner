@@ -69,6 +69,9 @@ def main():
     parser.add_argument('--buildcmd', dest='buildCmd', type=str,
                         help='CMake command used to build the example')
 
+    parser.add_argument('--memcheck', dest='memcheck', type=str,
+                        help='run test with memcheck command')
+
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                         help='run verbosely')
 
@@ -167,6 +170,16 @@ def main():
             testCommand = args.runCommand.replace("\"", "").split(" ")
         else:
             testCommand = []
+
+        if(args.memcheck):
+
+            memPath = os.path.join(outDir, args.testName+".out.memcheck")
+
+            testCommand = testCommand + [args.memcheck]
+            testCommand = testCommand + ["--log-file="+memPath]
+            testCommand = testCommand + ["--quiet"]
+            testCommand = testCommand + ["--tool=memcheck"]
+            testCommand = testCommand + ["--leak-check=yes"]
 
         testCommand = testCommand + [args.executableName]
 
