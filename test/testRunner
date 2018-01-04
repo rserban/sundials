@@ -173,10 +173,11 @@ def main():
 
         if(args.memcheck):
 
-            memPath = os.path.join(outDir, args.testName+".out.memcheck")
+            memFile = os.path.join(outDir, args.testName+".out.memcheck")
+            memLog  = os.path.join(outDir, "memcheck.log")
 
             testCommand = testCommand + [args.memcheck]
-            testCommand = testCommand + ["--log-file="+memPath]
+            testCommand = testCommand + ["--log-file="+memFile]
             testCommand = testCommand + ["--quiet"]
             testCommand = testCommand + ["--tool=memcheck"]
             testCommand = testCommand + ["--leak-check=yes"]
@@ -245,6 +246,14 @@ def main():
                     success = False
                 if not compare(outPath, answerPath, testInfo):
                     success = False
+
+            # check if any information was written to the memcheck file
+            if (args.memcheck):
+                with open(memLog, 'a') as mlog:
+                    if(os.stat(memFile).st_size != 0):
+                        print >> mlog, "Potential memory leak: "+testName
+                        print "Potential memory leak found."
+
         finally:
             outFile.close()
 
