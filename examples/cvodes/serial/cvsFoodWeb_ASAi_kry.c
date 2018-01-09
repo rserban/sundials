@@ -100,30 +100,31 @@
 
 #define ZERO RCONST(0.0)
 #define ONE  RCONST(1.0)
+#define TWO  RCONST(2.0)
 
 /* Problem Specification Constants */
 
-#define AA ONE               /* AA = a */
-#define EE RCONST(1e4)       /* EE = e */
-#define GG RCONST(0.5e-6)    /* GG = g */
-#define BB ONE               /* BB = b */
+#define AA    ONE               /* AA = a */
+#define EE    RCONST(1.0e4)     /* EE = e */
+#define GG    RCONST(0.5e-6)    /* GG = g */
+#define BB    ONE               /* BB = b */
 #define DPREY ONE    
 #define DPRED RCONST(0.5)
-#define ALPH ONE
-#define NP 3
-#define NS (2*NP)
+#define ALPH  ONE
+#define NP    3
+#define NS    (2*NP)
 
 /* Method Constants */
 
-#define MX   20
-#define MY   20
-#define MXNS (MX*NS)
-#define AX   ONE
-#define AY   ONE
-#define DX   (AX/(realtype)(MX-1))
-#define DY   (AY/(realtype)(MY-1))
-#define MP   NS
-#define MQ   (MX*MY)
+#define MX    20
+#define MY    20
+#define MXNS  (MX*NS)
+#define AX    ONE
+#define AY    ONE
+#define DX    (AX/(realtype)(MX-1))
+#define DY    (AY/(realtype)(MY-1))
+#define MP    NS
+#define MQ    (MX*MY)
 #define MXMP  (MX*MP)
 #define NGX   2
 #define NGY   2
@@ -133,9 +134,9 @@
 /* CVodeInit Constants */
 
 #define NEQ   (NS*MX*MY)
-#define T0    RCONST(0.0)
-#define RTOL  RCONST(1e-5)
-#define ATOL  RCONST(1e-5)
+#define T0    ZERO
+#define RTOL  RCONST(1.0e-5)
+#define ATOL  RCONST(1.0e-5)
 
 /* Output Constants */
 
@@ -150,7 +151,7 @@
 typedef struct {
   realtype **P[NGRP];
   sunindextype *pivot[NGRP];
-  int ns,  mxns, mp, mq, mx, my, ngrp, ngx, ngy, mxmp;
+  int ns, mxns, mp, mq, mx, my, ngrp, ngx, ngy, mxmp;
   int jgx[NGX+1], jgy[NGY+1], jigx[MX], jigy[MY];
   int jxr[NGX], jyr[NGY];
   realtype acoef[NS][NS], bcoef[NS], diff[NS];
@@ -217,8 +218,8 @@ static int check_retval(void *returnvalue, const char *funcname, int opt);
 /* Small Vector Kernels */
 
 static void v_inc_by_prod(realtype u[], realtype v[], realtype w[], int n);
-static void v_sum_prods(realtype u[], realtype p[], realtype q[], realtype v[], realtype w[],
-                        int n);
+static void v_sum_prods(realtype u[], realtype p[], realtype q[], realtype v[], 
+                        realtype w[], int n);
 static void v_prod(realtype u[], realtype v[], realtype w[], int n);
 static void v_zero(realtype u[], int n);
 
@@ -237,7 +238,7 @@ int main(int argc, char *argv[])
   SUNLinearSolver LS, LSB;
 
   int retval, ncheck;
-  
+
   int indexB;
 
   realtype reltolB=RTOL, abstolB=ATOL;
@@ -290,7 +291,7 @@ int main(int argc, char *argv[])
 
   printf("\nAllocate global memory\n");
   retval = CVodeAdjInit(cvode_mem, NSTEPS, CV_HERMITE);
-  if(check_retval(&retval, "CVadjInit", 1)) return(1);
+  if(check_retval(&retval, "CVodeAdjInit", 1)) return(1);
 
   /* Perform forward run */
 
@@ -460,14 +461,12 @@ static int Precond(realtype t, N_Vector c, N_Vector fc,
   sunindextype mp, denseretval;
   realtype uround, fac, r, r0, save, srur;
   realtype *f1, *fsave, *cdata, *rewtdata;
-  void *cvode_mem;
   WebData wdata;
   N_Vector rewt;
 
   wdata = (WebData) user_data;
-  cvode_mem = wdata->cvode_mem;
   rewt = wdata->rewt;
-  retval = CVodeGetErrWeights(cvode_mem, rewt);
+  retval = CVodeGetErrWeights(wdata->cvode_mem, rewt);
   if(check_retval(&retval, "CVodeGetErrWeights", 1)) return(1);
 
   cdata = N_VGetArrayPointer(c);
@@ -600,7 +599,7 @@ static int PSolve(realtype t, N_Vector c, N_Vector fc,
  */
 
 static int fB(realtype t, N_Vector c, N_Vector cB, 
-               N_Vector cBdot, void *user_data)
+              N_Vector cBdot, void *user_data)
 {
   int i, ic, ici, idxl, idxu, idyl, idyu, iyoff, jx, jy, ns, mxns;
   realtype dcxli, dcxui, dcyli, dcyui, x, y, *cox, *coy, *fsave, *fBsave, dx, dy;
@@ -1062,11 +1061,11 @@ static void GSIter(realtype gamma, N_Vector z, N_Vector x,
      Load local arrays beta, beta2, gam, gam2, and cof1. */
  
   for (i = 0; i < ns; i++) {
-    temp = ONE/(ONE + RCONST(2.0)*gamma*(cox[i] + coy[i]));
+    temp = ONE/(ONE + TWO*gamma*(cox[i] + coy[i]));
     beta[i] = gamma*cox[i]*temp;
-    beta2[i] = RCONST(2.0)*beta[i];
+    beta2[i] = TWO*beta[i];
     gam[i] = gamma*coy[i]*temp;
-    gam2[i] = RCONST(2.0)*gam[i];
+    gam2[i] = TWO*gam[i];
     cof1[i] = temp;
   }
 
@@ -1293,7 +1292,7 @@ static realtype doubleIntgr(N_Vector c, int i, WebData wdata)
   jy = 0;
   intgr_x = cdata[(i-1)+jy*mxns];
   for (jx = 1; jx < mx-1; jx++) {
-    intgr_x += RCONST(2.0)*cdata[(i-1) + jx*ns + jy*mxns]; 
+    intgr_x += TWO*cdata[(i-1) + jx*ns + jy*mxns]; 
   }
   intgr_x += cdata[(i-1)+(mx-1)*ns+jy*mxns];
   intgr_x *= RCONST(0.5)*dx;
@@ -1304,19 +1303,19 @@ static realtype doubleIntgr(N_Vector c, int i, WebData wdata)
     
     intgr_x = cdata[(i-1)+jy*mxns];
     for (jx = 1; jx < mx-1; jx++) {
-      intgr_x += RCONST(2.0)*cdata[(i-1) + jx*ns + jy*mxns]; 
+      intgr_x += TWO*cdata[(i-1) + jx*ns + jy*mxns]; 
     }
     intgr_x += cdata[(i-1)+(mx-1)*ns+jy*mxns];
     intgr_x *= RCONST(0.5)*dx;
     
-    intgr_xy += RCONST(2.0)*intgr_x;
+    intgr_xy += TWO*intgr_x;
 
   }
   
   jy = my-1;
   intgr_x = cdata[(i-1)+jy*mxns];
   for (jx = 1; jx < mx-1; jx++) {
-    intgr_x += RCONST(2.0)*cdata[(i-1) + jx*ns + jy*mxns]; 
+    intgr_x += TWO*cdata[(i-1) + jx*ns + jy*mxns]; 
   }
   intgr_x += cdata[(i-1)+(mx-1)*ns+jy*mxns];
   intgr_x *= RCONST(0.5)*dx;

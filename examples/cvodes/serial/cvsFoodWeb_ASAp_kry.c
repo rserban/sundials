@@ -29,7 +29,7 @@
  * where
  *
  *                 i          ns         j
- *  f (x,y,c)  =  c *(b(i) + sum a(i,j)*c )
+ *  f (x,y,c)  =  c *(b(i) + sum a(i,j)*c ).
  *   i                       j=1
  *
  * The number of species is ns = 2*np, with the first np being prey
@@ -48,8 +48,8 @@
  * The boundary conditions are: normal derivative = 0.
  * A polynomial in x and y is used to set the initial conditions.
  *
- * The PDEs are discretized by central differencing on an MX by
- * MY mesh. The resulting ODE system is stiff.
+ * The PDEs are discretized by central differencing on an MX by MY
+ * mesh. The resulting ODE system is stiff.
  *
  * The ODE system is solved by CVODES using Newton iteration and
  * the SUNLinSol_SPGMR linear solver (scaled preconditioned GMRES).
@@ -57,11 +57,11 @@
  * The preconditioner matrix used is the product of two matrices:
  * (1) A matrix, only defined implicitly, based on a fixed number
  * of Gauss-Seidel iterations using the diffusion terms only.
- * (2) A block-diagonal matrix based on the partial derivatives
- * of the interaction terms f only, using block-grouping (computing
+ * (2) A block-diagonal matrix based on the partial derivatives of
+ * the interaction terms f only, using block-grouping (computing
  * only a subset of the ns by ns blocks).
  *
- * Additionally, CVODES can integrate backwards in time the
+ * Additionally, CVODES integrates backwards in time the
  * the semi-discrete form of the adjoint PDE:
  *   d(lambda)/dt = - D^T ( lambda_xx + lambda_yy )
  *                  - F_c^T lambda
@@ -78,8 +78,7 @@
  * Matrix Methods in Stiff ODE Systems, J. Appl. Math. & Comp., 31
  * (1989), pp. 40-91.  Also available as Lawrence Livermore National
  * Laboratory Report UCRL-95088, Rev. 1, June 1987.
- * -----------------------------------------------------------------
- */
+ * -----------------------------------------------------------------*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,9 +91,9 @@
 #include <sundials/sundials_types.h>   /* defs. of realtype, sunindextype      */
 #include <sundials/sundials_math.h>    /* contains the macros ABS, SUNSQR, EXP */
 
-#define ZERO  RCONST(0.0)
-#define ONE   RCONST(1.0)
-#define TWO   RCONST(2.0)
+#define ZERO RCONST(0.0)
+#define ONE  RCONST(1.0)
+#define TWO  RCONST(2.0)
 
 /* Problem Specification Constants */
 
@@ -234,11 +233,12 @@ int main(int argc, char *argv[])
   int retval, ncheck;
 
   int indexB;
-  
+
   realtype reltolB=RTOL, abstolB=ATOL;
   N_Vector cB;
 
-  c = cB = NULL;
+  c = NULL;
+  cB = NULL;
   wdata = NULL;
   cvode_mem = NULL;
   LS = LSB = NULL;
@@ -535,7 +535,7 @@ static int PSolve(realtype t, N_Vector c, N_Vector fc,
                   realtype gamma, realtype delta,
                   int lr, void *user_data)
 {
-  realtype   ***P;
+  realtype ***P;
   sunindextype **pivot;
   int jx, jy, igx, igy, iv, ig, *jigx, *jigy, mx, my, ngx, mp;
   WebData wdata;
@@ -626,7 +626,7 @@ static int fB(realtype t, N_Vector c, N_Vector cB,
         /* Collect terms and load cdot elements. */
         cBdotdata[ici] = - coy[i-1]*(dcyui - dcyli) 
                          - cox[i-1]*(dcxui - dcxli)
-	                 - fBsave[ici];
+                         - fBsave[ici];
       }
     }
   }
@@ -711,7 +711,7 @@ static int PrecondB(realtype t, N_Vector c,
       }
     }
   }
-  
+
   /* Add identity matrix and do LU decompositions on blocks. */
 
    for (ig = 0; ig < ngrp; ig++) {
@@ -1009,7 +1009,6 @@ static void WebRatesB(realtype x, realtype y, realtype t, realtype c[], realtype
   for (j = 0; j < ns; j++) 
     for (i = 0; i < ns; i++)
       rateB[i] += acoef[j][i]*c[j]*cB[j];
-
 }
 
 /*
@@ -1031,6 +1030,7 @@ static void fblock(realtype t, realtype cdata[], int jx, int jy,
   WebRates(x, y, t, cdata+ic, cdotdata, wdata);
 }
 
+
 /*
  * This routine performs ITMAX=5 Gauss-Seidel iterations to compute an
  * approximation to (P-inverse)*z, where P = I - gamma*Jd, and
@@ -1041,7 +1041,8 @@ static void fblock(realtype t, realtype cdata[], int jx, int jy,
  * vector kernels v_sum_prods, v_prod, v_inc_by_prod.
  */
 
-static void GSIter(realtype gamma, N_Vector z, N_Vector x, WebData wdata)
+static void GSIter(realtype gamma, N_Vector z, N_Vector x, 
+                   WebData wdata)
 {
   int i, ic, iter, iyoff, jx, jy, ns, mxns, mx, my, x_loc, y_loc;
   realtype beta[NS], beta2[NS], cof1[NS], gam[NS], gam2[NS];
