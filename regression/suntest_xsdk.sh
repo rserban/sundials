@@ -1,6 +1,6 @@
 #!/bin/bash
 # -------------------------------------------------------------------------------
-# Programmer(s): David J. Gardner @ LLNL 
+# Programmer(s): David J. Gardner @ LLNL
 # -------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
 # Copyright (c) 2002-2019, Lawrence Livermore National Security
@@ -119,7 +119,7 @@ if [ "$realtype" != "double" ]; then
     PETSCSTATUS=OFF
 fi
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Configure SUNDIALS with CMake
 #
 # NOTE: Helpful options for debugging CMake
@@ -245,6 +245,19 @@ make test 2>&1 | tee test.log
 rc=${PIPESTATUS[0]}
 echo -e "\nmake test returned $rc\n" | tee -a test.log
 if [ $rc -ne 0 ]; then exit 1; fi
+
+# -------------------------------------------------------------------------------
+# Test SUNDIALS with memcheck
+# -------------------------------------------------------------------------------
+
+# smoke test for installation
+#echo "START TEST_MEMCHECK"
+#make test_memcheck 2>&1 | tee test_memcheck.log
+
+# check make install return code
+#rc=${PIPESTATUS[0]}
+#echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
+#if [ $rc -ne 0 ]; then exit 1; fi
 
 # -------------------------------------------------------------------------------
 # Install SUNDIALS

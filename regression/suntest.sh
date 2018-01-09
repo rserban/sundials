@@ -240,6 +240,19 @@ echo -e "\nmake test returned $rc\n" | tee -a test.log
 if [ $rc -ne 0 ]; then exit 1; fi
 
 # -------------------------------------------------------------------------------
+# Test SUNDIALS with memcheck
+# -------------------------------------------------------------------------------
+
+# smoke test for installation
+#echo "START TEST_MEMCHECK"
+#make test_memcheck 2>&1 | tee test_memcheck.log
+
+# check make install return code
+#rc=${PIPESTATUS[0]}
+#echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
+#if [ $rc -ne 0 ]; then exit 1; fi
+
+# -------------------------------------------------------------------------------
 # Install SUNDIALS
 # -------------------------------------------------------------------------------
 
