@@ -1165,15 +1165,19 @@ IF(EXAMPLES_ENABLED)
   IF(TESTRUNNER)
     INCLUDE(CTest)
 
-    # create test_memcheck target to run tests with valgrind
-    ADD_CUSTOM_TARGET(test_memcheck)
+    if(MEMORYCHECK_COMMAND)
 
-    # create directory for test_memcheck output
-    SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
+      # create test_memcheck target to run tests with valgrind
+      ADD_CUSTOM_TARGET(test_memcheck)
 
-    IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
-      FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
-    ENDIF()
+      # create directory for test_memcheck output
+      SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
+
+      IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
+        FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
+      ENDIF()
+
+    endif()
 
   ENDIF()
 
