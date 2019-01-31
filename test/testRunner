@@ -251,8 +251,8 @@ def main():
             if (args.memcheck):
                 with open(memLog, 'a') as mlog:
                     if(os.stat(memFile).st_size != 0):
-                        print >> mlog, "Potential memory leak: "+testName
-                        print "Potential memory leak found."
+                        print("Potential memory leak: %s"%testName, file=mlog)
+                        print("Potential memory leak found.")
 
         finally:
             outFile.close()
