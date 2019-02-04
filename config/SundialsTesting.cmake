@@ -31,6 +31,9 @@ IF(SUNDIALS_DEVTESTS)
 
   # look for the testRunner script in the test directory
   FIND_PROGRAM(TESTRUNNER testRunner PATHS test)
+  IF(NOT TESTRUNNER)
+    PRINT_ERROR("testRunner not found!")
+  ENDIF()
   HIDE_VARIABLE(TESTRUNNER)
 
 ENDIF()
@@ -39,16 +42,27 @@ ENDIF()
 # If memory check command is found, create memcheck target
 IF(MEMORYCHECK_COMMAND)
 
-  # Directory for memcheck output
-  SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
+  IF(SUNDIALS_DEVTESTS)
 
-  # Create memcheck testing directory
-  IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
-    FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
+    # Directory for memcheck output
+    SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
+
+    # Create memcheck testing directory
+    IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
+      FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
+    ENDIF()
+
+    # Create test_memcheck target for memory check test
+    ADD_CUSTOM_TARGET(test_memcheck
+      ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+      "All memcheck tests complete.")
+
+  ELSE()
+
+    # Create test_memcheck target for memory check test
+    ADD_CUSTOM_TARGET(test_memcheck COMMAND ${CMAKE_CTEST_COMMAND} -T memcheck)
+
   ENDIF()
-
-  # Create test_memcheck target for memory check test
-  ADD_CUSTOM_TARGET(test_memcheck)
 
 ENDIF()
 
@@ -57,7 +71,7 @@ ENDIF()
 IF(EXAMPLES_INSTALL)
 
   # Directory for installation testing
-  SET(TEST_INSTALL_DIR ${PROJECT_BINARY_DIR}/Testing_Install)
+  SET(TEST_INSTALL_DIR ${PROJECT_BINARY_DIR}/Testing/test_install)
 
   # Create installation testing directory
   IF(NOT EXISTS ${TEST_INSTALL_DIR})
