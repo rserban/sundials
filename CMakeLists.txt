@@ -121,17 +121,6 @@ INCLUDE(GNUInstallDirs)
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_LIBDIR)
 
 # ---------------------------------------------------------------
-# MACRO definitions
-# ---------------------------------------------------------------
-INCLUDE(SundialsCMakeMacros)
-INCLUDE(SundialsAddF2003InterfaceLibrary)
-
-# ---------------------------------------------------------------
-# Check for deprecated SUNDIALS CMake options/variables
-# ---------------------------------------------------------------
-INCLUDE(SundialsDeprecated)
-
-# ---------------------------------------------------------------
 # Which modules to build?
 # ---------------------------------------------------------------
 
@@ -180,6 +169,20 @@ ENDIF()
 #ELSE()
 #  SET(BUILD_CPODES OFF)
 #ENDIF()
+
+# ---------------------------------------------------------------
+# MACRO definitions
+# ---------------------------------------------------------------
+INCLUDE(CMakeParseArguments) # can be removed when CMake 3.5+ is required
+INCLUDE(SundialsCMakeMacros)
+INCLUDE(SundialsAddF2003InterfaceLibrary)
+INCLUDE(SundialsAddTest)
+INCLUDE(SundialsAddTestInstall)
+
+# ---------------------------------------------------------------
+# Check for deprecated SUNDIALS CMake options/variables
+# ---------------------------------------------------------------
+INCLUDE(SundialsDeprecated)
 
 # ---------------------------------------------------------------
 # xSDK specific options
@@ -558,59 +561,35 @@ ENDIF()
 # Install examples?
 # ---------------------------------------------------------------
 
+# Enable installing examples by default
+SET(DOCSTR "Install SUNDIALS examples")
 IF(EXAMPLES_ENABLED)
-
-  # If examples are enabled, set different options
-
-  # The examples will be linked with the library corresponding to the build type.
-  # Whenever building shared libraries, use them to link the examples.
-  IF(BUILD_SHARED_LIBS)
-    SET(LINK_LIBRARY_TYPE "shared")
-  ELSE(BUILD_SHARED_LIBS)
-    SET(LINK_LIBRARY_TYPE "static")
-  ENDIF(BUILD_SHARED_LIBS)
-
-  # Enable installing examples by default
-  OPTION(EXAMPLES_INSTALL "Install example files" ON)
-
-  # If examples are to be exported, check where we should install them.
-  IF(EXAMPLES_INSTALL)
-
-    SHOW_VARIABLE(EXAMPLES_INSTALL_PATH PATH
-      "Output directory for installing example files" "${CMAKE_INSTALL_PREFIX}/examples")
-
-    IF(NOT EXAMPLES_INSTALL_PATH)
-      PRINT_WARNING("The example installation path is empty"
-                    "Example installation path was reset to its default value")
-      SET(EXAMPLES_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/examples" CACHE STRING
-        "Output directory for installing example files" FORCE)
-    ENDIF(NOT EXAMPLES_INSTALL_PATH)
-
-    # create test_install target and directory for running smoke tests after
-    # installation
-    ADD_CUSTOM_TARGET(test_install)
-
-    SET(TEST_INSTALL_DIR ${PROJECT_BINARY_DIR}/Testing_Install)
-
-    IF(NOT EXISTS ${TEST_INSTALL_DIR})
-      FILE(MAKE_DIRECTORY ${TEST_INSTALL_DIR})
-    ENDIF()
-
-  ELSE(EXAMPLES_INSTALL)
-
-    HIDE_VARIABLE(EXAMPLES_INSTALL_PATH)
-
-  ENDIF(EXAMPLES_INSTALL)
-
-ELSE(EXAMPLES_ENABLED)
-
-  # If examples are disabled, hide all options related to
-  # building and installing the SUNDIALS examples
-
+  OPTION(EXAMPLES_INSTALL "${DOCSTR}" ON)
+ELSE()
+  FORCE_VARIABLE(EXAMPLES_INSTALL BOOL "${DOCSTR}" OFF)
   HIDE_VARIABLE(EXAMPLES_INSTALL)
+ENDIF()
+
+# If examples are to be exported, check where we should install them.
+IF(EXAMPLES_INSTALL)
+
+  SHOW_VARIABLE(EXAMPLES_INSTALL_PATH PATH
+    "Output directory for installing example files"
+    "${CMAKE_INSTALL_PREFIX}/examples")
+
+  IF(NOT EXAMPLES_INSTALL_PATH)
+    PRINT_WARNING("The example installation path is empty"
+      "Example installation path was reset to its default value")
+    SET(EXAMPLES_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/examples" CACHE STRING
+      "Output directory for installing example files" FORCE)
+  ENDIF()
+
+ELSE()
+
   HIDE_VARIABLE(EXAMPLES_INSTALL_PATH)
 
-ENDIF(EXAMPLES_ENABLED)
+ENDIF()
+
 
 # ==============================================================================
 # Advanced (hidden) options
@@ -1113,7 +1092,7 @@ endif(Trilinos_ENABLE)
 
 
 # ===============================================================
-# Add source and configuration files
+# At this point all the configuration options are set.
 # ===============================================================
 
 # ---------------------------------------------------------------
@@ -1136,55 +1115,21 @@ CONFIGURE_FILE(
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include ${PROJECT_BINARY_DIR}/include)
 
 # ---------------------------------------------------------------
-# Add selected modules to the build system
+# Enable testing and add source and example files to the build.
 # ---------------------------------------------------------------
 
+# Enable testing
+IF(EXAMPLES_ENABLED)
+  INCLUDE(SundialsTesting)
+ENDIF()
+
+# Add selected packages and modules to the build
 ADD_SUBDIRECTORY(src)
 
-# ---------------------------------------------------------------
-# Include the subdirectories corresponding to various examples
-# ---------------------------------------------------------------
-
-# If building and installing the examples is enabled, include
-# the subdirectories for those examples that will be built.
-# Also, if we will generate exported example Makefiles, set
-# variables needed in generating them from templates.
-
-# For now, TestRunner is not being distributed.
-# So:
-#  - Don't show TESTRUNNER variable
-#  - Don't enable testing if TestRunner if not found.
-#  - There will be no 'make test' target
-
-INCLUDE(SundialsAddTest)
-HIDE_VARIABLE(TESTRUNNER)
-
+# Add selected examples to the build
 IF(EXAMPLES_ENABLED)
-
-  # enable regression testing with 'make test'
-  IF(TESTRUNNER)
-    INCLUDE(CTest)
-
-    if(MEMORYCHECK_COMMAND)
-
-      # create test_memcheck target to run tests with valgrind
-      ADD_CUSTOM_TARGET(test_memcheck)
-
-      # create directory for test_memcheck output
-      SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
-
-      IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
-        FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
-      ENDIF()
-
-    endif()
-
-  ENDIF()
-
-  # Add SUNDIALS examples
   ADD_SUBDIRECTORY(examples)
-
-ENDIF(EXAMPLES_ENABLED)
+ENDIF()
 
 # ---------------------------------------------------------------
 # Install configuration header files and license file
