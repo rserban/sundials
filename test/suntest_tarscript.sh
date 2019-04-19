@@ -385,9 +385,9 @@ for tarball in *.tar.gz; do
 
                 fi
 
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
                 # Configure SUNDIALS with CMake
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
 
                 # only run development tests with double precision
                 if [ "$rt" != "double" ] && [ "$devtests" == "ON" ]; then
@@ -482,9 +482,9 @@ for tarball in *.tar.gz; do
                 echo -e "\ncmake returned $rc\n" | tee -a configure.log
                 if [ $rc -ne 0 ]; then exit 1; fi
 
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
                 # Make SUNDIALS
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
 
                 echo "START MAKE"
                 make -j $buildthreads 2>&1 | tee make.log
@@ -497,9 +497,9 @@ for tarball in *.tar.gz; do
                 # check if tests should be skipped (compile check only)
                 if [ "$skiptests" = "ON" ]; then cd ..; continue; fi
 
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
                 # Test SUNDIALS
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
 
                 # test sundials
                 echo "START TEST"
@@ -510,9 +510,22 @@ for tarball in *.tar.gz; do
                 echo -e "\nmake test returned $rc\n" | tee -a test.log
                 if [ $rc -ne 0 ]; then exit 1; fi
 
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
+                # Test SUNDIALS with memcheck
+                # --------------------------------------------------------------
+
+                # runtests with memcheck program
+                echo "START TEST_MEMCHECK"
+                make test_memcheck 2>&1 | tee test_memcheck.log
+
+                # check make install return code
+                rc=${PIPESTATUS[0]}
+                echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
+                if [ $rc -ne 0 ]; then exit 1; fi
+
+                # --------------------------------------------------------------
                 # Install SUNDIALS
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
 
                 # install sundials
                 echo "START INSTALL"
@@ -523,9 +536,9 @@ for tarball in *.tar.gz; do
                 echo -e "\nmake install returned $rc\n" | tee -a install.log
                 if [ $rc -ne 0 ]; then exit 1; fi
 
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
                 # Test SUNDIALS Install
-                # -------------------------------------------------------------------
+                # --------------------------------------------------------------
 
                 # smoke test for installation
                 echo "START TEST_INSTALL"
@@ -549,9 +562,9 @@ for tarball in *.tar.gz; do
 
 done
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Return
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 # if we make it here all tests have passed
 exit 0
