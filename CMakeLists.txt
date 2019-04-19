@@ -45,15 +45,15 @@ PROJECT(sundials C)
 # Set some variables with info on the SUNDIALS project
 SET(PACKAGE_BUGREPORT "woodward6@llnl.gov")
 SET(PACKAGE_NAME "SUNDIALS")
-SET(PACKAGE_STRING "SUNDIALS 4.0.2")
+SET(PACKAGE_STRING "SUNDIALS 5.0.0-dev.0")
 SET(PACKAGE_TARNAME "sundials")
 
 # set SUNDIALS version numbers
 # (use "" for the version label if none is needed)
-SET(PACKAGE_VERSION_MAJOR "4")
+SET(PACKAGE_VERSION_MAJOR "5")
 SET(PACKAGE_VERSION_MINOR "0")
-SET(PACKAGE_VERSION_PATCH "2")
-SET(PACKAGE_VERSION_LABEL "")
+SET(PACKAGE_VERSION_PATCH "0")
+SET(PACKAGE_VERSION_LABEL "dev.0")
 
 IF(PACKAGE_VERSION_LABEL)
   SET(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.${PACKAGE_VERSION_PATCH}-${PACKAGE_VERSION_LABEL}")
@@ -78,38 +78,38 @@ MARK_AS_ADVANCED(CLEAR
 
 # Specify the VERSION and SOVERSION for shared libraries
 
-SET(arkodelib_VERSION "3.0.2")
-SET(arkodelib_SOVERSION "3")
+SET(arkodelib_VERSION "4.0.0-dev.0")
+SET(arkodelib_SOVERSION "4")
 
-SET(cvodelib_VERSION "4.0.2")
-SET(cvodelib_SOVERSION "4")
+SET(cvodelib_VERSION "5.0.0-dev.0")
+SET(cvodelib_SOVERSION "5")
 
-SET(cvodeslib_VERSION "4.0.2")
-SET(cvodeslib_SOVERSION "4")
+SET(cvodeslib_VERSION "5.0.0-dev.0")
+SET(cvodeslib_SOVERSION "5")
 
-SET(idalib_VERSION "4.0.2")
-SET(idalib_SOVERSION "4")
+SET(idalib_VERSION "5.0.0-dev.0")
+SET(idalib_SOVERSION "5")
 
-SET(idaslib_VERSION "3.0.2")
-SET(idaslib_SOVERSION "3")
+SET(idaslib_VERSION "4.0.0-dev.0")
+SET(idaslib_SOVERSION "4")
 
-SET(kinsollib_VERSION "4.0.2")
-SET(kinsollib_SOVERSION "4")
+SET(kinsollib_VERSION "5.0.0-dev.0")
+SET(kinsollib_SOVERSION "5")
 
 SET(cpodeslib_VERSION "0.0.0")
 SET(cpodeslib_SOVERSION "0")
 
-SET(nveclib_VERSION "4.0.2")
-SET(nveclib_SOVERSION "4")
+SET(nveclib_VERSION "5.0.0-dev.0")
+SET(nveclib_SOVERSION "5")
 
-SET(sunmatrixlib_VERSION "2.0.2")
-SET(sunmatrixlib_SOVERSION "2")
+SET(sunmatrixlib_VERSION "3.0.0-dev.0")
+SET(sunmatrixlib_SOVERSION "3")
 
-SET(sunlinsollib_VERSION "2.0.2")
-SET(sunlinsollib_SOVERSION "2")
+SET(sunlinsollib_VERSION "3.0.0-dev.0")
+SET(sunlinsollib_SOVERSION "3")
 
-SET(sunnonlinsollib_VERSION "1.0.2")
-SET(sunnonlinsollib_SOVERSION "1")
+SET(sunnonlinsollib_VERSION "2.0.0-dev.0")
+SET(sunnonlinsollib_SOVERSION "2")
 
 # Specify the location of additional CMAKE modules
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
@@ -178,6 +178,7 @@ INCLUDE(SundialsCMakeMacros)
 INCLUDE(SundialsAddF2003InterfaceLibrary)
 INCLUDE(SundialsAddTest)
 INCLUDE(SundialsAddTestInstall)
+INCLUDE(SundialsOption)
 
 # ---------------------------------------------------------------
 # Check for deprecated SUNDIALS CMake options/variables
@@ -422,6 +423,28 @@ IF(LAPACK_ENABLE AND SUNDIALS_INDEX_SIZE MATCHES "64")
                 "Disabling LAPACK")
   SET(LAPACK_ENABLE OFF CACHE BOOL "LAPACK is disabled" FORCE)
 ENDIF()
+
+# ---------------------------------------------------------------
+# Enable SuperLU_DIST support?
+# ---------------------------------------------------------------
+sundials_option(SUPERLUDIST_ENABLE BOOL "Enable SuperLUDIST support" OFF
+                XSDK_NAME TPL_ENABLE_SUPERLUDIST)
+
+sundials_option(SUPERLUDIST_INCLUDE_DIR PATH "SuperLUDIST include directory" "${SUPERLUDIST_INCLUDE_DIR}"
+                DEPENDS_ON SUPERLUDIST_ENABLE
+                XSDK_NAME TPL_SUPERLUDIST_INCLUDE_DIRS)
+
+sundials_option(SUPERLUDIST_LIBRARY_DIR PATH "SuperLUDIST library directory" "${SUPERLUDIST_LIBRARY_DIR}"
+                DEPENDS_ON SUPERLUDIST_ENABLE
+                XSDK_HIDE)
+
+sundials_option(SUPERLUDIST_LIBRARIES STRING "Semi-colon separated list of additional libraries needed for SuperLU_DIST." "${SUPERLUDIST_LIBRARIES}"
+                DEPENDS_ON SUPERLUDIST_ENABLE
+                XSDK_NAME TPL_SUPERLUDIST_LIBRARIES)
+
+sundials_option(SUPERLUDIST_OpenMP BOOL "Enable SUNDIALS support for SuperLUDIST OpenMP on-node parallelism" OFF
+                DEPENDS_ON SUPERLUDIST_ENABLE
+                XSDK_NAME TPL_SUPERLUDIST_OpenMP)
 
 # ---------------------------------------------------------------
 # Enable SuperLU_MT support?
@@ -755,9 +778,10 @@ ENDIF()
 # (b) CUDA is enabled
 # (c) RAJA is enabled
 # (d) Trilinos is enabled
+# (e) SuperLU_DIST is enabled
 # ---------------------------------------------------------------
 
-if(EXAMPLES_ENABLE_CXX OR CUDA_ENABLE OR RAJA_ENABLE OR Trilinos_ENABLE)
+if(EXAMPLES_ENABLE_CXX OR CUDA_ENABLE OR RAJA_ENABLE OR Trilinos_ENABLE OR SUPERLUDIST_ENABLE)
   include(SundialsCXX)
 endif()
 
@@ -820,7 +844,7 @@ endif()
 # Find OpenMP
 # -------------------------------------------------------------
 
-if(OPENMP_ENABLE OR OPENMP_DEVICE_ENABLE)
+if(OPENMP_ENABLE OR OPENMP_DEVICE_ENABLE OR SUPERLUDIST_OpenMP)
 
   include(SundialsOpenMP)
 
@@ -867,7 +891,7 @@ endif()
 
 if(RAJA_ENABLE)
   # Look for CMake configuration file in RAJA installation
-  find_package(RAJA)
+  find_package(RAJA CONFIG PATHS ${RAJA_DIR} ${RAJA_DIR}/share/raja/cmake)
   if (RAJA_FOUND)
     include_directories(${RAJA_INCLUDE_DIR})
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} ${RAJA_NVCC_FLAGS})
@@ -938,6 +962,16 @@ ELSE()
   HIDE_VARIABLE(LAPACK_LIBRARIES)
 
 ENDIF()
+
+# ---------------------------------------------------------------
+# Find (and test) the SuperLUDIST libraries
+# ---------------------------------------------------------------
+
+if(SUPERLUDIST_ENABLE)
+  include(SundialsSuperLUDIST)
+else()
+  set(SUPERLUDIST_DISABLED TRUE CACHE INTERNAL "GUI - return when first set")
+endif()
 
 # ---------------------------------------------------------------
 # Find (and test) the SUPERLUMT libraries

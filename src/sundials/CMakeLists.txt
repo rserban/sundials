@@ -28,18 +28,10 @@ SET(sundials_HEADERS
   sundials_linearsolver.h
   sundials_math.h
   sundials_matrix.h
-  sundials_mpi.h
-  sundials_mpi_types.h
   sundials_nonlinearsolver.h
   sundials_mpi.h
   sundials_mpi_types.h
   sundials_nvector.h
-  sundials_pcg.h
-  sundials_sparse.h
-  sundials_spbcgs.h
-  sundials_spfgmr.h
-  sundials_spgmr.h
-  sundials_sptfqmr.h
   sundials_types.h
   sundials_version.h
   )

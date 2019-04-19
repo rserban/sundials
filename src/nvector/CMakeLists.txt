@@ -17,6 +17,9 @@
 # Always add SUNDIALS serial vector
 add_subdirectory(serial)
 
+# Always add SUNDIALS ManyVector
+add_subdirectory(manyvector)
+
 # Add NVECTOR modules with depedencies
 if(MPI_ENABLE AND MPI_C_FOUND)
   add_subdirectory(parallel)
@@ -34,9 +37,9 @@ if(OPENMP_DEVICE_ENABLE AND OPENMP_FOUND AND OPENMP_SUPPORTS_DEVICE_OFFLOADING)
   add_subdirectory(openmpdev)
 endif(OPENMP_DEVICE_ENABLE AND OPENMP_FOUND AND OPENMP_SUPPORTS_DEVICE_OFFLOADING)
 
-if(PTHREADS_ENABLE AND PTHREADS_FOUND)
+if(PTHREAD_ENABLE AND PTHREADS_FOUND)
   add_subdirectory(pthreads)
-endif(PTHREADS_ENABLE AND PTHREADS_FOUND)
+endif(PTHREAD_ENABLE AND PTHREADS_FOUND)
 
 if(PETSC_ENABLE AND PETSC_FOUND)
   add_subdirectory(petsc)
@@ -51,6 +54,6 @@ if(RAJA_ENABLE AND RAJA_FOUND)
 endif(RAJA_ENABLE AND RAJA_FOUND)
 
 IF(Trilinos_ENABLE AND Trilinos_FUNCTIONAL)
-  ADD_SUBDIRECTORY(nvec_trilinos)
+  ADD_SUBDIRECTORY(trilinos)
 ENDIF(Trilinos_ENABLE AND Trilinos_FUNCTIONAL)
 
