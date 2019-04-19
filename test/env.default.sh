@@ -34,7 +34,7 @@ export FC="$(spack location -i "$compiler")/bin/gfortran"
 
 # compiler flags (test scripts will append C/C++ standard flags)
 export CFLAGS="-g -Wall -Wpedantic -Werror"
-export CXXFLAGS="g -Wall -Wpedantic -Werror"
+export CXXFLAGS="-g -Wall -Wpedantic -Werror"
 export FFLAGS="-g -Wall -Wpedantic -ffpe-summary=none"
 
 # OpenMP settings
