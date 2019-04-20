@@ -29,12 +29,13 @@
 # ------------------------------------------------------------------------------
 
 # check number of inputs
-if [ "$#" -lt 4 ]; then
-    echo "ERROR: FOUR (4) inputs required"
+if [ "$#" -lt 5 ]; then
+    echo "ERROR: FIVE (5) inputs required"
     echo "real type  : [single|double|extended]"
     echo "index size : [32|64]"
     echo "TPLs       : [ON|OFF]"
     echo "test type  : [STD|DEV|NONE]"
+    echo "memcheck   : [ON|OFF]"
     exit 1
 fi
 
@@ -42,11 +43,12 @@ realtype=$1     # precision for realtypes
 indexsize=$2    # integer size for indices
 tplstatus=$3    # enable/disable third party libraries
 testtype=$4     # run standard tests, dev tests, or no tests (compile only)
+memcheck=$5     # memcheck test (make test_memcheck)
 buildthreads=1  # default number threads for parallel builds
 
 # check if the number of build threads was set
-if [ "$#" -gt 4 ]; then
-    buildthreads=$5
+if [ "$#" -gt 5 ]; then
+    buildthreads=$6
 fi
 
 # ------------------------------------------------------------------------------
@@ -110,6 +112,25 @@ case "$testtype" in
         ;;
     *)
         echo "ERROR: Unknown test option: $testtype"
+        exit 1
+        ;;
+esac
+
+# which tests to run (if any)
+case "$memcheck" in
+    ON|On|on)
+        echo -e "\nWARNING: OpenMP and PThreads vectors are disabled when memcheck is ON\n"
+        memtest=ON
+        OMPSTATUS=OFF
+        PTSTATUS=OFF
+        ;;
+    OFF|Off|off)
+        memtest=OFF
+        OMPSTATUS=ON
+        PTSTATUS=ON
+        ;;
+    *)
+        echo "ERROR: Unknown memcheck option: $memcheck"
         exit 1
         ;;
 esac
@@ -289,8 +310,8 @@ cmake \
     -D CUDA_NVCC_FLAGS="--compiler-options;-Wall;--compiler-options;-Werror" \
     -D CUDA_PROPAGATE_HOST_FLAGS=OFF \
     \
-    -D OPENMP_ENABLE=ON \
-    -D PTHREAD_ENABLE=ON \
+    -D OPENMP_ENABLE=${OMPSTATUS} \
+    -D PTHREAD_ENABLE=${PTSTATUS} \
     -D XSDK_ENABLE_CUDA=${CUDASTATUS} \
     -D RAJA_ENABLE=OFF \
     \
@@ -369,14 +390,16 @@ if [ $rc -ne 0 ]; then exit 1; fi
 # Test SUNDIALS with memcheck
 # ------------------------------------------------------------------------------
 
-# runtests with memcheck program
-echo "START TEST_MEMCHECK"
-make test_memcheck 2>&1 | tee test_memcheck.log
+if [ "$memtest" = "ON" ]; then
+    # run tests with memcheck program
+    echo "START TEST_MEMCHECK"
+    make test_memcheck 2>&1 | tee test_memcheck.log
 
-# check make install return code
-rc=${PIPESTATUS[0]}
-echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
-if [ $rc -ne 0 ]; then exit 1; fi
+    # check make install return code
+    rc=${PIPESTATUS[0]}
+    echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
+    if [ $rc -ne 0 ]; then exit 1; fi
+fi
 
 # ------------------------------------------------------------------------------
 # Install SUNDIALS

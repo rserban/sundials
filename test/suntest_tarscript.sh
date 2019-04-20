@@ -55,13 +55,14 @@
 
 # check number of inputs
 if [ "$#" -lt 6 ]; then
-    echo "ERROR: SIX (6) inputs required"
+    echo "ERROR: SEVEN (7) inputs required"
     echo "package      : [arkode|cvode|cvodes|ida|idas|kinsol|sundials|all]"
     echo "library type : [static|shared|each|both]"
     echo "real type    : [single|double|extended|all]"
     echo "index size   : [32|64|both]"
     echo "TPLs         : [ON|OFF]"
     echo "test type    : [STD|DEV|NONE]"
+    echo "memcheck     : [ON|OFF]"
     exit 1
 fi
 
@@ -71,11 +72,12 @@ tmprealtype=$3    # precision for realtypes
 tmpindexsize=$4   # integer size for indices
 tplstatus=$5      # enable/disable third party libraries
 testtype=$6       # run standard tests, dev tests, or no tests (compile only)
+memcheck=$7       # memcheck test (make test_memcheck)
 buildthreads=1    # default number threads for parallel builds
 
 # check if the number of build threads was set
-if [ "$#" -gt 6 ]; then
-    buildthreads=$7
+if [ "$#" -gt 7 ]; then
+    buildthreads=$8
 fi
 
 # ------------------------------------------------------------------------------
@@ -159,6 +161,20 @@ case "$testtype" in
         ;;
     *)
         echo "ERROR: Unknown test option: $testtype"
+        exit 1
+        ;;
+esac
+
+# which tests to run (if any)
+case "$memcheck" in
+    ON|On|on)
+        memtest=ON
+        ;;
+    OFF|Off|off)
+        memtest=OFF
+        ;;
+    *)
+        echo "ERROR: Unknown memcheck option: $memcheck"
         exit 1
         ;;
 esac
@@ -408,6 +424,16 @@ for tarball in *.tar.gz; do
                     dt=$devtests
                 fi
 
+                # do not build OpenMP or PThreads vectors when running memcheck tests
+                echo -e "\nWARNING: OpenMP and PThreads vectors are disabled when memcheck is ON\n"
+                if [ "$memtest" = "ON" ]; then
+                    OMPSTATUS=OFF
+                    PTSTATUS=OFF
+                else
+                    OMPSTATUS=ON
+                    PTSTATUS=ON
+                fi
+
                 echo "START CMAKE"
                 cmake \
                     -D CMAKE_INSTALL_PREFIX="../$installdir" \
@@ -444,8 +470,8 @@ for tarball in *.tar.gz; do
                     -D CUDA_NVCC_FLAGS="--compiler-options;-Wall;--compiler-options;-Werror" \
                     -D CUDA_PROPAGATE_HOST_FLAGS=OFF \
                     \
-                    -D OPENMP_ENABLE=ON \
-                    -D PTHREAD_ENABLE=ON \
+                    -D OPENMP_ENABLE=${OMPSTATUS} \
+                    -D PTHREAD_ENABLE=${PTSTATUS} \
                     -D CUDA_ENABLE=${CUDASTATUS} \
                     -D RAJA_ENABLE=OFF \
                     \
@@ -525,14 +551,16 @@ for tarball in *.tar.gz; do
                 # Test SUNDIALS with memcheck
                 # --------------------------------------------------------------
 
-                # runtests with memcheck program
-                echo "START TEST_MEMCHECK"
-                make test_memcheck 2>&1 | tee test_memcheck.log
+                if [ "$memtest" = "ON" ]; then
+                    # run tests with memcheck program
+                    echo "START TEST_MEMCHECK"
+                    make test_memcheck 2>&1 | tee test_memcheck.log
 
-                # check make install return code
-                rc=${PIPESTATUS[0]}
-                echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
-                if [ $rc -ne 0 ]; then exit 1; fi
+                    # check make install return code
+                    rc=${PIPESTATUS[0]}
+                    echo -e "\nmake test_memcheck returned $rc\n" | tee -a test_memcheck.log
+                    if [ $rc -ne 0 ]; then exit 1; fi
+                fi
 
                 # --------------------------------------------------------------
                 # Install SUNDIALS
