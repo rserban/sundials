@@ -46,6 +46,7 @@ APPDIR=/usr/casc/sundials/apps/rh6
 # MPI
 export MPIDIR="$(spack location -i openmpi@3.1.2 % "$compiler")"
 export MPIEXEC="${MPIDIR}/bin/mpirun"
+export MPISUPP="${MPIDIR}/share/openmpi/openmpi-valgrind.supp"
 
 # LAPACK / BLAS
 export BLASDIR="$(spack location -i openblas@0.3.5~ilp64 % "$compiler")"
