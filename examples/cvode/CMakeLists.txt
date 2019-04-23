@@ -34,7 +34,7 @@ endif()
 
 # CXX examples
 if(EXAMPLES_ENABLE_CXX)
-  if(MPI_ENABLE AND SUNDIALS_SUPERLUDIST)
+  if(MPI_ENABLE AND MPI_CXX_FOUND AND SUNDIALS_SUPERLUDIST)
     add_subdirectory(superludist)
   endif()
 endif()

@@ -39,7 +39,7 @@ if(SUPERLUDIST_OpenMP)
   if(NOT OPENMP_FOUND)
     PRINT_ERROR("SUPERLUDIST_OpenMP is set to ON but OpenMP was not found.")
   elseif(NOT OPENMP45_FOUND)
-    string(CONCAT ERRSTR "SuperLUDIST with OpenMP 4.5+ but it was not found. "
+    string(CONCAT ERRSTR "SuperLUDIST requires OpenMP 4.5+ but it was not found. "
       "Either use CMake 3.9+, or if you are sure OpenMP 4.5+ is available "
       "set the SKIP_OPENMP_DEVICE_CHECK advanced option to ON.")
     PRINT_ERROR(${ERRSTR})
