@@ -128,11 +128,20 @@ MACRO(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
       IF(MEMORYCHECK_COMMAND)
 
-        # add memcheck target for this example
-        ADD_CUSTOM_TARGET(memcheck_${NAME}
-          COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS}
+        # command line arguments for the test runner script
+        SET(MEMTEST_ARGS
           "--outputdir=${CMAKE_BINARY_DIR}/Testing/test_memcheck"
           "--memcheck=${MEMORYCHECK_COMMAND}"
+          )
+
+        IF(MEMORYCHECK_SUPPRESSIONS_FILE)
+          LIST(APPEND MEMTEST_ARGS
+            "--memchecksupp=${MEMORYCHECK_SUPPRESSIONS_FILE}")
+        ENDIF()
+
+        # add memcheck target for this example
+        ADD_CUSTOM_TARGET(memcheck_${NAME}
+          COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS} ${MEMTEST_ARGS}
           COMMENT "Running memcheck on ${NAME}"
           WORKING_DIRECTORY ${TEST_MEMCHECK_DIR}
           VERBATIM)

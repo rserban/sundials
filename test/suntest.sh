@@ -348,6 +348,8 @@ cmake \
     -D SKIP_OPENMP_DEVICE_CHECK=ON \
     \
     -D SUNDIALS_DEVTESTS="${devtests}" \
+    \
+    -D MEMORYCHECK_SUPPRESSIONS_FILE="${MPISUPP}" \
     ../../. 2>&1 | tee configure.log
 
 # check cmake return code

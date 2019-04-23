@@ -70,7 +70,11 @@ def main():
                         help='CMake command used to build the example')
 
     parser.add_argument('--memcheck', dest='memcheck', type=str,
-                        help='run test with memcheck command')
+                        help='memcheck command')
+    parser.add_argument('--memcheckops', dest='memcheckops', type=str,
+                        help='memcheck command options')
+    parser.add_argument('--memchecksupp', dest='memchecksupp', type=str,
+                        help='memcheck suppression file')
 
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                         help='run verbosely')
@@ -181,6 +185,12 @@ def main():
             testCommand = testCommand + ["--quiet"]
             testCommand = testCommand + ["--tool=memcheck"]
             testCommand = testCommand + ["--leak-check=yes"]
+
+            if(args.memcheckops):
+                testCommand = testCommand + [args.memcheckops]
+
+            if(args.memchecksupp):
+                testCommand = testCommand + ["--suppressions="+args.memchecksupp]
 
         testCommand = testCommand + [args.executableName]
 
