@@ -45,9 +45,10 @@
 #                    ON  : All possible TPLs enabled
 #                    OFF : No TPLs enabled
 #   <test type>  = Test type to run:
-#                    STD  : standard tests
-#                    DEV  : development tests
-#                    NONE : no test, configure and compile only
+#                    CONFIG : configure only
+#                    BUILD  : build only
+#                    STD    : run standard tests
+#                    DEV    : run development tests
 #
 # Optional Inputs:
 #   <build threads> = number of threads to use in parallel build (default 1)
@@ -61,7 +62,7 @@ if [ "$#" -lt 6 ]; then
     echo "real type    : [single|double|extended|all]"
     echo "index size   : [32|64|both]"
     echo "TPLs         : [ON|OFF]"
-    echo "test type    : [STD|DEV|NONE]"
+    echo "test type    : [CONFIG|BUILD|STD|DEV]"
     echo "memcheck     : [ON|OFF]"
     exit 1
 fi
@@ -71,7 +72,7 @@ tmplibtype=$2     # library type to build
 tmprealtype=$3    # precision for realtypes
 tmpindexsize=$4   # integer size for indices
 tplstatus=$5      # enable/disable third party libraries
-testtype=$6       # run standard tests, dev tests, or no tests (compile only)
+testtype=$6       # which test type to run
 memcheck=$7       # memcheck test (make test_memcheck)
 buildthreads=1    # default number threads for parallel builds
 
@@ -144,20 +145,21 @@ esac
 
 # which tests to run (if any)
 case "$testtype" in
-    STD|std|Std)
-        # only run standard tests
-        devtests=OFF
-        skiptests=OFF
+    CONFIG|Config|config)
+        # configure only, do not compile or test
+        testtype=CONFIG
         ;;
-    DEV|dev|Dev)
-        # only run development tests
-        devtests=ON
-        skiptests=OFF
+    BUILD|Build|build)
+        # configure and compile only, do not test
+        testtype=BUILD
         ;;
-    NONE|none|None)
-        # only compile sundials, do not test or install
-        devtests=OFF
-        skiptests=ON
+    STD|Std|std)
+        # configure, compile, and run standard tests
+        testtype=STD
+        ;;
+    DEV|Dev|dev)
+        # configure, compile, and run development tests
+        testtype=DEV
         ;;
     *)
         echo "ERROR: Unknown test option: $testtype"
@@ -421,11 +423,11 @@ for tarball in *.tar.gz; do
                 # --------------------------------------------------------------
 
                 # only run development tests with double precision
-                if [ "$rt" != "double" ] && [ "$devtests" == "ON" ]; then
+                if [ "$rt" != "double" ] && [ "$testtype" == "DEV" ]; then
                     echo -e "\nWARNING: Development tests only support realtype = double\n"
-                    dt=OFF
+                    devtests=OFF
                 else
-                    dt=$devtests
+                    devtests=ON
                 fi
 
                 # do not build OpenMP or PThreads vectors when running memcheck tests
@@ -515,13 +517,18 @@ for tarball in *.tar.gz; do
                     -D SUPERLUDIST_OpenMP=ON \
                     -D SKIP_OPENMP_DEVICE_CHECK=ON \
                     \
-                    -D SUNDIALS_DEVTESTS=$dt \
+                    -D SUNDIALS_DEVTESTS=${devtests} \
+                    \
+                    -D MEMORYCHECK_SUPPRESSIONS_FILE="${MPISUPP}" \
                     ../. 2>&1 | tee configure.log
 
                 # check cmake return code
                 rc=${PIPESTATUS[0]}
                 echo -e "\ncmake returned $rc\n" | tee -a configure.log
                 if [ $rc -ne 0 ]; then exit 1; fi
+
+                # check if test type was configure only
+                if [ "$testtype" = "CONFIG" ]; then cd ..; continue; fi
 
                 # --------------------------------------------------------------
                 # Make SUNDIALS
@@ -535,8 +542,8 @@ for tarball in *.tar.gz; do
                 echo -e "\nmake returned $rc\n" | tee -a make.log
                 if [ $rc -ne 0 ]; then exit 1; fi
 
-                # check if tests should be skipped (compile check only)
-                if [ "$skiptests" = "ON" ]; then cd ..; continue; fi
+                # check if test type was build only
+                if [ "$testtype" = "BUILD" ]; then cd ..; continue; fi
 
                 # --------------------------------------------------------------
                 # Test SUNDIALS

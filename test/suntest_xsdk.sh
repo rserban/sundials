@@ -21,8 +21,8 @@
 #   <real type>  = SUNDIALS real type: single, double or extended
 #   <index size> = SUNDIALS index size: 32 or 64
 #   <TPL status> = Enable/disable third party libraries: ON or OFF
-#   <test type>  = Test type: STD (standard), DEV (development), or
-#                  NONE (compile only)
+#   <test type>  = Test type: CONFIG (configure only), BUILD (compile only)
+#                  STD (standard tests), or DEV (development test)
 #
 # Optional Inputs:
 #   <build threads> = number of threads to use in parallel build (default 1)
@@ -34,7 +34,7 @@ if [ "$#" -lt 5 ]; then
     echo "real type  : [single|double|extended]"
     echo "index size : [32|64]"
     echo "TPLs       : [ON|OFF]"
-    echo "test type  : [STD|DEV|NONE]"
+    echo "test type  : [CONFIG|BUILD|STD|DEV]"
     echo "memcheck   : [ON|OFF]"
     exit 1
 fi
@@ -42,7 +42,7 @@ fi
 realtype=$1     # precision for realtypes
 indexsize=$2    # integer size for indices
 tplstatus=$3    # enable/disable third party libraries
-testtype=$4     # run standard tests, dev tests, or no tests (compile only)
+testtype=$4     # which test type to run
 memcheck=$5     # memcheck test (make test_memcheck)
 buildthreads=1  # default number threads for parallel builds
 
@@ -89,26 +89,32 @@ esac
 
 # which tests to run (if any)
 case "$testtype" in
-    STD|std|Std)
-        # only run standard tests
+    CONFIG|Config|config)
+        # configure only, do not compile or test
+        testtype=CONFIG
         devtests=OFF
-        skiptests=OFF
         ;;
-    DEV|dev|Dev)
-        # only run development tests (only double precision supported)
+    BUILD|Build|build)
+        # configure and compile only, do not test
+        testtype=BUILD
+        devtests=OFF
+        ;;
+    STD|Std|std)
+        # configure, compile, and run standard tests
+        testtype=STD
+        devtests=OFF
+        ;;
+    DEV|Dev|dev)
+        # configure, compile, and run development tests
+        # NOTE: only double precision is supported at this time
         if [ "$realtype" != "double" ]; then
             echo -e "\nWARNING: Development tests only support realtype = double\n"
+            testtype=STD
             devtests=OFF
-            skiptests=OFF
         else
+            testtype=DEV
             devtests=ON
-            skiptests=OFF
         fi
-        ;;
-    NONE|none|None)
-        # only compile sundials, do not test or install
-        devtests=OFF
-        skiptests=ON
         ;;
     *)
         echo "ERROR: Unknown test option: $testtype"
@@ -351,12 +357,17 @@ cmake \
     -D SKIP_OPENMP_DEVICE_CHECK=ON \
     \
     -D SUNDIALS_DEVTESTS="${devtests}" \
+    \
+    -D MEMORYCHECK_SUPPRESSIONS_FILE="${MPISUPP}" \
     ../../. 2>&1 | tee configure.log
 
 # check cmake return code
 rc=${PIPESTATUS[0]}
 echo -e "\ncmake returned $rc\n" | tee -a configure.log
 if [ $rc -ne 0 ]; then exit 1; fi
+
+# check if test type was configure only
+if [ "$testtype" = "CONFIG" ]; then exit 0; fi
 
 # ------------------------------------------------------------------------------
 # Make SUNDIALS
@@ -370,8 +381,8 @@ rc=${PIPESTATUS[0]}
 echo -e "\nmake returned $rc\n" | tee -a make.log
 if [ $rc -ne 0 ]; then exit 1; fi
 
-# check if tests should be skipped (compile check only)
-if [ "$skiptests" = "ON" ]; then exit 0; fi
+# check if test type was build only
+if [ "$testtype" = "BUILD" ]; then exit 0; fi
 
 # ------------------------------------------------------------------------------
 # Test SUNDIALS
