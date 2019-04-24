@@ -184,10 +184,10 @@ def main():
             testCommand = testCommand + ["--log-file="+memFile]
             testCommand = testCommand + ["--quiet"]
             testCommand = testCommand + ["--tool=memcheck"]
-            testCommand = testCommand + ["--leak-check=yes"]
+            testCommand = testCommand + ["--leak-check=full"]
 
             if(args.memcheckops):
-                testCommand = testCommand + [args.memcheckops]
+                testCommand = testCommand + args.memcheckops.split(" ")
 
             if(args.memchecksupp):
                 testCommand = testCommand + ["--suppressions="+args.memchecksupp]
