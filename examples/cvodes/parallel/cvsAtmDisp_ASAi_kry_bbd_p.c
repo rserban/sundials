@@ -435,13 +435,20 @@ int main(int argc, char *argv[])
 
   /* Free memory */
 
-  N_VDestroy_Parallel(y);
-  N_VDestroy_Parallel(q);
-  N_VDestroy_Parallel(qB);
-  N_VDestroy_Parallel(yB);
+  N_VDestroy(y);
+  N_VDestroy(q);
+  N_VDestroy(qB);
+  N_VDestroy(yB);
 
   CVodeFree(&cvode_mem);
   SUNLinSolFree(LS);
+
+  /* Free ProblemData */
+  N_VDestroy(d->p);
+  free(d->y_ext);
+  free(d->buf_send);
+  free(d->buf_recv);
+  free(d);
 
   MPI_Finalize();
 
