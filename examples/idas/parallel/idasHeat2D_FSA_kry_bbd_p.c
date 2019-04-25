@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 
   retval = IDASetConstraints(ida_mem, constraints);
   if(check_retval(&retval, "IDASetConstraints", 1, thispe)) MPI_Abort(comm, 1);
-  N_VDestroy_Parallel(constraints);
+  N_VDestroy(constraints);
 
   retval = IDAInit(ida_mem, heatres, t0, uu, up);
   if(check_retval(&retval, "IDAInit", 1, thispe)) MPI_Abort(comm, 1);
@@ -282,12 +282,12 @@ int main(int argc, char *argv[])
        however, the derivatives upS may not and therefore we will have
        to call IDACalcIC to find them) */
 
-    uuS = N_VCloneVectorArray_Parallel(NS, uu);
-    if (check_retval((void *)uuS, "N_VCloneVectorArray_Parallel", 0, thispe)) MPI_Abort(comm, 1);
+    uuS = N_VCloneVectorArray(NS, uu);
+    if (check_retval((void *)uuS, "N_VCloneVectorArray", 0, thispe)) MPI_Abort(comm, 1);
     for (is = 0; is < NS; is++)  N_VConst(ZERO,uuS[is]);
 
-    upS = N_VCloneVectorArray_Parallel(NS, uu);
-    if (check_retval((void *)upS, "N_VCloneVectorArray_Parallel", 0, thispe)) MPI_Abort(comm, 1);
+    upS = N_VCloneVectorArray(NS, uu);
+    if (check_retval((void *)upS, "N_VCloneVectorArray", 0, thispe)) MPI_Abort(comm, 1);
     for (is = 0; is < NS; is++)  N_VConst(ZERO,upS[is]);
 
     /* Initialize FSA using the default internal sensitivity residual function
@@ -353,10 +353,16 @@ int main(int argc, char *argv[])
   IDAFree(&ida_mem);
   SUNLinSolFree(LS);
   free(data);
-  N_VDestroy_Parallel(id);
-  N_VDestroy_Parallel(res);
-  N_VDestroy_Parallel(up);
-  N_VDestroy_Parallel(uu);
+  N_VDestroy(id);
+  N_VDestroy(res);
+  N_VDestroy(up);
+  N_VDestroy(uu);
+
+  if(sensi) {
+    free(pbar);
+    N_VDestroyVectorArray(uuS, NS);
+    N_VDestroyVectorArray(upS, NS);
+  }
 
   MPI_Finalize();
 
