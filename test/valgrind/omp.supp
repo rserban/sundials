@@ -1,0 +1,48 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   fun:gomp_realloc
+   fun:gomp_team_start
+   fun:GOMP_parallel
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   fun:gomp_realloc
+   fun:gomp_init_num_threads
+   fun:initialize_env
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:gomp_malloc
+   fun:gomp_new_thread_pool
+   fun:gomp_team_start
+   fun:GOMP_parallel
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   fun:gomp_team_start
+   fun:GOMP_parallel
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:gomp_malloc
+   fun:gomp_new_team
+   fun:GOMP_parallel
+}

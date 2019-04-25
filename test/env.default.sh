@@ -39,6 +39,7 @@ export FFLAGS="-g -Wall -Wpedantic -ffpe-summary=none"
 
 # OpenMP settings
 export OMP_NUM_THREADS=4
+export OMPSUPP="${PWD}/valgrind/omp.supp"
 
 # path to libraries installed without spack
 APPDIR=/usr/casc/sundials/apps/rh6
