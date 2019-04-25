@@ -11,7 +11,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -41,7 +40,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -54,7 +52,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -68,7 +65,6 @@
    fun:ompi_interlib_declare
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -80,7 +76,6 @@
    fun:ompi_interlib_declare
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -94,7 +89,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -107,7 +101,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -122,7 +115,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -153,7 +145,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -180,7 +171,6 @@
    fun:ompi_interlib_declare
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -210,7 +200,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -224,7 +213,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -237,7 +225,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -252,7 +239,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -340,7 +326,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -369,7 +354,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -384,7 +368,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -398,7 +381,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -414,7 +396,6 @@
    fun:ompi_interlib_declare
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -430,7 +411,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -458,7 +438,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -474,7 +453,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -491,7 +469,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -508,7 +485,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -519,7 +495,6 @@
    fun:ompi_mpiinfo_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -531,7 +506,6 @@
    fun:mca_pml_ob1_add_comm
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -542,7 +516,6 @@
    fun:mca_base_framework_open
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -554,7 +527,6 @@
    fun:ompi_mpiinfo_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -567,7 +539,6 @@
    fun:mca_pml_ob1_add_comm
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -578,7 +549,6 @@
    fun:mca_pml_ob1_add_comm
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -608,7 +578,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -706,7 +675,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -720,7 +688,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -735,7 +702,6 @@
    fun:ompi_interlib_declare
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -749,7 +715,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -764,7 +729,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -778,7 +742,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -794,7 +757,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -810,7 +772,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -860,7 +821,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -893,7 +853,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -909,7 +868,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -925,7 +883,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -941,7 +898,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -957,7 +913,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -973,7 +928,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1004,7 +958,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1034,7 +987,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1049,7 +1001,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1095,7 +1046,6 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1142,7 +1092,6 @@
    fun:ompi_mpiinfo_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1156,7 +1105,6 @@
    fun:mca_pml_ob1_add_comm
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1172,7 +1120,6 @@
    fun:mca_base_framework_open
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1186,7 +1133,6 @@
    fun:mca_base_framework_open
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
 {
    <insert_a_suppression_name_here>
@@ -1200,5 +1146,4 @@
    fun:orte_init
    fun:ompi_mpi_init
    fun:PMPI_Init
-   fun:main
 }
