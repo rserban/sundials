@@ -237,6 +237,7 @@ int main(int argc, char *argv[])
 
   retval = IDASetConstraints(ida_mem, constraints);
   if(check_retval(&retval, "IDASetConstraints", 1, thispe)) MPI_Abort(comm, 1);
+  N_VDestroy(constraints);
 
   retval = IDAInit(ida_mem, resHeat, t0, uu, up);
   if(check_retval(&retval, "IDAInit", 1, thispe)) MPI_Abort(comm, 1);
@@ -284,7 +285,6 @@ int main(int argc, char *argv[])
   N_VDestroy(res);
   N_VDestroy(up);
   N_VDestroy(uu);
-  N_VDestroy(constraints);
 
   DeleteUserData(data);
   free(data);
