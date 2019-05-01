@@ -15,7 +15,7 @@
 # SUNDIALS regression testing using xSDK options
 #
 # Usage: ./suntest_xsdk.sh <real type> <index size> <library type> <TPL status>
-#                          <test type> <build threads>
+#                          <test type> <memcheck> <build threads>
 #
 # Required Inputs:
 #   <real type>  = SUNDIALS real type to build/test with:
@@ -37,14 +37,17 @@
 #                    BUILD    : build only
 #                    STD      : standard tests
 #                    DEV      : development tests
+#   <memcheck>   = Enable/disable memcheck test:
+#                    ON       : run test_memcheck
+#                    OFF      : do not run test_memcheck
 #
 # Optional Inputs:
 #   <build threads> = number of threads to use in parallel build (default 1)
 # ------------------------------------------------------------------------------
 
 # check number of inputs
-if [ "$#" -lt 5 ]; then
-    echo "ERROR: FIVE (5) inputs required"
+if [ "$#" -lt 6 ]; then
+    echo "ERROR: SIX (6) inputs required"
     echo "real type    : [single|double|extended]"
     echo "index size   : [32|64]"
     echo "library type : [static|shared|both]"
@@ -58,7 +61,7 @@ realtype=$1     # precision for realtypes
 indexsize=$2    # integer size for indices
 libtype=$3      # library type to build
 tplstatus=$4    # enable/disable third party libraries
-testtype=$5     # run standard tests, dev tests, or no tests (compile only)
+testtype=$5     # which test type to run
 memcheck=$6     # memcheck test (make test_memcheck)
 buildthreads=1  # default number threads for parallel builds
 
@@ -162,12 +165,12 @@ esac
 case "$memcheck" in
     ON|On|on)
         echo -e "\nWARNING: OpenMP and PThreads vectors are disabled when memcheck is ON\n"
-        memtest=ON
+        memcheck=ON
         OMPSTATUS=OFF
         PTSTATUS=OFF
         ;;
     OFF|Off|off)
-        memtest=OFF
+        memcheck=OFF
         OMPSTATUS=ON
         PTSTATUS=ON
         ;;
@@ -447,7 +450,7 @@ if [ $rc -ne 0 ]; then cd ..; exit 1; fi
 # Test SUNDIALS with memcheck
 # ------------------------------------------------------------------------------
 
-if [ "$memtest" = "ON" ]; then
+if [ "$memcheck" = "ON" ]; then
     # run tests with memcheck program
     echo "START TEST_MEMCHECK"
     make test_memcheck 2>&1 | tee test_memcheck.log

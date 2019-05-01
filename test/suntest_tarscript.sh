@@ -15,7 +15,8 @@
 # SUNDIALS tarball regression testing script
 #
 # Usage: ./suntest_tarscript.sh <package> <lib type> <real type> <index size>
-#                               <TPL status> <test type> <build threads>
+#                               <TPL status> <test type> <memcheck>
+#                               <build threads>
 #
 # Required Inputs:
 #   <package>    = Which tarball to make and test:
@@ -28,13 +29,13 @@
 #                    sundials : create sundials tarball containing all packages
 #                    all      : all of the above options
 #   <real type>  = SUNDIALS real type to build/test with:
-#                    single   : single precision only
-#                    double   : double precision only
-#                    extended : extended (quad) precision only
+#                    single   : single (32-bit) precision
+#                    double   : double (64-bit) precision
+#                    extended : extended (128-bit) precision
 #                    all      : all of the above options
 #   <index size> = SUNDIALS index size to build/test with:
-#                    32       : 32-bit indices only
-#                    64       : 64-bit indices only
+#                    32       : 32-bit indices
+#                    64       : 64-bit indices
 #                    both     : both of the above options
 #   <lib type>   = Which library type to test:
 #                    static   : only build static libraries
@@ -45,10 +46,13 @@
 #                    ON       : All possible TPLs enabled
 #                    OFF      : No TPLs enabled
 #   <test type>  = Test type to run:
-#                    CONFIG : configure only
-#                    BUILD  : build only
-#                    STD    : run standard tests
-#                    DEV    : run development tests
+#                    CONFIG   : configure only
+#                    BUILD    : build only
+#                    STD      : standard tests
+#                    DEV      : development tests
+#   <memcheck>   = Enable/disable memcheck test:
+#                    ON       : run test_memcheck
+#                    OFF      : do not run test_memcheck
 #
 # Optional Inputs:
 #   <build threads> = number of threads to use in parallel build (default 1)
@@ -117,14 +121,14 @@ case "$indexsize" in
         ;;
 esac
 
-# set library types to test
+# set library types
 case "$libtype" in
     STATIC|Static|static) libtype=( "static" );;
     SHARED|Shared|shared) libtype=( "shared" );;
-    EACH|Each|each)       libtype=( "static" "shared") ;;
+    EACH|Each|each)       libtype=( "static" "shared" ) ;;
     BOTH|Both|both)       libtype=( "both" ) ;;
     *)
-        echo "ERROR: Unknown library type option: $libtype"
+        echo "ERROR: Unknown library type: $libtype"
         exit 1
         ;;
 esac
@@ -170,10 +174,10 @@ esac
 # which tests to run (if any)
 case "$memcheck" in
     ON|On|on)
-        memtest=ON
+        memcheck=ON
         ;;
     OFF|Off|off)
-        memtest=OFF
+        memcheck=OFF
         ;;
     *)
         echo "ERROR: Unknown memcheck option: $memcheck"
@@ -281,13 +285,13 @@ for tarball in *.tar.gz; do
             for lt in "${libtype[@]}"; do
 
                 # print test label for Jenkins section collapsing
-                echo "TEST: $rt $is $lt $TPLs $testtype $memtest $buildthreads"
+                echo "TEST: $rt $is $lt $TPLs $testtype $memcheck $buildthreads"
 
-                ./suntest.sh $rt $is $lt $TPLs $testtype $memtest $buildthreads
+                ./suntest.sh $rt $is $lt $TPLs $testtype $memcheck $buildthreads
 
                 # check return flag
                 if [ $? -ne 0 ]; then
-                    echo "FAILED: $rt $is $lt $TPLs $testtype $memtest $buildthreads"
+                    echo "FAILED: $rt $is $lt $TPLs $testtype $memcheck $buildthreads"
                     cd $testdir
                     exit 1
                 else

@@ -36,7 +36,10 @@
 #                    CONFIG   : configure only
 #                    BUILD    : build only
 #                    STD      : standard tests
-#                    DEV      : development tests only
+#                    DEV      : development tests
+#   <memcheck>   = Enable/disable memcheck test:
+#                    ON       : run test_memcheck
+#                    OFF      : do not run test_memcheck
 #
 # Optional Inputs:
 #   <build threads> = number of threads to use in parallel build (default 1)
@@ -162,12 +165,12 @@ esac
 case "$memcheck" in
     ON|On|on)
         echo -e "\nWARNING: OpenMP and PThreads vectors are disabled when memcheck is ON\n"
-        memtest=ON
+        memcheck=ON
         OMPSTATUS=OFF
         PTSTATUS=OFF
         ;;
     OFF|Off|off)
-        memtest=OFF
+        memcheck=OFF
         OMPSTATUS=ON
         PTSTATUS=ON
         ;;
@@ -440,7 +443,7 @@ if [ $rc -ne 0 ]; then cd ..; exit 1; fi
 # Test SUNDIALS with memcheck
 # ------------------------------------------------------------------------------
 
-if [ "$memtest" = "ON" ]; then
+if [ "$memcheck" = "ON" ]; then
     # run tests with memcheck program
     echo "START TEST_MEMCHECK"
     make test_memcheck 2>&1 | tee test_memcheck.log
