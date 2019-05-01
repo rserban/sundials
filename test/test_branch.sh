@@ -37,14 +37,14 @@ for rt in "${realtype[@]}"; do
     for is in "${indexsize[@]}"; do
 
         # print test header for Jenkins section collapsing
-        echo "TEST: ./suntest.sh $rt $is OFF BUILD OFF $bt"
+        echo "TEST: ./suntest.sh $rt $is both OFF BUILD OFF $bt"
 
         # run tests
-        ./suntest.sh $rt $is OFF BUILD OFF $bt
+        ./suntest.sh $rt $is both OFF BUILD OFF $bt
 
         # check return flag
         if [ $? -ne 0 ]; then
-            echo "FAILED: ./suntest.sh $rt $is OFF BUILD OFF $bt" | tee -a suntest.log
+            echo "FAILED: ./suntest.sh $rt $is both OFF BUILD OFF $bt" | tee -a suntest.log
             exit 1
         else
             echo "PASSED"
@@ -64,14 +64,14 @@ for rt in "${realtype[@]}"; do
     for is in "${indexsize[@]}"; do
 
         # print test header for Jenkins section collapsing
-        echo "TEST: ./suntest.sh $rt $is ON DEV OFF $bt"
+        echo "TEST: ./suntest.sh $rt $is both ON DEV OFF $bt"
 
         # run tests
-        ./suntest.sh $rt $is ON DEV OFF $bt
+        ./suntest.sh $rt $is both ON DEV OFF $bt
 
         # check return flag
         if [ $? -ne 0 ]; then
-            echo "FAILED: ./suntest.sh $rt $is ON DEV OFF $bt" | tee -a suntest.log
+            echo "FAILED: ./suntest.sh $rt $is both ON DEV OFF $bt" | tee -a suntest.log
             exit 1
         else
             echo "PASSED"
