@@ -8,7 +8,9 @@ To run the standard C tests use the following commands:
 ```
 mkdir <build directory>
 cd <build directory>
-cmake <sundials directory> -DCMAKE_INSTALL_PREFIX=<prefix> -DEXAMPLES_ENABLE_C=ON
+cmake <sundials directory> \
+      -DCMAKE_INSTALL_PREFIX=<prefix> \
+      -DEXAMPLES_ENABLE_C=ON
 make
 make test
 ```
@@ -16,7 +18,7 @@ This will create an out of source build, build sundials and all the C examples,
 and run the tests (which are the examples) that return a pass/fail status. All
 output is saved to the file `<build directory>/Testing/Temporary/LastTest.log`.
 
-### Development Test
+### Development Tests
 
 Examples that do not return a pass/fail status are considered "development" only
 tests and are excluded by default when running `make test`. To enable all
@@ -29,13 +31,21 @@ To run the development C tests use the following commands:
 ```
 mkdir <build directory>
 cd <build directory>
-cmake <sundials directory> -DCMAKE_INSTALL_PREFIX=<prefix> -DEXAMPLES_ENABLE_C=ON -DSUNDIALS_DEVTESTS=ON
+cmake <sundials directory> \
+      -DCMAKE_INSTALL_PREFIX=<prefix> \
+      -DEXAMPLES_ENABLE_C=ON \
+      -DSUNDIALS_DEVTESTS=ON
 make
 make test
 ```
 This will create an out of source build, build sundials and all the C examples,
 and run all the tests (which are the examples). The output from each test is
 saved to `<build directory>/Testing/output`.
+
+### Memory Check Tests
+
+Both the standard and development tests can run the the example programs under a
+memory check program (e.g., Valgrind's memcheck) using `make test_memcheck`.
 
 ## Testing Scripts
 
@@ -64,7 +74,7 @@ information on running the scripts.
 Note: At this time the testing scripts only run development tests when SUNDIALS
 is configured with real type double (either index size can be used).
 
-### Testing environment
+## Testing environment
 
 To setup the testing environment the test scripts will source one of the
 following environment scripts (listed in the order checked):
@@ -111,8 +121,8 @@ MPICXX    = MPI C++ compiler
 MPIFC     = MPI Fortran
 MPIEXEC   = executable for launching MPI runs
 
-BLAUSSTATUS = ON or OFF
-BLASLIBS    = full path to BLAS library
+BLASSTATUS = ON or OFF
+BLASLIBS   = full path to BLAS library
 
 LAPACKSTATUS = ON or OFF
 LAPACKLIBS   = full path to LAPACK library
