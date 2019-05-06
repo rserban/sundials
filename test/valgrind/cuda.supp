@@ -1,0 +1,2012 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:N_VNewEmpty
+   fun:N_VNewEmpty_Cuda
+   fun:N_VMakeManaged_Cuda
+   fun:_Z24Test_N_VMakeManaged_CudaP17_generic_N_Vectorii
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:N_VNewEmpty
+   fun:N_VNewEmpty_Cuda
+   fun:N_VMakeManaged_Cuda
+   fun:_Z24Test_N_VMakeManaged_CudaP17_generic_N_Vectorii
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+   fun:_ZN10suncudavec6VectorIdiEC1EibbPdS2_
+   fun:N_VMakeManaged_Cuda
+   fun:_Z24Test_N_VMakeManaged_CudaP17_generic_N_Vectorii
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:_Znwm
+   fun:N_VMakeManaged_Cuda
+   fun:_Z24Test_N_VMakeManaged_CudaP17_generic_N_Vectorii
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:_Znwm
+   fun:_ZN10suncudavec6VectorIdiEC1EibbPdS2_
+   fun:N_VMakeManaged_Cuda
+   fun:_Z24Test_N_VMakeManaged_CudaP17_generic_N_Vectorii
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:_dl_allocate_tls
+   fun:pthread_create@@GLIBC_2.2.5
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+   fun:_ZN10suncudavec6VectorIdiEC1EibbPdS2_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec24scaleAddMultiVectorArrayIdiEE9cudaErroriiPT_PPNS_6VectorIS2_T0_EES8_S8_
+   fun:N_VScaleAddMultiVectorArray_Cuda
+   fun:N_VScaleAddMultiVectorArray
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec28linearCombinationVectorArrayIdiEE9cudaErroriiPT_PPNS_6VectorIS2_T0_EES8_
+   fun:N_VLinearCombinationVectorArray_Cuda
+   fun:N_VLinearCombinationVectorArray
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAllocManaged
+   fun:_ZN6cudart12driverHelper16mallocManagedPtrEmjPPv
+   fun:_ZN6cudart20cudaApiMallocManagedEPPvmj
+   fun:cudaMallocManaged
+   fun:_ZN10suncudavec6VectorIdiE15allocateManagedEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAllocManaged
+   fun:_ZN6cudart12driverHelper16mallocManagedPtrEmjPPv
+   fun:_ZN6cudart20cudaApiMallocManagedEPPvmj
+   fun:cudaMallocManaged
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAllocManaged
+   fun:_ZN6cudart12driverHelper16mallocManagedPtrEmjPPv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:_dl_check_map_versions
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+   fun:_ZN10suncudavec6VectorIdiEC1EibbPdS2_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:openaux
+   fun:_dl_catch_error
+   fun:_dl_map_object_deps
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:pthread_cond_broadcast@GLIBC_2.2.5
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:pthread_cond_timedwait@GLIBC_2.2.5
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:pthread_once
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec16scaleVectorArrayIdiEE9cudaErroriPT_PPNS_6VectorIS2_T0_EES8_
+   fun:N_VScaleVectorArray_Cuda
+   fun:N_VScaleVectorArray
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+   fun:_ZN10suncudavec6VectorIdiEC1EibbPdS2_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec24scaleAddMultiVectorArrayIdiEE9cudaErroriiPT_PPNS_6VectorIS2_T0_EES8_S8_
+   fun:N_VScaleAddMultiVectorArray_Cuda
+   fun:N_VScaleAddMultiVectorArray
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec28linearCombinationVectorArrayIdiEE9cudaErroriiPT_PPNS_6VectorIS2_T0_EES8_
+   fun:N_VLinearCombinationVectorArray_Cuda
+   fun:N_VLinearCombinationVectorArray
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart24cudaApiDeviceSynchronizeEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAllocManaged
+   fun:_ZN6cudart12driverHelper16mallocManagedPtrEmjPPv
+   fun:_ZN6cudart20cudaApiMallocManagedEPPvmj
+   fun:cudaMallocManaged
+   fun:_ZN10suncudavec6VectorIdiE15allocateManagedEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:cache_rpath.part.4
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:_dl_new_object
+   fun:_dl_map_object_from_fd
+   fun:_dl_map_object
+   fun:openaux
+   fun:_dl_catch_error
+   fun:_dl_map_object_deps
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   fun:_dl_load_cache_lookup
+   fun:_dl_map_object
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   fun:_dl_load_cache_lookup
+   fun:_dl_map_object
+   fun:openaux
+   fun:_dl_catch_error
+   fun:_dl_map_object_deps
+   fun:dl_open_worker
+   fun:_dl_catch_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:strdup
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+   fun:_ZN10suncudavec6VectorIdiEC1EibbPdS2_
+   fun:N_VNew_Cuda
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart24cudaApiDeviceSynchronizeEv
+   fun:cudaDeviceSynchronize
+   fun:sync_device
+   fun:Test_N_VGetLength
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:start_thread
+   fun:clone
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart24cudaApiDeviceSynchronizeEv
+   fun:cudaDeviceSynchronize
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart24cudaApiDeviceSynchronizeEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec16scaleVectorArrayIdiEE9cudaErroriPT_PPNS_6VectorIS2_T0_EES8_
+   fun:N_VScaleVectorArray_Cuda
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec24scaleAddMultiVectorArrayIdiEE9cudaErroriiPT_PPNS_6VectorIS2_T0_EES8_S8_
+   fun:N_VScaleAddMultiVectorArray_Cuda
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec28linearCombinationVectorArrayIdiEE9cudaErroriiPT_PPNS_6VectorIS2_T0_EES8_
+   fun:N_VLinearCombinationVectorArray_Cuda
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+   fun:_ZN6cudart22doLazyInitContextStateEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+   fun:_ZN6cudart13cudaApiMallocEPPvm
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+   fun:_ZN6cudart19contextStateManager22getRuntimeContextStateEPPNS_12contextStateEb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:_ZN6cudart12contextState9loadCubinEPbPNS_12globalModuleE
+   fun:_ZN6cudart12globalModule15loadIntoContextEPNS_12contextStateE
+   fun:_ZN6cudart12contextState12applyChangesEv
+   fun:_ZN6cudart19contextStateManager36initRuntimeContextState_nonreentrantEPPNS_12contextStateE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+   fun:_ZN6cudart19contextStateManager17initDriverContextEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+   fun:_ZN6cudart19contextStateManager18initPrimaryContextEPNS_6deviceE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuMemAlloc_v2
+   fun:_ZN6cudart12driverHelper9mallocPtrEmPPv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuInit
+   fun:_ZN6cudart11globalState18loadDriverInternalEv
+   fun:_ZN6cudart24__loadDriverInternalUtilEv
+   fun:pthread_once
+   fun:_ZN6cudart8cuosOnceEPiPFvvE
+   fun:_ZN6cudart11globalState16initializeDriverEv
+   fun:cudaMalloc
+   fun:_ZN10suncudavec18ReducePartitioningIdiE14allocateBufferEv
+   fun:_ZN10suncudavec18ReducePartitioningIdiEC1Eij
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   obj:/usr/lib64/libcuda.so.418.56
+   fun:cuDevicePrimaryCtxRetain
+}
