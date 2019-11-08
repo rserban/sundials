@@ -40,14 +40,19 @@ nvec_petsc.tex \
 nvec_cuda.tex \
 nvec_raja.tex \
 nvec_trilinos.tex \
+nvec_manyvector.tex \
+nvec_mpimanyvector.tex \
+nvec_mpiplusx.tex \
 nvec_examples.tex \
 spils_constants.tex \
 sun_org.tex \
+sundials_release_history.tex \
 sundials_version.tex \
 sunmatrix_generic.tex \
 sunmatrix_band.tex \
 sunmatrix_dense.tex \
 sunmatrix_sparse.tex \
+sunmatrix_slunrloc.tex \
 sunmatrix_examples.tex \
 sunlinsol_generic.tex \
 sunlinsol_band.tex \
@@ -60,11 +65,14 @@ sunlinsol_spbcgs.tex \
 sunlinsol_spfgmr.tex \
 sunlinsol_spgmr.tex \
 sunlinsol_sptfqmr.tex \
+sunlinsol_superludist.tex \
 sunlinsol_superlumt.tex \
+sunlinsol_cusolversp.tex \
 sunlinsol_examples.tex \
 sunnonlinsol_generic.tex \
 sunnonlinsol_newton.tex \
 sunnonlinsol_fixedpoint.tex \
+sunnonlinsol_petscsnes.tex \
 types.tex \
 ug.tex \
 biblio.bib

@@ -31,7 +31,7 @@ packaged with two time-stepping modules, *ARKStep* and *ERKStep*.
 *ARKStep* supports ODE systems posed in split, linearly-implicit form,
 
 .. math::
-   M \dot{y} = f_E(t,y) + f_I(t,y),  \qquad y(t_0) = y_0,
+   M \dot{y} = f^E(t,y) + f^I(t,y),  \qquad y(t_0) = y_0,
    :label: ODE_split_linearly_implicit
 
 where :math:`t` is the independent variable, :math:`y` is the set of
@@ -40,9 +40,9 @@ user-specified, nonsingular operator from :math:`\mathbb{R}^N` to
 :math:`\mathbb{R}^N`, and the right-hand side function is partitioned
 into up to two components:
 
-- :math:`f_E(t,y)` contains the "nonstiff" time scale components to be
+- :math:`f^E(t,y)` contains the "nonstiff" time scale components to be
   integrated explicitly, and
-- :math:`f_I(t,y)`  contains the "stiff" time scale components to be
+- :math:`f^I(t,y)`  contains the "stiff" time scale components to be
   integrated implicitly.
 
 Either of these operators may be disabled, allowing for fully
@@ -58,7 +58,7 @@ ODE right-hand side into explicit and implicit components
 enable accurate and efficient time integration of stiff, nonstiff, and
 mixed stiff/nonstiff systems of ordinary differential equations.  A
 key feature allowing for high efficiency of these methods is that only
-the components in :math:`f_I(t,y)` must be solved implicitly, allowing
+the components in :math:`f^I(t,y)` must be solved implicitly, allowing
 for splittings tuned for use with optimal implicit solver algorithms.
 
 This framework allows for significant freedom over the constitutive
@@ -80,7 +80,7 @@ Runge Kutta methods.   As with ARKStep, the ERKStep module is packaged
 with adaptive explicit methods of orders 2-8.
 
 
-For problems that include nonzero implicit term :math:`f_I(t,y)`, the
+For problems that include nonzero implicit term :math:`f^I(t,y)`, the
 resulting implicit system (assumed nonlinear, unless specified
 otherwise) is solved approximately at each integration step, using a
 modified Newton method, inexact Newton method, or an
@@ -107,6 +107,275 @@ preconditioner routines.
 Changes from previous versions
 --------------------------------
 
+Changes in x.x.x
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Fixed a build system bug related to finding LAPACK/BLAS.
+
+Changes in v4.0.0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Build system changes**
+
+Increased the minimum required CMake version to 3.5 for most SUNDIALS
+configurations, and 3.10 when CUDA or OpenMP with device offloading are enabled.
+
+The CMake option ``BLAS_ENABLE`` and the variable ``BLAS_LIBRARIES`` have been
+removed to simplify builds as SUNDIALS packages do not use BLAS directly. For
+third party libraries that require linking to BLAS, the path to the BLAS
+library should be included in the ``_LIBRARIES`` variable for the third party
+library e.g., ``SUPERLUDIST_LIBRARIES`` when enabling SuperLU_DIST.
+
+Fixed a bug in the build system that prevented the PThreads NVECTOR module from
+being built.
+
+**NVECTOR module changes**
+
+Two new functions were added to aid in creating custom NVECTOR objects. The
+constructor :c:func:`N_VNewEmpty()` allocates an "empty" generic NVECTOR with
+the object's content pointer and the function pointers in the operations
+structure initialized to ``NULL``. When used in the constructor for custom
+objects this function will ease the introduction of any new optional operations
+to the NVECTOR API by ensuring only required operations need to be set.
+Additionally, the function :c:func:`N_VCopyOps()` has been added to copy the
+operation function pointers between vector objects. When used in clone routines
+for custom vector objects these functions also will ease the introduction of
+any new optional operations to the NVECTOR API by ensuring all operations
+are copied when cloning objects.
+
+Two new NVECTOR implementations, NVECTOR_MANYVECTOR and
+NVECTOR_MPIMANYVECTOR, have been created to support flexible partitioning
+of solution data among different processing elements (e.g., CPU + GPU) or for
+multi-physics problems that couple distinct MPI-based simulations together. This
+implementation is accompanied by additions to user documentation and SUNDIALS
+examples.
+
+One new required vector operation and ten new optional vector operations have
+been added to the NVECTOR API. The new required operation, :c:func:`N\_VGetLength()`,
+returns the global length of an ``N_Vector``. The optional operations have
+been added to support the new NVECTOR_MPIMANYVECTOR implementation. The
+operation :c:func:`N_VGetCommunicator()` must be implemented by subvectors that are
+combined to create an NVECTOR_MPIMANYVECTOR, but is not used outside of
+this context. The remaining nine operations are optional local reduction
+operations intended to eliminate unnecessary latency when performing vector
+reduction operations (norms, etc.) on distributed memory systems. The optional
+local reduction vector operations are
+:c:func:`N\_VDotProdLocal`,
+:c:func:`N\_VMaxNormLocal`,
+:c:func:`N\_VMinLocal`,
+:c:func:`N\_VL1NormLocal`,
+:c:func:`N\_VWSqrSumLocal`,
+:c:func:`N\_VWSqrSumMaskLocal`,
+:c:func:`N\_VInvTestLocal`,
+:c:func:`N\_VConstrMaskLocal`, and
+:c:func:`N\_VMinQuotientLocal`.
+If an NVECTOR implementation defines any of the local operations as
+``NULL``, then the NVECTOR_MPIMANYVECTOR will call standard NVECTOR
+operations to complete the computation.
+
+An additional NVECTOR implementation, NVECTOR_MPIPLUSX, has been created to
+support the MPI+X paradigm where X is a type of on-node parallelism
+(*e.g.*, OpenMP, CUDA). The implementation is accompanied by additions to
+user documentation and SUNDIALS examples.
+
+The ``*_MPICuda`` and ``*_MPIRaja`` functions have been removed from the
+NVECTOR_CUDA and NVECTOR_RAJA implementations respectively. Accordingly, the
+``nvector_mpicuda.h``, ``nvector_mpiraja.h``, ``libsundials_nvecmpicuda.lib``,
+and ``libsundials_nvecmpicudaraja.lib`` files have been removed. Users should
+use the NVECTOR_MPIPLUSX module coupled in conjunction with the NVECTOR_CUDA
+or NVECTOR_RAJA modules to replace the functionality. The necessary changes are
+minimal and should require few code modifications. See the programs in
+``examples/ida/mpicuda`` and ``examples/ida/mpiraja`` for examples of how to
+use the NVECTOR_MPIPLUSX module with the NVECTOR_CUDA and NVECTOR_RAJA modules
+respectively.
+
+Fixed a memory leak in the NVECTOR_PETSC module clone function.
+
+Made performance improvements to the NVECTOR_CUDA module. Users who utilize a
+non-default stream should no longer see default stream synchronizations
+after memory transfers.
+
+Added a new constructor to the NVECTOR_CUDA module that allows a user to provide
+custom allocate and free functions for the vector data array and internal
+reduction buffer.
+
+Added new Fortran 2003 interfaces for most NVECTOR modules. See the
+:ref:`FortranInterfaces` section for more details.
+
+Added three new NVECTOR utility functions,
+:c:func:`N_VGetVecAtIndexVectorArray()`
+:c:func:`N_VSetVecAtIndexVectorArray()`, and
+:c:func:`N_VNewVectorArray`,
+for working with ``N_Vector`` arrays when using the Fortran 2003 interfaces.
+
+**SUNMatrix module changes**
+
+Two new functions were added to aid in creating custom SUNMATRIX objects. The
+constructor :c:func:`SUNMatNewEmpty()` allocates an "empty" generic SUNMATRIX with
+the object's content pointer and the function pointers in the operations
+structure initialized to ``NULL``. When used in the constructor for custom
+objects this function will ease the introduction of any new optional operations
+to the SUNMATRIX API by ensuring only required operations need to be set.
+Additionally, the function :c:func:`SUNMatCopyOps()` has been added to copy the
+operation function pointers between matrix objects. When used in clone routines
+for custom matrix objects these functions also will ease the introduction of any
+new optional operations to the SUNMATRIX API by ensuring all operations are
+copied when cloning objects.
+
+A new operation, :c:func:`SUNMatMatvecSetup()`, was added to the SUNMATRIX API.
+Users who have implemented custom SUNMATRIX modules will need to at least
+update their code to set the corresponding ``ops`` structure member,
+``matvecsetup``, to ``NULL``.
+
+A new operation, :c:func:`SUNMatMatvecSetup()`, was added to the SUNMATRIX API
+to perform any setup necessary for computing a matrix-vector product. This
+operation is useful for SUNMATRIX implementations which need to prepare the
+matrix itself, or communication structures before performing the matrix-vector
+product. Users who have implemented custom SUNMATRIX modules will need to at
+least update their code to set the corresponding ``ops`` structure member,
+``matvecsetup``, to ``NULL``.
+
+The generic SUNMATRIX API now defines error codes to be returned by
+SUNMATRIX operations. Operations which return an integer flag indiciating
+success/failure may return different values than previously.
+
+A new SUNMATRIX (and SUNLINEARSOLVER) implementation was added to
+facilitate the use of the SuperLU_DIST library with SUNDIALS.
+
+Added new Fortran 2003 interfaces for most SUNMATRIX modules. See the
+:ref:`FortranInterfaces` section for more details.
+
+**SUNLinearSolver module changes**
+
+A new function was added to aid in creating custom SUNLINEARSOLVER objects.
+The constructor :c:func:`SUNLinSolNewEmpty()` allocates an "empty" generic
+SUNLINEARSOLVER with the object's content pointer and the function pointers
+in the operations structure initialized to ``NULL``. When used in the
+constructor for custom objects this function will ease the introduction of any
+new optional operations to the SUNLINEARSOLVER API by ensuring only required
+operations need to be set.
+
+The return type of the SUNLINEARSOLVER API function :c:func:`SUNLinSolLastFlag()`
+has changed from ``long int`` to ``sunindextype`` to be consistent with the
+type used to store row indices in dense and banded linear solver modules.
+
+Added a new optional operation to the SUNLINEARSOLVER API,
+:c:func:`SUNLinSolGetID`, that returns a ``SUNLinearSolver_ID`` for identifying
+the linear solver module.
+
+The SUNLINEARSOLVER API has been updated to make the initialize and setup
+functions optional.
+
+A new SUNLINEARSOLVER (and SUNMATRIX) implementation was added to
+facilitate the use of the SuperLU_DIST library with SUNDIALS.
+
+Added a new SUNLinearSolver implementation, ``SUNLinearSolver_cuSolverSp_batchQR``,
+which leverages the NVIDIA cuSOLVER sparse batched QR method for efficiently
+solving block diagonal linear systems on NVIDIA GPUs.
+
+
+Added three new accessor functions to the SUNLinSol_KLU module,
+:c:func:`SUNLinSol_KLUGetSymbolic()`, :c:func:`SUNLinSol_KLUGetNumeric()`, and
+:c:func:`SUNLinSol_KLUGetCommon()`, to provide user access to the underlying
+KLU solver structures.
+
+Added new Fortran 2003 interfaces for most SUNLINEARSOLVER modules. See the
+:ref:`FortranInterfaces` section for more details.
+
+**SUNNonlinearSolver module changes**
+
+A new function was added to aid in creating custom SUNNONLINEARSOLVER
+objects. The constructor :c:func:`SUNNonlinSolNewEmpty()` allocates an "empty"
+generic SUNNONLINEARSOLVER with the object's content pointer and the function
+pointers in the operations structure initialized to ``NULL``. When used in the
+constructor for custom objects this function will ease the introduction of any
+new optional operations to the SUNNONLINEARSOLVER API by ensuring only
+required operations need to be set.
+
+To facilitate the use of user supplied nonlinear solver convergence test
+functions the :c:func:`SUNNonlinSolSetConvTestFn()` function in the
+SUNNONLINEARSOLVER API has been updated to take a ``void*`` data pointer as
+input. The supplied data pointer will be passed to the nonlinear solver
+convergence test function on each call.
+
+The inputs values passed to the first two inputs of the :c:func:`SUNNonlinSolSolve()`
+function in the SUNNONLINEARSOLVER have been changed to be the predicted
+state and the initial guess for the correction to that state. Additionally,
+the definitions of :c:type:`SUNNonlinSolLSetupFn` and :c:type:`SUNNonlinSolLSolveFn`
+in the SUNNONLINEARSOLVER API have been updated to remove unused input
+parameters.
+
+Added a new ``SUNNonlinearSolver`` implementation, ``SUNNonlinsol_PetscSNES``,
+which interfaces to the PETSc SNES nonlinear solver API.
+
+Added new Fortran 2003 interfaces for most SUNNONLINEARSOLVER modules. See the
+:ref:`FortranInterfaces` section for more details.
+
+**ARKode changes**
+
+The MRIStep module has been updated to support explicit, implicit, or IMEX
+methods as the fast integrator using the ARKStep module. As a result some
+function signatures have been changed including :c:func:`MRIStepCreate` which
+now takes an ARKStep memory structure for the fast integration as an input.
+
+Fixed a bug in the ARKStep time-stepping module that would result in an infinite
+loop if the nonlinear solver failed to converge more than the maximum allowed times
+during a single step.
+
+Fixed a bug that would result in a "too much accuracy requested" error when
+using fixed time step sizes with explicit methods in some cases.
+
+Fixed a bug in ARKStep where the mass matrix linear solver setup function was
+not called in the Matrix-free case.
+
+Fixed a minor bug in ARKStep where an incorrect flag is reported when an
+error occurs in the mass matrix setup or Jacobian-vector product setup
+functions.
+
+Fixed a memeory leak in FARKODE when not using the default nonlinear solver.
+
+The reinitialization functions :c:func:`ERKStepReInit()`,
+:c:func:`ARKStepReInit()`, and :c:func:`MRIStepReInit()` have been updated to
+retain the minimum and maxiumum step size values from before reinitialization
+rather than resetting them to the default values.
+
+Removed extraneous calls to :c:func:`N_VMin()` for simulations where
+the scalar valued absolute tolerance, or all entries of the
+vector-valued absolute tolerance array, are strictly positive.  In
+this scenario, ARKode will remove at least one global reduction per
+time step.
+
+The ARKLS interface has been updated to only zero the Jacobian matrix before
+calling a user-supplied Jacobian evaluation function when the attached linear
+solver has type ``SUNLINEARSOLVER_DIRECT``.
+
+A new linear solver interface function :c:func:`ARKLsLinSysFn` was added as an
+alternative method for evaluating the linear system :math:`A = M - \gamma J`.
+
+Added two new embedded ARK methods of orders 4 and 5 to ARKode (from [KC2019]_).
+
+Support for optional inequality constraints on individual components of the
+solution vector has been added the ARKode ERKStep and ARKStep modules. See
+the descriptions of :c:func:`ERKStepSetConstraints()` and
+:c:func:`ARKStepSetConstraints()` for more details. Note that enabling
+constraint handling requires the NVECTOR operations :c:func:`N_VMinQuotient()`,
+:c:func:`N_VConstrMask()`, and :c:func:`N_VCompare()` that were not previously
+required by ARKode.
+
+Added two new 'Get' functions to ARKStep, :c:func:`ARKStepGetCurrentGamma()`,
+and :c:func:`ARKStepGetCurrentState`, that may be useful to users who choose
+to provide their own nonlinear solver implementation.
+
+Add two new 'Set' functions to MRIStep, :c:func:`MRIStepSetPreInnerFn()` and
+:c:func:`MRIStepSetPostInnerFn()` for performing communication or memory
+transfers needed before or after the inner integration.
+
+A new Fortran 2003 interface to ARKode was added. This includes Fortran 2003 interfaces
+to the ARKStep, ERKStep, and MRIStep time-stepping modules. See the
+:ref:`FortranInterfaces` section for more details.
+
+
+
 Changes in v3.1.0
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -123,7 +392,7 @@ enables all examples that use CUDA including the RAJA examples with a CUDA back 
 (if the RAJA NVECTOR is enabled).
 
 The implementation header file `arkode_impl.h` is no longer installed. This means users
-who are direclty manipulating the ``ARKodeMem`` structure will need to update their code
+who are directly manipulating the ``ARKodeMem`` structure will need to update their code
 to use ARKode's public API.
 
 Python is no longer required to run ``make test`` and ``make test_install``.
@@ -179,7 +448,7 @@ Two changes were made in the initial step size algorithm:
 * Fixed an efficiency bug where an extra call to the right hand side function was made.
 
 * Changed the behavior of the algorithm if the max-iterations case is hit.
-  Before the algorithm would exit with the step size calculated on the 
+  Before the algorithm would exit with the step size calculated on the
   penultimate iteration. Now it will exit with the step size calculated
   on the final iteration.
 
@@ -191,7 +460,7 @@ ARKode's previous direct and iterative linear solver interfaces, ARKDLS and
 ARKSPILS, have been merged into a single unified linear solver interface, ARKLS,
 to support any valid SUNLINSOL module. This includes ``DIRECT`` and
 ``ITERATIVE`` types as well as the new ``MATRIX_ITERATIVE`` type. Details
-regarding how ARKLS utilizes linear solvers of each type as well as discussion 
+regarding how ARKLS utilizes linear solvers of each type as well as discussion
 regarding intended use cases for user-supplied SUNLinSol implementations are
 included in the chapter :ref:`SUNLinSol`. All ARKode examples programs and the
 standalone linear solver examples have been updated to use the unified linear
@@ -264,16 +533,16 @@ Multiple changes to the CUDA NVECTOR were made:
 
   * Changed the ``N_VMake_Cuda`` function to take a host data pointer and a device
     data pointer instead of an ``N_VectorContent_Cuda`` object.
-    
+
   * Changed ``N_VGetLength_Cuda`` to return the global vector length instead of
     the local vector length.
 
   * Added ``N_VGetLocalLength_Cuda`` to return the local vector length.
-  
+
   * Added ``N_VGetMPIComm_Cuda`` to return the MPI communicator used.
 
   * Removed the accessor functions in the namespace ``suncudavec``.
-  
+
   * Added the ability to set the ``cudaStream_t`` used for execution of the CUDA
     NVECTOR kernels. See the function ``N_VSetCudaStreams_Cuda``.
 
@@ -288,13 +557,13 @@ Multiple changes to the RAJA NVECTOR were made:
   * Added ``N_VGetLocalLength_Raja`` to return the local vector length.
 
   * Added ``N_VGetMPIComm_Raja`` to return the MPI communicator used.
- 
+
   * Removed the accessor functions in the namespace ``sunrajavec``.
 
 A new NVECTOR implementation for leveraging OpenMP 4.5+ device offloading has
 been added, NVECTOR_OpenMPDEV. See :ref:`NVectors.OpenMPDEV` for more details.
 
-     
+
 Changes in v2.2.1
 ^^^^^^^^^^^^^^^^^^^^^^^
 

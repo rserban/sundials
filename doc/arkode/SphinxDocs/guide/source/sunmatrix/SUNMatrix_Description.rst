@@ -63,6 +63,7 @@ defined as
      int          (*copy)(SUNMatrix, SUNMatrix);
      int          (*scaleadd)(realtype, SUNMatrix, SUNMatrix);
      int          (*scaleaddi)(realtype, SUNMatrix);
+     int          (*matvecsetup)(SUNMatrix);
      int          (*matvec)(SUNMatrix, N_Vector, N_Vector);
      int          (*space)(SUNMatrix, long int*, long int*);
    };
@@ -114,12 +115,50 @@ particular implementation of the SUNMATRIX module must:
   implementation to be used to access different parts in the content
   field of the newly defined ``SUNMatrix``. 
 
+To aid in the creation of custom SUNMATRIX modules the generic SUNMATRIX module
+provides three utility functions :c:func:`SUNMatNewEmpty()`,  :c:func:`SUNMatCopyOps()`,
+and :c:func:`SUNMatFreeEmpty`. When used in custom SUNMATRIX constructors and clone
+routines these functions will ease the introduction of any new optional matrix
+operations to the SUNMATRIX API by ensuring only required operations need to be
+set and all operations are copied when cloning a matrix.
 
+.. c:function:: SUNMatrix SUNMatNewEmpty()
+
+  This function allocates a new generic ``SUNMatrix`` object and initializes its
+  content pointer and the function pointers in the operations structure to ``NULL``.
+
+  **Return value:** If successful, this function returns a ``SUNMatrix``
+  object. If an error occurs when allocating the object, then this routine will
+  return ``NULL``.
+
+.. c:function:: int SUNMatCopyOps(SUNMatrix A, SUNMatrix B)
+
+  This function copies the function pointers in the ``ops`` structure of ``A``
+  into the ``ops`` structure of ``B``. 
+
+   **Arguments:**
+      * *A* -- the matrix to copy operations from.
+      * *B* -- the matrix to copy operations to.
+
+   **Return value:**  If successful, this function returns ``0``. If either of
+   the inputs are ``NULL`` or the ``ops`` structure of either input is ``NULL``,
+   then is function returns a non-zero value.
+
+.. c:function:: void SUNMatFreeEmpty(SUNMatrix A)
+
+  This routine frees the generic ``SUNMatrix`` object, under the assumption that any
+  implementation-specific data that was allocated within the underlying content structure
+  has already been freed. It will additionally test whether the ops pointer is ``NULL``, 
+  and, if it is not, it will free it as well.
+
+   **Arguments:**
+      * *A* -- a SUNMatrix object
+
+  
 Each SUNMATRIX implementation included in SUNDIALS has a unique 
 identifier specified in enumeration and shown in the table below.  
 It is recommended that a user-supplied SUNMATRIX implementation use
 the ``SUNMATRIX_CUSTOM`` identifier.
-
 
 
 .. _SUNMatrix.matrixIDs:
@@ -129,11 +168,13 @@ Identifiers associated with matrix kernels supplied with SUNDIALS
 
 .. cssclass:: table-bordered
 
-======================  ============================================  ==============
-Matrix ID               Matrix type                                   ID Value
-======================  ============================================  ==============
-SUNMATRIX_DENSE         Dense :math:`M\times N` matrix                0
-SUNMATRIX_BAND          Band :math:`M\times M` matrix                 1
-SUNMATRIX_SPARSE        Sparse (CSR or CSC) :math:`M\times N` matrix  2
-SUNMATRIX_CUSTOM        User-provided custom matrix                   3
-======================  ============================================  ==============
+======================  ==============================================  ==============
+Matrix ID               Matrix type                                     ID Value
+======================  ==============================================  ==============
+SUNMATRIX_DENSE         Dense :math:`M\times N` matrix                  0
+SUNMATRIX_BAND          Band :math:`M\times M` matrix                   1
+SUNMATRIX_SPARSE        Sparse (CSR or CSC) :math:`M\times N` matrix    2
+SUNMATRIX_SLUNRLOC      SUNMatrix wrapper for SuperLU_DIST SuperMatrix  3
+SUNMATRIX_CUSTOM        User-provided custom matrix                     4
+======================  ==============================================  ==============
+

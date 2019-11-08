@@ -79,7 +79,7 @@ specify the explicit and/or implicit portions of the ODE system:
    **Arguments:**
       * *t* -- the current value of the independent variable.
       * *y* -- the current value of the dependent variable vector.
-      * *ydot* -- the output vector that forms a portion of the ODE RHS :math:`f_E(t,y) + f_I(t,y)`.
+      * *ydot* -- the output vector that forms a portion of the ODE RHS :math:`f^E(t,y) + f^I(t,y)`.
       * *user_data* -- the `user_data` pointer that was passed to :c:func:`ARKStepSetUserData()`.
 
    **Return value:**
@@ -266,10 +266,10 @@ Explicit stability function
 --------------------------------------
 
 A user may supply a function to predict the maximum stable step size
-for the explicit portion of the ImEx system, :math:`f_E(t,y)`.  While
+for the explicit portion of the ImEx system, :math:`f^E(t,y)`.  While
 the accuracy-based time step adaptivity algorithms may be sufficient
 for retaining a stable solution to the ODE system, these may be
-inefficient if :math:`f_E(t,y)` contains moderately stiff terms.  In
+inefficient if :math:`f^E(t,y)` contains moderately stiff terms.  In
 this scenario, a user may provide a function of type :c:type:`ARKExpStabFn`
 to provide this stability information to ARKStep.  This function
 must set the scalar step size satisfying the stability restriction for
@@ -340,24 +340,25 @@ ODE system, the user must supply a function of type :c:type:`ARKRootFn`.
 Jacobian construction (matrix-based linear solvers)
 --------------------------------------------------------------
 
-If a matrix-based linear solver module is used (i.e., a non-NULL
-``SUNMatrix`` object was supplied to
-:c:func:`ARKStepSetLinearSolver()` in section
-:ref:`ARKStep_CInterface.Skeleton`), the user may provide a
-function of type :c:type:`ARKLsJacFn` to provide the Jacobian approximation.
+If a matrix-based linear solver module is used (i.e., a non-NULL ``SUNMatrix``
+object was supplied to :c:func:`ARKStepSetLinearSolver()` in section
+:ref:`ARKStep_CInterface.Skeleton`), the user may provide a function of type
+:c:type:`ARKLsJacFn` to provide the Jacobian approximation or
+:c:type:`ARKLsLinSysFn` to provide an approximation of the linear system
+:math:`A = I - \gamma J` or :math:`A = M - \gamma J`.
 
 
 
 .. c:type:: typedef int (*ARKLsJacFn)(realtype t, N_Vector y, N_Vector fy, SUNMatrix Jac, void* user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
 
    This function computes the Jacobian matrix :math:`J =
-   \frac{\partial f_I}{\partial y}` (or an approximation to it).
+   \frac{\partial f^I}{\partial y}` (or an approximation to it).
 
    **Arguments:**
       * *t* -- the current value of the independent variable.
       * *y* -- the current value of the dependent variable vector, namely
         the predicted value of :math:`y(t)`.
-      * *fy* -- the current value of the vector :math:`f_I(t,y)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
       * *Jac* -- the output Jacobian matrix.
       * *user_data* -- a pointer to user data, the same as the
         *user_data* parameter that was passed to :c:func:`ARKStepSetUserData()`.
@@ -383,6 +384,11 @@ function of type :c:type:`ARKLsJacFn` to provide the Jacobian approximation.
    Prior to calling the user-supplied Jacobian function, the Jacobian
    matrix :math:`J(t,y)` is zeroed out, so only nonzero elements need
    to be loaded into *Jac*.
+
+   With direct linear solvers (i.e., linear solvers with type
+   ``SUNLINEARSOLVER_DIRECT``), the Jacobian matrix :math:`J(t,y)` is zeroed out
+   prior to calling the user-supplied Jacobian function so only nonzero elements
+   need to be loaded into *Jac*.
 
    If the user's :c:type:`ARKLsJacFn` function uses difference
    quotient approximations, then it may need to access quantities not
@@ -472,6 +478,46 @@ function of type :c:type:`ARKLsJacFn` to provide the Jacobian approximation.
 
 
 
+.. c:type:: typedef int (*ARKLsLinSysFn)(realtype t, N_Vector y, N_Vector fy, SUNMatrix A, SUNMatrix M, booleantype jok, booleantype *jcur, realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
+
+   This function computes the linear system matrix :math:`A = M - \gamma J` (or
+   an approximation to it).
+
+   **Arguments:**
+      * *t* -- the current value of the independent variable.
+      * *y* -- the current value of the dependent variable vector, namely the
+        predicted value of :math:`y(t)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
+      * *A* -- the output linear system matrix.
+      * *M* -- the current mass matrix (this input is ``NULL`` if :math:`M = I`).
+      * *jok* -- is an input flag indicating whether the Jacobian-related data
+        needs to be updated. The *jok* argument provides for the reuse of
+        Jacobian data in the preconditioner solve function. When *jok* =
+        ``SUNFALSE``, the Jacobian-related data should be recomputed from
+        scratch. When *jok* = ``SUNTRUE`` the Jacobian data, if saved from the
+        previous call to this function, can be reused (with the current value of
+        *gamma*). A call with *jok* = ``SUNTRUE`` can only occur after a call
+        with *jok* = ``SUNFALSE``.
+      * *jcur* -- is a pointer to a flag which should be set to ``SUNTRUE`` if
+        Jacobian data was recomputed, or set to ``SUNFALSE`` if Jacobian data
+        was not recomputed, but saved data was still reused.
+      * *gamma* -- the scalar :math:`\gamma` appearing in the Newton matrix
+        given by :math:`A=I-\gamma J` or :math:`A=M-\gamma J`.
+      * *user_data* -- a pointer to user data, the same as the *user_data*
+        parameter that was passed to :c:func:`ARKStepSetUserData()`.
+      * *tmp1*, *tmp2*, *tmp3* -- pointers to memory allocated to variables of
+        type ``N_Vector`` which can be used by an ARKLsLinSysFn as temporary
+        storage or work space.
+
+   **Return value:**
+   An *ARKLsLinSysFn* function should return 0 if successful, a positive value
+   if a recoverable error occurred (in which case ARKStep will attempt to
+   correct, while ARKLS sets *last_flag* to *ARKLS_JACFUNC_RECVR*), or a
+   negative value if it failed unrecoverably (in which case the integration is
+   halted, :c:func:`ARKStepEvolve()` returns *ARK_LSETUP_FAIL* and ARKLS sets
+   *last_flag* to *ARKLS_JACFUNC_UNRECVR*).
+
+
 
 .. _ARKStep_CInterface.JTimesFn:
 
@@ -490,14 +536,14 @@ the default is a difference quotient approximation to these products.
 .. c:type:: typedef int (*ARKLsJacTimesVecFn)(N_Vector v, N_Vector Jv, realtype t, N_Vector y, N_Vector fy, void* user_data, N_Vector tmp)
 
    This function computes the product :math:`Jv =
-   \left(\frac{\partial f_I}{\partial y}\right)v` (or an approximation to it).
+   \left(\frac{\partial f^I}{\partial y}\right)v` (or an approximation to it).
 
    **Arguments:**
       * *v* -- the vector to multiply.
       * *Jv* -- the output vector computed.
       * *t* -- the current value of the independent variable.
       * *y* -- the current value of the dependent variable vector.
-      * *fy* -- the current value of the vector :math:`f_I(t,y)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
       * *user_data* -- a pointer to user data, the same as the
         *user_data* parameter that was passed to :c:func:`ARKStepSetUserData()`.
       * *tmp* -- pointer to memory allocated to a variable of type
@@ -541,7 +587,7 @@ defined as follows:
    **Arguments:**
       * *t* -- the current value of the independent variable.
       * *y* -- the current value of the dependent variable vector.
-      * *fy* -- the current value of the vector :math:`f_I(t,y)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
       * *user_data* -- a pointer to user data, the same as the
         *user_data* parameter that was passed to :c:func:`ARKStepSetUserData()`.
 
@@ -582,7 +628,7 @@ where :math:`P` corresponds to either a left or right
 preconditioning matrix.  Here :math:`P` should approximate (at least
 crudely) the Newton matrix :math:`A=M-\gamma J`, where :math:`M` is
 the mass matrix (typically :math:`M=I` unless working in a
-finite-element setting) and :math:`J = \frac{\partial f_I}{\partial
+finite-element setting) and :math:`J = \frac{\partial f^I}{\partial
 y}`  If preconditioning is done on both sides, the product of the two
 preconditioner matrices should approximate :math:`A`.
 
@@ -595,7 +641,7 @@ preconditioner matrices should approximate :math:`A`.
    **Arguments:**
       * *t* -- the current value of the independent variable.
       * *y* -- the current value of the dependent variable vector.
-      * *fy* -- the current value of the vector :math:`f_I(t,y)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
       * *r* -- the right-hand side vector of the linear system.
       * *z* -- the computed output solution vector.
       * *gamma* -- the scalar :math:`\gamma` appearing in the Newton
@@ -641,7 +687,7 @@ user-supplied function of type :c:type:`ARKLsPrecSetupFn`.
    **Arguments:**
       * *t* -- the current value of the independent variable.
       * *y* -- the current value of the dependent variable vector.
-      * *fy* -- the current value of the vector :math:`f_I(t,y)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
       * *jok* -- is an input flag indicating whether the Jacobian-related
         data needs to be updated. The *jok* argument provides for the
         reuse of Jacobian data in the preconditioner solve function. When
