@@ -26,8 +26,8 @@
 #include <string.h>
 
 #include "cvode_impl.h"
-#include <sundials/sundials_math.h>
-#include <sundials/sundials_types.h>
+#include "sundials/sundials_math.h"
+#include "sundials/sundials_types.h"
 #include "sunnonlinsol/sunnonlinsol_newton.h"
 
 /*=================================================================*/
@@ -175,11 +175,12 @@
  *    SMALL_NST   nst > SMALL_NST => use ETAMX3
  *    MXNCF       max no. of convergence failures during one step try
  *    MXNEF       max no. of error test failures during one step try
- *    MXNEF1      max no. of error test failures before forcing a reduction of order
- *    SMALL_NEF   if an error failure occurs and SMALL_NEF <= nef <= MXNEF1, then
- *                reset eta =  SUNMIN(eta, ETAMXF)
- *    LONG_WAIT   number of steps to wait before considering an order change when
- *                q==1 and MXNEF1 error test failures have occurred
+ *    MXNEF1      max no. of error test failures before forcing a reduction of
+ *                order
+ *    SMALL_NEF   if an error failure occurs and SMALL_NEF <= nef <= MXNEF1,
+ *                then reset eta =  SUNMIN(eta, ETAMXF)
+ *    LONG_WAIT   number of steps to wait before considering an order change
+ *                when q==1 and MXNEF1 error test failures have occurred
  *
  * cvNls
  *
