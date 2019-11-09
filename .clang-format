@@ -23,9 +23,9 @@ AlignConsecutiveDeclarations: false # <<< change? >>>
 AlignEscapedNewlines: Left          # changed
 AlignOperands:   true
 AlignTrailingComments: true
-AllowAllArgumentsOnNextLine: true
+AllowAllArgumentsOnNextLine: false # changed
 AllowAllConstructorInitializersOnNextLine: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false # changed
 AllowShortBlocksOnASingleLine: false     # <<< change? >>>
 AllowShortCaseLabelsOnASingleLine: false # <<< change? >>>
 AllowShortFunctionsOnASingleLine: All
@@ -104,13 +104,13 @@ ObjCBlockIndentWidth: 2
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PenaltyBreakAssignment: 2
-PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakBeforeFirstCallParameter: 1000 # changed
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
-PenaltyReturnTypeOnItsOwnLine: 60
+PenaltyReturnTypeOnItsOwnLine: 1000 # changed
 PointerAlignment: Right
 ReflowComments:  true
 SortIncludes:    true
