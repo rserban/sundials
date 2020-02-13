@@ -400,7 +400,7 @@ cmake \
     \
     -D SUNDIALS_DEVTESTS="${devtests}" \
     \
-    -D MEMORYCHECK_SUPPRESSIONS_FILE="${MPISUPP}" \
+    -D MEMORYCHECK_COMMAND_OPTIONS="${MEMCHECK_OPS} ${MEMCHECK_SUPP}" \
     ../../. 2>&1 | tee configure.log
 
 # check cmake return code

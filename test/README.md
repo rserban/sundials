@@ -74,7 +74,7 @@ information on running the scripts.
 Note: At this time the testing scripts only run development tests when SUNDIALS
 is configured with real type double (either index size can be used).
 
-## Testing environment
+### Testing environment
 
 To setup the testing environment the test scripts will source one of the
 following environment scripts (listed in the order checked):
@@ -121,9 +121,6 @@ MPICXX    = MPI C++ compiler
 MPIFC     = MPI Fortran
 MPIEXEC   = executable for launching MPI runs
 
-BLASSTATUS = ON or OFF
-BLASLIBS   = full path to BLAS library
-
 LAPACKSTATUS = ON or OFF
 LAPACKLIBS   = full path to LAPACK library
 
@@ -142,3 +139,10 @@ HYPREDIR    = full path to hypre installation
 PETSCSTATUS = ON or OFF
 PETSCDIR    = full path to PETSc installation
 ```
+
+## Using Spack to install TPLs
+
+The TPLs needed for a complete build of SUNDIALS can be easily installed with
+spack and the spack environment included in the SUNDIALS repository. Simply
+navigate to `test/spack` and run `spack install`. For more information on Spack
+environments is the [Spack tutorial](https://spack.readthedocs.io/en/latest/tutorial_environments.html).
