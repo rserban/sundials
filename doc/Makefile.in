@@ -2,7 +2,7 @@
 # Programmer(s): Radu Serban, Slaven Peles, Cody Balos @ LLNL
 # -----------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -41,9 +41,12 @@ nvec_cuda.tex \
 nvec_raja.tex \
 nvec_trilinos.tex \
 nvec_manyvector.tex \
+nvec_mpimanyvector.tex \
+nvec_mpiplusx.tex \
 nvec_examples.tex \
 spils_constants.tex \
 sun_org.tex \
+sundials_release_history.tex \
 sundials_version.tex \
 sunmatrix_generic.tex \
 sunmatrix_band.tex \
@@ -64,10 +67,12 @@ sunlinsol_spgmr.tex \
 sunlinsol_sptfqmr.tex \
 sunlinsol_superludist.tex \
 sunlinsol_superlumt.tex \
+sunlinsol_cusolversp.tex \
 sunlinsol_examples.tex \
 sunnonlinsol_generic.tex \
 sunnonlinsol_newton.tex \
 sunnonlinsol_fixedpoint.tex \
+sunnonlinsol_petscsnes.tex \
 types.tex \
 ug.tex \
 biblio.bib
@@ -80,7 +85,6 @@ bandmat.pdf \
 cscmat.pdf \
 sunorg1.pdf \
 sunorg2.pdf \
-sunorg3.pdf \
 doc_logo_blue.pdf \
 warning.pdf
 

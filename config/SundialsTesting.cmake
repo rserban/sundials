@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------
-# Author: David J. Gardner @ LLNL
+# Programmer(s): David J. Gardner @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -15,72 +15,115 @@
 # ---------------------------------------------------------------
 
 # Enable testing with 'make test'
-INCLUDE(CTest)
+include(CTest)
 
 
-# If development tests are enabled, Python is needed to use the test runner
-IF(SUNDIALS_DEVTESTS)
+# Check if development tests are enabled
+if(SUNDIALS_TEST_DEVTESTS)
 
-  find_package(PythonInterp)
-  IF(${PYTHON_VERSION_MAJOR} LESS 3)
-    IF(${PYTHON_VERSION_MINOR} LESS 7)
-      PRINT_WARNING("Python version must be 2.7.x or greater to run development tests"
-        "Examples will build but 'make test' will fail.")
-    ENDIF()
-  ENDIF()
+  message("SUNDIALS Development testing")
+
+  # Python is needed to use the test runner
+  find_package(PythonInterp REQUIRED)
+  if(${PYTHON_VERSION_MAJOR} LESS 3)
+    if(${PYTHON_VERSION_MINOR} LESS 7)
+      print_warning("Python version must be 2.7.x or greater to run development tests"
+        "Examples will build but 'make test' may fail.")
+    endif()
+  endif()
 
   # look for the testRunner script in the test directory
-  FIND_PROGRAM(TESTRUNNER testRunner PATHS test)
-  IF(NOT TESTRUNNER)
-    PRINT_ERROR("testRunner not found!")
-  ENDIF()
-  HIDE_VARIABLE(TESTRUNNER)
+  find_program(TESTRUNNER testRunner PATHS test NO_DEFAULT_PATH)
+  if(NOT TESTRUNNER)
+    print_error("Could not locate testRunner. Set SUNDIALS_TEST_DEVTESTS=OFF to continue.")
+  endif()
+  message(STATUS "Found testRunner: ${TESTRUNNER}")
+  hide_variable(TESTRUNNER)
 
-ENDIF()
+  # Create the default test output directory
+  set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/Testing/output)
 
+  if(NOT EXISTS ${TEST_OUTPUT_DIR})
+    file(MAKE_DIRECTORY ${TEST_OUTPUT_DIR})
+  endif()
+
+  # If a non-default output directory was provided make sure it exists
+  if(SUNDIALS_TEST_OUTPUT_DIR)
+    message(STATUS "Using non-default test output directory: ${SUNDIALS_TEST_OUTPUT_DIR}")
+    if(NOT EXISTS ${SUNDIALS_TEST_OUTPUT_DIR})
+      file(MAKE_DIRECTORY ${SUNDIALS_TEST_OUTPUT_DIR})
+    endif()
+  endif()
+
+  # If a non-default answer directory was provided make sure it exists
+  if(SUNDIALS_TEST_ANSWER_DIR)
+    message(STATUS "Using non-default test answer directory: ${SUNDIALS_TEST_ANSWER_DIR}")
+    if(NOT EXISTS ${SUNDIALS_TEST_ANSWER_DIR})
+      print_error("SUNDIALS_TEST_ANSWER_DIR does not exist!")
+    endif()
+  endif()
+
+  # Check if using non-default comparison precisions when testing
+  if(SUNDIALS_TEST_FLOAT_PRECISION)
+    message(STATUS "Using non-default float precision: ${SUNDIALS_TEST_FLOAT_PRECISION}")
+  endif()
+
+  if(SUNDIALS_TEST_INTEGER_PRECISION)
+    message(STATUS "Using non-default integer precision: ${SUNDIALS_TEST_INTEGER_PRECISION}")
+  endif()
+
+endif()
 
 # If memory check command is found, create memcheck target
-IF(MEMORYCHECK_COMMAND)
+if(MEMORYCHECK_COMMAND)
 
-  IF(SUNDIALS_DEVTESTS)
+  if(SUNDIALS_DEVTESTS)
 
     # Directory for memcheck output
-    SET(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
+    set(TEST_MEMCHECK_DIR ${PROJECT_BINARY_DIR}/Testing/test_memcheck)
 
     # Create memcheck testing directory
-    IF(NOT EXISTS ${TEST_MEMCHECK_DIR})
-      FILE(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
-    ENDIF()
+    if(NOT EXISTS ${TEST_MEMCHECK_DIR})
+      file(MAKE_DIRECTORY ${TEST_MEMCHECK_DIR})
+    endif()
 
     # Create test_memcheck target for memory check test
-    ADD_CUSTOM_TARGET(test_memcheck
+    add_custom_target(test_memcheck
       ${CMAKE_COMMAND} -E cmake_echo_color --cyan
       "All memcheck tests complete.")
 
-  ELSE()
+  else()
 
     # Create test_memcheck target for memory check test
-    ADD_CUSTOM_TARGET(test_memcheck COMMAND ${CMAKE_CTEST_COMMAND} -T memcheck)
+    add_custom_target(test_memcheck COMMAND ${CMAKE_CTEST_COMMAND} -T memcheck)
 
-  ENDIF()
+  endif()
 
-ENDIF()
+endif()
 
+# If examples are installed, create post install smoke test targets
+if(EXAMPLES_INSTALL)
 
-# If examples are installed, create post install smoke tests
-IF(EXAMPLES_INSTALL)
+  # Directories for installation testing
+  set(TEST_INSTALL_DIR ${PROJECT_BINARY_DIR}/Testing_Install)
+  set(TEST_INSTALL_ALL_DIR ${PROJECT_BINARY_DIR}/Testing_Install_All)
 
-  # Directory for installation testing
-  SET(TEST_INSTALL_DIR ${PROJECT_BINARY_DIR}/Testing/test_install)
+  # Create installation testing directories
+  if(NOT EXISTS ${TEST_INSTALL_DIR})
+    file(MAKE_DIRECTORY ${TEST_INSTALL_DIR})
+  endif()
 
-  # Create installation testing directory
-  IF(NOT EXISTS ${TEST_INSTALL_DIR})
-    FILE(MAKE_DIRECTORY ${TEST_INSTALL_DIR})
-  ENDIF()
+  if(NOT EXISTS ${TEST_INSTALL_ALL_DIR})
+    file(MAKE_DIRECTORY ${TEST_INSTALL_ALL_DIR})
+  endif()
 
-  # Create test_install target for installation smoke test
-  ADD_CUSTOM_TARGET(test_install
+  # Create test_install and test_install_all targets
+  add_custom_target(test_install
     ${CMAKE_COMMAND} -E cmake_echo_color --cyan
     "All installation tests complete.")
 
-ENDIF()
+  add_custom_target(test_install_all
+    ${CMAKE_COMMAND} -E cmake_echo_color --cyan
+    "All installation tests complete.")
+
+endif()

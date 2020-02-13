@@ -2,7 +2,7 @@
 # Programmer(s): David J. Gardner and Shelby Lockhart @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -62,12 +62,7 @@ foreach(example_tuple ${nvector_openmpdev_examples})
   if(NOT TARGET ${example})
     # example source files
     add_executable(${example} ${example}.c
-      ../test_nvector.c ../../../src/sundials/sundials_nvector.c
-       ../../../src/sundials/sundials_mpi.c)
-
-    # must ensure SUNDIALS_MPI_ENABLED=0 so that the correct block
-    # of sundials_mpi.h is included.
-    TARGET_COMPILE_DEFINITIONS(${example} PRIVATE -DSUNDIALS_MPI_ENABLED=0)
+      ../test_nvector.c ../../../src/sundials/sundials_nvector.c)
 
     # folder to organize targets in an IDE
     set_target_properties(${example} PROPERTIES FOLDER "Examples")
@@ -84,7 +79,7 @@ foreach(example_tuple ${nvector_openmpdev_examples})
   endif()
 
   # add example to regression tests
-  SUNDIALS_ADD_TEST(${test_name} ${example}
+  sundials_add_test(${test_name} ${example}
     TEST_ARGS ${example_args}
     EXAMPLE_TYPE ${example_type}
     NODIFF)
@@ -109,8 +104,8 @@ if(EXAMPLES_INSTALL)
   # Prepare substitution variables for Makefile and/or CMakeLists templates
   set(SOLVER_LIB "sundials_nvecopenmpdev")
 
-  EXAMPLES2STRING(nvector_openmpdev_examples EXAMPLES)
-  EXAMPLES2STRING(nvector_examples_dependencies EXAMPLES_DEPENDENCIES)
+  examples2string(nvector_openmpdev_examples EXAMPLES)
+  examples2string(nvector_examples_dependencies EXAMPLES_DEPENDENCIES)
 
   # Regardless of the platform we're on, we will generate and install
   # CMakeLists.txt file for building the examples. This file  can then
@@ -135,13 +130,13 @@ if(EXAMPLES_INSTALL)
 
   if(UNIX)
     # generate Makefile and place it in the binary dir
-    CONFIGURE_FILE(
+    configure_file(
       ${PROJECT_SOURCE_DIR}/examples/templates/makefile_openmpdev_ex.in
       ${PROJECT_BINARY_DIR}/examples/nvector/openmpdev/Makefile_ex
       @ONLY
       )
     # install the configured Makefile_ex as Makefile
-    INSTALL(
+    install(
       FILES ${PROJECT_BINARY_DIR}/examples/nvector/openmpdev/Makefile_ex
       DESTINATION ${EXAMPLES_INSTALL_PATH}/nvector/openmpdev
       RENAME Makefile

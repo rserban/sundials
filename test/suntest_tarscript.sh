@@ -3,7 +3,7 @@
 # Programmer(s): David J. Gardner @ LLNL
 # ------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -200,7 +200,7 @@ mkdir tarballs   || exit 1
 cd ../scripts || exit 1
 
 echo "START TARSCRIPT"
-./tarscript -s $package | tee -a tar.log
+./tarscript $package | tee -a tar.log
 
 # check tarscript return code
 rc=${PIPESTATUS[0]}

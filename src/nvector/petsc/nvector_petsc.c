@@ -5,7 +5,7 @@
  * Radu Serban, and Aaron Collier @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -23,7 +23,6 @@
 
 #include <nvector/nvector_petsc.h>
 #include <sundials/sundials_math.h>
-#include <sundials/sundials_mpi.h>
 
 #define ZERO   RCONST(0.0)
 #define HALF   RCONST(0.5)
@@ -125,7 +124,7 @@ N_Vector N_VNewEmpty_Petsc(MPI_Comm comm,
 
   /* Compute global length as sum of local lengths */
   n = local_length;
-  ierr = MPI_Allreduce(&n, &Nsum, 1, PVEC_INTEGER_MPI_TYPE, MPI_SUM, comm);
+  ierr = MPI_Allreduce(&n, &Nsum, 1, MPI_SUNINDEXTYPE, MPI_SUM, comm);
   CHKERRABORT(comm,ierr);
   if (Nsum != global_length) {
     fprintf(stderr, BAD_N);
@@ -308,6 +307,15 @@ void N_VDestroyVectorArray_Petsc(N_Vector *vs, int count)
 Vec N_VGetVector_Petsc(N_Vector v)
 {
   return NV_PVEC_PTC(v);
+}
+
+/* ----------------------------------------------------------------
+ * Function to set the PETSc vector
+ */
+
+void N_VSetVector_Petsc(N_Vector v, Vec p)
+{
+  NV_PVEC_PTC(v) = p;
 }
 
 /* ----------------------------------------------------------------
@@ -670,7 +678,7 @@ realtype N_VWrmsNorm_Petsc(N_Vector x, N_Vector w)
   realtype global_sum;
   sunindextype N_global = NV_GLOBLENGTH_PTC(x);
   realtype sum = N_VWSqrSumLocal_Petsc(x, w);
-  SUNMPI_Allreduce_scalar(sum, &global_sum, SUNMPI_SUM, NV_COMM_PTC(x));
+  (void) MPI_Allreduce(&sum, &global_sum, 1, MPI_SUNREALTYPE, MPI_SUM, NV_COMM_PTC(x));
   return (SUNRsqrt(global_sum/N_global)); 
 }
 
@@ -706,7 +714,7 @@ realtype N_VWrmsNormMask_Petsc(N_Vector x, N_Vector w, N_Vector id)
   realtype global_sum;
   sunindextype N_global = NV_GLOBLENGTH_PTC(x);
   realtype sum = N_VWSqrSumMaskLocal_Petsc(x, w, id);
-  SUNMPI_Allreduce_scalar(sum, &global_sum, SUNMPI_SUM, NV_COMM_PTC(x));
+  (void) MPI_Allreduce(&sum, &global_sum, 1, MPI_SUNREALTYPE, MPI_SUM, NV_COMM_PTC(x));
   return (SUNRsqrt(global_sum/N_global));
 }
 
@@ -740,7 +748,7 @@ realtype N_VWL2Norm_Petsc(N_Vector x, N_Vector w)
 {
   realtype global_sum;
   realtype sum = N_VWSqrSumLocal_Petsc(x, w);
-  SUNMPI_Allreduce_scalar(sum, &global_sum, SUNMPI_SUM, NV_COMM_PTC(x));
+  (void) MPI_Allreduce(&sum, &global_sum, 1, MPI_SUNREALTYPE, MPI_SUM, NV_COMM_PTC(x));
   return (SUNRsqrt(global_sum));
 }
 
@@ -821,7 +829,7 @@ booleantype N_VInvTest_Petsc(N_Vector x, N_Vector z)
 {
   realtype val2;
   realtype val = (N_VInvTestLocal_Petsc(x, z)) ? ONE : ZERO;
-  SUNMPI_Allreduce_scalar(val, &val2, SUNMPI_MIN, NV_COMM_PTC(x));
+  (void) MPI_Allreduce(&val, &val2, 1, MPI_SUNREALTYPE, MPI_MIN, NV_COMM_PTC(x));
   if (val2 == ZERO)
     return(SUNFALSE);
   else
@@ -874,7 +882,7 @@ booleantype N_VConstrMask_Petsc(N_Vector c, N_Vector x, N_Vector m)
 {
   realtype temp2;
   realtype temp = (N_VConstrMaskLocal_Petsc(c, x, m)) ? ZERO : ONE;
-  SUNMPI_Allreduce_scalar(temp, &temp2, SUNMPI_MAX, NV_COMM_PTC(x));
+  (void) MPI_Allreduce(&temp, &temp2, 1, MPI_SUNREALTYPE, MPI_MAX, NV_COMM_PTC(x));
   return (temp2 == ONE) ? SUNFALSE : SUNTRUE;
 }
 
@@ -915,7 +923,7 @@ realtype N_VMinQuotient_Petsc(N_Vector num, N_Vector denom)
 {
   PetscReal gmin;
   realtype minval = N_VMinQuotientLocal_Petsc(num, denom);
-  SUNMPI_Allreduce_scalar(minval, &gmin, SUNMPI_MIN, NV_COMM_PTC(num));
+  (void) MPI_Allreduce(&minval, &gmin, 1, MPI_SUNREALTYPE, MPI_MIN, NV_COMM_PTC(num));
   return(gmin);
 }
 
@@ -1219,12 +1227,12 @@ int N_VWrmsNormVectorArray_Petsc(int nvec, N_Vector* X, N_Vector* W, realtype* n
     VecRestoreArray(NV_PVEC_PTC(X[i]), &xd);
     VecRestoreArray(NV_PVEC_PTC(W[i]), &wd);
   }
-  retval = SUNMPI_Allreduce(nrm, nvec, SUNMPI_SUM, comm);
+  retval = MPI_Allreduce(MPI_IN_PLACE, nrm, nvec, MPI_SUNREALTYPE, MPI_SUM, comm);
 
   for (i=0; i<nvec; i++)
     nrm[i] = SUNRsqrt(nrm[i]/Ng);
 
-  return retval == SUNMPI_SUCCESS ? 0 : -1;
+  return retval == MPI_SUCCESS ? 0 : -1;
 }
 
 
@@ -1265,12 +1273,12 @@ int N_VWrmsNormMaskVectorArray_Petsc(int nvec, N_Vector* X, N_Vector* W,
   }
   VecRestoreArray(NV_PVEC_PTC(id), &idd);
 
-  retval = SUNMPI_Allreduce(nrm, nvec, SUNMPI_SUM, comm);
+  retval = MPI_Allreduce(MPI_IN_PLACE, nrm, nvec, MPI_SUNREALTYPE, MPI_SUM, comm);
 
   for (i=0; i<nvec; i++)
     nrm[i] = SUNRsqrt(nrm[i]/Ng);
 
-  return retval == SUNMPI_SUCCESS ? 0 : -1;
+  return retval == MPI_SUCCESS ? 0 : -1;
 }
 
 

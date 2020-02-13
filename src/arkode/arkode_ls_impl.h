@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -102,7 +102,18 @@ typedef struct ARKLsMemRec {
   ARKLsJacTimesVecFn jtimes;
   void *Jt_data;
 
-  long int last_flag; /* last error flag returned by any function */
+  /* Linear system setup function
+   * (a) user-provided linsys function:
+   *     - user_linsys = SUNTRUE
+   *     - A_data      = user_data
+   * (b) internal linsys function:
+   *     - user_linsys = SUNFALSE
+   *     - A_data      = cvode_mem */
+  booleantype user_linsys;
+  ARKLsLinSysFn linsys;
+  void* A_data;
+
+  int last_flag; /* last error flag returned by any function */
 
 } *ARKLsMem;
 
@@ -118,6 +129,7 @@ typedef struct ARKLsMassMemRec {
   ARKLsMassFn mass;   /* user-provided mass matrix routine to call   */
   SUNMatrix M;        /* mass matrix structure                       */
   SUNMatrix M_lu;     /* mass matrix structure for LU decomposition  */
+  void* M_data;       /* user data pointer */
 
   /* Iterative solver tolerance */
   realtype sqrtN;     /* sqrt(N)                                     */
@@ -157,7 +169,7 @@ typedef struct ARKLsMassMemRec {
   ARKLsMassTimesVecFn mtimes;
   void *mt_data;
 
-  long int last_flag; /* last error flag returned by any function    */
+  int last_flag; /* last error flag returned by any function    */
 
 } *ARKLsMassMem;
 
@@ -249,6 +261,10 @@ int arkLSSetJacTimes(void* arkode_mem, ARKLsJacTimesSetupFn jtsetup,
                      ARKLsJacTimesVecFn jtimes);
 int arkLSSetMassTimes(void* arkode_mem, ARKLsMassTimesSetupFn msetup,
                       ARKLsMassTimesVecFn mtimes, void* mtimes_data);
+int arkLSSetLinSysFn(void* arkode_mem, ARKLsLinSysFn linsys);
+
+int arkLSSetUserData(void *arkode_mem, void* user_data);
+int arkLSSetMassUserData(void *arkode_mem, void* user_data);
 
 int arkLSGetWorkSpace(void* arkode_mem, long int* lenrwLS, long int* leniwLS);
 int arkLSGetNumJacEvals(void* arkode_mem, long int* njevals);

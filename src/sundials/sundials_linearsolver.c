@@ -1,10 +1,10 @@
 /* -----------------------------------------------------------------
  * Programmer(s): Daniel Reynolds @ SMU
- *                David J. Gardner, Carol S. Woodward, and 
+ *                David J. Gardner, Carol S. Woodward, and
  *                Slaven Peles @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -42,6 +42,7 @@ SUNLinearSolver SUNLinSolNewEmpty()
 
   /* initialize operations to NULL */
   ops->gettype           = NULL;
+  ops->getid             = NULL;
   ops->setatimes         = NULL;
   ops->setpreconditioner = NULL;
   ops->setscalingvectors = NULL;
@@ -63,14 +64,37 @@ SUNLinearSolver SUNLinSolNewEmpty()
 }
 
 /* -----------------------------------------------------------------
+ * Free a generic SUNLinearSolver (assumes content is already empty)
+ * ----------------------------------------------------------------- */
+
+void SUNLinSolFreeEmpty(SUNLinearSolver S)
+{
+  if (S == NULL)  return;
+
+  /* free non-NULL ops structure */
+  if (S->ops)  free(S->ops);
+  S->ops = NULL;
+
+  /* free overall N_Vector object and return */
+  free(S);
+  return;
+}
+
+/* -----------------------------------------------------------------
  * Functions in the 'ops' structure
  * -----------------------------------------------------------------*/
 
 SUNLinearSolver_Type SUNLinSolGetType(SUNLinearSolver S)
 {
-  SUNLinearSolver_Type type;
-  type = S->ops->gettype(S);
-  return(type);
+  return(S->ops->gettype(S));
+}
+
+SUNLinearSolver_ID SUNLinSolGetID(SUNLinearSolver S)
+{
+  if (S->ops->getid)
+    return(S->ops->getid(S));
+  else
+    return(SUNLINEARSOLVER_CUSTOM);
 }
 
 int SUNLinSolSetATimes(SUNLinearSolver S, void* A_data,
@@ -103,12 +127,18 @@ int SUNLinSolSetScalingVectors(SUNLinearSolver S,
 
 int SUNLinSolInitialize(SUNLinearSolver S)
 {
-  return ((int) S->ops->initialize(S));
+  if (S->ops->initialize)
+    return ((int) S->ops->initialize(S));
+  else
+    return SUNLS_SUCCESS;
 }
 
 int SUNLinSolSetup(SUNLinearSolver S, SUNMatrix A)
 {
-  return ((int) S->ops->setup(S, A));
+  if (S->ops->setup)
+    return ((int) S->ops->setup(S, A));
+  else
+    return SUNLS_SUCCESS;
 }
 
 int SUNLinSolSolve(SUNLinearSolver S, SUNMatrix A, N_Vector x,
@@ -141,10 +171,10 @@ N_Vector SUNLinSolResid(SUNLinearSolver S)
     return NULL;
 }
 
-long int SUNLinSolLastFlag(SUNLinearSolver S)
+sunindextype SUNLinSolLastFlag(SUNLinearSolver S)
 {
   if (S->ops->lastflag)
-    return ((long int) S->ops->lastflag(S));
+    return ((sunindextype) S->ops->lastflag(S));
   else
     return SUNLS_SUCCESS;
 }

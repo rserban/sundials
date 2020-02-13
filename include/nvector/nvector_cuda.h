@@ -2,7 +2,7 @@
  * Programmer(s): Slaven Peles and Cody J. Balos @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -80,6 +80,10 @@ SUNDIALS_EXPORT N_Vector N_VMake_Cuda(sunindextype length,
 SUNDIALS_EXPORT N_Vector N_VMakeManaged_Cuda(sunindextype length,
                                              realtype *vdata);
 
+SUNDIALS_EXPORT N_Vector N_VMakeWithManagedAllocator_Cuda(sunindextype length,
+                                                          void* (*allocfn)(size_t),
+                                                          void (*freefn)(void*));
+
 SUNDIALS_EXPORT sunindextype N_VGetLength_Cuda(N_Vector v);
 
 SUNDIALS_EXPORT realtype *N_VGetHostArrayPointer_Cuda(N_Vector v);
@@ -154,15 +158,8 @@ SUNDIALS_EXPORT int N_VWrmsNormMaskVectorArray_Cuda(int nvec, N_Vector* X,
                                                     realtype* nrm);
 
 /* OPTIONAL local reduction kernels (no parallel communication) */
-SUNDIALS_EXPORT realtype N_VDotProdLocal_Cuda(N_Vector x, N_Vector y);
-SUNDIALS_EXPORT realtype N_VMaxNormLocal_Cuda(N_Vector x);
-SUNDIALS_EXPORT realtype N_VMinLocal_Cuda(N_Vector x);
-SUNDIALS_EXPORT realtype N_VL1NormLocal_Cuda(N_Vector x);
 SUNDIALS_EXPORT realtype N_VWSqrSumLocal_Cuda(N_Vector x, N_Vector w);
 SUNDIALS_EXPORT realtype N_VWSqrSumMaskLocal_Cuda(N_Vector x, N_Vector w, N_Vector id);
-SUNDIALS_EXPORT booleantype N_VInvTestLocal_Cuda(N_Vector x, N_Vector z);
-SUNDIALS_EXPORT booleantype N_VConstrMaskLocal_Cuda(N_Vector c, N_Vector x, N_Vector m);
-SUNDIALS_EXPORT realtype N_VMinQuotientLocal_Cuda(N_Vector num, N_Vector denom);
 
 
 /*

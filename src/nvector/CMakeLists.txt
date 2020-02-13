@@ -2,7 +2,7 @@
 # Programmer(s): Cody J. Balos @ LLNL
 # ------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -25,6 +25,10 @@ if(MPI_ENABLE AND MPI_C_FOUND)
   add_subdirectory(parallel)
 endif(MPI_ENABLE AND MPI_C_FOUND)
 
+if(MPI_ENABLE AND MPI_C_FOUND)
+  add_subdirectory(mpiplusx)
+endif(MPI_ENABLE AND MPI_C_FOUND)
+
 if(HYPRE_ENABLE AND HYPRE_FOUND)
   add_subdirectory(parhyp)
 endif(HYPRE_ENABLE AND HYPRE_FOUND)
@@ -45,15 +49,14 @@ if(PETSC_ENABLE AND PETSC_FOUND)
   add_subdirectory(petsc)
 endif(PETSC_ENABLE AND PETSC_FOUND)
 
-if(CUDA_ENABLE AND CUDA_FOUND)
+if(CUDA_ENABLE AND CMAKE_CUDA_COMPILER)
   add_subdirectory(cuda)
-endif(CUDA_ENABLE AND CUDA_FOUND)
+endif(CUDA_ENABLE AND CMAKE_CUDA_COMPILER)
 
 if(RAJA_ENABLE AND RAJA_FOUND)
   add_subdirectory(raja)
 endif(RAJA_ENABLE AND RAJA_FOUND)
 
-IF(Trilinos_ENABLE AND Trilinos_FUNCTIONAL)
-  ADD_SUBDIRECTORY(trilinos)
-ENDIF(Trilinos_ENABLE AND Trilinos_FUNCTIONAL)
-
+if(Trilinos_ENABLE AND Trilinos_FOUND)
+  add_subdirectory(trilinos)
+endif(Trilinos_ENABLE AND Trilinos_FOUND)

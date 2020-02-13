@@ -3,7 +3,7 @@
  * Based on codes <solver>_lapack.c by: Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -80,6 +80,7 @@ SUNLinearSolver SUNLinSol_LapackBand(N_Vector y, SUNMatrix A)
 
   /* Attach operations */
   S->ops->gettype    = SUNLinSolGetType_LapackBand;
+  S->ops->getid      = SUNLinSolGetID_LapackBand;
   S->ops->initialize = SUNLinSolInitialize_LapackBand;
   S->ops->setup      = SUNLinSolSetup_LapackBand;
   S->ops->solve      = SUNLinSolSolve_LapackBand;
@@ -120,17 +121,23 @@ SUNLinearSolver_Type SUNLinSolGetType_LapackBand(SUNLinearSolver S)
 }
 
 
+SUNLinearSolver_ID SUNLinSolGetID_LapackBand(SUNLinearSolver S)
+{
+  return(SUNLINEARSOLVER_LAPACKBAND);
+}
+
+
 int SUNLinSolInitialize_LapackBand(SUNLinearSolver S)
 {
   /* all solver-specific memory has already been allocated */
   LASTFLAG(S) = SUNLS_SUCCESS;
-  return(LASTFLAG(S));
+  return(SUNLS_SUCCESS);
 }
 
 
 int SUNLinSolSetup_LapackBand(SUNLinearSolver S, SUNMatrix A)
 {
-  int n, ml, mu, ldim, ier;
+  sunindextype n, ml, mu, ldim, ier;
 
   /* check for valid inputs */
   if ( (A == NULL) || (S == NULL) )
@@ -139,7 +146,7 @@ int SUNLinSolSetup_LapackBand(SUNLinearSolver S, SUNMatrix A)
   /* Ensure that A is a band matrix */
   if (SUNMatGetID(A) != SUNMATRIX_BAND) {
     LASTFLAG(S) = SUNLS_ILL_INPUT;
-    return(LASTFLAG(S));
+    return(SUNLS_ILL_INPUT);
   }
 
   /* Call LAPACK to do LU factorization of A */
@@ -148,9 +155,9 @@ int SUNLinSolSetup_LapackBand(SUNLinearSolver S, SUNMatrix A)
   mu = SUNBandMatrix_UpperBandwidth(A);
   ldim = SUNBandMatrix_LDim(A);
   xgbtrf_f77(&n, &n, &ml, &mu, SUNBandMatrix_Data(A),
-	     &ldim, PIVOTS(S), &ier);
+             &ldim, PIVOTS(S), &ier);
 
-  LASTFLAG(S) = (long int) ier;
+  LASTFLAG(S) = ier;
   if (ier > 0)
     return(SUNLS_LUFACT_FAIL);
   if (ier < 0)
@@ -162,7 +169,7 @@ int SUNLinSolSetup_LapackBand(SUNLinearSolver S, SUNMatrix A)
 int SUNLinSolSolve_LapackBand(SUNLinearSolver S, SUNMatrix A, N_Vector x,
                               N_Vector b, realtype tol)
 {
-  int n, ml, mu, ldim, one, ier;
+  sunindextype n, ml, mu, ldim, one, ier;
   realtype *xdata;
 
   /* check for valid inputs */
@@ -175,8 +182,8 @@ int SUNLinSolSolve_LapackBand(SUNLinearSolver S, SUNMatrix A, N_Vector x,
   /* access x data array */
   xdata = N_VGetArrayPointer(x);
   if (xdata == NULL) {
-    LASTFLAG(S) = 1;
-    return(LASTFLAG(S));
+    LASTFLAG(S) = SUNLS_MEM_FAIL;
+    return(SUNLS_MEM_FAIL);
   }
 
   /* Call LAPACK to solve the linear system */
@@ -186,19 +193,20 @@ int SUNLinSolSolve_LapackBand(SUNLinearSolver S, SUNMatrix A, N_Vector x,
   ldim = SUNBandMatrix_LDim(A);
   one = 1;
   xgbtrs_f77("N", &n, &ml, &mu, &one, SUNBandMatrix_Data(A),
-	     &ldim, PIVOTS(S), xdata, &n, &ier, 1);
-  LASTFLAG(S) = (long int) ier;
+             &ldim, PIVOTS(S), xdata, &n, &ier);
+  LASTFLAG(S) = ier;
   if (ier < 0)
     return(SUNLS_PACKAGE_FAIL_UNREC);
 
   LASTFLAG(S) = SUNLS_SUCCESS;
-  return(LASTFLAG(S));
+  return(SUNLS_SUCCESS);
 }
 
 
-long int SUNLinSolLastFlag_LapackBand(SUNLinearSolver S)
+sunindextype SUNLinSolLastFlag_LapackBand(SUNLinearSolver S)
 {
   /* return the stored 'last_flag' value */
+  if (S == NULL) return(-1);
   return(LASTFLAG(S));
 }
 

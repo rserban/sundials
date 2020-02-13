@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------
-# Programmer:  Radu Serban and David Gardner @ LLNL
+# Programmer(s): Radu Serban and David Gardner @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -53,7 +53,7 @@ endif()
 # Check if ISO_C_BINDING is supported
 # -----------------------------------------------------------------------------
 if(F2003_INTERFACE_ENABLE)
-  message(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports ISO_C_BINDING")
+  message(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports F2003")
 
   set(F2003Test_DIR ${PROJECT_BINARY_DIR}/F2003Test_DIR)
   file(MAKE_DIRECTORY ${F2003Test_DIR})
@@ -64,6 +64,7 @@ if(F2003_INTERFACE_ENABLE)
     "PROJECT(ftest Fortran)\n"
     "SET(CMAKE_VERBOSE_MAKEFILE ON)\n"
     "SET(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\")\n"
+    "SET(CMAKE_Fortran_COMPILER \"${CMAKE_Fortran_COMPILER}\")\n"
     "SET(CMAKE_Fortran_FLAGS \"${CMAKE_Fortran_FLAGS}\")\n"
     "SET(CMAKE_Fortran_FLAGS_RELEASE \"${CMAKE_Fortran_FLAGS_RELEASE}\")\n"
     "SET(CMAKE_Fortran_FLAGS_DEBUG \"${CMAKE_Fortran_FLAGS_DEBUG}\")\n"
@@ -81,15 +82,15 @@ if(F2003_INTERFACE_ENABLE)
   try_compile(FTEST_OK ${F2003Test_DIR} ${F2003Test_DIR}
     ftest OUTPUT_VARIABLE MY_OUTPUT)
 
-  # To ensure we do not use stuff from the previous attempts, 
+  # To ensure we do not use stuff from the previous attempts,
   # we must remove the CMakeFiles directory.
   file(REMOVE_RECURSE ${F2003Test_DIR}/CMakeFiles)
 
   if(FTEST_OK)
-    message(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports ISO_C_BINDING -- yes")
-    set(Fortran_COMPILER_SUPPORTS_ISOCBINDING TRUE)
+    message(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports F2003 -- yes")
+    set(F2003_FOUND TRUE)
   else()
-    set(Fortran_COMPILER_SUPPORTS_ISOCBINDING FALSE)
+    set(F2003_FOUND FALSE)
   endif()
 endif()
 
@@ -162,6 +163,7 @@ if(NEED_FORTRAN_NAME_MANGLING)
     "PROJECT(ftest Fortran)\n"
     "SET(CMAKE_VERBOSE_MAKEFILE ON)\n"
     "SET(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\")\n"
+    "SET(CMAKE_Fortran_COMPILER \"${CMAKE_Fortran_COMPILER}\")\n"
     "SET(CMAKE_Fortran_FLAGS \"${CMAKE_Fortran_FLAGS}\")\n"
     "SET(CMAKE_Fortran_FLAGS_RELEASE \"${CMAKE_Fortran_FLAGS_RELEASE}\")\n"
     "SET(CMAKE_Fortran_FLAGS_DEBUG \"${CMAKE_Fortran_FLAGS_DEBUG}\")\n"
@@ -205,6 +207,7 @@ if(NEED_FORTRAN_NAME_MANGLING)
       "PROJECT(ctest1 C)\n"
       "SET(CMAKE_VERBOSE_MAKEFILE ON)\n"
       "SET(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\")\n"
+      "SET(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\")\n"
       "SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}\")\n"
       "SET(CMAKE_C_FLAGS_RELEASE \"${CMAKE_C_FLAGS_RELEASE}\")\n"
       "SET(CMAKE_C_FLAGS_DEBUG \"${CMAKE_C_FLAGS_DEBUG}\")\n"
@@ -226,11 +229,15 @@ if(NEED_FORTRAN_NAME_MANGLING)
       # Get the current list entry (current scheme)
       list(GET options ${iopt} opt)
       # Generate C source which calls the "mysub" function using the current scheme
-      file(WRITE ${FortranTest_DIR}/ctest1.c "int main(){${opt}();return(0);}\n")
+      file(WRITE ${FortranTest_DIR}/ctest1.c
+        "extern void ${opt}();\n"
+        "int main(){${opt}();return(0);}\n")
       # Use TRY_COMPILE to make the "ctest1" executable from the current C source
       # and linking to the previously created "flib" library.
       try_compile(CTEST_OK ${FortranTest_DIR} ${FortranTest_DIR}
         ctest1 OUTPUT_VARIABLE MY_OUTPUT)
+      # Write output compiling the test code
+      file(WRITE ${FortranTest_DIR}/ctest1_${opt}.out "${MY_OUTPUT}")
       # To ensure we do not use stuff from the previous attempts,
       # we must remove the CMakeFiles directory.
       file(REMOVE_RECURSE ${FortranTest_DIR}/CMakeFiles)
@@ -253,6 +260,7 @@ if(NEED_FORTRAN_NAME_MANGLING)
       "PROJECT(ctest2 C)\n"
       "SET(CMAKE_VERBOSE_MAKEFILE ON)\n"
       "SET(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\")\n"
+      "SET(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\")\n"
       "SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}\")\n"
       "SET(CMAKE_C_FLAGS_RELEASE \"${CMAKE_C_FLAGS_RELEASE}\")\n"
       "SET(CMAKE_C_FLAGS_DEBUG \"${CMAKE_C_FLAGS_DEBUG}\")\n"
@@ -267,9 +275,12 @@ if(NEED_FORTRAN_NAME_MANGLING)
     set(iopt 0)
     while(${iopt} LESS ${imax})
       list(GET options ${iopt} opt)
-      file(WRITE ${FortranTest_DIR}/ctest2.c "int main(){${opt}();return(0);}\n")
+      file(WRITE ${FortranTest_DIR}/ctest2.c
+        "extern void ${opt}();\n"
+        "int main(){${opt}();return(0);}\n")
       try_compile(CTEST_OK ${FortranTest_DIR} ${FortranTest_DIR}
         ctest2 OUTPUT_VARIABLE MY_OUTPUT)
+      file(WRITE ${FortranTest_DIR}/ctest2_${opt}.out "${MY_OUTPUT}")
       file(REMOVE_RECURSE ${FortranTest_DIR}/CMakeFiles)
       if(CTEST_OK)
         set(CMAKE_Fortran_SCHEME_WITH_UNDERSCORES ${opt})
@@ -336,4 +347,3 @@ if(NEED_FORTRAN_NAME_MANGLING)
   endif(FTEST_OK)
 
 endif()
-

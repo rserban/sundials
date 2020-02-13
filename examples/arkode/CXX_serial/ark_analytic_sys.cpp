@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -44,7 +44,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <arkode/arkode_arkstep.h>      // prototypes for ARKStep fcts., consts.
 #include <nvector/nvector_serial.h>     // access to serial N_Vector
 #include <sunmatrix/sunmatrix_dense.h>  // access to dense SUNMatrix

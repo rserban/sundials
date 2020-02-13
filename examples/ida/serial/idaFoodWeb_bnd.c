@@ -3,7 +3,7 @@
  *                Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -360,7 +360,7 @@ static int resweb(realtype tt, N_Vector cc, N_Vector cp,
 
 static void InitUserData(UserData webdata)
 {
-  int i, j, np;
+  sunindextype i, j, np;
   realtype *a1,*a2, *a3, *a4, dx2, dy2;
 
   webdata->mx = MX;

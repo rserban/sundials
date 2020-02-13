@@ -4,7 +4,7 @@
  *                Slaven Peles @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -58,6 +58,24 @@ SUNMatrix SUNMatNewEmpty()
   A->content = NULL;
 
   return(A);
+}
+
+
+/* -----------------------------------------------------------------
+ * Free a generic SUNMatrix (assumes content is already empty)
+ * ----------------------------------------------------------------- */
+
+void SUNMatFreeEmpty(SUNMatrix A)
+{
+  if (A == NULL)  return;
+  
+  /* free non-NULL ops structure */
+  if (A->ops)  free(A->ops);
+  A->ops = NULL;
+
+  /* free overall SUNMatrix object and return */
+  free(A);
+  return;
 }
 
 

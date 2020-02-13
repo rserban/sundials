@@ -3,7 +3,7 @@
  *                and Aaron Collier @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -103,11 +103,11 @@ SUNDIALS_EXPORT N_Vector N_VMake_Parallel(MPI_Comm comm,
                                           sunindextype global_length,
                                           realtype *v_data);
 
-SUNDIALS_EXPORT N_Vector *N_VCloneVectorArray_Parallel(int count, N_Vector w);
+SUNDIALS_EXPORT N_Vector* N_VCloneVectorArray_Parallel(int count, N_Vector w);
 
-SUNDIALS_EXPORT N_Vector *N_VCloneVectorArrayEmpty_Parallel(int count, N_Vector w);
+SUNDIALS_EXPORT N_Vector* N_VCloneVectorArrayEmpty_Parallel(int count, N_Vector w);
 
-SUNDIALS_EXPORT void N_VDestroyVectorArray_Parallel(N_Vector *vs, int count);
+SUNDIALS_EXPORT void N_VDestroyVectorArray_Parallel(N_Vector* vs, int count);
 
 SUNDIALS_EXPORT sunindextype N_VGetLength_Parallel(N_Vector v);
 
@@ -154,7 +154,7 @@ SUNDIALS_EXPORT int N_VLinearCombination_Parallel(int nvec, realtype* c, N_Vecto
 SUNDIALS_EXPORT int N_VScaleAddMulti_Parallel(int nvec, realtype* a, N_Vector x,
                                               N_Vector* Y, N_Vector* Z);
 SUNDIALS_EXPORT int N_VDotProdMulti_Parallel(int nvec, N_Vector x,
-                                             N_Vector *Y, realtype* dotprods);
+                                             N_Vector* Y, realtype* dotprods);
 
 /* vector array operations */
 SUNDIALS_EXPORT int N_VLinearSumVectorArray_Parallel(int nvec, 

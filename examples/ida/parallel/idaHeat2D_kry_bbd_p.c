@@ -4,7 +4,7 @@
  *         Allan Taylor, Alan Hindmarsh and Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -51,7 +51,6 @@
 #include <sunlinsol/sunlinsol_spgmr.h>
 #include <nvector/nvector_parallel.h>
 #include <sundials/sundials_types.h>
-#include <sundials/sundials_math.h>
 
 #include <mpi.h>
 
@@ -112,7 +111,7 @@ static int SetInitialProfile(N_Vector uu, N_Vector up, N_Vector id,
 
 static void PrintHeader(sunindextype Neq, realtype rtol, realtype atol);
 
-static void PrintCase(int case_number, int mudq, int mukeep);
+static void PrintCase(int case_number, sunindextype mudq, sunindextype mukeep);
 
 static void PrintOutput(int id, void *ida_mem, realtype t, N_Vector uu);
 
@@ -453,7 +452,7 @@ static int reslocal(sunindextype Nlocal, realtype tres,
   if (ixsub == npex-1) ixend--;
   if (jysub == 0) jybegin++;
   if (jysub == npey-1) jyend--;
-  
+
   /* Loop over all grid points in local subgrid. */
 
   for (ly = jybegin; ly <=jyend; ly++) {
@@ -484,13 +483,13 @@ static int BSend(MPI_Comm comm, int thispe, int ixsub,
   /* If jysub > 0, send data from bottom x-line of u. */
 
   if (jysub != 0)
-    MPI_Send(&uarray[0], dsizex, PVEC_REAL_MPI_TYPE, thispe-NPEX, 0, comm);
+    MPI_Send(&uarray[0], dsizex, MPI_SUNREALTYPE, thispe-NPEX, 0, comm);
 
   /* If jysub < NPEY-1, send data from top x-line of u. */
 
   if (jysub != NPEY-1) {
     offsetu = (MYSUB-1)*dsizex;
-    MPI_Send(&uarray[offsetu], dsizex, PVEC_REAL_MPI_TYPE,
+    MPI_Send(&uarray[offsetu], dsizex, MPI_SUNREALTYPE,
              thispe+NPEX, 0, comm);
   }
 
@@ -501,7 +500,7 @@ static int BSend(MPI_Comm comm, int thispe, int ixsub,
       offsetu = ly*dsizex;
       bufleft[ly] = uarray[offsetu];
     }
-    MPI_Send(&bufleft[0], dsizey, PVEC_REAL_MPI_TYPE, thispe-1, 0, comm);
+    MPI_Send(&bufleft[0], dsizey, MPI_SUNREALTYPE, thispe-1, 0, comm);
   }
 
   /* If ixsub < NPEX-1, send data from right y-line of u (via bufright). */
@@ -511,7 +510,7 @@ static int BSend(MPI_Comm comm, int thispe, int ixsub,
       offsetu = ly*MXSUB + (MXSUB-1);
       bufright[ly] = uarray[offsetu];
     }
-    MPI_Send(&bufright[0], dsizey, PVEC_REAL_MPI_TYPE, thispe+1, 0, comm);
+    MPI_Send(&bufright[0], dsizey, MPI_SUNREALTYPE, thispe+1, 0, comm);
   }
 
   return(0);
@@ -539,25 +538,25 @@ static int BRecvPost(MPI_Comm comm, MPI_Request request[], int thispe,
 
   /* If jysub > 0, receive data for bottom x-line of uext. */
   if (jysub != 0)
-    MPI_Irecv(&uext[1], dsizex, PVEC_REAL_MPI_TYPE,
+    MPI_Irecv(&uext[1], dsizex, MPI_SUNREALTYPE,
               thispe-NPEX, 0, comm, &request[0]);
 
   /* If jysub < NPEY-1, receive data for top x-line of uext. */
   if (jysub != NPEY-1) {
     offsetue = (1 + (MYSUB+1)*(MXSUB+2));
-    MPI_Irecv(&uext[offsetue], dsizex, PVEC_REAL_MPI_TYPE,
+    MPI_Irecv(&uext[offsetue], dsizex, MPI_SUNREALTYPE,
               thispe+NPEX, 0, comm, &request[1]);
   }
 
   /* If ixsub > 0, receive data for left y-line of uext (via bufleft). */
   if (ixsub != 0) {
-    MPI_Irecv(&bufleft[0], dsizey, PVEC_REAL_MPI_TYPE,
+    MPI_Irecv(&bufleft[0], dsizey, MPI_SUNREALTYPE,
               thispe-1, 0, comm, &request[2]);
   }
 
   /* If ixsub < NPEX-1, receive data for right y-line of uext (via bufright). */
   if (ixsub != NPEX-1) {
-    MPI_Irecv(&bufright[0], dsizey, PVEC_REAL_MPI_TYPE,
+    MPI_Irecv(&bufright[0], dsizey, MPI_SUNREALTYPE,
               thispe+1, 0, comm, &request[3]);
   }
 
@@ -742,11 +741,11 @@ static void PrintHeader(sunindextype Neq, realtype rtol, realtype atol)
  * Print case and table header
  */
 
-static void PrintCase(int case_number, int mudq, int mukeep)
+static void PrintCase(int case_number, sunindextype mudq, sunindextype mukeep)
 {
   printf("\n\nCase %1d. \n", case_number);
-  printf("   Difference quotient half-bandwidths = %d",mudq);
-  printf("   Retained matrix half-bandwidths = %d \n",mukeep);
+  printf("   Difference quotient half-bandwidths = %ld", (long int) mudq);
+  printf("   Retained matrix half-bandwidths = %ld \n", (long int) mukeep);
 
   /* Print output table heading and initial line of table. */
   printf("\n   Output Summary (umax = max-norm of solution) \n\n");

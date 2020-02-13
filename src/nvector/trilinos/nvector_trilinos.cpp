@@ -5,7 +5,7 @@
  * Radu Serban, and Aaron Collier @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -84,9 +84,7 @@ N_Vector N_VNewEmpty_Trilinos()
   v->ops->nvcloneempty      = N_VCloneEmpty_Trilinos;
   v->ops->nvdestroy         = N_VDestroy_Trilinos;
   v->ops->nvspace           = N_VSpace_Trilinos;
-#if SUNDIALS_MPI_ENABLED
   v->ops->nvgetcommunicator = N_VGetCommunicator_Trilinos;
-#endif
   v->ops->nvgetlength       = N_VGetLength_Trilinos;
 
   /* standard vector operations */
@@ -220,11 +218,10 @@ void N_VSpace_Trilinos(N_Vector x, sunindextype *lrw, sunindextype *liw)
   const Teuchos::RCP<const Teuchos::Comm<int> >& comm = xv->getMap()->getComm();
   int npes = comm->getSize();
 
-  *lrw = xv->getGlobalLength();
+  *lrw = (sunindextype)(xv->getGlobalLength());
   *liw = 2*npes;
 }
 
-#if SUNDIALS_MPI_ENABLED
 /*
  * MPI communicator accessor
  */
@@ -232,13 +229,16 @@ void *N_VGetCommunicator_Trilinos(N_Vector x)
 {
   using namespace Sundials;
 
+#ifdef SUNDIALS_TRILINOS_HAVE_MPI
   Teuchos::RCP<const vector_type> xv = N_VGetVector_Trilinos(x);
   /* Access Teuchos::Comm* (which is actually a Teuchos::MpiComm*) */
   auto comm = Teuchos::rcp_dynamic_cast<const Teuchos::MpiComm<int>>(xv->getMap()->getComm());
 
   return((void*) comm->getRawMpiComm().get());   /* extract raw pointer to MPI_Comm */
-}
+#else
+  return(NULL);
 #endif
+}
 
 /*
  * Global vector length accessor
@@ -624,4 +624,3 @@ realtype N_VMinQuotientLocal_Trilinos(N_Vector num, N_Vector denom)
 
   return TpetraVector::minQuotientLocal(*numv, *denv);
 }
-

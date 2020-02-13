@@ -4,7 +4,7 @@
  * Based on ark_brusselator.c by Daniel R. Reynolds @ SMU
  * ----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -65,7 +65,7 @@ int main()
   realtype Tf = RCONST(2.0);     /* final time */
   realtype dTout = RCONST(0.1);  /* time between outputs */
   sunindextype NEQ = 3;          /* number of dependent vars. */
-  int Nt = ceil(Tf/dTout);       /* number of output times */
+  int Nt = (int) ceil(Tf/dTout); /* number of output times */
   realtype hs = RCONST(0.025);   /* slow step size */
   realtype hf = RCONST(0.001);   /* fast step size */
   realtype a, b, ep;             /* ODE parameters */
@@ -123,6 +123,10 @@ int main()
      initial dependent variable vector y. */
   inner_arkode_mem = ARKStepCreate(ff, NULL, T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
+
+  /* Attach user data to fast integrator */
+  retval = ARKStepSetUserData(inner_arkode_mem, (void *) rdata);
+  if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   /* Set the fast method */
   retval = ARKStepSetTableNum(inner_arkode_mem, -1, KNOTH_WOLKE_3_3);

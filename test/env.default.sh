@@ -3,7 +3,7 @@
 # Programmer(s): Cody J. Balos and David J. Gardner @ LLNL
 # -------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -14,7 +14,8 @@
 # -------------------------------------------------------------------------------
 # Script that sets up the default SUNDIALS testing environment.
 #
-# Usage: source env.default.sh <real type> <index size>
+# Usage: source env.default.sh <real type> <index size> <compiler spec> \
+#                              <build type>
 #
 # Required Inputs:
 #   <real type>  = SUNDIALS real type to build/test with:
@@ -24,6 +25,14 @@
 #   <index size> = SUNDIALS index size to build/test with:
 #                    32       : 32-bit indices
 #                    64       : 64-bit indices
+#
+# Optional Inputs:
+#   <compiler spec> = Compiler to build sundials with:
+#                       gcc@4.9.4
+#   <build type>    = SUNDIALS build type:
+#                       dbg : debug build
+#                       opt : optimized build
+#
 # -------------------------------------------------------------------------------
 
 # check number of inputs
@@ -34,15 +43,27 @@ if [ "$#" -lt 2 ]; then
     return 1
 fi
 
-realtype=$1          # precision for realtypes
-indexsize=$2         # integer size for indices
-compiler="gcc@4.9.4" # compiler spec for spack
+# set required inputs
+realtype=$1   # precision for realtypes
+indexsize=$2  # integer size for indices
+
+# set defaults for optional inputs
+compiler="gcc@4.9.4" # compiler spec
+bldtype="dbg"        # build type dbg = debug or opt = optimized
+
+# set optional inputs if provided
+if [ "$#" -gt 2 ]; then
+    compiler=$3
+fi
+
+if [ "$#" -gt 3 ]; then
+    bldtype=$4
+fi
 
 # ------------------------------------------------------------------------------
 # Check input values
 # ------------------------------------------------------------------------------
 
-# set real types to test
 case "$realtype" in
     single|double|extended) ;;
     *)
@@ -51,7 +72,6 @@ case "$realtype" in
         ;;
 esac
 
-# set index sizes to test
 case "$indexsize" in
     32|64) ;;
     *)
@@ -60,53 +80,121 @@ case "$indexsize" in
         ;;
 esac
 
+case "$compiler" in
+    gcc@4.9.4|gcc@8.3.0|gcc@9.2.0) ;;
+    clang@9.0.0);;
+    *)
+        echo "ERROR: Unknown compiler spec: $compiler"
+        return 1
+        ;;
+esac
+
+case "$bldtype" in
+    dbg|opt) ;;
+    *)
+        echo "ERROR: Unknown build type: $bldtype"
+        return 1
+        ;;
+esac
+
 # ------------------------------------------------------------------------------
 # Setup environment
 # ------------------------------------------------------------------------------
 
+# get compiler name and version from spec
+compilername="${compiler%%@*}"
+compilerversion="${compiler##*@}"
+
 # set file permissions (rwxrwxr-x)
 umask 002
 
-# if SPACK_ROOT is not set, check for the shared spack installation
-if [ -z "$SPACK_ROOT" ]; then
-    if [ -d "/usr/casc/sundials/apps/spack" ]; then
-        export SPACK_ROOT=/usr/casc/sundials/apps/spack
-    else
-        echo "ERROR: Could not locate spack installation"
-        return 1
-    fi
+# path to libraries not installed through spack
+APPDIR=/usr/casc/sundials/share/sunenv/apps/${compilername}-${compilerversion}
+
+# ------------------------------------------------------------------------------
+# Compilers and flags
+# ------------------------------------------------------------------------------
+
+if [ "$compilername" == "gcc" ]; then
+    COMPILER_DIR="$(spack location -i "$compiler")"
+    export CC="${COMPILER_DIR}/bin/gcc"
+    export CXX="${COMPILER_DIR}/bin/g++"
+    export FC="${COMPILER_DIR}/bin/gfortran"
+else
+    COMPILER_DIR="$(spack location -i "llvm@$compilerversion")"
+    export CC="${COMPILER_DIR}/bin/clang"
+    export CXX="${COMPILER_DIR}/bin/clang++"
 fi
 
-# make sure the spack environment is setup
-source ${SPACK_ROOT}/share/spack/setup-env.sh
-
-# path to libraries not installed through spack
-APPDIR=/usr/casc/sundials/apps/rh6
-
-# compilers
-export CC="$(spack location -i "$compiler")/bin/gcc"
-export CXX="$(spack location -i "$compiler")/bin/g++"
-export FC="$(spack location -i "$compiler")/bin/gfortran"
-
 # compiler flags (test scripts will append C/C++ standard flags)
-export CFLAGS="-g -Wall -Wpedantic -Werror"
-export CXXFLAGS="-g -Wall -Wpedantic -Werror"
-export FFLAGS="-g -Wall -Wpedantic -ffpe-summary=none"
+if [ "$bldtype" == "dbg" ]; then
+    export CFLAGS="-g -O0"
+    export CXXFLAGS="-g -O0"
+    export FFLAGS="-g -O0"
+else
+    export CFLAGS="-g -O3"
+    export CXXFLAGS="-g -O3"
+    export FFLAGS="-g -O3"
+fi
+
+# append additional compiler flags
+export CFLAGS="${CFLAGS} -Wall -Wpedantic -Werror"
+export CXXFLAGS="${CXXFLAGS} -Wall -Wpedantic -Werror"
+export FFLAGS="${FFLAGS} -Wall -Wpedantic -ffpe-summary=none"
+
+if [[ "$realtype" == "double" && "$indexsize" == "32" ]]; then
+    export CFLAGS="${CFLAGS} -Wconversion -Wno-sign-conversion"
+    export CXXFLAGS="${CXXFLAGS} -Wconversion -Wno-sign-conversion"
+fi
+
+# ------------------------------------------------------------------------------
+# SUNDIALS Options
+# ------------------------------------------------------------------------------
+
+# Sundials packages
+export ARKODE_STATUS=ON
+export CVODE_STATUS=ON
+export CVODES_STATUS=ON
+export IDA_STATUS=ON
+export IDAS_STATUS=ON
+export KINSOL_STATUS=ON
+
+# Fortran interface status
+if [ "$compilername" == "gcc" ]; then
+    export F77_STATUS=ON
+    export F03_STATUS=ON
+else
+    export F77_STATUS=OFF
+    export F03_STATUS=OFF
+fi
+
+# ------------------------------------------------------------------------------
+# Third party libraries
+# ------------------------------------------------------------------------------
+
+# PThread settings
+export PTHREAD_STATUS=ON
 
 # OpenMP settings
+export OPENMP_STATUS=ON
 export OMP_NUM_THREADS=4
 export OMPSUPP="${PWD}/valgrind/omp.supp"
 
+# OpenMP DEV settings
+export OPENMPDEV_STATUS=OFF
+
 # CUDA settings
-if [ "$realtype" == "extended" ]; then
-    export CUDASTATUS=OFF
-else
-    export CUDASTATUS=ON
+if [[ ("$compiler" != "gcc@9.2.0") && ("$compiler" != "clang@9.0.0") ]]; then
+    if [ "$realtype" == "extended" ]; then
+        export CUDA_STATUS=OFF
+    else
+        export CUDA_STATUS=ON
+    fi
 fi
 
 # MPI
-export MPISTATUS=ON
-MPIDIR="$(spack location -i openmpi@3.1.2 % "$compiler")"
+export MPI_STATUS=ON
+MPIDIR="$(spack location -i openmpi@3.1.4 % "$compiler")"
 export MPICC="${MPIDIR}/bin/mpicc"
 export MPICXX="${MPIDIR}/bin/mpicxx"
 export MPIFC="${MPIDIR}/bin/mpifort"
@@ -114,16 +202,18 @@ export MPIEXEC="${MPIDIR}/bin/mpirun"
 export MPISUPP="${PWD}/valgrind/mpi.supp"
 
 # LAPACK / BLAS
-if [ "$realtype" == "extended" ] || [ "$indexsize" == "64" ]; then
-    export BLASSTATUS=OFF
-    export LAPACKSTATUS=OFF
+if [ "$realtype" == "extended" ]; then
+    export LAPACK_STATUS=OFF
+    unset LAPACKLIBS
 else
-    export BLASSTATUS=ON
-    export LAPACKSTATUS=ON
+    export LAPACK_STATUS=ON
+    if [ "$indexsize" == "32" ]; then
+        LAPACKDIR="$(spack location -i openblas@0.3.7~ilp64 % "$compiler")"
+    else
+        LAPACKDIR="$(spack location -i openblas@0.3.7+ilp64 % "$compiler")"
+    fi
+    export LAPACKLIBS="${LAPACKDIR}/lib/libopenblas.so"
 fi
-BLASDIR="$(spack location -i openblas@0.3.5~ilp64 % "$compiler")"
-export BLASLIBS=${BLASDIR}/lib/libopenblas.so
-export LAPACKLIBS=${BLASLIBS}
 
 # PARMETIS
 if [ "$indexsize" == "32" ]; then
@@ -139,67 +229,90 @@ if [ "$indexsize" == "32" ]; then
 else
     METISDIR="$(spack location -i metis+int64~real64 % "$compiler")"
 fi
-METISLIB="${METISDIR}/lib/libmetis.so"e
+METISLIB="${METISDIR}/lib/libmetis.so"
 
 # KLU
 if [ "$realtype" != "double" ]; then
-    export KLUSTATUS=OFF
+    export KLU_STATUS=OFF
     unset KLUDIR
 else
-    export KLUSTATUS=ON
+    export KLU_STATUS=ON
     export KLUDIR="$(spack location -i suite-sparse@5.3.0 % "$compiler")"
 fi
 
 # SuperLU_MT
 if [ "$realtype" == "extended" ]; then
-    export SLUMTSTATUS=OFF
+    export SLUMT_STATUS=OFF
     unset SLUMTDIR
 else
-    export SLUMTSTATUS=ON
+    export SLUMT_STATUS=ON
     if [ "$indexsize" == "32" ]; then
-        export SLUMTDIR=${APPDIR}/superlu_mt/SuperLU_MT_3.1_fpic
+        export SLUMTDIR="$(spack location -i superlu-mt@3.1~int64~blas % "$compiler")"
     else
-        export SLUMTDIR=${APPDIR}/superlu_mt/SuperLU_MT_3.1_long_int_fpic
+        export SLUMTDIR="$(spack location -i superlu-mt@3.1+int64~blas % "$compiler")"
     fi
+    export SLUMTLIBS="${SLUMTDIR}/lib/libblas_PTHREAD.a"
+    export SLUMTTYPE="PTHREAD"
 fi
 
 # SuperLU_DIST
 if [ "$realtype" != "double" ]; then
-    export SLUDISTSTATUS=OFF
+    export SLUDIST_STATUS=OFF
     unset SLUDISTDIR
     unset SLUDISTLIBS
 else
-    export SLUDISTSTATUS=ON
+    export SLUDIST_STATUS=ON
     if [ "$indexsize" == "32" ]; then
-        export SLUDISTDIR="$(spack location -i superlu-dist@develop~int64+openmp % "$compiler")"
+        export SLUDISTDIR="$(spack location -i superlu-dist@6.1.1~int64+openmp % "$compiler")"
     else
-        export SLUDISTDIR="$(spack location -i superlu-dist@develop+int64+openmp % "$compiler")"
+        export SLUDISTDIR="$(spack location -i superlu-dist@6.1.1+int64+openmp % "$compiler")"
     fi
+    # built with 32-bit blas
+    BLASDIR="$(spack location -i openblas@0.3.7~ilp64 % "$compiler")"
+    BLASLIBS=${BLASDIR}/lib/libopenblas.so
     export SLUDISTLIBS="${BLASLIBS};${PARMETISLIB};${METISLIB};${SLUDISTDIR}/lib/libsuperlu_dist.a"
 fi
 
 # hypre
 if [ "$realtype" != "double" ]; then
-    export HYPRESTATUS=OFF
+    export HYPRE_STATUS=OFF
     unset HYPREDIR
 else
-    export HYPRESTATUS=ON
+    export HYPRE_STATUS=ON
     if [ "$indexsize" == "32" ]; then
-        export HYPREDIR="$(spack location -i hypre@2.14.0~int64 % "$compiler")"
+        export HYPREDIR="$(spack location -i hypre@2.18.2~int64 % "$compiler")"
     else
-        export HYPREDIR="$(spack location -i hypre@2.14.0+int64 % "$compiler")"
+        export HYPREDIR="$(spack location -i hypre@2.18.2+int64 % "$compiler")"
     fi
 fi
 
 # petsc
 if [ "$realtype" != "double" ]; then
-    export PETSCSTATUS=OFF
+    export PETSC_STATUS=OFF
     unset PETSCDIR
 else
-    export PETSCSTATUS=ON
+    export PETSC_STATUS=ON
     if [ "$indexsize" == "32" ]; then
-        export PETSCDIR="$(spack location -i petsc@3.10.3~int64 % $compiler)"
+        export PETSCDIR="$(spack location -i petsc@3.12.1~int64 % $compiler)"
     else
-        export PETSCDIR="$(spack location -i petsc@3.10.3+int64 % $compiler)"
+        export PETSCDIR="$(spack location -i petsc@3.12.1+int64 % $compiler)"
+    fi
+fi
+
+# trilinos
+if [ "$realtype" == "double" ] && [ "$indexsize" == "32" ]; then
+    export TRILINOS_STATUS=ON
+    export TRILINOSDIR="$(spack location -i trilinos@12.14.1 % $compiler)"
+else
+    export TRILINOS_STATUS=OFF
+    unset TRILINOSDIR
+fi
+
+# raja
+RAJA_STATUS=OFF
+if [[ ("$compiler" != "gcc@9.2.0") && ("$compiler" != "clang@9.0.0") ]]; then
+    if [ "$realtype" == "double" ]; then
+        RAJA_STATUS=ON
+        export RAJADIR=${APPDIR}/raja-0.10.0
     fi
 fi

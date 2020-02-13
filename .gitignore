@@ -24,6 +24,7 @@
 *.nvvp
 *.ptp-sync*
 *~
+\#*
 
 # OS X
 .DS_Store
@@ -46,6 +47,7 @@
 
 # directories created by ARKode's Sphinx documentation system
 /doc/arkode/SphinxDocs/extra_packages/sphinx-bootstrap-theme
+/doc/arkode/SphinxDocs/extra_packages/sphinx-fortran
 /doc/arkode/SphinxDocs/guide/build
 /doc/arkode/SphinxDocs/examples/build
 
@@ -61,3 +63,9 @@
 !/test/spack/.spack-env/view/.spack
 /test/spack/.spack-env/view/.spack/*
 !/test/spack/.spack-env/view/.spack/projections.yaml
+
+# swig
+/swig/swig
+
+# editor files
+.vscode

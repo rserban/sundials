@@ -2,7 +2,7 @@
 # Programmer(s): Slaven Peles, Cody Balos @ LLNL
 # -----------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -26,6 +26,7 @@ cvs_org.tex \
 cvs_sim.tex \
 cvs_fwd.tex \
 cvs_adj.tex \
+cvs_fcmix.tex \
 cvs_nvec.tex \
 cvs_newlinsolv.tex \
 cvs_sunlinsol.tex \

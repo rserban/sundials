@@ -24,7 +24,7 @@ $tar $tarfile $distrobase/include/ida/ida_spils.h   || exit 1
 
 $tar $tarfile $distrobase/src/ida/LICENSE        || exit 1
 $tar $tarfile $distrobase/src/ida/NOTICE         || exit 1
-$tar $tarfile $distrobase/src/ida/README         || exit 1
+$tar $tarfile $distrobase/src/ida/README.md      || exit 1
 $tar $tarfile $distrobase/src/ida/CMakeLists.txt || exit 1
 
 $tar $tarfile $distrobase/src/ida/ida_bbdpre.c       || exit 1
@@ -59,6 +59,11 @@ $tar $tarfile $distrobase/src/ida/fcmix/fidapreco.c         || exit 1
 $tar $tarfile $distrobase/src/ida/fcmix/fidaroot.c          || exit 1
 $tar $tarfile $distrobase/src/ida/fcmix/fidaroot.h          || exit 1
 $tar $tarfile $distrobase/src/ida/fcmix/fidasparse.c        || exit 1
+
+echo "   --- Add ida F2003 interface to $tarfile"
+
+$tar $tarfile $distrobase/src/ida/fmod/CMakeLists.txt
+$tar $tarfile $distrobase/src/ida/fmod/fida_mod.{c,f90}
 
 echo "   --- Add ida examples to $tarfile"
 
@@ -99,12 +104,15 @@ $tar $tarfile $distrobase/examples/ida/C_openmp/idaFoodWeb_bnd_omp.out || exit 1
 $tar $tarfile $distrobase/examples/ida/C_openmp/idaFoodWeb_kry_omp.c   || exit 1
 $tar $tarfile $distrobase/examples/ida/C_openmp/idaFoodWeb_kry_omp.out || exit 1
 
-$tar $tarfile $distrobase/examples/ida/petsc/README                    || exit 1
-$tar $tarfile $distrobase/examples/ida/petsc/CMakeLists.txt            || exit 1
-# $tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_jac_petsc.c   || exit 1
-# $tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_jac_petsc.out || exit 1
-$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_kry_petsc.c     || exit 1
-$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_kry_petsc.out   || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/README                             || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/CMakeLists.txt                     || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_spgmr.c            || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_spgmr.out          || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_snes.c             || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_snes.out           || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_snes_-pre.out      || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_snes_-jac.out      || exit 1
+$tar $tarfile $distrobase/examples/ida/petsc/idaHeat2D_petsc_snes_-jac_-pre.out || exit 1
 
 $tar $tarfile $distrobase/examples/ida/parallel/README                   || exit 1
 $tar $tarfile $distrobase/examples/ida/parallel/CMakeLists.txt           || exit 1
@@ -158,3 +166,10 @@ $tar $tarfile $distrobase/examples/ida/fcmix_pthreads/README                    
 $tar $tarfile $distrobase/examples/ida/fcmix_pthreads/CMakeLists.txt               || exit 1
 $tar $tarfile $distrobase/examples/ida/fcmix_pthreads/fidaRoberts_dns_pthreads.f   || exit 1
 $tar $tarfile $distrobase/examples/ida/fcmix_pthreads/fidaRoberts_dns_pthreads.out || exit 1
+
+$tar $tarfile $distrobase/examples/ida/F2003_serial/README                       || exit 1
+$tar $tarfile $distrobase/examples/ida/F2003_serial/CMakeLists.txt               || exit 1
+$tar $tarfile $distrobase/examples/ida/F2003_serial/idaHeat2D_kry_f2003.f90      || exit 1
+$tar $tarfile $distrobase/examples/ida/F2003_serial/idaHeat2D_kry_f2003.out      || exit 1
+$tar $tarfile $distrobase/examples/ida/F2003_serial/idaRoberts_dns_f2003.f90     || exit 1
+$tar $tarfile $distrobase/examples/ida/F2003_serial/idaRoberts_dns_f2003.out     || exit 1

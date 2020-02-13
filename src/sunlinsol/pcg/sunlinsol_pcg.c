@@ -3,7 +3,7 @@
  * Based on sundials_pcg.c code, written by Daniel Reynolds @ SMU
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -79,6 +79,7 @@ SUNLinearSolver SUNLinSol_PCG(N_Vector y, int pretype, int maxl)
 
   /* Attach operations */
   S->ops->gettype           = SUNLinSolGetType_PCG;
+  S->ops->getid             = SUNLinSolGetID_PCG;
   S->ops->setatimes         = SUNLinSolSetATimes_PCG;
   S->ops->setpreconditioner = SUNLinSolSetPreconditioner_PCG;
   S->ops->setscalingvectors = SUNLinSolSetScalingVectors_PCG;
@@ -184,6 +185,13 @@ SUNLinearSolver_Type SUNLinSolGetType_PCG(SUNLinearSolver S)
 {
   return(SUNLINEARSOLVER_ITERATIVE);
 }
+
+
+SUNLinearSolver_ID SUNLinSolGetID_PCG(SUNLinearSolver S)
+{
+  return(SUNLINEARSOLVER_PCG);
+}
+
 
 int SUNLinSolInitialize_PCG(SUNLinearSolver S)
 {
@@ -440,7 +448,7 @@ N_Vector SUNLinSolResid_PCG(SUNLinearSolver S)
 }
 
 
-long int SUNLinSolLastFlag_PCG(SUNLinearSolver S)
+sunindextype SUNLinSolLastFlag_PCG(SUNLinearSolver S)
 {
   /* return the stored 'last_flag' value */
   if (S == NULL) return(-1);

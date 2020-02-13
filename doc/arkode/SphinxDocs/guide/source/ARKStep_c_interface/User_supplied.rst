@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2019, Lawrence Livermore National Security
+   Copyright (c) 2002-2020, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -34,6 +34,8 @@ The user-supplied functions for ARKStep consist of:
 * a function that handles adaptive time step error control (optional),
 
 * a function that handles explicit time step stability (optional),
+
+* a function that updates the implicit stage prediction (optional),
 
 * a function that defines the root-finding problem(s) to solve
   (optional),
@@ -303,6 +305,47 @@ step, and the accuracy-based time step.
 
 
 
+
+.. _ARKStep_CInterface.StagePredictFn:
+
+Implicit stage prediction function
+--------------------------------------
+
+A user may supply a function to update the prediction for each implicit stage solution.
+If supplied, this routine will be called *after* any existing ARKStep predictor
+algorithm completes, so that the predictor may be modified by the user as desired.
+In this scenario, a user may provide a function of type :c:type:`ARKStepStagePredictFn`
+to provide this implicit predictor to ARKStep.  This function takes as input the
+already-predicted implicit stage solution and the corresponding 'time' for that prediction;
+it then updates the prediction vector as desired.
+
+
+
+.. c:type:: typedef int (*ARKStepStagePredictFn)(realtype t, N_Vector zpred, void* user_data)
+
+   This function updates the prediction for the implicit stage solution.
+
+   **Arguments:**
+      * *t* -- the current value of the independent variable.
+      * *zpred* -- the ARKStep-predicted stage solution on input, and the user-modified
+        predicted stage solution on output.
+      * *user_data* -- a pointer to user data, the same as the
+        *user_data* parameter that was passed to :c:func:`ARKStepSetUserData()`.
+
+   **Return value:**
+   An *ARKStepStagePredictFn* function should return 0 if it
+   successfully set the upcoming stable step size, and a non-zero
+   value otherwise.
+
+   **Notes:**  This may be useful if there are bound constraints on the solution,
+   and these should be enforced prior to beginning the nonlinear or linear implicit solver
+   algorithm.
+
+   This routine is incompatible with the "minimum correction predictor" -- option 5 to the
+   routine :c:func:`ARKStepSetPredictorMethod()`.  If both are selected, then ARKStep will
+   override its built-in implicit predictor routine to instead use option 0 (trivial predictor).
+
+
 .. _ARKStep_CInterface.RootfindingFn:
 
 Rootfinding function
@@ -340,11 +383,12 @@ ODE system, the user must supply a function of type :c:type:`ARKRootFn`.
 Jacobian construction (matrix-based linear solvers)
 --------------------------------------------------------------
 
-If a matrix-based linear solver module is used (i.e., a non-NULL
-``SUNMatrix`` object was supplied to
-:c:func:`ARKStepSetLinearSolver()` in section
-:ref:`ARKStep_CInterface.Skeleton`), the user may provide a
-function of type :c:type:`ARKLsJacFn` to provide the Jacobian approximation.
+If a matrix-based linear solver module is used (i.e., a non-NULL ``SUNMatrix``
+object was supplied to :c:func:`ARKStepSetLinearSolver()` in section
+:ref:`ARKStep_CInterface.Skeleton`), the user may provide a function of type
+:c:type:`ARKLsJacFn` to provide the Jacobian approximation or
+:c:type:`ARKLsLinSysFn` to provide an approximation of the linear system
+:math:`A = I - \gamma J` or :math:`A = M - \gamma J`.
 
 
 
@@ -383,6 +427,11 @@ function of type :c:type:`ARKLsJacFn` to provide the Jacobian approximation.
    Prior to calling the user-supplied Jacobian function, the Jacobian
    matrix :math:`J(t,y)` is zeroed out, so only nonzero elements need
    to be loaded into *Jac*.
+
+   With direct linear solvers (i.e., linear solvers with type
+   ``SUNLINEARSOLVER_DIRECT``), the Jacobian matrix :math:`J(t,y)` is zeroed out
+   prior to calling the user-supplied Jacobian function so only nonzero elements
+   need to be loaded into *Jac*.
 
    If the user's :c:type:`ARKLsJacFn` function uses difference
    quotient approximations, then it may need to access quantities not
@@ -470,6 +519,46 @@ function of type :c:type:`ARKLsJacFn` to provide the Jacobian approximation.
    :c:func:`SUNSparseMatrix_NNZ()`.  The SUNMATRIX_SPARSE type is
    further documented in the section :ref:`SUNMatrix_Sparse`.
 
+
+
+.. c:type:: typedef int (*ARKLsLinSysFn)(realtype t, N_Vector y, N_Vector fy, SUNMatrix A, SUNMatrix M, booleantype jok, booleantype *jcur, realtype gamma, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3)
+
+   This function computes the linear system matrix :math:`A = M - \gamma J` (or
+   an approximation to it).
+
+   **Arguments:**
+      * *t* -- the current value of the independent variable.
+      * *y* -- the current value of the dependent variable vector, namely the
+        predicted value of :math:`y(t)`.
+      * *fy* -- the current value of the vector :math:`f^I(t,y)`.
+      * *A* -- the output linear system matrix.
+      * *M* -- the current mass matrix (this input is ``NULL`` if :math:`M = I`).
+      * *jok* -- is an input flag indicating whether the Jacobian-related data
+        needs to be updated. The *jok* argument provides for the reuse of
+        Jacobian data in the preconditioner solve function. When *jok* =
+        ``SUNFALSE``, the Jacobian-related data should be recomputed from
+        scratch. When *jok* = ``SUNTRUE`` the Jacobian data, if saved from the
+        previous call to this function, can be reused (with the current value of
+        *gamma*). A call with *jok* = ``SUNTRUE`` can only occur after a call
+        with *jok* = ``SUNFALSE``.
+      * *jcur* -- is a pointer to a flag which should be set to ``SUNTRUE`` if
+        Jacobian data was recomputed, or set to ``SUNFALSE`` if Jacobian data
+        was not recomputed, but saved data was still reused.
+      * *gamma* -- the scalar :math:`\gamma` appearing in the Newton matrix
+        given by :math:`A=I-\gamma J` or :math:`A=M-\gamma J`.
+      * *user_data* -- a pointer to user data, the same as the *user_data*
+        parameter that was passed to :c:func:`ARKStepSetUserData()`.
+      * *tmp1*, *tmp2*, *tmp3* -- pointers to memory allocated to variables of
+        type ``N_Vector`` which can be used by an ARKLsLinSysFn as temporary
+        storage or work space.
+
+   **Return value:**
+   An *ARKLsLinSysFn* function should return 0 if successful, a positive value
+   if a recoverable error occurred (in which case ARKStep will attempt to
+   correct, while ARKLS sets *last_flag* to *ARKLS_JACFUNC_RECVR*), or a
+   negative value if it failed unrecoverably (in which case the integration is
+   halted, :c:func:`ARKStepEvolve()` returns *ARK_LSETUP_FAIL* and ARKLS sets
+   *last_flag* to *ARKLS_JACFUNC_UNRECVR*).
 
 
 

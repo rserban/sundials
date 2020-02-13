@@ -3,7 +3,7 @@
 # Programmer(s): David J. Gardner @ LLNL
 # ------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -12,7 +12,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # SUNDIALS Copyright End
 # ------------------------------------------------------------------------------
-# SUNDIALS regression testing using xSDK options
+# SUNDIALS regression testing script using xSDK options
 #
 # Usage: ./suntest_xsdk.sh <real type> <index size> <library type> <TPL status>
 #                          <test type> <memcheck> <build threads>
@@ -21,7 +21,7 @@
 #   <real type>  = SUNDIALS real type to build/test with:
 #                    single   : single (32-bit) precision
 #                    double   : double (64-bit) precision
-#                    extended : extended (128-bit) precision
+#                    extended : extended (80-bit) precision
 #   <index size> = SUNDIALS index size to build/test with:
 #                    32       : 32-bit indices
 #                    64       : 64-bit indices
@@ -43,6 +43,8 @@
 #
 # Optional Inputs:
 #   <build threads> = number of threads to use in parallel build (default 1)
+#   <compiler spec> = compiler spec (compiler-name@compiler-version)
+#   <build type>    = debug (dbg) or optimized (opt)
 # ------------------------------------------------------------------------------
 
 # check number of inputs
@@ -54,6 +56,10 @@ if [ "$#" -lt 6 ]; then
     echo "TPLs         : [ON|OFF]"
     echo "test type    : [CONFIG|BUILD|STD|DEV]"
     echo "memcheck     : [ON|OFF]"
+    echo "Optional inputs"
+    echo "  build threads : [number of build threads e.g., 8]"
+    echo "  compiler spec : [compiler spec e.g., gcc@4.9.4]"
+    echo "  build type    : [dbg|opt]"
     exit 1
 fi
 
@@ -65,14 +71,45 @@ testtype=$5     # which test type to run
 memcheck=$6     # memcheck test (make test_memcheck)
 buildthreads=1  # default number threads for parallel builds
 
-# check if the number of build threads was set
+# set defaults for optional inputs
+buildthreads=1  # number threads for parallel builds
+compiler=""     # compiler spec
+bldtype=""      # build type
+
+# set optional inputs if provided
+if [ "$#" -gt 5 ]; then
+    buildthreads=$6
+fi
+
 if [ "$#" -gt 6 ]; then
-    buildthreads=$7
+    compiler=$7
+fi
+
+if [ "$#" -gt 7 ]; then
+    bldtype=$8
 fi
 
 # ------------------------------------------------------------------------------
 # Check inputs
 # ------------------------------------------------------------------------------
+
+# build and install directory names
+builddir=build_xsdk
+installdir=install_xsdk
+
+# add compiler spec to directory names
+if [ "$compiler" != "" ]; then
+    # replace @ with -
+    compilername=${compiler/@/-}
+    builddir=${builddir}_${compilername}
+    installdir=${installdir}_${compilername}
+fi
+
+# add build type to directory names
+if [ "$bldtype" != "" ]; then
+    builddir=${builddir}_${bldtype}
+    installdir=${installdir}_${bldtype}
+fi
 
 # set real types to test
 case "$realtype" in
@@ -82,6 +119,8 @@ case "$realtype" in
         exit 1
         ;;
 esac
+builddir=${builddir}_${realtype}
+installdir=${installdir}_${realtype}
 
 # set index sizes to test
 case "$indexsize" in
@@ -91,6 +130,8 @@ case "$indexsize" in
         exit 1
         ;;
 esac
+builddir=${builddir}_${indexsize}
+installdir=${installdir}_${indexsize}
 
 # set library types
 case "$libtype" in
@@ -111,6 +152,9 @@ case "$libtype" in
         exit 1
         ;;
 esac
+builddir=${builddir}_${libtype}
+installdir=${installdir}_${libtype}
+
 
 # set TPL status
 case "$tplstatus" in
@@ -125,6 +169,8 @@ case "$tplstatus" in
         exit 1
         ;;
 esac
+builddir=${builddir}_${tplstatus}
+installdir=${installdir}_${tplstatus}
 
 # which tests to run (if any)
 case "$testtype" in
@@ -160,6 +206,8 @@ case "$testtype" in
         exit 1
         ;;
 esac
+builddir=${builddir}_${testtype}
+installdir=${installdir}_${testtype}
 
 # which tests to run (if any)
 case "$memcheck" in
@@ -190,22 +238,37 @@ esac
 
 if [ ! -z "$SUNDIALS_ENV" ]; then
     echo "Setting up environment with $SUNDIALS_ENV"
-    source $SUNDIALS_ENV $realtype $indexsize
+    time source $SUNDIALS_ENV $realtype $indexsize $compiler $bldtype
 elif [ -f env.sh ]; then
     echo "Setting up environment with ./env.sh"
-    source env.sh $realtype $indexsize
+    time source env.sh $realtype $indexsize $compiler $bldtype
 elif [ -f ~/.sundials_config/env.sh ]; then
     echo "Setting up environment with ~/.sundials_config/env.sh"
-    source ~/.sundials_config/env.sh $realtype $indexsize
+    time source ~/.sundials_config/env.sh $realtype $indexsize $compiler $bldtype
 else
     echo "Setting up environment with ./env.default.sh"
-    source env.default.sh $realtype $indexsize
+    time source env.default.sh $realtype $indexsize $compiler $bldtype
 fi
 
 # check return value
 if [ $? -ne 0 ]; then
     echo "environment setup failed"
     exit 1;
+fi
+
+# ------------------------------------------------------------------------------
+# SUNDIALS test settings
+# ------------------------------------------------------------------------------
+
+# Check that only one of SUNDIALS_TEST_OUTPUT_DIR and SUNDIALS_TEST_ANSWER_DIR
+# are set to ensure tests do not pass erronously
+
+if [ -n "${SUNDIALS_TEST_OUTPUT_DIR}" ] && [ -n "${SUNDIALS_TEST_ANSWER_DIR}" ]
+then
+    echo "ERROR: Both SUNDIALS_TEST_OUTPUT_DIR and SUNDIALS_TEST_ANSWER_DIR are set"
+    echo "SUNDIALS_TEST_OUTPUT_DIR = ${SUNDIALS_TEST_OUTPUT_DIR}"
+    echo "SUNDIALS_TEST_ANSWER_DIR = ${SUNDIALS_TEST_ANSWER_DIR}"
+    exit 1
 fi
 
 # ------------------------------------------------------------------------------
@@ -217,97 +280,120 @@ if [ "$TPLs" == "ON" ]; then
     # C and C++ standard flags to append
     CSTD="-std=c99"
     CXXSTD="-std=c++11"
+    C90MATH=OFF
 
     # CUDA
-    CUDASTATUS=${CUDASTATUS:-"OFF"}
+    CUDA_STATUS=${CUDA_STATUS:-"OFF"}
 
     # MPI
-    MPISTATUS=${MPISTATUS:-"OFF"}
-    if [ "$MPISTATUS" == "ON" ] && [ -z "$MPICC" ]; then
-        echo "ERROR: MPISTATUS = ON but MPICC is not set"
-        exit 1
-    fi
-
-    # BLAS
-    BLASSTATUS=${BLASSTATUS:-"OFF"}
-    if [ "$BLASSTATUS" == "ON" ] && [ -z "$BLASLIBS" ]; then
-        echo "ERROR: BLASSTATUS = ON but BLASLIBS is not set"
+    MPI_STATUS=${MPI_STATUS:-"OFF"}
+    if [ "$MPI_STATUS" == "ON" ] && [ -z "$MPICC" ]; then
+        echo "ERROR: MPI_STATUS = ON but MPICC is not set"
         exit 1
     fi
 
     # LAPACK
-    LAPACKSTATUS=${LAPACKSTATUS:-"OFF"}
-    if [ "$LAPACKSTATUS" == "ON" ] && [ -z "$LAPACKLIBS" ]; then
-        echo "ERROR: LAPACKSTATUS = ON but LAPACKLIBS is not set"
+    LAPACK_STATUS=${LAPACK_STATUS:-"OFF"}
+    if [ "$LAPACK_STATUS" == "ON" ] && [ -z "$LAPACKLIBS" ]; then
+        echo "ERROR: LAPACK_STATUS = ON but LAPACKLIBS is not set"
         exit 1
     fi
 
     # KLU
-    KLUSTATUS=${KLUSTATUS:-"OFF"}
-    if [ "$KLUSTATUS" == "ON" ] && [ -z "$KLUDIR" ]; then
-        echo "ERROR: KLUSTATUS = ON but KLUDIR is not set"
+    KLU_STATUS=${KLU_STATUS:-"OFF"}
+    if [ "$KLU_STATUS" == "ON" ] && [ -z "$KLUDIR" ]; then
+        echo "ERROR: KLU_STATUS = ON but KLUDIR is not set"
         exit 1
     fi
 
     # SuperLU_MT
-    SLUMTSTATUS=${SLUMTSTATUS:-"OFF"}
-    if [ "$SLUMTSTATUS" == "ON" ] && [ -z "$SLUMTDIR" ]; then
-        echo "ERROR: SLUMTSTATUS = ON but SLUMTDIR is not set"
+    SLUMT_STATUS=${SLUMT_STATUS:-"OFF"}
+    if [ "$SLUMT_STATUS" == "ON" ] && [ -z "$SLUMTDIR" ]; then
+        echo "ERROR: SLUMT_STATUS = ON but SLUMTDIR is not set"
         exit 1
     fi
 
     # SuperLU_DIST
-    SLUDISTSTATUS=${SLUDISTSTATUS:-"OFF"}
-    if [ "$SLUDISTSTATUS" == "ON" ] && [ -z "$SLUDISTDIR" ]; then
-        echo "ERROR: SLUDISTSTATUS = ON but SLUDISTDIR is not set"
+    SLUDIST_STATUS=${SLUDIST_STATUS:-"OFF"}
+    if [ "$SLUDIST_STATUS" == "ON" ] && [ -z "$SLUDISTDIR" ]; then
+        echo "ERROR: SLUDIST_STATUS = ON but SLUDISTDIR is not set"
         exit 1
     fi
 
     # hypre
-    HYPRESTATUS=${HYPRESTATUS:-"OFF"}
-    if [ "$HYPRESTATUS" == "ON" ] && [ -z "$HYPREDIR" ]; then
-        echo "ERROR: HYPRESTATUS = ON but HYPREDIR is not set"
+    HYPRE_STATUS=${HYPRE_STATUS:-"OFF"}
+    if [ "$HYPRE_STATUS" == "ON" ] && [ -z "$HYPREDIR" ]; then
+        echo "ERROR: HYPRE_STATUS = ON but HYPREDIR is not set"
         exit 1
     fi
 
     # PETSc
-    PETSCSTATUS=${PETSCSTATUS:-"OFF"}
-    if [ "$PETSCSTATUS" == "ON" ] && [ -z "$PETSCDIR" ]; then
-        echo "ERROR: PETSCSTATUS = ON but PETSCDIR is not set"
+    PETSC_STATUS=${PETSC_STATUS:-"OFF"}
+    if [ "$PETSC_STATUS" == "ON" ] && [ -z "$PETSCDIR" ]; then
+        echo "ERROR: PETSC_STATUS = ON but PETSCDIR is not set"
+        exit 1
+    fi
+
+    # Trilinos
+    TRILINOS_STATUS=${TRILINOS_STATUS:-"OFF"}
+    if [ "$TRILINOS_STATUS" == "ON" ] && [ -z "$TRILINOSDIR" ]; then
+        echo "ERROR: TRILINOS_STATUS = ON but TRILINOSDIR is not set"
+        exit 1
+    fi
+
+    # RAJA
+    RAJA_STATUS=${RAJA_STATUS:-"OFF"}
+    if [ "$RAJA_STATUS" == "ON" ] && [ -z "$RAJADIR" ]; then
+        echo "ERROR: RAJA_STATUS = ON but RAJADIR is not set"
         exit 1
     fi
 
 else
 
     # C and C++ standard flags to append
-    CSTD="-std=c90"
+    if [ "$realtype" != "double" ]; then
+        CSTD="-std=c99"
+        C90MATH=OFF
+    else
+        CSTD="-std=c90"
+        C90MATH=ON
+    fi
     CXXSTD="-std=c++11"
 
     # disable all TPLs
-    MPISTATUS=OFF
-    LAPACKSTATUS=OFF
-    BLASSTATUS=OFF
-    KLUSTATUS=OFF
-    SLUMTSTATUS=OFF
-    SLUDISTSTATUS=OFF
-    HYPRESTATUS=OFF
-    PETSCSTATUS=OFF
-    CUDASTATUS=OFF
+    MPI_STATUS=OFF
+    LAPACK_STATUS=OFF
+    KLU_STATUS=OFF
+    SLUMT_STATUS=OFF
+    SLUDIST_STATUS=OFF
+    HYPRE_STATUS=OFF
+    PETSC_STATUS=OFF
+    CUDA_STATUS=OFF
+    TRILINOS_STATUS=OFF
+    RAJA_STATUS=OFF
 
 fi
+
+# Ensure OpenMP and PThread options are set (default to OFF)
+OPENMP_STATUS=${OPENMP_STATUS:-"OFF"}
+OPENMPDEV_STATUS=${OPENMPDEV_STATUS:-"OFF"}
+PTHREAD_STATUS=${PTHREAD_STATUS:-"OFF"}
+
+# Ensure Fortran interface options are set (default to OFF)
+F77_STATUS=${F77_STATUS:-"OFF"}
+F03_STATUS=${F03_STATUS:-"OFF"}
+
+# Ensure SUNDIALS package options are set (default to ON)
+ARKODE_STATUS=${ARKODE_STATUS:-"ON"}
+CVODE_STATUS=${CVODE_STATUS:-"ON"}
+CVODES_STATUS=${CVODES_STATUS:-"ON"}
+IDA_STATUS=${IDA_STATUS:-"ON"}
+IDAS_STATUS=${IDAS_STATUS:-"ON"}
+KINSOL_STATUS=${KINSOL_STATUS:-"ON"}
 
 # ------------------------------------------------------------------------------
 # Setup test directories
 # ------------------------------------------------------------------------------
-
-# build and install directories
-if [ "$TPLs" == "ON" ]; then
-    builddir=build_xsdk_${realtype}_${indexsize}_${libtype}_tpls
-    installdir=install_xsdk_${realtype}_${indexsize}_${libtype}_tpls
-else
-    builddir=build_xsdk_${realtype}_${indexsize}_${libtype}
-    installdir=install_xsdk_${realtype}_${indexsize}_${libtype}
-fi
 
 # remove old build and install directories
 \rm -rf $builddir
@@ -328,8 +414,15 @@ else
     xsdk_realtype=$realtype
 fi
 
+# set Fortran status for xSDK build
+if [[ "${F77_STATUS}" == "ON" || "${F03_STATUS}" == "ON" ]]; then
+    FORTRAN_STATUS=ON
+else
+    FORTRAN_STATUS=OFF
+fi
+
 echo "START CMAKE"
-cmake \
+time cmake \
     -D USE_XSDK_DEFAULTS=ON \
     \
     -D CMAKE_INSTALL_PREFIX="../$installdir" \
@@ -337,23 +430,23 @@ cmake \
     -D BUILD_STATIC_LIBS="${STATIC}" \
     -D BUILD_SHARED_LIBS="${SHARED}" \
     \
-    -D BUILD_ARKODE=ON \
-    -D BUILD_CVODE=ON \
-    -D BUILD_CVODES=ON \
-    -D BUILD_IDA=ON \
-    -D BUILD_IDAS=ON \
-    -D BUILD_KINSOL=ON \
+    -D BUILD_ARKODE="${ARKODE_STATUS}" \
+    -D BUILD_CVODE="${CVODE_STATUS}" \
+    -D BUILD_CVODES="${CVODES_STATUS}" \
+    -D BUILD_IDA="${IDA_STATUS}" \
+    -D BUILD_IDAS="${IDAS_STATUS}" \
+    -D BUILD_KINSOL="${KINSOL_STATUS}" \
     \
     -D XSDK_PRECISION=${xsdk_realtype} \
     -D XSDK_INDEX_SIZE=${indexsize} \
     \
-    -D XSDK_ENABLE_FORTRAN=ON \
+    -D XSDK_ENABLE_FORTRAN="${FORTRAN_STATUS}" \
     \
     -D EXAMPLES_ENABLE_C=ON \
     -D EXAMPLES_ENABLE_CXX=ON \
-    -D EXAMPLES_ENABLE_F77=ON \
-    -D EXAMPLES_ENABLE_F90=ON \
-    -D EXAMPLES_ENABLE_CUDA=${CUDASTATUS} \
+    -D EXAMPLES_ENABLE_F77="${FORTRAN_STATUS}" \
+    -D EXAMPLES_ENABLE_F90="${FORTRAN_STATUS}" \
+    -D EXAMPLES_ENABLE_CUDA="${CUDA_STATUS}" \
     \
     -D CMAKE_C_COMPILER=$CC \
     -D CMAKE_CXX_COMPILER=$CXX \
@@ -362,52 +455,64 @@ cmake \
     -D CMAKE_C_FLAGS="${CFLAGS} ${CSTD}" \
     -D CMAKE_CXX_FLAGS="${CXXFLAGS} ${CXXSTD}" \
     -D CMAKE_Fortran_FLAGS="${FFLAGS}" \
-    -D CUDA_NVCC_FLAGS="--compiler-options;-Wall;--compiler-options;-Werror" \
-    -D CUDA_PROPAGATE_HOST_FLAGS=OFF \
     \
-    -D OPENMP_ENABLE=${OMPSTATUS} \
-    -D PTHREAD_ENABLE=${PTSTATUS} \
-    -D XSDK_ENABLE_CUDA=${CUDASTATUS} \
-    -D RAJA_ENABLE=OFF \
+    -D OPENMP_ENABLE="${OPENMP_STATUS}" \
+    -D PTHREAD_ENABLE="${PTHREAD_STATUS}" \
+    -D XSDK_ENABLE_CUDA="${CUDA_STATUS}" \
     \
-    -D MPI_ENABLE="${MPISTATUS}" \
+    -D OPENMP_DEVICE_ENABLE="${OPENMPDEV_STATUS}" \
+    -D SKIP_OPENMP_DEVICE_CHECK=TURE \
+    \
+    -D MPI_ENABLE="${MPI_STATUS}" \
     -D MPI_C_COMPILER="${MPICC}" \
     -D MPI_CXX_COMPILER="${MPICXX}" \
     -D MPI_Fortran_COMPILER="${MPIFC}" \
     -D MPIEXEC_EXECUTABLE="${MPIEXEC}" \
     \
-    -D TPL_ENABLE_BLAS="${BLASSTATUS}" \
-    -D TPL_BLAS_LIBRARIES="${BLASLIBS}" \
-    \
-    -D TPL_ENABLE_LAPACK="${LAPACKSTATUS}" \
+    -D TPL_ENABLE_LAPACK="${LAPACK_STATUS}" \
     -D TPL_LAPACK_LIBRARIES="${LAPACKLIBS}" \
     \
-    -D TPL_ENABLE_KLU="${KLUSTATUS}" \
+    -D TPL_ENABLE_KLU="${KLU_STATUS}" \
     -D TPL_KLU_INCLUDE_DIRS="${KLUDIR}/include" \
     -D TPL_KLU_LIBRARIES="${KLUDIR}/lib/libklu.so" \
     \
-    -D TPL_ENABLE_HYPRE="${HYPRESTATUS}" \
+    -D TPL_ENABLE_HYPRE="${HYPRE_STATUS}" \
     -D TPL_HYPRE_INCLUDE_DIRS="${HYPREDIR}/include" \
     -D TPL_HYPRE_LIBRARIES="${HYPREDIR}/lib/libHYPRE.so" \
     \
-    -D TPL_ENABLE_PETSC="${PETSCSTATUS}" \
-    -D TPL_PETSC_INCLUDE_DIRS="${PETSCDIR}/include" \
-    -D TPL_PETSC_LIBRARIES="${PETSCDIR}/lib/libpetsc.so" \
+    -D TPL_ENABLE_PETSC="${PETSC_STATUS}" \
+    -D TPL_PETSC_DIR="${PETSCDIR}" \
     \
-    -D TPL_ENABLE_SUPERLUMT="${SLUMTSTATUS}" \
-    -D TPL_SUPERLUMT_INCLUDE_DIRS="${SLUMTDIR}/SRC" \
-    -D TPL_SUPERLUMT_LIBRARIES="${SLUMTDIR}/lib/libsuperlu_mt_PTHREAD.a" \
-    -D TPL_SUPERLUMT_THREAD_TYPE=Pthread \
+    -D TPL_ENABLE_SUPERLUMT="${SLUMT_STATUS}" \
+    -D TPL_SUPERLUMT_INCLUDE_DIRS="${SLUMTDIR}/include" \
+    -D TPL_SUPERLUMT_LIBRARIES="${SLUMTLIBS};${SLUMTDIR}/lib/libsuperlu_mt_PTHREAD.a" \
+    -D TPL_SUPERLUMT_THREAD_TYPE="${SLUMTTYPE}" \
     \
-    -D TPL_ENABLE_SUPERLUDIST="${SLUDISTSTATUS}" \
+    -D TPL_ENABLE_SUPERLUDIST="${SLUDIST_STATUS}" \
     -D TPL_SUPERLUDIST_INCLUDE_DIRS="${SLUDISTDIR}/include" \
     -D TPL_SUPERLUDIST_LIBRARIES="${SLUDISTLIBS}" \
     -D TPL_SUPERLUDIST_OpenMP=ON \
     -D SKIP_OPENMP_DEVICE_CHECK=ON \
     \
-    -D SUNDIALS_DEVTESTS="${devtests}" \
+    -D TPL_ENABLE_TRILINOS="${TRILINOS_STATUS}" \
+    -D Trilinos_DIR="${TRILINOSDIR}" \
+    \
+    -D TPL_ENABLE_RAJA="${RAJA_STATUS}" \
+    -D RAJA_DIR="${RAJADIR}" \
+    \
+    -D USE_GENERIC_MATH="${C90MATH}" \
+    \
+    -D SUNDIALS_TEST_DEVTESTS="${devtests}" \
+    -D SUNDIALS_TEST_UNITTESTS=ON \
+    -D SUNDIALS_TEST_OUTPUT_DIR="${SUNDIALS_TEST_OUTPUT_DIR}" \
+    -D SUNDIALS_TEST_ANSWER_DIR="${SUNDIALS_TEST_ANSWER_DIR}" \
+    -D SUNDIALS_TEST_FLOAT_PRECISION="${SUNDIALS_TEST_FLOAT_PRECISION}" \
+    -D SUNDIALS_TEST_INTEGER_PRECISION="${SUNDIALS_TEST_INTEGER_PRECISION}" \
     \
     -D MEMORYCHECK_SUPPRESSIONS_FILE="${MPISUPP}" \
+    \
+    -D CMAKE_VERBOSE_MAKEFILE=OFF \
+    \
     ../../. 2>&1 | tee configure.log
 
 # check cmake return code
@@ -423,7 +528,7 @@ if [ "$testtype" = "CONFIG" ]; then cd ..; exit 0; fi
 # ------------------------------------------------------------------------------
 
 echo "START MAKE"
-make -j $buildthreads 2>&1 | tee make.log
+time make -j $buildthreads 2>&1 | tee make.log
 
 # check make return code
 rc=${PIPESTATUS[0]}
@@ -439,7 +544,7 @@ if [ "$testtype" = "BUILD" ]; then cd ..; exit 0; fi
 
 # test sundials
 echo "START TEST"
-make test 2>&1 | tee test.log
+time ctest -j $buildthreads test 2>&1 | tee test.log
 
 # check make test return code
 rc=${PIPESTATUS[0]}
@@ -467,7 +572,7 @@ fi
 
 # install sundials
 echo "START INSTALL"
-make install 2>&1 | tee install.log
+time make -j $buildthreads install 2>&1 | tee install.log
 
 # check make install return code
 rc=${PIPESTATUS[0]}
@@ -480,11 +585,24 @@ if [ $rc -ne 0 ]; then cd ..; exit 1; fi
 
 # smoke test for installation
 echo "START TEST_INSTALL"
-make test_install 2>&1 | tee test_install.log
+time make test_install 2>&1 | tee test_install.log
 
 # check make install return code
 rc=${PIPESTATUS[0]}
 echo -e "\nmake test_install returned $rc\n" | tee -a test_install.log
+if [ $rc -ne 0 ]; then cd ..; exit 1; fi
+
+# ------------------------------------------------------------------------------
+# Test SUNDIALS Install All
+# ------------------------------------------------------------------------------
+
+# smoke test for installation
+echo "START TEST_INSTALL_ALL"
+time make test_install_all 2>&1 | tee test_install_all.log
+
+# check make install all return code
+rc=${PIPESTATUS[0]}
+echo -e "\nmake test_install_all returned $rc\n" | tee -a test_install_all.log
 if [ $rc -ne 0 ]; then cd ..; exit 1; fi
 
 # ------------------------------------------------------------------------------

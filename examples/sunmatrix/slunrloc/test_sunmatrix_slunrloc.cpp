@@ -3,7 +3,7 @@
  * Programmer(s): Cody J. Balos @ LLNL
  * ----------------------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -20,6 +20,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cmath>
 #include <superlu_ddefs.h>
 
 #include <nvector/nvector_serial.h>
@@ -84,8 +85,8 @@ int main(int argc, char *argv[])
   SetTiming(print_timing);
 
   /* Validate the process grid size */
-  nprow = atol(argv[2]);
-  npcol = atol(argv[3]);
+  nprow = atoi(argv[2]);
+  npcol = atoi(argv[3]);
   if (nprow <= 0 || npcol <= 0) {
     if (rank == 0)
       printf("ERROR: nprow and npcol must be positive integers \n");
@@ -97,7 +98,7 @@ int main(int argc, char *argv[])
   }
 
   /* Extract matrix size arguments */
-  M = N = atol(argv[1]);
+  M = N = (sunindextype) atol(argv[1]);
 
   /* Setup the process grid */
   superlu_gridinit(MPI_COMM_WORLD, nprow, npcol, &grid);
@@ -121,17 +122,20 @@ int main(int argc, char *argv[])
   }
 
   /* Initialize matrices and vectors to null */
-  D = NULL;
-  A = NULL;
-  I = NULL;
-  x = NULL;
-  y = NULL;
+  D  = NULL;
+  A  = NULL;
+  I  = NULL;
+  x  = NULL;
+  y  = NULL;
+  gx = NULL;
+  gy = NULL;
   matdata = NULL;
   rowptrs = NULL;
   colind  = NULL;
 
   /* Setup global matrix */
   if (grid.iam == 0) {
+
     /* Create the matrix as dense first */
     D = SUNDenseMatrix(M, N);
 
@@ -165,7 +169,7 @@ int main(int argc, char *argv[])
       return(1);
     }
 
-    fails = csr_from_dense(D, ZERO, &matdata, &colind, &rowptrs); 
+    fails = csr_from_dense(D, ZERO, &matdata, &colind, &rowptrs);
     if (fails != 0) {
       printf(">>> FAIL: csr_from_dense failure \n");
       return(1);
@@ -182,26 +186,26 @@ int main(int argc, char *argv[])
 
       /* send number of local NNZ */
       NNZ_local = rowptrs[fstrow_temp+M_localtemp] - rowptrs[fstrow_temp];
-      MPI_Send(&NNZ_local, 1, PVEC_INTEGER_MPI_TYPE, i, i, grid.comm);
+      MPI_Send(&NNZ_local, 1, MPI_SUNINDEXTYPE, i, i, grid.comm);
 
       /* send out rowptrs */
       rowtemp = &rowptrs[fstrow_temp];
-      MPI_Send(rowtemp, M_localtemp+1, PVEC_INTEGER_MPI_TYPE, i, i, grid.comm);
+      MPI_Send(rowtemp, M_localtemp+1, MPI_SUNINDEXTYPE, i, i, grid.comm);
 
       /* send corresponding column indices */
       coltemp = &colind[rowptrs[fstrow_temp]];
-      MPI_Send(coltemp, NNZ_local, PVEC_INTEGER_MPI_TYPE, i, i, grid.comm);
+      MPI_Send(coltemp, NNZ_local, MPI_SUNINDEXTYPE, i, i, grid.comm);
 
       /* send corresponding data */
       datatemp = &matdata[rowptrs[fstrow_temp]];
-      MPI_Send(datatemp, NNZ_local, PVEC_REAL_MPI_TYPE, i, i, grid.comm);
+      MPI_Send(datatemp, NNZ_local, MPI_SUNREALTYPE, i, i, grid.comm);
 
       /* send vector data */
       datatemp = &xdata[fstrow_temp];
-      MPI_Send(datatemp, M_localtemp, PVEC_REAL_MPI_TYPE, i, i, grid.comm);
+      MPI_Send(datatemp, M_localtemp, MPI_SUNREALTYPE, i, i, grid.comm);
 
       datatemp = &ydata[fstrow_temp];
-      MPI_Send(datatemp, M_localtemp, PVEC_REAL_MPI_TYPE, i, i, grid.comm);
+      MPI_Send(datatemp, M_localtemp, MPI_SUNREALTYPE, i, i, grid.comm);
     }
 
     NNZ_local = rowptrs[M_local] - rowptrs[0];
@@ -228,11 +232,13 @@ int main(int argc, char *argv[])
     /* make the local NVectors */
     x = N_VMake_Parallel(grid.comm, M_local, N, xdata);
     y = N_VMake_Parallel(grid.comm, M_local, N, ydata);
+
   } else {
+
     sunindextype shift;
 
     /* recieve number of local nnz */
-    MPI_Recv(&NNZ_local, 1, PVEC_INTEGER_MPI_TYPE, 0, grid.iam, grid.comm, &mpistatus);
+    MPI_Recv(&NNZ_local, 1, MPI_SUNINDEXTYPE, 0, grid.iam, grid.comm, &mpistatus);
 
     /* Allocate memory for matrix members */
     matdata = (realtype*) malloc(NNZ_local*sizeof(realtype));
@@ -240,9 +246,9 @@ int main(int argc, char *argv[])
     rowptrs = (sunindextype*) malloc((M_local+1)*sizeof(sunindextype));
 
     /* receive distributed matrix */
-    MPI_Recv(rowptrs, M_local+1, PVEC_INTEGER_MPI_TYPE, 0, grid.iam, grid.comm, &mpistatus);
-    MPI_Recv(colind, NNZ_local, PVEC_INTEGER_MPI_TYPE, 0, grid.iam, grid.comm, &mpistatus);
-    MPI_Recv(matdata, NNZ_local, PVEC_REAL_MPI_TYPE, 0, grid.iam, grid.comm, &mpistatus);
+    MPI_Recv(rowptrs, M_local+1, MPI_SUNINDEXTYPE, 0, grid.iam, grid.comm, &mpistatus);
+    MPI_Recv(colind, NNZ_local, MPI_SUNINDEXTYPE, 0, grid.iam, grid.comm, &mpistatus);
+    MPI_Recv(matdata, NNZ_local, MPI_SUNREALTYPE, 0, grid.iam, grid.comm, &mpistatus);
 
     /* localize rowptrs */
     shift = rowptrs[0];
@@ -272,8 +278,8 @@ int main(int argc, char *argv[])
     ydata = N_VGetArrayPointer(y);
 
     /* recieve vectors */
-    MPI_Recv(xdata, M_local, PVEC_REAL_MPI_TYPE, 0, grid.iam, grid.comm, &mpistatus);
-    MPI_Recv(ydata, M_local, PVEC_REAL_MPI_TYPE, 0, grid.iam, grid.comm, &mpistatus);
+    MPI_Recv(xdata, M_local, MPI_SUNREALTYPE, 0, grid.iam, grid.comm, &mpistatus);
+    MPI_Recv(ydata, M_local, MPI_SUNREALTYPE, 0, grid.iam, grid.comm, &mpistatus);
   }
 
   /* Create local I matrix that is the same shape as A (which was
@@ -459,8 +465,9 @@ int check_matrix_entry(SUNMatrix A, realtype val, realtype tol)
   nnz_loc = Astore->nnz_loc;
   for(i=0; i < nnz_loc; i++) {
     if (FNEQ(Adata[i],val,tol) != 0) {
-      printf("rhs=%g\n", SUNRabs(val)*tol);
-      printf("  Adata[%ld] = %g != %g (err = %g)\n", (long int) i, Adata[i], val, SUNRabs(Adata[i]-val));
+      printf("rhs=%g\n", std::abs(val)*tol);
+      printf("  Adata[%ld] = %g != %g (err = %g)\n", (long int) i, Adata[i],
+             val, std::abs(Adata[i]-val));
       failure++;
     }
   }
@@ -537,7 +544,7 @@ int csr_from_dense(SUNMatrix Ad, realtype droptol, realtype **matdata,
     return -1;
   if (SUNMatGetID(Ad) != SUNMATRIX_DENSE)
     return -1;
-  
+
   /* set size of new matrix */
   M = SUNDenseMatrix_Rows(Ad);
   N = SUNDenseMatrix_Columns(Ad);
@@ -546,26 +553,25 @@ int csr_from_dense(SUNMatrix Ad, realtype droptol, realtype **matdata,
   nnz = 0;
   for (j=0; j<N; j++)
     for (i=0; i<M; i++)
-      nnz += (SUNRabs(SM_ELEMENT_D(Ad,i,j)) > droptol);
-  
+      nnz += (std::abs(SM_ELEMENT_D(Ad,i,j)) > droptol);
+
   /* allocate */
   (*matdata) = (realtype*) malloc(nnz*sizeof(realtype));
   (*colind)  = (sunindextype*) malloc(nnz*sizeof(sunindextype));
   (*rowptrs) = (sunindextype*) malloc((M+1)*sizeof(sunindextype));
-    
+
   /* copy nonzeros from Ad into As, based on CSR/CSC type */
   nnz = 0;
   for (i=0; i<M; i++) {
     (*rowptrs)[i] = nnz;
     for (j=0; j<N; j++) {
-      if ( SUNRabs(SM_ELEMENT_D(Ad,i,j)) > droptol ) { 
+      if ( std::abs(SM_ELEMENT_D(Ad,i,j)) > droptol ) {
         (*colind)[nnz] = j;
         (*matdata)[nnz++] = SM_ELEMENT_D(Ad,i,j);
       }
     }
   }
   (*rowptrs)[M] = nnz;
-    
+
   return 0;
 }
-

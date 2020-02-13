@@ -7,7 +7,7 @@
  *                   @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ static int VScaleSumVectorArray_Pthreads(int nvec, realtype c, N_Vector* X, N_Ve
 static int VScaleDiffVectorArray_Pthreads(int nvec, realtype c, N_Vector* X, N_Vector* Y, N_Vector* Z); /* Z=c(X-Y)  */
 static int VLin1VectorArray_Pthreads(int nvec, realtype a, N_Vector* X, N_Vector* Y, N_Vector* Z);      /* Z=aX+Y    */
 static int VLin2VectorArray_Pthreads(int nvec, realtype a, N_Vector* X, N_Vector* Y, N_Vector* Z);      /* Z=aX-Y    */
-static int VaxpyVectorArray_Pthreads(int nvec, realtype a, N_Vector* X, N_Vector* Y);                   /* Y <- aX+Y */
+static int VaxpyVectorArray_Pthreads(int nvec, realtype a, N_Vector* X, N_Vector* Y);                    /* Y <- aX+Y */
 
 /* Pthread companion functions for vector operations */
 static void *N_VLinearSum_PT(void *thread_data);
@@ -264,15 +264,15 @@ N_Vector N_VMake_Pthreads(sunindextype length, int num_threads, realtype *v_data
  * Function to create an array of new vectors.
  */
 
-N_Vector *N_VCloneVectorArray_Pthreads(int count, N_Vector w)
+N_Vector* N_VCloneVectorArray_Pthreads(int count, N_Vector w)
 {
-  N_Vector *vs;
+  N_Vector* vs;
   int j;
 
   if (count <= 0) return(NULL);
 
   vs = NULL;
-  vs = (N_Vector *) malloc(count * sizeof(N_Vector));
+  vs = (N_Vector*) malloc(count * sizeof(N_Vector));
   if(vs == NULL) return(NULL);
 
   for (j = 0; j < count; j++) {
@@ -291,15 +291,15 @@ N_Vector *N_VCloneVectorArray_Pthreads(int count, N_Vector w)
  * Function to create an array of new vectors with NULL data array.
  */
 
-N_Vector *N_VCloneVectorArrayEmpty_Pthreads(int count, N_Vector w)
+N_Vector* N_VCloneVectorArrayEmpty_Pthreads(int count, N_Vector w)
 {
-  N_Vector *vs;
+  N_Vector* vs;
   int j;
 
   if (count <= 0) return(NULL);
 
   vs = NULL;
-  vs = (N_Vector *) malloc(count * sizeof(N_Vector));
+  vs = (N_Vector*) malloc(count * sizeof(N_Vector));
   if(vs == NULL) return(NULL);
 
   for (j = 0; j < count; j++) {
@@ -318,7 +318,7 @@ N_Vector *N_VCloneVectorArrayEmpty_Pthreads(int count, N_Vector w)
  * Function to free an array created with N_VCloneVectorArray_Pthreads
  */
 
-void N_VDestroyVectorArray_Pthreads(N_Vector *vs, int count)
+void N_VDestroyVectorArray_Pthreads(N_Vector* vs, int count)
 {
   int j;
 
@@ -2455,7 +2455,7 @@ static void *N_VLinearCombination_PT(void *thread_data)
   /*
    * X[0] = c[0] * X[0] + sum{ c[i] * X[i] }, i = 1,...,nvec-1
    */
-  if ((my_data->Y1[0] == my_data->x1)) {
+  if (my_data->Y1[0] == my_data->x1) {
     for (j=start; j<end; j++) {
       zd[j] *= c[0];
     }
@@ -2736,9 +2736,9 @@ int N_VLinearSumVectorArray_Pthreads(int nvec, realtype a, N_Vector* X,
   Pthreads_Data  *thread_data;
   pthread_attr_t attr;
 
-  realtype c;
-  N_Vector* V1;
-  N_Vector* V2;
+  realtype    c;
+  N_Vector*  V1;
+  N_Vector*  V2;
   booleantype test;
 
   /* invalid number of vectors */
@@ -3357,8 +3357,8 @@ int N_VScaleAddMultiVectorArray_Pthreads(int nvec, int nsum, realtype* a,
   pthread_attr_t attr;
 
   int          retval;
-  N_Vector*    YY;
-  N_Vector*    ZZ;
+  N_Vector*   YY;
+  N_Vector*   ZZ;
 
   /* invalid number of vectors */
   if (nvec < 1) return(-1);
@@ -3377,8 +3377,8 @@ int N_VScaleAddMultiVectorArray_Pthreads(int nvec, int nsum, realtype* a,
     }
 
     /* should have called N_VScaleAddMulti */
-    YY = (N_Vector *) malloc(nsum * sizeof(N_Vector));
-    ZZ = (N_Vector *) malloc(nsum * sizeof(N_Vector));
+    YY = (N_Vector*) malloc(nsum * sizeof(N_Vector));
+    ZZ = (N_Vector*) malloc(nsum * sizeof(N_Vector));
 
     for (j=0; j<nsum; j++) {
       YY[j] = Y[j][0];
@@ -3521,7 +3521,7 @@ int N_VLinearCombinationVectorArray_Pthreads(int nvec, int nsum, realtype* c,
 
   int          retval;
   realtype*    ctmp;
-  N_Vector*    Y;
+  N_Vector*   Y;
 
   /* invalid number of vectors */
   if (nvec < 1) return(-1);
@@ -3546,7 +3546,7 @@ int N_VLinearCombinationVectorArray_Pthreads(int nvec, int nsum, realtype* c,
     }
 
     /* should have called N_VLinearCombination */
-    Y = (N_Vector *) malloc(nsum * sizeof(N_Vector));
+    Y = (N_Vector*) malloc(nsum * sizeof(N_Vector));
 
     for (i=0; i<nsum; i++) {
       Y[i] = X[i][0];

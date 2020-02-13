@@ -2,7 +2,7 @@
  * Programmer(s): Radu Serban and Aaron Collier @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -68,6 +68,8 @@ typedef enum {
   SUNDIALS_NVEC_OPENMPDEV,
   SUNDIALS_NVEC_TRILINOS,
   SUNDIALS_NVEC_MANYVECTOR,
+  SUNDIALS_NVEC_MPIMANYVECTOR,
+  SUNDIALS_NVEC_MPIPLUSX,
   SUNDIALS_NVEC_CUSTOM
 } N_Vector_ID;
 
@@ -77,10 +79,10 @@ typedef enum {
  * ----------------------------------------------------------------- */
 
 /* Forward reference for pointer to N_Vector_Ops object */
-typedef struct _generic_N_Vector_Ops *N_Vector_Ops;
+typedef _SUNDIALS_STRUCT_ _generic_N_Vector_Ops *N_Vector_Ops;
 
 /* Forward reference for pointer to N_Vector object */
-typedef struct _generic_N_Vector *N_Vector;
+typedef _SUNDIALS_STRUCT_ _generic_N_Vector *N_Vector;
 
 /* Define array of N_Vectors */
 typedef N_Vector *N_Vector_S;
@@ -150,7 +152,7 @@ struct _generic_N_Vector_Ops {
    operations corresponding to that implementation. */
 struct _generic_N_Vector {
   void *content;
-  struct _generic_N_Vector_Ops *ops;
+  N_Vector_Ops ops;
 };
 
 
@@ -159,6 +161,7 @@ struct _generic_N_Vector {
  * ----------------------------------------------------------------- */
 
 SUNDIALS_EXPORT N_Vector N_VNewEmpty();
+SUNDIALS_EXPORT void N_VFreeEmpty(N_Vector v);
 SUNDIALS_EXPORT int N_VCopyOps(N_Vector w, N_Vector v);
 
 SUNDIALS_EXPORT N_Vector_ID N_VGetVectorID(N_Vector w);
@@ -245,9 +248,14 @@ SUNDIALS_EXPORT realtype N_VMinQuotientLocal(N_Vector num, N_Vector denom);
  * Additional functions exported by NVECTOR module
  * ----------------------------------------------------------------- */
 
-SUNDIALS_EXPORT N_Vector *N_VCloneEmptyVectorArray(int count, N_Vector w);
-SUNDIALS_EXPORT N_Vector *N_VCloneVectorArray(int count, N_Vector w);
-SUNDIALS_EXPORT void N_VDestroyVectorArray(N_Vector *vs, int count);
+SUNDIALS_EXPORT N_Vector* N_VNewVectorArray(int count);
+SUNDIALS_EXPORT N_Vector* N_VCloneEmptyVectorArray(int count, N_Vector w);
+SUNDIALS_EXPORT N_Vector* N_VCloneVectorArray(int count, N_Vector w);
+SUNDIALS_EXPORT void N_VDestroyVectorArray(N_Vector* vs, int count);
+
+/* These function are really only for users of the Fortran interface */
+SUNDIALS_EXPORT N_Vector N_VGetVecAtIndexVectorArray(N_Vector* vs, int index);
+SUNDIALS_EXPORT void N_VSetVecAtIndexVectorArray(N_Vector* vs, int index, N_Vector w);
 
 #ifdef __cplusplus
 }

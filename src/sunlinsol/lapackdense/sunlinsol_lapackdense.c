@@ -3,7 +3,7 @@
  * Based on codes <solver>_lapack.c by: Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -80,6 +80,7 @@ SUNLinearSolver SUNLinSol_LapackDense(N_Vector y, SUNMatrix A)
 
   /* Attach operations */
   S->ops->gettype    = SUNLinSolGetType_LapackDense;
+  S->ops->getid      = SUNLinSolGetID_LapackDense;
   S->ops->initialize = SUNLinSolInitialize_LapackDense;
   S->ops->setup      = SUNLinSolSetup_LapackDense;
   S->ops->solve      = SUNLinSolSolve_LapackDense;
@@ -120,17 +121,23 @@ SUNLinearSolver_Type SUNLinSolGetType_LapackDense(SUNLinearSolver S)
 }
 
 
+SUNLinearSolver_ID SUNLinSolGetID_LapackDense(SUNLinearSolver S)
+{
+  return(SUNLINEARSOLVER_LAPACKDENSE);
+}
+
+
 int SUNLinSolInitialize_LapackDense(SUNLinearSolver S)
 {
   /* all solver-specific memory has already been allocated */
   LASTFLAG(S) = SUNLS_SUCCESS;
-  return(LASTFLAG(S));
+  return(SUNLS_SUCCESS);
 }
 
 
 int SUNLinSolSetup_LapackDense(SUNLinearSolver S, SUNMatrix A)
 {
-  int n, ier;
+  sunindextype n, ier;
 
   /* check for valid inputs */
   if ( (A == NULL) || (S == NULL) )
@@ -139,13 +146,13 @@ int SUNLinSolSetup_LapackDense(SUNLinearSolver S, SUNMatrix A)
   /* Ensure that A is a dense matrix */
   if (SUNMatGetID(A) != SUNMATRIX_DENSE) {
     LASTFLAG(S) = SUNLS_ILL_INPUT;
-    return(LASTFLAG(S));
+    return(SUNLS_ILL_INPUT);
   }
 
   /* Call LAPACK to do LU factorization of A */
   n = SUNDenseMatrix_Rows(A);
   xgetrf_f77(&n, &n, SUNDenseMatrix_Data(A), &n, PIVOTS(S), &ier);
-  LASTFLAG(S) = (long int) ier;
+  LASTFLAG(S) = ier;
   if (ier > 0)
     return(SUNLS_LUFACT_FAIL);
   if (ier < 0)
@@ -155,9 +162,9 @@ int SUNLinSolSetup_LapackDense(SUNLinearSolver S, SUNMatrix A)
 
 
 int SUNLinSolSolve_LapackDense(SUNLinearSolver S, SUNMatrix A, N_Vector x,
-                              N_Vector b, realtype tol)
+                               N_Vector b, realtype tol)
 {
-  int n, one, ier;
+  sunindextype n, one, ier;
   realtype *xdata;
 
   if ( (A == NULL) || (S == NULL) || (x == NULL) || (b == NULL) )
@@ -170,26 +177,27 @@ int SUNLinSolSolve_LapackDense(SUNLinearSolver S, SUNMatrix A, N_Vector x,
   xdata = N_VGetArrayPointer(x);
   if (xdata == NULL) {
     LASTFLAG(S) = SUNLS_MEM_FAIL;
-    return(LASTFLAG(S));
+    return(SUNLS_MEM_FAIL);
   }
 
   /* Call LAPACK to solve the linear system */
   n = SUNDenseMatrix_Rows(A);
   one = 1;
   xgetrs_f77("N", &n, &one, SUNDenseMatrix_Data(A),
-	     &n, PIVOTS(S), xdata, &n, &ier, 1);
-  LASTFLAG(S) = (long int) ier;
+             &n, PIVOTS(S), xdata, &n, &ier);
+  LASTFLAG(S) = ier;
   if (ier < 0)
     return(SUNLS_PACKAGE_FAIL_UNREC);
 
   LASTFLAG(S) = SUNLS_SUCCESS;
-  return(LASTFLAG(S));
+  return(SUNLS_SUCCESS);
 }
 
 
-long int SUNLinSolLastFlag_LapackDense(SUNLinearSolver S)
+sunindextype SUNLinSolLastFlag_LapackDense(SUNLinearSolver S)
 {
   /* return the stored 'last_flag' value */
+  if (S == NULL) return(-1);
   return(LASTFLAG(S));
 }
 

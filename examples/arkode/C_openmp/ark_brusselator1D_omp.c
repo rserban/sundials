@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -53,7 +53,7 @@
 #include <sunmatrix/sunmatrix_band.h> /* access to band SUNMatrix */
 #include <sunlinsol/sunlinsol_band.h> /* access to band SUNLinearSolver */
 #include <sundials/sundials_types.h>  /* def. of type 'realtype' */
-#include <sundials/sundials_math.h>   /* def. of SUNRsqrt, etc. */
+
 #ifdef _OPENMP
 #include <omp.h>                      /* OpenMP functions */
 #endif
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
   num_threads = omp_get_max_threads();   /* overwrite with OMP_NUM_THREADS environment variable */
 #endif
   if (argc > 1)                          /* overwrite with command line value, if supplied */
-    num_threads = strtol(argv[1], NULL, 0);
+    num_threads = (int) strtol(argv[1], NULL, 0);
 
   /* store the inputs in the UserData structure */
   udata->N  = N;
@@ -262,11 +262,11 @@ int main(int argc, char *argv[])
     flag = ARKStepEvolve(arkode_mem, tout, y, &t, ARK_NORMAL);    /* call integrator */
     if (check_flag(&flag, "ARKStepEvolve", 1)) break;
     u = N_VWL2Norm(y,umask);                               /* access/print solution statistics */
-    u = SUNRsqrt(u*u/N);
+    u = sqrt(u*u/N);
     v = N_VWL2Norm(y,vmask);
-    v = SUNRsqrt(v*v/N);
+    v = sqrt(v*v/N);
     w = N_VWL2Norm(y,wmask);
-    w = SUNRsqrt(w*w/N);
+    w = sqrt(w*w/N);
     printf("  %10.6"FSYM"  %10.6"FSYM"  %10.6"FSYM"  %10.6"FSYM"\n", t, u, v, w);
     if (flag >= 0) {                                       /* successful solve: update output time */
       tout += dTout;
@@ -349,7 +349,7 @@ static int f(realtype t, N_Vector y, N_Vector ydot, void *user_data)
   realtype dx = udata->dx;
   realtype *Ydata=NULL, *dYdata=NULL;
   realtype uconst, vconst, wconst, u, ul, ur, v, vl, vr, w, wl, wr;
-  sunindextype i;
+  sunindextype i = 0;
 
   /* clear out ydot (to be careful) */
   N_VConst(0.0, ydot);
@@ -424,7 +424,7 @@ static int LaplaceMatrix(realtype c, SUNMatrix Jac, UserData udata)
 {
   sunindextype N = udata->N;            /* set shortcuts */
   realtype dx = udata->dx;
-  sunindextype i;
+  sunindextype i  = 0;
   realtype uconst = c*udata->du/dx/dx;
   realtype vconst = c*udata->dv/dx/dx;
   realtype wconst = c*udata->dw/dx/dx;
@@ -456,7 +456,7 @@ static int ReactionJac(realtype c, N_Vector y, SUNMatrix Jac, UserData udata)
 {
   sunindextype N = udata->N;                   /* set shortcuts */
   realtype ep = udata->ep;
-  sunindextype i;
+  sunindextype i = 0;
   realtype u, v, w;
   realtype *Ydata = N_VGetArrayPointer(y);     /* access solution array */
   if (check_flag((void *)Ydata, "N_VGetArrayPointer", 0)) return 1;

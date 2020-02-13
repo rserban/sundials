@@ -2,7 +2,7 @@
    Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2019, Lawrence Livermore National Security
+   Copyright (c) 2002-2020, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -145,6 +145,7 @@ present the SUNLinSol modules provided with SUNDIALS.
    SUNLinSol_KLU
    SUNLinSol_SuperLUDIST
    SUNLinSol_SuperLUMT
+   SUNLinSol_cuSolverSp
    SUNLinSol_SPGMR
    SUNLinSol_SPFGMR
    SUNLinSol_SPBCGS

@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2019, Lawrence Livermore National Security
+   Copyright (c) 2002-2020, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -56,5 +56,7 @@ patterns in the NVECTORS used.
    NVector_OpenMPDEV
    NVector_Trilinos
    NVector_ManyVector
+   NVector_MPIManyVector
+   NVector_MPIPlusX
    NVector_Examples
    ARKode_requirements

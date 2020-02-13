@@ -1,8 +1,8 @@
 # -----------------------------------------------------------------------------
-# Programmer: Cody J. Balos and Slaven Peles @ LLNL
+# Programmer(s): Cody J. Balos and Slaven Peles @ LLNL
 # -----------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -58,4 +58,3 @@ if(Trilinos_FOUND AND NOT TARGET Trilinos::Trilinos)
     INTERFACE_INCLUDE_DIRECTORIES "${Trilinos_INCLUDE_DIRS}"
     INTERFACE_LINK_LIBRARIES "${Trilinos_LIBRARIES}")
 endif()
-

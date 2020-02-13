@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -84,13 +84,13 @@ static int check_flag(void *flagvalue, const char *funcname, int opt);
 int main()
 {
   /* general problem parameters */
-  realtype T0 = RCONST(0.0);     /* initial time */
-  realtype Tf = RCONST(10.0);    /* final time */
-  realtype dTout = RCONST(1.0);  /* time between outputs */
-  sunindextype NEQ = 3;          /* number of dependent vars. */
-  int Nt = ceil(Tf/dTout);       /* number of output times */
-  int test = 2;                  /* test problem to run */
-  realtype reltol = 1.0e-6;      /* tolerances */
+  realtype T0 = RCONST(0.0);         /* initial time */
+  realtype Tf = RCONST(10.0);        /* final time */
+  realtype dTout = RCONST(1.0);      /* time between outputs */
+  sunindextype NEQ = 3;              /* number of dependent vars. */
+  int Nt = (int) ceil(Tf/dTout);     /* number of output times */
+  int test = 2;                      /* test problem to run */
+  realtype reltol = 1.0e-6;          /* tolerances */
   realtype abstol = 1.0e-10;
   realtype a, b, ep, u0, v0, w0;
 

@@ -2,7 +2,7 @@
  * Programmer(s): David J. Gardner @ LLNL
  * -----------------------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -58,6 +58,23 @@ SUNNonlinearSolver SUNNonlinSolNewEmpty()
   NLS->content = NULL;
 
   return(NLS);
+}
+
+/* -----------------------------------------------------------------------------
+ * Free a generic SUNNonlinearSolver (assumes content is already empty)
+ * ---------------------------------------------------------------------------*/
+
+void SUNNonlinSolFreeEmpty(SUNNonlinearSolver NLS)
+{
+  if (NLS == NULL)  return;
+
+  /* free non-NULL ops structure */
+  if (NLS->ops)  free(NLS->ops);
+  NLS->ops = NULL;
+
+  /* free overall N_Vector object and return */
+  free(NLS);
+  return;
 }
 
 /* -----------------------------------------------------------------------------
@@ -139,10 +156,12 @@ int SUNNonlinSolSetLSolveFn(SUNNonlinearSolver NLS, SUNNonlinSolLSolveFn LSolveF
 }
 
 /* set the convergence test function (optional) */
-int SUNNonlinSolSetConvTestFn(SUNNonlinearSolver NLS, SUNNonlinSolConvTestFn CTestFn)
+int SUNNonlinSolSetConvTestFn(SUNNonlinearSolver NLS,
+                              SUNNonlinSolConvTestFn CTestFn,
+                              void* ctest_data)
 {
   if (NLS->ops->setctestfn)
-    return((int) NLS->ops->setctestfn(NLS, CTestFn));
+    return((int) NLS->ops->setctestfn(NLS, CTestFn, ctest_data));
   else
     return(SUN_NLS_SUCCESS);
 }

@@ -5,7 +5,7 @@
  * George Byrne, and Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -41,7 +41,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
+#include <cmath>
 
 #include "superlu_ddefs.h"
 
@@ -51,7 +51,6 @@
 #include <sunlinsol/sunlinsol_superludist.h>      /* access to the SuperLU-DIST SUNLinearSolver   */
 #include <sunmatrix/sunmatrix_slunrloc.h>         /* access to the SuperLU SLU_NR_loc SUNMatrix   */
 #include <sundials/sundials_types.h>              /* definition of type realtype                  */
-#include <sundials/sundials_math.h>               /* definition of ABS and EXP                    */
 
 #include <mpi.h> /* MPI constants and types */
 
@@ -267,15 +266,11 @@ int main(int argc, char *argv[])
   CVodeFree(&cvode_mem);         /* Free the integrator memory */
   free(data);                    /* Free user data */
 
-  /* Free the underlying data of A */
-  free(matdata);
-  free(colind);
-  free(rowptr);
-
   /* Free the SuperLU_DIST structures */
   PStatFree(&stat);
   ScalePermstructFree(&scaleperm);
   LUstructFree(&LUstruct);
+  Destroy_CompRowLoc_Matrix_dist(&Asuper);
   superlu_gridexit(&grid);
 
   MPI_Finalize();
@@ -303,7 +298,7 @@ static void SetIC(N_Vector u, realtype dx, sunindextype my_length,
   for (i=1; i<=my_length; i++) {
     iglobal = my_base + i;
     x = iglobal*dx;
-    udata[i-1] = x*(XMAX - x)*SUNRexp(TWO*x);
+    udata[i-1] = x*(XMAX - x)*exp(TWO*x);
   }
 }
 
@@ -396,16 +391,16 @@ static int f(realtype t, N_Vector u, N_Vector udot, void *user_data)
 
   /* Pass needed data to processes before and after current process. */
    if (my_pe != 0)
-     MPI_Send(&z[1], 1, PVEC_REAL_MPI_TYPE, my_pe_m1, 0, comm);
+     MPI_Send(&z[1], 1, MPI_SUNREALTYPE, my_pe_m1, 0, comm);
    if (my_pe != last_pe)
-     MPI_Send(&z[my_length], 1, PVEC_REAL_MPI_TYPE, my_pe_p1, 0, comm);
+     MPI_Send(&z[my_length], 1, MPI_SUNREALTYPE, my_pe_p1, 0, comm);
 
   /* Receive needed data from processes before and after current process. */
    if (my_pe != 0)
-     MPI_Recv(&z[0], 1, PVEC_REAL_MPI_TYPE, my_pe_m1, 0, comm, &status);
+     MPI_Recv(&z[0], 1, MPI_SUNREALTYPE, my_pe_m1, 0, comm, &status);
    else z[0] = ZERO;
    if (my_pe != last_pe)
-     MPI_Recv(&z[my_length+1], 1, PVEC_REAL_MPI_TYPE, my_pe_p1, 0, comm,
+     MPI_Recv(&z[my_length+1], 1, MPI_SUNREALTYPE, my_pe_p1, 0, comm,
               &status);
    else z[my_length + 1] = ZERO;
 

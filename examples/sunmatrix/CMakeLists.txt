@@ -1,8 +1,9 @@
 # ---------------------------------------------------------------
-# Programmer:  David Gardner, Slaven Peles, and Cody Balos @ LLNL
+# Programmer(s): David J. Gardner, Slaven Peles, and
+#                Cody Balos @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -11,15 +12,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # SUNDIALS Copyright End
 # ---------------------------------------------------------------
-# examples/sunmatrix level CMakeLists.txt for SUNDIALS (for CMake)
+# examples/sunmatrix level CMakeLists.txt for SUNDIALS
 # ---------------------------------------------------------------
 
 # Always add the serial sunmatrix dense/band/sparse examples
-ADD_SUBDIRECTORY(dense)
-ADD_SUBDIRECTORY(band)
-ADD_SUBDIRECTORY(sparse)
+add_subdirectory(dense)
+add_subdirectory(band)
+add_subdirectory(sparse)
 
-IF(MPI_ENABLE AND MPI_C_FOUND AND MPI_CXX_FOUND AND
+if(MPI_ENABLE AND MPI_C_FOUND AND MPI_CXX_FOUND AND
     SUNDIALS_SUPERLUDIST)
-  ADD_SUBDIRECTORY(slunrloc)
-ENDIF()
+  add_subdirectory(slunrloc)
+endif()

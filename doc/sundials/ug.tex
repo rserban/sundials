@@ -59,29 +59,29 @@
 
 %----- VERSIONS AND UCRL NUMBERS OF SUNDIALS CODES
 
-\newcommand{\sunrelease}{v5.0.0-dev.0}
+\newcommand{\sunrelease}{v5.1.0}
 
-\newcommand{\cvrelease}{v5.0.0-dev.0}
+\newcommand{\cvrelease}{v5.1.0}
 \newcommand{\cvucrlug}{UCRL-SM-208108}
 \newcommand{\cvucrlex}{UCRL-SM-208110}
 
-\newcommand{\cvsrelease}{v5.0.0-dev.0}
+\newcommand{\cvsrelease}{v5.1.0}
 \newcommand{\cvsucrlug}{UCRL-SM-208111}
 \newcommand{\cvsucrlex}{UCRL-SM-208115}
 
-\newcommand{\idarelease}{v5.0.0-dev.0}
+\newcommand{\idarelease}{v5.1.0}
 \newcommand{\idaucrlug}{UCRL-SM-208112}
 \newcommand{\idaucrlex}{UCRL-SM-208113}
 
-\newcommand{\idasrelease}{v4.0.0-dev.0}
+\newcommand{\idasrelease}{v4.1.0}
 \newcommand{\idasucrlug}{UCRL-SM-234051}
 \newcommand{\idasucrlex}{LLNL-TR-437091}
 
-\newcommand{\kinrelease}{v5.0.0-dev.0}
+\newcommand{\kinrelease}{v5.1.0}
 \newcommand{\kinucrlug}{UCRL-SM-208116}
 \newcommand{\kinucrlex}{UCRL-SM-208114}
 
-\newcommand{\arkrelease}{v4.0.0-dev.0}
+\newcommand{\arkrelease}{v4.1.0}
 \newcommand{\arkucrlug}{LLNL-SM-668082}
 \newcommand{\arkucrlex}{????-??-??????}
 
@@ -103,6 +103,8 @@
 \newcommand{\nvectrilinos}{{\normalfont\scshape nvector\_trilinos}}
 \newcommand{\nvecwrap}{{\normalfont\scshape nvector\_senswrapper}}
 \newcommand{\nvecmanyvector}{{\normalfont\scshape nvector\_manyvector}}
+\newcommand{\nvecmpimanyvector}{{\normalfont\scshape nvector\_mpimanyvector}}
+\newcommand{\nvecmpiplusx}{{\normalfont\scshape nvector\_mpiplusx}}
 %----- Matrices:
 \newcommand{\sunmatrix}{{\normalfont\scshape sunmatrix}}
 \newcommand{\fsunmatrix}{{\normalfont\scshape fsunmatrix}}
@@ -120,6 +122,7 @@
 \newcommand{\sunlinsolklu}{{\normalfont\scshape sunlinsol\_klu}}
 \newcommand{\sunlinsolsludist}{{\normalfont\scshape sunlinsol\_superludist}}
 \newcommand{\sunlinsolslumt}{{\normalfont\scshape sunlinsol\_superlumt}}
+\newcommand{\sunlinsolcuspbqr}{{\normalfont\scshape sunlinsol\_cusolversp\_batchqr}}
 \newcommand{\sunlinsolspgmr}{{\normalfont\scshape sunlinsol\_spgmr}}
 \newcommand{\sunlinsolspfgmr}{{\normalfont\scshape sunlinsol\_spfgmr}}
 \newcommand{\sunlinsolspbcgs}{{\normalfont\scshape sunlinsol\_spbcgs}}
@@ -130,6 +133,7 @@
 \newcommand{\fsunnonlinsol}{{\normalfont\scshape fsunnonlinsol}}
 \newcommand{\sunnonlinsolnewton}{{\normalfont\scshape sunnonlinsol\_newton}}
 \newcommand{\sunnonlinsolfixedpoint}{{\normalfont\scshape sunnonlinsol\_fixedpoint}}
+\newcommand{\sunnonlinsolpetsc}{{\normalfont\scshape sunnonlinsol\_petscsnes}}
 %----- Packages:
 \newcommand{\cvode}{{\normalfont\scshape cvode}}
 \newcommand{\pvode}{{\normalfont\scshape pvode}}
@@ -509,8 +513,24 @@ Approved for public release; further dissemination unlimited
   \addArgs{#4}
   \addRetval{#5}
   \addNotes{#6}
-  \item[F2003 Name]{This function is callable as \id{F#1} when using the Fortran
-  2003 interface module.}
+  \item[F2003 Name]{\id{F#1}}
+  \end{Ventry}
+}
+%%-----------------------------------------------------
+%% User-callable function with a Fortran 2003 interface
+%% and an additional entry on how to call the F2003
+%% function.
+%%-----------------------------------------------------
+\newcommand{\ucfunctionfl}[7]{
+  \noindent\paragraph{\fbox{\id{#1}}}
+  \begin{Ventry}[Return value]
+  \item[Call]{\id{#2}}
+  \item[Description]{#3}
+  \addArgs{#4}
+  \addRetval{#5}
+  \addNotes{#6}
+  \item[F2003 Name]{\id{F#1}}
+  \item[F2003 Call]{\id{#7}}
   \end{Ventry}
 }
 %%-----------------------------------------------------
@@ -526,8 +546,7 @@ Approved for public release; further dissemination unlimited
   \addRetval{#5}
   \addNotes{#6}
   \addDepName{#7}
-  \item[F2003 Name]{This function is callable as \id{F#1} when using the Fortran
-  2003 interface module.}
+  \item[F2003 Name]{\id{F#1}}
   \end{Ventry}
 }
 %%--------------------------------------------

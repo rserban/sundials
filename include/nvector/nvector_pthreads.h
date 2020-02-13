@@ -7,7 +7,7 @@
  *                   @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -131,11 +131,11 @@ SUNDIALS_EXPORT N_Vector N_VNewEmpty_Pthreads(sunindextype vec_length, int n_thr
 SUNDIALS_EXPORT N_Vector N_VMake_Pthreads(sunindextype vec_length, int n_threads,
                                           realtype *v_data);
 
-SUNDIALS_EXPORT N_Vector *N_VCloneVectorArray_Pthreads(int count, N_Vector w);
+SUNDIALS_EXPORT N_Vector* N_VCloneVectorArray_Pthreads(int count, N_Vector w);
 
-SUNDIALS_EXPORT N_Vector *N_VCloneVectorArrayEmpty_Pthreads(int count, N_Vector w);
+SUNDIALS_EXPORT N_Vector* N_VCloneVectorArrayEmpty_Pthreads(int count, N_Vector w);
 
-SUNDIALS_EXPORT void N_VDestroyVectorArray_Pthreads(N_Vector *vs, int count);
+SUNDIALS_EXPORT void N_VDestroyVectorArray_Pthreads(N_Vector* vs, int count);
 
 SUNDIALS_EXPORT sunindextype N_VGetLength_Pthreads(N_Vector v);
 

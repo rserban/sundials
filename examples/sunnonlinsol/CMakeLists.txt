@@ -2,7 +2,7 @@
 # Programmer(s): David J. Gardner @ LLNL
 # ------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2019, Lawrence Livermore National Security
+# Copyright (c) 2002-2020, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -17,3 +17,7 @@
 # Always add the Newton and fixed point examples
 add_subdirectory(newton)
 add_subdirectory(fixedpoint)
+
+if(PETSC_ENABLE AND PETSC_FOUND)
+    add_subdirectory(petsc)
+endif()
