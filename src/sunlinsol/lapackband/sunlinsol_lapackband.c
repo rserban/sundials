@@ -3,7 +3,7 @@
  * Based on codes <solver>_lapack.c by: Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2019, Lawrence Livermore National Security
+ * Copyright (c) 2002-2020, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -193,7 +193,7 @@ int SUNLinSolSolve_LapackBand(SUNLinearSolver S, SUNMatrix A, N_Vector x,
   ldim = SUNBandMatrix_LDim(A);
   one = 1;
   xgbtrs_f77("N", &n, &ml, &mu, &one, SUNBandMatrix_Data(A),
-             &ldim, PIVOTS(S), xdata, &n, &ier, 1);
+             &ldim, PIVOTS(S), xdata, &n, &ier);
   LASTFLAG(S) = ier;
   if (ier < 0)
     return(SUNLS_PACKAGE_FAIL_UNREC);
