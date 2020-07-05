@@ -12,6 +12,7 @@
 # SUNDIALS Copyright End
 # ------------------------------------------------------------------------------
 # clang-format style configuration file based on LLVM style
+# clang-format -style=file src/cvode/cvode.c > cvode-format.c
 # ------------------------------------------------------------------------------
 ---
 Language:        Cpp
@@ -19,7 +20,7 @@ AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: true        # changed
 AlignConsecutiveAssignments: true   # changed
-AlignConsecutiveDeclarations: false # <<< change? >>>
+AlignConsecutiveDeclarations: false # change? <<<
 AlignEscapedNewlines: Left          # changed
 AlignOperands:   true
 AlignTrailingComments: true
@@ -30,7 +31,7 @@ AllowShortBlocksOnASingleLine: false     # <<< change? >>>
 AllowShortCaseLabelsOnASingleLine: false # <<< change? >>>
 AllowShortFunctionsOnASingleLine: All
 AllowShortLambdasOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: WithoutElse # changed
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
@@ -41,7 +42,7 @@ BinPackParameters: true
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      false
-  AfterControlStatement: false
+  AfterControlStatement: true
   AfterEnum:       false
   AfterFunction:   true # changed
   AfterNamespace:  false
@@ -50,7 +51,7 @@ BraceWrapping:
   AfterUnion:      false
   AfterExternBlock: false
   BeforeCatch:     false
-  BeforeElse:      false
+  BeforeElse:      true
   IndentBraces:    false
   SplitEmptyFunction: false  # changed
   SplitEmptyRecord: false    # changed
@@ -82,14 +83,11 @@ ForEachMacros:
   - BOOST_FOREACH
 IncludeBlocks:   Regroup # changed
 IncludeCategories:
-  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority:        2
-    SortPriority:    0
   - Regex:           '^(<|"(gtest|gmock|isl|json)/)'
-    Priority:        3
+    Priority:        1
     SortPriority:    0
   - Regex:           '.*'
-    Priority:        1
+    Priority:        2
     SortPriority:    0
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
@@ -100,7 +98,7 @@ IndentWidth:     2
 IndentWrappedFunctionNames: false
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
-KeepEmptyLinesAtTheStartOfBlocks: true # <<< change? >>>
+KeepEmptyLinesAtTheStartOfBlocks: false
 MacroBlockBegin: ''
 MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1 # <<< change? >>>
@@ -121,7 +119,7 @@ PointerAlignment: Right
 ReflowComments:  true
 SortIncludes:    true
 SortUsingDeclarations: true
-SpaceAfterCStyleCast: true # changed
+SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
