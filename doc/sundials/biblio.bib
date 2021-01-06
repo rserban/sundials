@@ -16,7 +16,7 @@
 @techreport{arkode_ug,
 author={Daniel R. Reynolds and David J. Gardner and Alan C. Hindmarsh
 and Carol S. Woodward and Jean M. Sexton},
-title={{User Documentation for ARKODE v4.3.0}},
+title={{User Documentation for ARKODE v4.6.1}},
 institution={LLNL},
 number={LLNL-SM-668082},
 year=2020
@@ -26,7 +26,7 @@ year=2020
 %
 @techreport{arkode_ex,
 author={Daniel R. Reynolds},
-title={{Example Programs for ARKODE v4.3.0}},
+title={{Example Programs for ARKODE v4.6.1}},
 institution={Southern Methodist University},
 year=2020
 }
@@ -35,7 +35,7 @@ year=2020
 %
 @techreport{cvode_ug,
 author={A. C. Hindmarsh and R. Serban},
-title={{User Documentation for CVODE v5.3.0}},
+title={{User Documentation for CVODE v5.6.1}},
 institution={LLNL},
 number={UCRL-SM-208108},
 year=2020
@@ -45,7 +45,7 @@ year=2020
 %
 @techreport{cvode_ex,
 author={A. C. Hindmarsh and R. Serban and D. R. Reynolds},
-title={{Example Programs for CVODE v5.3.0}},
+title={{Example Programs for CVODE v5.6.1}},
 institution={LLNL},
 note={UCRL-SM-208110},
 year=2020
@@ -55,7 +55,7 @@ year=2020
 %
 @techreport{cvodes_ug,
 author={A. C. Hindmarsh and R. Serban},
-title={{User Documentation for CVODES v5.3.0}},
+title={{User Documentation for CVODES v5.6.1}},
 institution={LLNL},
 note={UCRL-SM-208111},
 year=2020
@@ -65,7 +65,7 @@ year=2020
 %
 @techreport{cvodes_ex,
 author={R. Serban and A. C. Hindmarsh},
-title={{Example Programs for CVODES v5.3.0}},
+title={{Example Programs for CVODES v5.6.1}},
 institution={LLNL},
 number={UCRL-SM-208115},
 year=2020
@@ -75,7 +75,7 @@ year=2020
 %
 @techreport{ida_ug,
 author={A. C. Hindmarsh and R. Serban and A. Collier},
-title={{User Documentation for IDA v5.3.0}},
+title={{User Documentation for IDA v5.6.1}},
 institution={LLNL},
 number={UCRL-SM-208112},
 year=2020
@@ -85,7 +85,7 @@ year=2020
 %
 @techreport{ida_ex,
 author={A. C. Hindmarsh and R. Serban and A. Collier},
-title={{Example Programs for IDA v5.3.0}},
+title={{Example Programs for IDA v5.6.1}},
 institution={LLNL},
 number={UCRL-SM-208113},
 year=2020
@@ -95,7 +95,7 @@ year=2020
 %
 @techreport{idas_ug,
 author={R. Serban and C. Petra and A. C. Hindmarsh},
-title={{User Documentation for IDAS v4.3.0}},
+title={{User Documentation for IDAS v4.6.1}},
 institution={LLNL},
 number={UCRL-SM-234051},
 year=2020
@@ -105,7 +105,7 @@ year=2020
 %
 @techreport{idas_ex,
 author={R. Serban and A. C. Hindmarsh},
-title={{Example Programs for IDAS v4.3.0}},
+title={{Example Programs for IDAS v4.6.1}},
 institution={LLNL},
 number={LLNL-TR-437091},
 year=2020
@@ -115,7 +115,7 @@ year=2020
 %
 @techreport{kinsol_ug,
 author={A. M. Collier and A. C. Hindmarsh and R. Serban and C.S. Woodward},
-title={{User Documentation for KINSOL v5.3.0}},
+title={{User Documentation for KINSOL v5.6.1}},
 institution={LLNL},
 number={UCRL-SM-208116},
 year=2020
@@ -125,7 +125,7 @@ year=2020
 %
 @techreport{kinsol_ex,
 author={A. M. Collier and R. Serban},
-title={{Example Programs for KINSOL v5.3.0}},
+title={{Example Programs for KINSOL v5.6.1}},
 institution={LLNL},
 number={UCRL-SM-208114},
 year=2020
@@ -726,20 +726,6 @@ year=1952
 @Misc{SuperLUDIST_site,
   title = 	 {{SuperLU\_DIST Parallel Sparse Matrix Factorization Library}},
   howpublished = {http://crd-legacy.lbl.gov/~xiaoye/SuperLU/},
-}
-%
-% cuSOLVER
-%
-@Misc{cuSOLVER_site,
-  title = {{NVIDIA cuSOLVER Documentation}},
-  howpublished = {https://docs.nvidia.com/cuda/cusolver/index.html}
-}
-%
-% cuSPARSE
-%
-@Misc{cuSPARSE_site,
-  title = {{NVIDIA cuSPARSE Documentation}},
-  howpublished = {https://docs.nvidia.com/cuda/cusparse/index.html}
 }
 %
 % ADIFOR
@@ -1452,6 +1438,7 @@ year={1999}
 %
 % CUDA references
 %
+
 @book{cheng2014professional,
   title={Professional Cuda C Programming},
   author={Cheng, John and Grossman, Max and McKercher, Ty},
@@ -1466,9 +1453,44 @@ year={1999}
   institution={TRM-06704-001 v8}
 }
 
+@Misc{cuda_site,
+  title = {{NVIDIA CUDA Programming Guide}},
+  howpublished = {https://docs.nvidia.com/cuda/index.html}
+}
+
+@Misc{cuSOLVER_site,
+  title = {{NVIDIA cuSOLVER Programming Guide}},
+  howpublished = {https://docs.nvidia.com/cuda/cusolver/index.html}
+}
+
+@Misc{cuSPARSE_site,
+  title = {{NVIDIA cuSPARSE Programming Guide}},
+  howpublished = {https://docs.nvidia.com/cuda/cusparse/index.html}
+}
+
+%
+% ROCm/HIP references
+%
+
+@Misc{rocm_site,
+  title = {{AMD ROCm Documentation}},
+  howpublished = {https://rocmdocs.amd.com/en/latest/index.html}
+}
+
+
+%
+% oneAPI references
+%
+
+@Misc{oneAPI_site,
+  title = {{Intel oneAPI Programming Guide}},
+  howpublished = {https://software.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top.html}
+}
+
 %
 % RAJA references
 %
+
 @TechReport{raja,
  author = {R. D. Hornung and J. A. Keasler},
  title = {The RAJA Poratability Layer: Overview and Status},
@@ -1527,6 +1549,7 @@ author = "H. Carter Edwards and Christian R. Trott and Daniel Sunderland"
 %
 % SWIG Fortran references
 %
+
 @article{Swig-Fortran,
 author    = {Seth R. Johnson and
               Andrey Prokopenko and
@@ -1546,6 +1569,7 @@ bibsource = {dblp computer science bibliography, https://dblp.org}
 %
 % Using an alternative function in Jacobian-vector products
 %
+
 @article{dorr2010numerical,
   title={A numerical algorithm for the solution of a phase-field model of polycrystalline materials},
   author={Dorr, M.R. and Fattebert, J.-L. and Wickett, M.E. and Belak, J.F. and Turchi, P.E.A.},

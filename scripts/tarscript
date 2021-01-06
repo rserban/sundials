@@ -43,13 +43,13 @@ function print_usage
 # VERSION NUMBERS
 #---------------------------------------------------------
 
-SUN_VER="5.3.0"
-CV_VER="5.3.0"
-CVS_VER="5.3.0"
-IDA_VER="5.3.0"
-IDAS_VER="4.3.0"
-KIN_VER="5.3.0"
-ARK_VER="4.3.0"
+SUN_VER="5.6.1"
+CV_VER="5.6.1"
+CVS_VER="5.6.1"
+IDA_VER="5.6.1"
+IDAS_VER="4.6.1"
+KIN_VER="5.6.1"
+ARK_VER="4.6.1"
 
 #---------------------------------------------------------
 # Test if the script is executed from within its directory
@@ -165,14 +165,19 @@ fi
 
 # Location of the scripts
 scriptdir=`pwd`
-cd ..
+
 # Sundials directory
-sundialsdir=`pwd`
-# Location of tarballs
 cd ..
+sundialsdir=`pwd`
+
+# Location of tarballs
+\rm -rf tarballs || exit 1
+mkdir tarballs   || exit 1
+cd tarballs      || exit 1
 rootdir=`pwd`
 
-tmpdir=$rootdir/tmp_dir.$$
+# Location of source for tarballs
+tmpdir=$rootdir/tmp_dir
 
 #---------------------------
 # Create temporary directory
@@ -209,12 +214,15 @@ cp $sundialsdir/doc/sundials/install_guide.pdf $tmpdir/INSTALL_GUIDE.pdf || exit
 make QUIET= purge    || exit 1
 
 cd -
-cp -r $sundialsdir/config $tmpdir/ || exit 1
+cp -r $sundialsdir/cmake $tmpdir/ || exit 1
 cp -r $sundialsdir/test $tmpdir/   || exit 1
+
+cp -r $sundialsdir/doc/sundials $tmpdir/doc/ || exit 1
 
 cp -r $sundialsdir/include/sundials $tmpdir/include/     || exit 1
 cp -r $sundialsdir/include/nvector $tmpdir/include/      || exit 1
 cp -r $sundialsdir/include/sunmatrix $tmpdir/include/    || exit 1
+cp -r $sundialsdir/include/sunmemory $tmpdir/include/    || exit 1
 cp -r $sundialsdir/include/sunlinsol $tmpdir/include/    || exit 1
 cp -r $sundialsdir/include/sunnonlinsol $tmpdir/include/ || exit 1
 
@@ -222,18 +230,17 @@ cp    $sundialsdir/src/CMakeLists.txt $tmpdir/src/ || exit 1
 cp -r $sundialsdir/src/sundials $tmpdir/src/       || exit 1
 cp -r $sundialsdir/src/nvector $tmpdir/src/        || exit 1
 cp -r $sundialsdir/src/sunmatrix $tmpdir/src/      || exit 1
+cp -r $sundialsdir/src/sunmemory $tmpdir/src/      || exit 1
 cp -r $sundialsdir/src/sunlinsol $tmpdir/src/      || exit 1
 cp -r $sundialsdir/src/sunnonlinsol $tmpdir/src/   || exit 1
 
-cp -r $sundialsdir/doc/sundials $tmpdir/doc/ || exit 1
-
-cp    $sundialsdir/examples/CMakeLists.txt $tmpdir/examples/     || exit 1
-cp    $sundialsdir/examples/test_utilities.f90 $tmpdir/examples/ || exit 1
-cp -r $sundialsdir/examples/nvector $tmpdir/examples/            || exit 1
-cp -r $sundialsdir/examples/sunmatrix $tmpdir/examples/          || exit 1
-cp -r $sundialsdir/examples/sunlinsol $tmpdir/examples/          || exit 1
-cp -r $sundialsdir/examples/sunnonlinsol $tmpdir/examples/       || exit 1
-cp -r $sundialsdir/examples/templates $tmpdir/examples/          || exit 1
+cp    $sundialsdir/examples/CMakeLists.txt $tmpdir/examples/         || exit 1
+cp -r $sundialsdir/examples/utilities $tmpdir/examples/               || exit 1
+cp -r $sundialsdir/examples/nvector $tmpdir/examples/                || exit 1
+cp -r $sundialsdir/examples/sunmatrix $tmpdir/examples/              || exit 1
+cp -r $sundialsdir/examples/sunlinsol $tmpdir/examples/              || exit 1
+cp -r $sundialsdir/examples/sunnonlinsol $tmpdir/examples/           || exit 1
+cp -r $sundialsdir/examples/templates $tmpdir/examples/              || exit 1
 
 #cd $tmpdir
 #echo -e "\n--- Generate configure script ---"
