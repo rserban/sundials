@@ -164,6 +164,12 @@ static int EvolveARK(N_Vector y, realtype h, realtype T0,
 static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
                      realtype Tf, int Nt, UserData *udata);
 
+static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
+                     realtype Tf, int Nt, UserData *udata);
+
+static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
+                        N_Vector y, realtype *t);
+
 // -----------------------------------------------------------------------------
 // Output and utility functions
 // -----------------------------------------------------------------------------
@@ -179,6 +185,7 @@ static int CloseOutput(OutputData *udata);
 // Print integration statistics
 static int OutputStatsARK(void *arkode_mem);
 static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem);
+static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem);
 
 // Check function return values
 static int check_retval(void *returnvalue, const char *funcname, int opt);
@@ -301,12 +308,19 @@ int main(int argc, char *argv[])
   switch (method)
   {
   case(0):
+    cout << "Integrating with ARKStep" << endl << endl;
     retval = EvolveARK(y, hs, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolvARK", 1)) return 1;
     break;
   case(1):
+    cout << "Integrating with MRIStep" << endl << endl;
     retval = EvolveMRI(y, hs, hf, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolveMRI", 1)) return 1;
+    break;
+  case(2):
+    cout << "Integrating with Lie-Trotter splitting" << endl << endl;
+    retval = EvolveLT(y, hs, hf, T0, Tf, Nt, &udata);
+    if (check_retval(&retval, "EvolveLT", 1)) return 1;
     break;
   default:
     cerr << "ERROR: invalid method" << endl;
@@ -325,8 +339,9 @@ int main(int argc, char *argv[])
 
 
 // ---------------
-// Evovle with ARK
+// Evolve with ARK
 // ---------------
+
 
 static int EvolveARK(N_Vector y, realtype h, realtype T0,
                      realtype Tf, int Nt, UserData *udata)
@@ -487,6 +502,7 @@ static int OutputStatsARK(void *arkode_mem)
 // ---------------
 // Evolve with MRI
 // ---------------
+
 
 static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
                      realtype Tf, int Nt, UserData *udata)
@@ -653,6 +669,259 @@ static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
 
 
 static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem)
+{
+  int retval;
+
+  long int nsts, nfs, nstf, nffe, nffi, nnif, nncf, njef;
+
+  // Get some slow integrator statistics
+  retval = MRIStepGetNumSteps(arkode_mem, &nsts);
+  if (check_retval(&retval, "MRIStepGetNumSteps", 1)) return 1;
+
+  retval = MRIStepGetNumRhsEvals(arkode_mem, &nfs);
+  if (check_retval(&retval, "MRIStepGetNumRhsEvals", 1)) return 1;
+
+  // Get some fast integrator statistics
+  retval = ARKStepGetNumSteps(inner_arkode_mem, &nstf);
+  if (check_retval(&retval, "ARKStepGetNumSteps", 1)) return 1;
+
+  retval = ARKStepGetNumRhsEvals(inner_arkode_mem, &nffe, &nffi);
+  if (check_retval(&retval, "ARKStepGetNumRhsEvals", 1)) return 1;
+
+  // Print some final statistics
+  cout << endl;
+  cout << "Final Solver Statistics:" << endl;
+  cout << "  Slow Steps = " << nsts << endl;
+  cout << "  Fast Steps = " << nstf << endl;
+  cout << "  Slow Rhs evals = " << nfs << endl;
+  cout << "  Fast Rhs evals = " << nffi << endl;
+
+  // Get/print fast integrator implicit solver statistics
+  retval = ARKStepGetNonlinSolvStats(inner_arkode_mem, &nnif, &nncf);
+  if (check_retval(&retval, "ARKStepGetNonlinSolvStats", 1)) return 1;
+
+  retval = ARKStepGetNumJacEvals(inner_arkode_mem, &njef);
+  if (check_retval(&retval, "ARKStepGetNumJacEvals", 1)) return 1;
+
+  cout << "  Fast Newton iters      = " << nnif << endl;
+  cout << "  Fast Newton conv fails = " << nncf << endl;
+  cout << "  Fast Jacobian evals    = " << njef << endl;
+  cout << endl;
+
+  return 0;
+}
+
+
+// ---------------------------------
+// Evovle with Lie-Trotter Splitting
+// ---------------------------------
+
+
+static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
+                    realtype Tf, int Nt, UserData *udata)
+{
+  // reusable error flag
+  int retval;
+
+  // integrator data and settings
+  realtype reltol = RCONST(1.0e-4);   // relative tolerance
+  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
+
+  // -------------------------
+  // Setup the fast integrator
+  // -------------------------
+
+  // Implicit reactions
+  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
+  if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
+
+  // attach expicit Euler
+  ARKodeButcherTable Bf = ARKodeButcherTable_Alloc(1, SUNFALSE);
+  if (check_retval((void *)Bf, "ARKodeButcherTable_Alloc", 0)) return 1;
+
+  Bf->A[0][0] = ONE;
+  Bf->b[0]    = ONE;
+  Bf->c[0]    = ONE;
+  Bf->q       = 1;
+
+  retval = ARKStepSetTables(inner_arkode_mem, 1, 0, Bf, NULL);
+  if (check_retval(&retval, "ARKStepSetTables", 1)) return 1;
+
+  // Set the fast step size
+  retval = ARKStepSetFixedStep(inner_arkode_mem, hf);
+  if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
+
+  // Specify fast tolerances
+  retval = ARKStepSStolerances(inner_arkode_mem, reltol, abstol);
+  if (check_retval(&retval, "ARKStepSStolerances", 1)) return 1;
+
+  // Initialize matrix and linear solver data structures
+  SUNMatrix A = SUNBandMatrix(udata->NEQ, 3, 3);
+  if (check_retval((void *)A, "SUNBandMatrix", 0)) return 1;
+
+  SUNLinearSolver LS = SUNLinSol_Band(y, A);
+  if (check_retval((void *)LS, "SUNLinSol_Band", 0)) return 1;
+
+  // Attach matrix and linear solver
+  retval = ARKStepSetLinearSolver(inner_arkode_mem, LS, A);
+  if (check_retval(&retval, "ARKStepSetLinearSolver", 1)) return 1;
+
+  // Set the Jacobian routine
+  retval = ARKStepSetJacFn(inner_arkode_mem, JacReaction);
+  if (check_retval(&retval, "ARKStepSetJacFn", 1)) return 1;
+
+  // Set max number of nonlinear iters
+  retval = ARKStepSetMaxNonlinIters(inner_arkode_mem, 10);
+  if (check_retval(&retval, "ARKStepSetMaxNonlinIters", 1)) return 1;
+
+  // Attach user data to fast integrator
+  retval = ARKStepSetUserData(inner_arkode_mem, (void *) udata);
+  if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
+
+  // -------------------------
+  // Setup the slow integrator
+  // -------------------------
+
+  // integrator data and settings
+  void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, T0, y);
+  if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
+
+  // attach expicit Euler
+  ARKodeButcherTable Bs = ARKodeButcherTable_Alloc(1, SUNFALSE);
+  if (check_retval((void *)Bs, "ARKodeButcherTable_Alloc", 0)) return 1;
+
+  Bs->A[0][0] = ZERO;
+  Bs->b[0]    = ONE;
+  Bs->c[0]    = ZERO;
+  Bs->q       = 1;
+
+  retval = ARKStepSetTables(arkode_mem, 1, 0, NULL, Bs);
+  if (check_retval(&retval, "ARKStepSetTables", 1)) return 1;
+
+  // Set the step size
+  retval = ARKStepSetFixedStep(arkode_mem, hs);
+  if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
+
+  // Attach user data to fast integrator
+  retval = ARKStepSetUserData(arkode_mem, (void *) udata);
+  if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
+
+  // Set maximum number of steps taken by solver
+  retval = MRIStepSetMaxNumSteps(arkode_mem, 1000000);
+  if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
+
+  // -------------
+  // Integrate ODE
+  // -------------
+
+  // Open output files
+  OutputData outdata;
+  retval = OpenOutput(y, udata->NEQ, &outdata);
+  if (check_retval(&retval, "OpenOutput", 1)) return 1;
+
+  // time between outputs
+  realtype dTout = (Tf - T0) / Nt;
+
+  // Set initial time and first output time
+  realtype t    = T0;
+  realtype tout = T0 + dTout;
+
+  // Output the initial condition
+  retval = WriteOutput(t, y, &outdata);
+  if (check_retval(&retval, "WriteOutput", 1)) return 1;
+
+  // Main time-stepping
+  Timer evolve;
+
+  for (int iout = 0; iout < Nt; iout++)
+  {
+    // Advance in time
+    evolve.start();
+    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, tout, y, &t);
+    evolve.stop();
+    if (check_retval(&retval, "LTStepEvolve", 1)) break;
+
+    // Write output
+    retval = WriteOutput(t, y, &outdata);
+    if (check_retval(&retval, "WriteOutput", 1)) break;
+
+    // Update output time
+    tout += dTout;
+    tout = (tout > Tf) ? Tf : tout;
+  }
+
+  // Close output
+  retval = CloseOutput(&outdata);
+  if (check_retval(&retval, "CloseOutput", 1)) return 1;
+
+  // --------
+  // Finalize
+  // --------
+
+  // Output integration stats
+  retval = OutputStatsLT(arkode_mem, inner_arkode_mem);
+  if (check_retval(&retval, "OutputStats", 1)) return 1;
+
+  cout << "Timing:" << endl;
+  cout << "  Evolution: " << evolve.total()  << endl;
+
+  // Clean up
+  ARKStepFree(&arkode_mem);    // Free integrator memory
+  ARKodeButcherTable_Free(Bf); // Free Butcher table
+  ARKodeButcherTable_Free(Bs); // Free Butcher table
+  SUNMatDestroy(A);            // Free fast matrix
+  SUNLinSolFree(LS);           // Free fast linear solver
+
+  return 0;
+}
+
+
+static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
+                        N_Vector y, realtype *t)
+{
+  int      retval;
+  realtype tmp_t1 = *t;
+  realtype tmp_t2;
+  realtype troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t1;
+
+  // Stop outer method at the output time
+  retval = ARKStepSetStopTime(arkode_mem, tout);
+  if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+
+  // until tout is reached
+  while (fabs(tmp_t1 - tout) > troundoff)
+  {
+    // One step with the outer method to from tmp_t1 to tmp_t2 (t_n + h_s)
+    retval = ARKStepEvolve(arkode_mem, tout, y, &tmp_t2, ARK_ONE_STEP);
+    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+
+    // Reset the inner method with outer state but at tmp_t1
+    retval = ARKStepReset(inner_arkode_mem, tmp_t1, y);
+    if (check_retval(&retval, "ARKStepReset", 1)) break;
+
+    // Stop inner method at tmp_t2 (do not interpolate)
+    retval = ARKStepSetStopTime(inner_arkode_mem, tmp_t2);
+    if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+
+    // Subcycle the inner method from tmp_t1 to tmp_t2 (update tmp_t1)
+    retval = ARKStepEvolve(inner_arkode_mem, tmp_t2, y, &tmp_t1, ARK_NORMAL);
+    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+
+    // Reset the outer method with inner state at tmp_t1 = tmp_t2
+    retval = ARKStepReset(arkode_mem, tmp_t1, y);
+    if (check_retval(&retval, "ARKStepReset", 1)) break;
+
+    troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t1;
+  }
+
+  // update return time
+  *t = tmp_t1;
+
+  return retval;
+}
+
+
+static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem)
 {
   int retval;
 
