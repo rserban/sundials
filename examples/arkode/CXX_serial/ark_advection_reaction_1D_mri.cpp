@@ -166,14 +166,14 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
 static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
                     realtype Tf, int Nt, UserData *udata);
 
-static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
-                        N_Vector y, realtype *t);
+static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
+                        realtype dTout, realtype tout, N_Vector y, realtype *t);
 
 static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
                     realtype Tf, int Nt, UserData *udata);
 
-static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
-                        N_Vector y, realtype *t);
+static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
+                        realtype dTout, realtype tout, N_Vector y, realtype *t);
 
 // -----------------------------------------------------------------------------
 // Output and utility functions
@@ -919,7 +919,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
   {
     // Advance in time
     evolve.start();
-    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, tout, y, &t);
+    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, hs, dTout, tout, y, &t);
     evolve.stop();
     if (check_retval(&retval, "LTStepEvolve", 1)) break;
 
@@ -958,42 +958,39 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
 }
 
 
-static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
-                        N_Vector y, realtype *t)
+static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
+                        realtype dTout, realtype tout, N_Vector y, realtype *t)
 {
   int      retval;
   realtype tmp_t1 = *t;
   realtype tmp_t2;
-  realtype troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t1;
 
   // Stop outer method at the output time
   retval = ARKStepSetStopTime(arkode_mem, tout);
   if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
 
-  // Step until tout is reached
-  while (fabs(tmp_t1 - tout) > troundoff)
+  // Step until tout is reached (assume hs evenly divides dTout)
+  for (int i = 0; i < dTout / hs; i++)
   {
     // Outer: single step to t_n + h_s (tmp_t1 -> tmp_t2)
     retval = ARKStepEvolve(arkode_mem, tout, y, &tmp_t2, ARK_ONE_STEP);
-    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+    if (check_retval(&retval, "Outer: ARKStepEvolve", 1)) break;
 
     // Inner: reset to outer state but at t_n (tmp_t1)
     retval = ARKStepReset(inner_arkode_mem, tmp_t1, y);
-    if (check_retval(&retval, "ARKStepReset", 1)) break;
+    if (check_retval(&retval, "Inner: ARKStepReset", 1)) break;
 
     // Inner: stop at t_n + h_s (tmp_t1 -> tmp_t2)
     retval = ARKStepSetStopTime(inner_arkode_mem, tmp_t2);
-    if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+    if (check_retval(&retval, "Inner: ARKStepSetStopTime", 1)) return 1;
 
     // Inner: subcycle to t_n + h_s (tmp_t1 -> tmp_t2, update tmp_t1)
     retval = ARKStepEvolve(inner_arkode_mem, tmp_t2, y, &tmp_t1, ARK_NORMAL);
-    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+    if (check_retval(&retval, "Inner: ARKStepEvolve", 1)) break;
 
     // Outer: reset to inner state at tmp_t1 (same as tmp_t2)
     retval = ARKStepReset(arkode_mem, tmp_t1, y);
-    if (check_retval(&retval, "ARKStepReset", 1)) break;
-
-    troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t1;
+    if (check_retval(&retval, "Outer: ARKStepReset", 1)) break;
   }
 
   // Update return time
@@ -1156,7 +1153,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
   {
     // Advance in time
     evolve.start();
-    retval = SMStepEvolve(arkode_mem, inner_arkode_mem, tout, y, &t);
+    retval = SMStepEvolve(arkode_mem, inner_arkode_mem, hs, dTout, tout, y, &t);
     evolve.stop();
     if (check_retval(&retval, "SMStepEvolve", 1)) break;
 
@@ -1193,47 +1190,44 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
 }
 
 
-static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
-                        N_Vector y, realtype *t)
+static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
+                        realtype dTout, realtype tout, N_Vector y, realtype *t)
 {
   int      retval;
   realtype tmp_t1 = *t;
   realtype tmp_t2, tmp_t3;
-  realtype troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t1;
 
   // Stop outer method at the output time
   retval = ARKStepSetStopTime(arkode_mem, tout);
   if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
 
-  // Step until tout is reached
-  while (fabs(tmp_t1 - tout) > troundoff)
+  // Step until tout is reached (assume hs evenly divides dTout)
+  for (int i = 0; i < dTout / hs; i++)
   {
     // Outer: single step to t_n + h_s / 2 (tmp_t1 -> tmp_t2)
     retval = ARKStepEvolve(arkode_mem, tout, y, &tmp_t2, ARK_ONE_STEP);
-    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+    if (check_retval(&retval, "Outer 1: ARKStepEvolve", 1)) break;
 
     // Inner: reset to outer state but at t_n (tmp_t1)
     retval = ARKStepReset(inner_arkode_mem, tmp_t1, y);
-    if (check_retval(&retval, "ARKStepReset", 1)) break;
+    if (check_retval(&retval, "Inner: ARKStepReset", 1)) break;
 
     // Inner: stop at t_n + h_s (tmp_t1 -> tmp_t3)
     tmp_t3 = tmp_t1 + TWO * (tmp_t2 - tmp_t1);
     retval = ARKStepSetStopTime(inner_arkode_mem, tmp_t3);
-    if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+    if (check_retval(&retval, "Inner: ARKStepSetStopTime", 1)) return 1;
 
     // Inner: subcycle to t_n + h_s (tmp_t1 -> tmp_t3, update tmp_t1)
     retval = ARKStepEvolve(inner_arkode_mem, tmp_t3, y, &tmp_t1, ARK_NORMAL);
-    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+    if (check_retval(&retval, "Inner: ARKStepEvolve", 1)) break;
 
     // Outer: reset to inner state but at t_n + h_s / 2 (tmp_t2)
     retval = ARKStepReset(arkode_mem, tmp_t2, y);
-    if (check_retval(&retval, "ARKStepReset", 1)) break;
+    if (check_retval(&retval, "Outer: ARKStepReset", 1)) break;
 
     // Outer: single step to t_n + h_s (tmp_t2 -> tmp_t1, same as tmp_t3)
     retval = ARKStepEvolve(arkode_mem, tmp_t1, y, &tmp_t2, ARK_ONE_STEP);
-    if (check_retval(&retval, "ARKStepEvolve", 1)) break;
-
-    troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t2;
+    if (check_retval(&retval, "Outer: ARKStepEvolve", 1)) break;
   }
 
   // Update return time
