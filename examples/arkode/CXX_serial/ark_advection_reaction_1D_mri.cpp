@@ -90,16 +90,16 @@
 #define TWO   RCONST(2.0)
 #define PI    RCONST(3.141592653589793238462643383279502884197169)
 
-// accessor macros between 1D array and species v at location x
+// Accessor macros between 1D array and species v at location x
 #define IDX(x,v) (3*(x)+v)
 
 using namespace std;
 
 // -----------------------------------------------------------------------------
-// User data and output data structures
+// Utility data structures and classes
 // -----------------------------------------------------------------------------
 
-// user data structure
+// User data structure
 struct UserData
 {
   sunindextype N;   // number of nodes
@@ -114,7 +114,7 @@ struct UserData
 };
 
 
-// output data structure
+// Output data structure
 struct OutputData
 {
   sunindextype NEQ;                  // vector length
@@ -203,10 +203,10 @@ static int check_retval(void *returnvalue, const char *funcname, int opt);
 
 int main(int argc, char *argv[])
 {
-  // reusable error flag
+  // Reusable error flag
   int retval;
 
-  // general problem settings
+  // General problem settings
   realtype     T0  = ZERO;            // initial time
   realtype     Tf  = RCONST(10.0);    // final time
   int          Nt  = 10;              // number of output times
@@ -216,27 +216,23 @@ int main(int argc, char *argv[])
   int          m;                     // time scale separation
   realtype     hf;                    // fast time step
   realtype     hs;                    // slow time step
-  realtype     dx  = ONE / (N-1);     // mesh spacing
-  realtype     a   = RCONST(0.6);     // problem parameters
-  realtype     b   = RCONST(2.0);
-  realtype     ep  = RCONST(1.0e-2);
-  realtype     au  = RCONST(0.001);
-  realtype     av  = RCONST(0.001);
-  realtype     aw  = RCONST(0.001);
+  realtype     dx = ONE / (N-1);      // mesh spacing
+  realtype     a  = RCONST(0.6);      // problem parameters
+  realtype     b  = RCONST(2.0);
+  realtype     ep = RCONST(1.0e-2);
+  realtype     au = RCONST(0.001);
+  realtype     av = RCONST(0.001);
+  realtype     aw = RCONST(0.001);
 
-  // --------------
-  // Initialization
-  // --------------
-
-  // start timer
+  // Start timer
   Timer overall;
   overall.start();
 
-  // Retrieve the command-line options: slow step size and scale separation
+  // Retrieve command-line options: method, slow step size, and scale separation
   if (argc < 4)
   {
     cerr << "ERROR: enter method (int), hs (real), and m (int) \n" << endl;
-    return(-1);
+    return -1;
   }
   method = stoi(argv[1]);
 #if defined(SUNDIALS_SINGLE_PRECISION)
@@ -252,22 +248,22 @@ int main(int argc, char *argv[])
   if (method < 0)
   {
     cerr << "ERROR: method must be >= 0" << endl;
-    return(-1);
+    return -1;
   }
 
   if (hs <= ZERO)
   {
     cerr << "ERROR: hs must be > 0" << endl;
-    return(-1);
+    return -1;
   }
 
   if (m < 0)
   {
     cerr << "ERROR: m must be > 0" << endl;
-    return(-1);
+    return -1;
   }
 
-  // set the fast step size
+  // Set the fast step size
   hf = hs / m;
 
   // Initial problem output
@@ -291,7 +287,7 @@ int main(int argc, char *argv[])
   cout << "    m      = " << m << endl;
   cout << endl;
 
-  // initialize udata data
+  // Initialize user data
   UserData udata;
   udata.N   = N;
   udata.NEQ = NEQ;
@@ -342,7 +338,7 @@ int main(int argc, char *argv[])
   // Free solution vector
   N_VDestroy(y);
 
-  // Stop timer and output timings
+  // Output total runtime
   overall.stop();
   cout << "  Total:     " << overall.total() << endl;
 
@@ -350,20 +346,20 @@ int main(int argc, char *argv[])
 }
 
 
-// ---------------
+// -----------------------------------------------------------------------------
 // Evolve with ARK
-// ---------------
+// -----------------------------------------------------------------------------
 
 
 static int EvolveARK(N_Vector y, realtype h, realtype T0,
                      realtype Tf, int Nt, UserData *udata)
 {
-  // reusable error flag
+  // Reusable error flag
   int retval;
 
-  // integrator data and settings
-  realtype reltol = RCONST(1.0e-4);   // relative tolerance
-  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
+  // Integrator data and settings
+  realtype reltol = RCONST(1.0e-4);  // relative tolerance
+  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   void *arkode_mem = ARKStepCreate(RhsAdvection, RhsReaction, T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
@@ -416,7 +412,7 @@ static int EvolveARK(N_Vector y, realtype h, realtype T0,
   retval = OpenOutput(y, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
-  // time between outputs
+  // Time between outputs
   realtype dTout = (Tf - T0) / Nt;
 
   // Set initial time and first output time
@@ -511,21 +507,21 @@ static int OutputStatsARK(void *arkode_mem)
 }
 
 
-// ---------------
+// -----------------------------------------------------------------------------
 // Evolve with MRI
-// ---------------
+// -----------------------------------------------------------------------------
 
 
 static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
                      realtype Tf, int Nt, UserData *udata)
 {
-  // reusable error flag
+  // Reusable error flag
   int retval;
 
-  // integrator data and settings
+  // Integrator data and settings
   //MRIStepCoupling C = NULL; // slow coupling table
-  realtype reltol = RCONST(1.0e-4);   // relative tolerance
-  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
+  realtype reltol = RCONST(1.0e-4);  // relative tolerance
+  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   // -------------------------
   // Setup the fast integrator
@@ -618,7 +614,7 @@ static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
   retval = OpenOutput(y, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
-  // time between outputs
+  // Time between outputs
   realtype dTout = (Tf - T0) / Nt;
 
   // Set initial time and first output time
@@ -724,20 +720,20 @@ static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem)
 }
 
 
-// ---------------------------------
+// -----------------------------------------------------------------------------
 // Evovle with Lie-Trotter Splitting
-// ---------------------------------
+// -----------------------------------------------------------------------------
 
 
 static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
                     realtype Tf, int Nt, UserData *udata)
 {
-  // reusable error flag
+  // Reusable error flag
   int retval;
 
-  // integrator data and settings
-  realtype reltol = RCONST(1.0e-4);   // relative tolerance
-  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
+  // Integrator data and settings
+  realtype reltol = RCONST(1.0e-4);  // relative tolerance
+  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   // -------------------------
   // Setup the fast integrator
@@ -747,7 +743,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
   void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
 
-  // attach expicit Euler
+  // Attach expicit Euler
   ARKodeButcherTable Bf = ARKodeButcherTable_Alloc(1, SUNFALSE);
   if (check_retval((void *)Bf, "ARKodeButcherTable_Alloc", 0)) return 1;
 
@@ -794,7 +790,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
   // Setup the slow integrator
   // -------------------------
 
-  // integrator data and settings
+  // Integrator data and settings
   void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
 
@@ -831,7 +827,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
   retval = OpenOutput(y, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
-  // time between outputs
+  // Time between outputs
   realtype dTout = (Tf - T0) / Nt;
 
   // Set initial time and first output time
@@ -900,33 +896,33 @@ static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
   retval = ARKStepSetStopTime(arkode_mem, tout);
   if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
 
-  // until tout is reached
+  // Step until tout is reached
   while (fabs(tmp_t1 - tout) > troundoff)
   {
-    // One step with the outer method to from tmp_t1 to tmp_t2 (t_n + h_s)
+    // Outer: single step to t_n + h_s (tmp_t1 -> tmp_t2)
     retval = ARKStepEvolve(arkode_mem, tout, y, &tmp_t2, ARK_ONE_STEP);
     if (check_retval(&retval, "ARKStepEvolve", 1)) break;
 
-    // Reset the inner method with outer state but at tmp_t1
+    // Inner: reset to outer state but at t_n (tmp_t1)
     retval = ARKStepReset(inner_arkode_mem, tmp_t1, y);
     if (check_retval(&retval, "ARKStepReset", 1)) break;
 
-    // Stop inner method at tmp_t2 (do not interpolate)
+    // Inner: stop at t_n + h_s (tmp_t1 -> tmp_t2)
     retval = ARKStepSetStopTime(inner_arkode_mem, tmp_t2);
     if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
 
-    // Subcycle the inner method from tmp_t1 to tmp_t2 (update tmp_t1)
+    // Inner: subcycle to t_n + h_s (tmp_t1 -> tmp_t2, update tmp_t1)
     retval = ARKStepEvolve(inner_arkode_mem, tmp_t2, y, &tmp_t1, ARK_NORMAL);
     if (check_retval(&retval, "ARKStepEvolve", 1)) break;
 
-    // Reset the outer method with inner state at tmp_t1 = tmp_t2
+    // Outer: reset to inner state at tmp_t1 (same as tmp_t2)
     retval = ARKStepReset(arkode_mem, tmp_t1, y);
     if (check_retval(&retval, "ARKStepReset", 1)) break;
 
     troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t1;
   }
 
-  // update return time
+  // Update return time
   *t = tmp_t1;
 
   return retval;
@@ -977,20 +973,20 @@ static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem)
 }
 
 
-// ------------------------------------
+// -----------------------------------------------------------------------------
 // Evovle with Strang-Marchuk Splitting
-// ------------------------------------
+// -----------------------------------------------------------------------------
 
 
 static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
                     realtype Tf, int Nt, UserData *udata)
 {
-  // reusable error flag
+  // Reusable error flag
   int retval;
 
-  // integrator data and settings
-  realtype reltol = RCONST(1.0e-4);   // relative tolerance
-  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
+  // Integrator data and settings
+  realtype reltol = RCONST(1.0e-4);  // relative tolerance
+  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   // -------------------------
   // Setup the fast integrator
@@ -1039,7 +1035,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
   // Setup the slow integrator
   // -------------------------
 
-  // integrator data and settings
+  // Integrator data and settings
   void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
 
@@ -1068,7 +1064,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
   retval = OpenOutput(y, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
-  // time between outputs
+  // Time between outputs
   realtype dTout = (Tf - T0) / Nt;
 
   // Set initial time and first output time
@@ -1135,7 +1131,7 @@ static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
   retval = ARKStepSetStopTime(arkode_mem, tout);
   if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
 
-  // until tout is reached
+  // Step until tout is reached
   while (fabs(tmp_t1 - tout) > troundoff)
   {
     // Outer: single step to t_n + h_s / 2 (tmp_t1 -> tmp_t2)
@@ -1152,22 +1148,21 @@ static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
     if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
 
     // Inner: subcycle to t_n + h_s (tmp_t1 -> tmp_t3, update tmp_t1)
-    retval = ARKStepEvolve(inner_arkode_mem, tmp_t3, y, &tmp_t1,
-                           ARK_NORMAL);
+    retval = ARKStepEvolve(inner_arkode_mem, tmp_t3, y, &tmp_t1, ARK_NORMAL);
     if (check_retval(&retval, "ARKStepEvolve", 1)) break;
 
     // Outer: reset to inner state but at t_n + h_s / 2 (tmp_t2)
     retval = ARKStepReset(arkode_mem, tmp_t2, y);
     if (check_retval(&retval, "ARKStepReset", 1)) break;
 
-    // Outer: single step to t_n + h_s (tmp_t2 -> tmp_t1 or tmp_t3)
+    // Outer: single step to t_n + h_s (tmp_t2 -> tmp_t1, same as tmp_t3)
     retval = ARKStepEvolve(arkode_mem, tmp_t1, y, &tmp_t2, ARK_ONE_STEP);
     if (check_retval(&retval, "ARKStepEvolve", 1)) break;
 
     troundoff = RCONST(100.0) * UNIT_ROUNDOFF * tmp_t2;
   }
 
-  // update return time
+  // Update return time
   *t = tmp_t2;
 
   return retval;
@@ -1218,34 +1213,34 @@ static int OutputStatsSM(void *arkode_mem, void* inner_arkode_mem)
 }
 
 
-// ----------------------------------
+// -----------------------------------------------------------------------------
 // Functions called by the integrator
-// ----------------------------------
+// -----------------------------------------------------------------------------
 
 
-// Compute the advection ODE RHS
+// Compute the advection ODE Rhs
 static int RhsAdvection(realtype t, N_Vector y, N_Vector ydot, void *user_data)
 {
-  // access problem data
+  // Access problem data
   UserData     *udata = (UserData*) user_data;
   sunindextype N      = udata->N;
 
-  // access data arrays
+  // Access data arrays
   realtype *Ydata = N_VGetArrayPointer(y);
   if (check_retval((void *)Ydata, "N_VGetArrayPointer", 0)) return 1;
 
   realtype *dYdata = N_VGetArrayPointer(ydot);
   if (check_retval((void *)dYdata, "N_VGetArrayPointer", 0)) return 1;
 
-  // iterate over domain, computing all equations
+  // Set advection constants
   realtype auconst = -udata->au / RCONST(2.0) / udata->dx;
   realtype avconst = -udata->av / RCONST(2.0) / udata->dx;
   realtype awconst = -udata->aw / RCONST(2.0) / udata->dx;
 
-  // enforce left stationary boundary condition
+  // Enforce left stationary boundary condition
   dYdata[IDX(0,0)] = dYdata[IDX(0,1)] = dYdata[IDX(0,2)] = ZERO;
 
-  // compute reaction at interior nodes
+  // Compute reaction at interior nodes
   realtype ul, ur, vl, vr, wl, wr;
 
   for (sunindextype i = 1; i < N - 1; i++)
@@ -1259,7 +1254,7 @@ static int RhsAdvection(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     dYdata[IDX(i,2)] = (wr - wl) * awconst;
   }
 
-  // enforce right stationary boundary condition
+  // Enforce right stationary boundary condition
   dYdata[IDX(N-1,0)] = dYdata[IDX(N-1,1)] = dYdata[IDX(N-1,2)] = ZERO;
 
   // Return with success
@@ -1267,29 +1262,29 @@ static int RhsAdvection(realtype t, N_Vector y, N_Vector ydot, void *user_data)
 }
 
 
-// Compute the reaction ODE RHS
+// Compute the reaction ODE Rhs
 static int RhsReaction(realtype t, N_Vector y, N_Vector ydot, void *user_data)
 {
-  // access problem data
+  // Access problem data
   UserData *udata = (UserData*) user_data;
 
-  // set variable shortcuts
+  // Set variable shortcuts
   sunindextype N = udata->N;
   realtype     a  = udata->a;
   realtype     b  = udata->b;
   realtype     ep = udata->ep;
 
-  // access data arrays
+  // Access data arrays
   realtype *Ydata = N_VGetArrayPointer(y);
   if (check_retval((void *)Ydata, "N_VGetArrayPointer", 0)) return 1;
 
   realtype *dYdata = N_VGetArrayPointer(ydot);
   if (check_retval((void *)dYdata, "N_VGetArrayPointer", 0)) return 1;
 
-  // enforce left stationary boundary condition
+  // Enforce left stationary boundary condition
   dYdata[IDX(0,0)] = dYdata[IDX(0,1)] = dYdata[IDX(0,2)] = ZERO;
 
-  // iterate over interior domain
+  // Iterate over interior domain
   realtype u, v, w;
 
   for (sunindextype i = 1; i < N - 1; i++)
@@ -1303,7 +1298,7 @@ static int RhsReaction(realtype t, N_Vector y, N_Vector ydot, void *user_data)
     dYdata[IDX(i,2)] = ((b - w) / ep) - w * u;
   }
 
-  // enforce right stationary boundary condition
+  // Enforce right stationary boundary condition
   dYdata[IDX(N-1,0)] = dYdata[IDX(N-1,1)] = dYdata[IDX(N-1,2)] = ZERO;
 
   return 0;
@@ -1315,37 +1310,37 @@ static int JacReaction(realtype t, N_Vector y, N_Vector fy, SUNMatrix J,
                        void *user_data, N_Vector tmp1, N_Vector tmp2,
                        N_Vector tmp3)
 {
-  // access problem data
+  // Access problem data
   UserData *udata = (UserData*) user_data;
 
-  // set shortcuts
+  // Set shortcuts
   sunindextype N  = udata->N;
   realtype     ep = udata->ep;
 
-  // access solution array
+  // Access solution array
   realtype *Ydata = N_VGetArrayPointer(y);
   if (check_retval((void *)Ydata, "N_VGetArrayPointer", 0)) return 1;
 
-  // iterate over interior nodes
+  // Iterate over interior nodes
   realtype u, v, w;
 
   for (sunindextype i = 1; i < N - 1; i++)
   {
-    // set nodal value shortcuts
+    // Set nodal value shortcuts
     u = Ydata[IDX(i,0)];
     v = Ydata[IDX(i,1)];
     w = Ydata[IDX(i,2)];
 
-    // all vars wrt u
+    // All vars wrt u
     SM_ELEMENT_B(J,IDX(i,0),IDX(i,0)) = TWO * u * v - (w + ONE);
     SM_ELEMENT_B(J,IDX(i,1),IDX(i,0)) = w - TWO * u * v;
     SM_ELEMENT_B(J,IDX(i,2),IDX(i,0)) = -w;
 
-    // all vars wrt v
+    // All vars wrt v
     SM_ELEMENT_B(J,IDX(i,0),IDX(i,1)) = u * u;
     SM_ELEMENT_B(J,IDX(i,1),IDX(i,1)) = -u * u;
 
-    // all vars wrt w
+    // All vars wrt w
     SM_ELEMENT_B(J,IDX(i,0),IDX(i,2)) = -u;
     SM_ELEMENT_B(J,IDX(i,1),IDX(i,2)) = u;
     SM_ELEMENT_B(J,IDX(i,2),IDX(i,2)) = (-ONE / ep) - u;
@@ -1356,15 +1351,15 @@ static int JacReaction(realtype t, N_Vector y, N_Vector fy, SUNMatrix J,
 }
 
 
-// ----------------------------------
+// -----------------------------------------------------------------------------
 // Output and utility functions
-// ----------------------------------
+// -----------------------------------------------------------------------------
 
 
 // Set the initial condition
 static int SetIC(N_Vector y, void *user_data)
 {
-  // access problem data
+  // Access problem data
   UserData *udata = (UserData*) user_data;
 
   // set variable shortcuts
@@ -1385,11 +1380,12 @@ static int SetIC(N_Vector y, void *user_data)
     Ydata[IDX(i,2)] =  b  + RCONST(0.1) * sin(PI * i * dx);  // w
   }
 
-  // Return  with success
-  return(0);
+  // Return with success
+  return 0;
 }
 
 
+// Open output stream, allocate data
 static int OpenOutput(N_Vector y, sunindextype NEQ,
                       OutputData *outdata)
 {
@@ -1440,11 +1436,12 @@ static int OpenOutput(N_Vector y, sunindextype NEQ,
 }
 
 
+// Write output to screen and file
 static int WriteOutput(realtype t, N_Vector y, OutputData *outdata)
 {
   sunindextype N = outdata->NEQ / 3;
 
-  // print solution norms to screen
+  // Print solution norms to screen
   realtype u = N_VWL2Norm(y, outdata->umask);
   u = SUNRsqrt(u * u / N);
 
@@ -1457,11 +1454,11 @@ static int WriteOutput(realtype t, N_Vector y, OutputData *outdata)
   cout << setw(11) << t << setw(14) << u << setw(14) << v << setw(14) << w
        << endl;
 
-  // get solution data array
+  // Get solution data array
   realtype *data = N_VGetArrayPointer(y);
   if (check_retval((void *)data, "N_VGetArrayPointer", 0)) return 1;
 
-  // write solution to disk
+  // Write solution to disk
   outdata->yout << t << " ";
   for (sunindextype i = 0; i < outdata->NEQ; i++)
   {
@@ -1473,6 +1470,7 @@ static int WriteOutput(realtype t, N_Vector y, OutputData *outdata)
 }
 
 
+// Close output stream, free data
 static int CloseOutput(OutputData *outdata)
 {
   cout << "------------------------------------------------------" << endl;
@@ -1485,9 +1483,11 @@ static int CloseOutput(OutputData *outdata)
   return 0;
 }
 
-// ------------------------
+
+// -----------------------------------------------------------------------------
 // Private helper functions
-// ------------------------
+// -----------------------------------------------------------------------------
+
 
 // Check function return value...
 //   opt == 0 means SUNDIALS function allocates memory so check if
@@ -1496,7 +1496,6 @@ static int CloseOutput(OutputData *outdata)
 //            flag >= 0
 //   opt == 2 means function allocates memory so check if returned
 //            NULL pointer
-
 static int check_retval(void *returnvalue, const char *funcname, int opt)
 {
   int *errvalue;
@@ -1530,6 +1529,5 @@ static int check_retval(void *returnvalue, const char *funcname, int opt)
 
   return 0;
 }
-
 
 //---- end of file ----
