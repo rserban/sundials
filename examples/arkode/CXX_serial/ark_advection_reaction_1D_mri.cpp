@@ -406,7 +406,7 @@ static int EvolveARK(N_Vector y, realtype h, realtype T0,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = ARKStepSetMaxNumSteps(arkode_mem, 1000000);
+  retval = ARKStepSetMaxNumSteps(arkode_mem, 100000000);
   if (check_retval(&retval, "ARKStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
@@ -672,7 +672,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   if (check_retval(&retval, "MRIStepSetFixedStep", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 1000000);
+  retval = MRIStepSetMaxNumSteps(arkode_mem, 100000000);
   if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
 
   // Pass udata to user functions
@@ -889,7 +889,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 1000000);
+  retval = MRIStepSetMaxNumSteps(arkode_mem, 100000000);
   if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
@@ -1123,7 +1123,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 1000000);
+  retval = MRIStepSetMaxNumSteps(arkode_mem, 100000000);
   if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
