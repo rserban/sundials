@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 
   // General problem settings
   realtype     T0  = ZERO;            // initial time
-  realtype     Tf  = RCONST(10.0);    // final time
+  realtype     Tf  = RCONST(3.0);     // final time
   int          Nt  = 10;              // number of output times
   sunindextype N   = 201;             // number of spatial nodes
   sunindextype NEQ = 3 * N;           // number of equations
