@@ -814,17 +814,9 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
 
-  // Attach expicit Euler
-  ARKodeButcherTable Bf = ARKodeButcherTable_Alloc(1, SUNFALSE);
-  if (check_retval((void *)Bf, "ARKodeButcherTable_Alloc", 0)) return 1;
-
-  Bf->A[0][0] = ONE;
-  Bf->b[0]    = ONE;
-  Bf->c[0]    = ONE;
-  Bf->q       = 1;
-
-  retval = ARKStepSetTables(inner_arkode_mem, 1, 0, Bf, NULL);
-  if (check_retval(&retval, "ARKStepSetTables", 1)) return 1;
+  // Set method order to use
+  retval = ARKStepSetOrder(inner_arkode_mem, 2);
+  if (check_retval(&retval, "ARKStepSetOrder",1)) return 1;
 
   // Set the fast step size
   retval = ARKStepSetFixedStep(inner_arkode_mem, hf);
@@ -946,7 +938,6 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
 
   // Clean up
   ARKStepFree(&arkode_mem);    // Free integrator memory
-  ARKodeButcherTable_Free(Bf); // Free Butcher table
   ARKodeButcherTable_Free(Bs); // Free Butcher table
   SUNMatDestroy(A);            // Free fast matrix
   SUNLinSolFree(LS);           // Free fast linear solver
