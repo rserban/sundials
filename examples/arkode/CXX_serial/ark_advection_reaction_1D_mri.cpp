@@ -795,7 +795,7 @@ static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem)
 
 
 // -----------------------------------------------------------------------------
-// Evovle with Lie-Trotter Splitting
+// Evolve with Lie-Trotter Splitting
 // -----------------------------------------------------------------------------
 
 
@@ -1033,7 +1033,7 @@ static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem)
 
 
 // -----------------------------------------------------------------------------
-// Evovle with Strang-Marchuk Splitting
+// Evolve with Strang-Marchuk Splitting
 // -----------------------------------------------------------------------------
 
 
@@ -1184,7 +1184,7 @@ static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
 
   // Stop outer method at the output time
   retval = ARKStepSetStopTime(arkode_mem, tout);
-  if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+  if (check_retval(&retval, "Outer: ARKStepSetStopTime", 1)) return 1;
 
   // Step until tout is reached (assume hs evenly divides dTout)
   for (int i = 0; i < dTout / hs; i++)
