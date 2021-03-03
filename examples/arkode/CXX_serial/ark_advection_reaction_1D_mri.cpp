@@ -157,20 +157,23 @@ static int JacReaction(realtype t, N_Vector y, N_Vector fy, SUNMatrix J,
 // Problem evolution functions
 // -----------------------------------------------------------------------------
 
-static int EvolveARK(N_Vector y, realtype h, realtype T0,
-                     realtype Tf, int Nt, UserData *udata);
-
-static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
+static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
                      realtype T0, realtype Tf, int Nt, UserData *udata);
 
-static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
-                    realtype Tf, int Nt, UserData *udata);
+static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
+                     realtype reltol, realtype abstol, realtype T0, realtype Tf,
+                     int Nt, UserData *udata);
+
+static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
+                    realtype abstol, realtype T0, realtype Tf, int Nt,
+                    UserData *udata);
 
 static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
                         realtype dTout, realtype tout, N_Vector y, realtype *t);
 
-static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
-                    realtype Tf, int Nt, UserData *udata);
+static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
+                    realtype abstol, realtype T0, realtype Tf, int Nt,
+                    UserData *udata);
 
 static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
                         realtype dTout, realtype tout, N_Vector y, realtype *t);
@@ -224,6 +227,8 @@ int main(int argc, char *argv[])
   realtype     au = RCONST(0.001);
   realtype     av = RCONST(0.001);
   realtype     aw = RCONST(0.001);
+  realtype reltol = RCONST(1.0e-4);   // relative tolerance
+  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
 
   // Start timer
   Timer overall;
@@ -318,22 +323,23 @@ int main(int argc, char *argv[])
   {
   case(0):
     cout << "Integrating with ARKStep" << endl << endl;
-    retval = EvolveARK(y, hs, T0, Tf, Nt, &udata);
+    retval = EvolveARK(y, hs, reltol, abstol, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolvARK", 1)) return 1;
     break;
   case(1):
     cout << "Integrating with Lie-Trotter splitting" << endl << endl;
-    retval = EvolveLT(y, hs, hf, T0, Tf, Nt, &udata);
+    retval = EvolveLT(y, hs, hf, reltol, abstol, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolveLT", 1)) return 1;
     break;
   case(2):
     cout << "Integrating with Strang-Marchuk splitting" << endl << endl;
-    retval = EvolveSM(y, hs, hf, T0, Tf, Nt, &udata);
+    retval = EvolveSM(y, hs, hf, reltol, abstol, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolveSM", 1)) return 1;
     break;
   case(3):
     cout << "Integrating with MRIStep, ";
-    retval = EvolveMRI(mri_order, y, hs, hf, T0, Tf, Nt, &udata);
+    retval = EvolveMRI(mri_order, y, hs, hf, reltol, abstol, T0, Tf, Nt,
+                       &udata);
     if (check_retval(&retval, "EvolveMRI", 1)) return 1;
     break;
   default:
@@ -357,16 +363,13 @@ int main(int argc, char *argv[])
 // -----------------------------------------------------------------------------
 
 
-static int EvolveARK(N_Vector y, realtype h, realtype T0,
-                     realtype Tf, int Nt, UserData *udata)
+static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
+                     realtype T0, realtype Tf, int Nt, UserData *udata)
 {
   // Reusable error flag
   int retval;
 
   // Integrator data and settings
-  realtype reltol = RCONST(1.0e-4);  // relative tolerance
-  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
-
   void *arkode_mem = ARKStepCreate(RhsAdvection, RhsReaction, T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
 
@@ -519,14 +522,11 @@ static int OutputStatsARK(void *arkode_mem)
 
 
 static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
-                     realtype T0, realtype Tf, int Nt, UserData *udata)
+                     realtype reltol, realtype abstol, realtype T0, realtype Tf,
+                     int Nt, UserData *udata)
 {
   // Reusable error flag
   int retval;
-
-  // Integrator data and settings
-  realtype reltol = RCONST(1.0e-4);  // relative tolerance
-  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   // -------------------------
   // Setup the fast integrator
@@ -799,15 +799,12 @@ static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
-                    realtype Tf, int Nt, UserData *udata)
+static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
+                    realtype abstol, realtype T0, realtype Tf, int Nt,
+                    UserData *udata)
 {
   // Reusable error flag
   int retval;
-
-  // Integrator data and settings
-  realtype reltol = RCONST(1.0e-4);  // relative tolerance
-  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   // -------------------------
   // Setup the fast integrator
@@ -1049,15 +1046,12 @@ static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
-                    realtype Tf, int Nt, UserData *udata)
+static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
+                    realtype abstol, realtype T0, realtype Tf, int Nt,
+                    UserData *udata)
 {
   // Reusable error flag
   int retval;
-
-  // Integrator data and settings
-  realtype reltol = RCONST(1.0e-4);  // relative tolerance
-  realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
   // -------------------------
   // Setup the fast integrator
