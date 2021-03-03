@@ -227,8 +227,8 @@ int main(int argc, char *argv[])
   realtype     au = RCONST(0.001);
   realtype     av = RCONST(0.001);
   realtype     aw = RCONST(0.001);
-  realtype reltol = RCONST(1.0e-4);   // relative tolerance
-  realtype abstol = RCONST(1.0e-9);   // absolute tolerance
+  realtype reltol = RCONST(1.0e-8);   // relative tolerance
+  realtype abstol = RCONST(1.0e-12);  // absolute tolerance
 
   // Start timer
   Timer overall;
