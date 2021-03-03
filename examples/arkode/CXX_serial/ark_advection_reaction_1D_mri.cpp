@@ -183,7 +183,8 @@ static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype tout,
 static int SetIC(N_Vector y, void *user_data);
 
 // Output solution and error
-static int OpenOutput(N_Vector y, sunindextype NEQ, OutputData *udata);
+static int OpenOutput(N_Vector y, sunindextype N, sunindextype NEQ,
+                      OutputData *udata);
 static int WriteOutput(realtype t, N_Vector u, OutputData *udata);
 static int CloseOutput(OutputData *udata);
 
@@ -414,7 +415,7 @@ static int EvolveARK(N_Vector y, realtype h, realtype T0,
 
   // Open output files
   OutputData outdata;
-  retval = OpenOutput(y, udata->NEQ, &outdata);
+  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
@@ -684,7 +685,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
 
   // Open output files
   OutputData outdata;
-  retval = OpenOutput(y, udata->NEQ, &outdata);
+  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
@@ -897,7 +898,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
 
   // Open output files
   OutputData outdata;
-  retval = OpenOutput(y, udata->NEQ, &outdata);
+  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
@@ -1134,7 +1135,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype T0,
 
   // Open output files
   OutputData outdata;
-  retval = OpenOutput(y, udata->NEQ, &outdata);
+  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
@@ -1459,11 +1460,9 @@ static int SetIC(N_Vector y, void *user_data)
 
 
 // Open output stream, allocate data
-static int OpenOutput(N_Vector y, sunindextype NEQ,
+static int OpenOutput(N_Vector y, sunindextype N, sunindextype NEQ,
                       OutputData *outdata)
 {
-  sunindextype N = NEQ / 3;
-
   // Save number of equations
   outdata->NEQ = NEQ;
 
@@ -1497,6 +1496,12 @@ static int OpenOutput(N_Vector y, sunindextype NEQ,
 
   // Open output streams for solution
   outdata->yout.open("advection_reaction_1D_mri.out");
+  outdata->yout <<  "# title Advection-Reaction (Brusselator)" << endl;
+  outdata->yout <<  "# nvar 3"      << endl;
+  outdata->yout <<  "# vars u v w"  << endl;
+  outdata->yout <<  "# nx  " << N   << endl;
+  outdata->yout <<  "# xl  " << 0.0 << endl;
+  outdata->yout <<  "# xu  " << 1.0 << endl;
   outdata->yout << scientific;
   outdata->yout << setprecision(numeric_limits<realtype>::digits10);
 
