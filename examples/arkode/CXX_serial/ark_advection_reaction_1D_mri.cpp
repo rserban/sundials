@@ -71,7 +71,6 @@
 #include <sunmatrix/sunmatrix_band.h> // access to band SUNMatrix
 #include <sunlinsol/sunlinsol_band.h> // access to band SUNLinearSolver
 #include <sundials/sundials_types.h>  // def. of type 'realtype'
-#include <sundials/sundials_math.h>   // def. of SUNRsqrt, etc.
 
 #if defined(SUNDIALS_EXTENDED_PRECISION)
 #define GSYM "Lg"
@@ -161,8 +160,8 @@ static int JacReaction(realtype t, N_Vector y, N_Vector fy, SUNMatrix J,
 static int EvolveARK(N_Vector y, realtype h, realtype T0,
                      realtype Tf, int Nt, UserData *udata);
 
-static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
-                     realtype Tf, int Nt, UserData *udata);
+static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
+                     realtype T0, realtype Tf, int Nt, UserData *udata);
 
 static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype T0,
                     realtype Tf, int Nt, UserData *udata);
@@ -213,6 +212,7 @@ int main(int argc, char *argv[])
   sunindextype N   = 201;             // number of spatial nodes
   sunindextype NEQ = 3 * N;           // number of equations
   int          method;                // integration method
+  int          mri_order = 3;         // MRI method order
   int          m;                     // time scale separation
   realtype     hf;                    // fast time step
   realtype     hs;                    // slow time step
@@ -243,6 +243,11 @@ int main(int argc, char *argv[])
   hs = stold(argv[2]);
 #endif
   m = stoi(argv[3]);
+
+  if (argc > 4)
+  {
+    mri_order = stoi(argv[4]);
+  }
 
   // Check arguments for validity
   if (method < 0)
@@ -316,19 +321,19 @@ int main(int argc, char *argv[])
     if (check_retval(&retval, "EvolvARK", 1)) return 1;
     break;
   case(1):
-    cout << "Integrating with MRIStep" << endl << endl;
-    retval = EvolveMRI(y, hs, hf, T0, Tf, Nt, &udata);
-    if (check_retval(&retval, "EvolveMRI", 1)) return 1;
-    break;
-  case(2):
     cout << "Integrating with Lie-Trotter splitting" << endl << endl;
     retval = EvolveLT(y, hs, hf, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolveLT", 1)) return 1;
     break;
-  case(3):
+  case(2):
     cout << "Integrating with Strang-Marchuk splitting" << endl << endl;
     retval = EvolveSM(y, hs, hf, T0, Tf, Nt, &udata);
     if (check_retval(&retval, "EvolveSM", 1)) return 1;
+    break;
+  case(3):
+    cout << "Integrating with MRIStep, ";
+    retval = EvolveMRI(mri_order, y, hs, hf, T0, Tf, Nt, &udata);
+    if (check_retval(&retval, "EvolveMRI", 1)) return 1;
     break;
   default:
     cerr << "ERROR: invalid method" << endl;
@@ -400,8 +405,8 @@ static int EvolveARK(N_Vector y, realtype h, realtype T0,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 1000000);
-  if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
+  retval = ARKStepSetMaxNumSteps(arkode_mem, 1000000);
+  if (check_retval(&retval, "ARKStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
   // Integrate ODE
@@ -512,14 +517,13 @@ static int OutputStatsARK(void *arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
-                     realtype Tf, int Nt, UserData *udata)
+static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
+                     realtype T0, realtype Tf, int Nt, UserData *udata)
 {
   // Reusable error flag
   int retval;
 
   // Integrator data and settings
-  //MRIStepCoupling C = NULL; // slow coupling table
   realtype reltol = RCONST(1.0e-4);  // relative tolerance
   realtype abstol = RCONST(1.0e-9);  // absolute tolerance
 
@@ -531,26 +535,61 @@ static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
   void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
 
-  // Use esdirk-3-3 for the fast method
-  ARKodeButcherTable B = ARKodeButcherTable_Alloc(3, SUNFALSE);
-  if (check_retval((void *)B, "ARKodeButcherTable_Alloc", 0)) return 1;
+  // Set fast method table
+  ARKodeButcherTable B;
+  realtype gamma, beta;
 
-  realtype beta  = SUNRsqrt(RCONST(3.0)) / RCONST(6.0) + RCONST(0.5);
-  realtype gamma = (-ONE/RCONST(8.0)) * (SUNRsqrt(RCONST(3.0)) + ONE);
+  switch (mri_order)
+  {
+  case(2):
+    // sdirk-2-2
+    cout << "2nd order" << endl << endl;
+    B = ARKodeButcherTable_Alloc(2, SUNFALSE);
+    if (check_retval((void *)B, "ARKodeButcherTable_Alloc", 0)) return 1;
 
-  B->A[1][0] = RCONST(4.0) * gamma + TWO * beta;
-  B->A[1][1] = ONE - RCONST(4.0) * gamma - TWO * beta;
-  B->A[2][0] = RCONST(0.5) - beta - gamma;
-  B->A[2][1] = gamma;
-  B->A[2][2] = beta;
-  B->b[0]    = ONE / RCONST(6.0);
-  B->b[1]    = ONE / RCONST(6.0);
-  B->b[2]    = TWO / RCONST(3.0);
-  B->c[1]    = ONE;
-  B->c[2]    = RCONST(0.5);
-  B->q       = 3;
+    gamma = (TWO - sqrt(TWO)) / TWO;
 
-  retval = ARKStepSetTables(inner_arkode_mem, 3, 0, B, NULL);
+    B->A[0][0] = gamma;
+    B->A[1][0] = ONE - gamma;
+    B->A[1][1] = gamma;
+    B->b[0]    = ONE - gamma;
+    B->b[1]    = gamma;
+    B->c[0]    = gamma;
+    B->c[1]    = ONE;
+    B->q       = 2;
+    break;
+  case(3):
+    // esdirk-3-3
+    cout << "3rd order" << endl << endl;
+    B = ARKodeButcherTable_Alloc(3, SUNFALSE);
+    if (check_retval((void *)B, "ARKodeButcherTable_Alloc", 0)) return 1;
+
+    beta  = sqrt(RCONST(3.0)) / RCONST(6.0) + RCONST(0.5);
+    gamma = (-ONE/RCONST(8.0)) * (sqrt(RCONST(3.0)) + ONE);
+
+    B->A[1][0] = RCONST(4.0) * gamma + TWO * beta;
+    B->A[1][1] = ONE - RCONST(4.0) * gamma - TWO * beta;
+    B->A[2][0] = RCONST(0.5) - beta - gamma;
+    B->A[2][1] = gamma;
+    B->A[2][2] = beta;
+    B->b[0]    = ONE / RCONST(6.0);
+    B->b[1]    = ONE / RCONST(6.0);
+    B->b[2]    = TWO / RCONST(3.0);
+    B->c[1]    = ONE;
+    B->c[2]    = RCONST(0.5);
+    B->q       = 3;
+    break;
+  case(4):
+    cout << "4th order" << endl << endl;
+    B = ARKodeButcherTable_LoadDIRK(CASH_5_3_4);
+    if (check_retval((void *)B, "ARKodeButcherTable_LoadDIRK", 0)) return 1;
+    break;
+  default:
+    cerr << "ERROR: invalid method order" << endl;
+    break;
+  }
+
+  retval = ARKStepSetTables(inner_arkode_mem, mri_order, 0, B, NULL);
   if (check_retval(&retval, "ARKStepSetTables", 1)) return 1;
 
   // Set the fast step size
@@ -592,6 +631,40 @@ static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
   void *arkode_mem = MRIStepCreate(RhsAdvection, T0, y, MRISTEP_ARKSTEP,
                                    inner_arkode_mem);
   if (check_retval((void *)arkode_mem, "MRIStepCreate", 0)) return 1;
+
+  // Set slow method table
+  MRIStepCoupling C;
+  ARKodeButcherTable Bc;
+
+  switch (mri_order)
+  {
+  case(2):
+    // MRI-GARK-ERK22
+    Bc = ARKodeButcherTable_Alloc(2, SUNFALSE);
+    if (check_retval((void *)Bc, "MRIStepCoupling_Alloc", 0)) return 1;
+    Bc->A[1][0] = RCONST(0.5);
+    Bc->b[1] = ONE;
+    Bc->c[1] = RCONST(0.5);
+    Bc->q = 2;
+    C = MRIStepCoupling_MIStoMRI(Bc, 2, 0);
+    if (check_retval((void *)C, "MRIStepCoupling_MIStoMRI", 0)) return 1;
+    ARKodeButcherTable_Free(Bc);
+    break;
+  case(3):
+    C = MRIStepCoupling_LoadTable(MIS_KW3);
+    if (check_retval((void *)C, "MRIStepCoupling_LoadTable", 0)) return 1;
+    break;
+  case(4):
+    C = MRIStepCoupling_LoadTable(MRI_GARK_ERK45a);
+    if (check_retval((void *)C, "MRIStepCoupling_LoadTable", 0)) return 1;
+    break;
+  default:
+    cerr << "ERROR: invalid method order" << endl;
+    break;
+  }
+
+  retval = MRIStepSetCoupling(arkode_mem, C);
+  if (check_retval(&retval, "MRIStepSetCoupling", 1)) return 1;
 
   // Set the slow step size
   retval = MRIStepSetFixedStep(arkode_mem, hs);
@@ -668,7 +741,7 @@ static int EvolveMRI(N_Vector y, realtype hs, realtype hf, realtype T0,
   ARKStepFree(&inner_arkode_mem);   // Free integrator memory
   MRIStepFree(&arkode_mem);         // Free integrator memory
   ARKodeButcherTable_Free(B);       // Free Butcher table
-  // MRIStepCoupling_Free(C);          // Free coupling coefficients
+  MRIStepCoupling_Free(C);          // Free coupling coefficients
   SUNMatDestroy(A);                 // Free fast matrix
   SUNLinSolFree(LS);                // Free fast linear solver
 
@@ -1443,13 +1516,13 @@ static int WriteOutput(realtype t, N_Vector y, OutputData *outdata)
 
   // Print solution norms to screen
   realtype u = N_VWL2Norm(y, outdata->umask);
-  u = SUNRsqrt(u * u / N);
+  u = sqrt(u * u / N);
 
   realtype v = N_VWL2Norm(y, outdata->vmask);
-  v = SUNRsqrt(v * v / N);
+  v = sqrt(v * v / N);
 
   realtype w = N_VWL2Norm(y, outdata->wmask);
-  w = SUNRsqrt(w * w / N);
+  w = sqrt(w * w / N);
 
   cout << setw(11) << t << setw(14) << u << setw(14) << v << setw(14) << w
        << endl;
