@@ -118,7 +118,6 @@ struct UserOptions
 {
   realtype T0     = ZERO;             // initial time
   realtype Tf     = RCONST(3.0);      // final time
-  int      Nt     = 10;               // number of output times
   int      method = 3;                // MRI method
   int      order  = 3;                // method order
   int      m      = 5;                // time scale separation
@@ -131,6 +130,9 @@ struct UserOptions
 // Output data structure
 struct OutputData
 {
+  int          Nt = 10;              // number of output times
+  realtype     dTout;                // Time between outputs
+  sunindextype N;                    // number of nodes
   sunindextype NEQ;                  // vector length
   ofstream     yout;                 // solution output stream
   N_Vector     umask, vmask, wmask;  // mask vectors for output
@@ -172,16 +174,20 @@ static int JacReaction(realtype t, N_Vector y, N_Vector fy, SUNMatrix J,
 // Problem evolution functions
 // -----------------------------------------------------------------------------
 
-static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts);
+static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts,
+                     OutputData *outdata);
 
-static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts);
+static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts,
+                     OutputData *outdata);
 
-static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts);
+static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts,
+                    OutputData *outdata);
 
 static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
                         realtype dTout, realtype tout, N_Vector y, realtype *t);
 
-static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts);
+static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts,
+                    OutputData *outdata);
 
 static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
                         realtype dTout, realtype tout, N_Vector y, realtype *t);
@@ -192,16 +198,15 @@ static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
 
 // Read the command line inputs
 static int ReadInputs(int *argc, char ***argv, UserData *udata,
-                      UserOptions *uopts);
+                      UserOptions *uopts, OutputData *outdata);
 
 // Set the initial condition
 static int SetIC(N_Vector y, void *user_data);
 
 // Output solution and error
-static int OpenOutput(N_Vector y, sunindextype N, sunindextype NEQ,
-                      OutputData *udata);
-static int WriteOutput(realtype t, N_Vector u, OutputData *udata);
-static int CloseOutput(OutputData *udata);
+static int OpenOutput(N_Vector y, OutputData *outdata);
+static int WriteOutput(realtype t, N_Vector y, OutputData *outdata);
+static int CloseOutput(OutputData *outdata);
 
 // Print integration statistics
 static int OutputStatsARK(void *arkode_mem);
@@ -228,9 +233,10 @@ int main(int argc, char *argv[])
   // Create user data, options, and output structures
   UserData    udata;
   UserOptions uopts;
+  OutputData  outdata;
 
   // Parse command line inputs
-  retval = ReadInputs(&argc, &argv, &udata, &uopts);
+  retval = ReadInputs(&argc, &argv, &udata, &uopts, &outdata);
   if (check_retval(&retval, "ReadInputs", 1)) return 1;
 
   // Initial problem output
@@ -269,22 +275,22 @@ int main(int argc, char *argv[])
   {
   case(0):
     cout << "Integrating with ARKStep" << endl << endl;
-    retval = EvolveARK(y, &udata, &uopts);
+    retval = EvolveARK(y, &udata, &uopts, &outdata);
     if (check_retval(&retval, "EvolvARK", 1)) return 1;
     break;
   case(1):
     cout << "Integrating with Lie-Trotter splitting" << endl << endl;
-    retval = EvolveLT(y, &udata, &uopts);
+    retval = EvolveLT(y, &udata, &uopts, &outdata);
     if (check_retval(&retval, "EvolveLT", 1)) return 1;
     break;
   case(2):
     cout << "Integrating with Strang-Marchuk splitting" << endl << endl;
-    retval = EvolveSM(y, &udata, &uopts);
+    retval = EvolveSM(y, &udata, &uopts, &outdata);
     if (check_retval(&retval, "EvolveSM", 1)) return 1;
     break;
   case(3):
     cout << "Integrating with MRIStep, ";
-    retval = EvolveMRI(y, &udata, &uopts);
+    retval = EvolveMRI(y, &udata, &uopts, &outdata);
     if (check_retval(&retval, "EvolveMRI", 1)) return 1;
     break;
   default:
@@ -308,7 +314,8 @@ int main(int argc, char *argv[])
 // -----------------------------------------------------------------------------
 
 
-static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts)
+static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts,
+                     OutputData *outdata)
 {
   // Reusable error flag
   int retval;
@@ -361,25 +368,21 @@ static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts)
   // -------------
 
   // Open output files
-  OutputData outdata;
-  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
+  retval = OpenOutput(y, outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
-
-  // Time between outputs
-  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
   realtype t    = uopts->T0;
-  realtype tout = uopts->T0 + dTout;
+  realtype tout = uopts->T0 + outdata->dTout;
 
   // Output the initial condition
-  retval = WriteOutput(t, y, &outdata);
+  retval = WriteOutput(t, y, outdata);
   if (check_retval(&retval, "WriteOutput", 1)) return 1;
 
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < uopts->Nt; iout++)
+  for (int iout = 0; iout < outdata->Nt; iout++)
   {
     // Stop at output time (do not interpolate)
     retval = ARKStepSetStopTime(arkode_mem, tout);
@@ -392,16 +395,16 @@ static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts)
     if (check_retval(&retval, "ARKStepEvolve", 1)) break;
 
     // Write output
-    retval = WriteOutput(t, y, &outdata);
+    retval = WriteOutput(t, y, outdata);
     if (check_retval(&retval, "WriteOutput", 1)) break;
 
     // Update output time
-    tout += dTout;
+    tout += outdata->dTout;
     tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
-  retval = CloseOutput(&outdata);
+  retval = CloseOutput(outdata);
   if (check_retval(&retval, "CloseOutput", 1)) return 1;
 
   // --------
@@ -465,7 +468,8 @@ static int OutputStatsARK(void *arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts)
+static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts,
+                     OutputData *outdata)
 {
   // Reusable error flag
   int retval;
@@ -626,25 +630,21 @@ static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts)
   // -------------
 
   // Open output files
-  OutputData outdata;
-  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
+  retval = OpenOutput(y, outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
-
-  // Time between outputs
-  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
   realtype t    = uopts->T0;
-  realtype tout = uopts->T0 + dTout;
+  realtype tout = uopts->T0 + outdata->dTout;
 
   // Output the initial condition
-  retval = WriteOutput(t, y, &outdata);
+  retval = WriteOutput(t, y, outdata);
   if (check_retval(&retval, "WriteOutput", 1)) return 1;
 
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < uopts->Nt; iout++)
+  for (int iout = 0; iout < outdata->Nt; iout++)
   {
     // Stop at output time (do not interpolate)
     retval = MRIStepSetStopTime(arkode_mem, tout);
@@ -657,16 +657,16 @@ static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts)
     if (check_retval(&retval, "MRIStepEvolve", 1)) break;
 
     // Write output
-    retval = WriteOutput(t, y, &outdata);
+    retval = WriteOutput(t, y, outdata);
     if (check_retval(&retval, "WriteOutput", 1)) break;
 
     // Update output time
-    tout += dTout;
+    tout += outdata->dTout;
     tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
-  retval = CloseOutput(&outdata);
+  retval = CloseOutput(outdata);
   if (check_retval(&retval, "CloseOutput", 1)) return 1;
 
   // --------
@@ -741,7 +741,8 @@ static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts)
+static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts,
+                    OutputData *outdata)
 {
   // Reusable error flag
   int retval;
@@ -826,44 +827,40 @@ static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts)
   // -------------
 
   // Open output files
-  OutputData outdata;
-  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
+  retval = OpenOutput(y, outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
-
-  // Time between outputs
-  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
   realtype t    = uopts->T0;
-  realtype tout = uopts->T0 + dTout;
+  realtype tout = uopts->T0 + outdata->dTout;
 
   // Output the initial condition
-  retval = WriteOutput(t, y, &outdata);
+  retval = WriteOutput(t, y, outdata);
   if (check_retval(&retval, "WriteOutput", 1)) return 1;
 
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < uopts->Nt; iout++)
+  for (int iout = 0; iout < outdata->Nt; iout++)
   {
     // Advance in time
     evolve.start();
-    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, uopts->hs, dTout, tout,
-                          y, &t);
+    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, uopts->hs, outdata->dTout,
+                          tout, y, &t);
     evolve.stop();
     if (check_retval(&retval, "LTStepEvolve", 1)) break;
 
     // Write output
-    retval = WriteOutput(t, y, &outdata);
+    retval = WriteOutput(t, y, outdata);
     if (check_retval(&retval, "WriteOutput", 1)) break;
 
     // Update output time
-    tout += dTout;
+    tout += outdata->dTout;
     tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
-  retval = CloseOutput(&outdata);
+  retval = CloseOutput(outdata);
   if (check_retval(&retval, "CloseOutput", 1)) return 1;
 
   // --------
@@ -978,7 +975,8 @@ static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts)
+static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts,
+                    OutputData *outdata)
 {
   // Reusable error flag
   int retval;
@@ -1055,44 +1053,40 @@ static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts)
   // -------------
 
   // Open output files
-  OutputData outdata;
-  retval = OpenOutput(y, udata->N, udata->NEQ, &outdata);
+  retval = OpenOutput(y, outdata);
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
-
-  // Time between outputs
-  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
   realtype t    = uopts->T0;
-  realtype tout = uopts->T0 + dTout;
+  realtype tout = uopts->T0 + outdata->dTout;
 
   // Output the initial condition
-  retval = WriteOutput(t, y, &outdata);
+  retval = WriteOutput(t, y, outdata);
   if (check_retval(&retval, "WriteOutput", 1)) return 1;
 
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < uopts->Nt; iout++)
+  for (int iout = 0; iout < outdata->Nt; iout++)
   {
     // Advance in time
     evolve.start();
-    retval = SMStepEvolve(arkode_mem, inner_arkode_mem, uopts->hs, dTout, tout,
-                          y, &t);
+    retval = SMStepEvolve(arkode_mem, inner_arkode_mem, uopts->hs,
+                          outdata->dTout, tout, y, &t);
     evolve.stop();
     if (check_retval(&retval, "SMStepEvolve", 1)) break;
 
     // Write output
-    retval = WriteOutput(t, y, &outdata);
+    retval = WriteOutput(t, y, outdata);
     if (check_retval(&retval, "WriteOutput", 1)) break;
 
     // Update output time
-    tout += dTout;
+    tout += outdata->dTout;
     tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
-  retval = CloseOutput(&outdata);
+  retval = CloseOutput(outdata);
   if (check_retval(&retval, "CloseOutput", 1)) return 1;
 
   // --------
@@ -1379,12 +1373,8 @@ static int SetIC(N_Vector y, void *user_data)
 
 
 // Open output stream, allocate data
-static int OpenOutput(N_Vector y, sunindextype N, sunindextype NEQ,
-                      OutputData *outdata)
+static int OpenOutput(N_Vector y, OutputData *outdata)
 {
-  // Save number of equations
-  outdata->NEQ = NEQ;
-
   // Create vector masks
   outdata->umask = N_VClone(y);
   if (check_retval((void *)(outdata->umask), "N_VNew_Serial", 0)) return 1;
@@ -1401,26 +1391,26 @@ static int OpenOutput(N_Vector y, sunindextype N, sunindextype NEQ,
   N_VConst(ZERO, outdata->umask);
   data = N_VGetArrayPointer(outdata->umask);
   if (check_retval((void *)data, "N_VGetArrayPointer", 0)) return 1;
-  for (sunindextype i = 0; i < N; i++) data[IDX(i,0)] = ONE;
+  for (sunindextype i = 0; i < outdata->N; i++) data[IDX(i,0)] = ONE;
 
   N_VConst(ZERO, outdata->vmask);
   data = N_VGetArrayPointer(outdata->vmask);
   if (check_retval((void *)data, "N_VGetArrayPointer", 0)) return 1;
-  for (sunindextype i = 0; i < N; i++) data[IDX(i,1)] = ONE;
+  for (sunindextype i = 0; i < outdata->N; i++) data[IDX(i,1)] = ONE;
 
   N_VConst(ZERO, outdata->wmask);
   data = N_VGetArrayPointer(outdata->wmask);
   if (check_retval((void *)data, "N_VGetArrayPointer", 0)) return 1;
-  for (sunindextype i = 0; i < N; i++) data[IDX(i,2)] = ONE;
+  for (sunindextype i = 0; i < outdata->N; i++) data[IDX(i,2)] = ONE;
 
   // Open output streams for solution
   outdata->yout.open("advection_reaction_1D_mri.out");
   outdata->yout <<  "# title Advection-Reaction (Brusselator)" << endl;
-  outdata->yout <<  "# nvar 3"      << endl;
-  outdata->yout <<  "# vars u v w"  << endl;
-  outdata->yout <<  "# nx  " << N   << endl;
-  outdata->yout <<  "# xl  " << 0.0 << endl;
-  outdata->yout <<  "# xu  " << 1.0 << endl;
+  outdata->yout <<  "# nvar 3" << endl;
+  outdata->yout <<  "# vars u v w" << endl;
+  outdata->yout <<  "# nx " << outdata->N << endl;
+  outdata->yout <<  "# xl " << 0.0 << endl;
+  outdata->yout <<  "# xu " << 1.0 << endl;
   outdata->yout << scientific;
   outdata->yout << setprecision(numeric_limits<realtype>::digits10);
 
@@ -1436,17 +1426,15 @@ static int OpenOutput(N_Vector y, sunindextype N, sunindextype NEQ,
 // Write output to screen and file
 static int WriteOutput(realtype t, N_Vector y, OutputData *outdata)
 {
-  sunindextype N = outdata->NEQ / 3;
-
   // Print solution norms to screen
   realtype u = N_VWL2Norm(y, outdata->umask);
-  u = sqrt(u * u / N);
+  u = sqrt(u * u / outdata->N);
 
   realtype v = N_VWL2Norm(y, outdata->vmask);
-  v = sqrt(v * v / N);
+  v = sqrt(v * v / outdata->N);
 
   realtype w = N_VWL2Norm(y, outdata->wmask);
-  w = sqrt(w * w / N);
+  w = sqrt(w * w / outdata->N);
 
   cout << setw(11) << t << setw(14) << u << setw(14) << v << setw(14) << w
        << endl;
@@ -1488,7 +1476,7 @@ static int CloseOutput(OutputData *outdata)
 
 // Read command line inputs
 static int ReadInputs(int *argc, char ***argv, UserData *udata,
-                      UserOptions *uopts)
+                      UserOptions *uopts, OutputData *outdata)
 {
   // Check for input args
   int arg_idx = 1;
@@ -1517,8 +1505,8 @@ static int ReadInputs(int *argc, char ***argv, UserData *udata,
     }
     else if (arg == "--Nt")
     {
-      uopts->Nt = stoi((*argv)[arg_idx++]);
-      if (uopts->Nt < 1)
+      outdata->Nt = stoi((*argv)[arg_idx++]);
+      if (outdata->Nt < 1)
       {
         cerr << "ERROR: Nt must be > 0" << endl;
         return -1;
@@ -1597,6 +1585,11 @@ static int ReadInputs(int *argc, char ***argv, UserData *udata,
   udata->NEQ = 3 * udata->N;
   udata->dx  = ONE / (udata->N - 1);
   uopts->hf  = uopts->hs / uopts->m;
+
+  // Compute time between outputs and save problem sizes
+  outdata->dTout = (uopts->Tf - uopts->T0) / outdata->Nt;
+  outdata->N     = udata->N;
+  outdata->NEQ   = udata->NEQ;
 
   // Return success
   return 0;
