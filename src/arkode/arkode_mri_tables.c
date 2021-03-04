@@ -29,10 +29,6 @@
 #define RSYM ".16g"
 #endif
 
-/* constants */
-#define ZERO   RCONST(0.0)
-#define ONE    RCONST(1.0)
-
 
 /*---------------------------------------------------------------
   Returns MRIStepCoupling table structure for pre-set MRI methods.
@@ -52,9 +48,11 @@
      imeth                       order   type    QP
     ------------------------------------------------
      MIS_KW3                     3       E       Y
+     MRI_GARK_ERK33a             3       E       Y
      MRI_GARK_ERK45a             4       E       Y?
      MRI_GARK_IRK21a             2       ID      Y
-     MRI_GARK_ESDIRK34a          4       ID      N?
+     MRI_GARK_ESDIRK34a          3       ID      N?
+     MRI_GARK_ESDIRK46a          4       ID      N?
     ------------------------------------------------
 
   ---------------------------------------------------------------*/
@@ -155,6 +153,105 @@ MRIStepCoupling MRIStepCoupling_LoadTable(int imethod)
     C->G[0][6][0] = -beta;
     C->G[0][6][6] = beta;
     C->q = 3;
+    C->p = 0;
+    break;
+
+  case(MRI_GARK_ERK33a):   /* A. Sandu, SINUM 57:2300-2327, 2019 */
+    C = MRIStepCoupling_Alloc(2,4);
+    C->c[1] = ONE/RCONST(3.0);
+    C->c[2] = TWO/RCONST(3.0);
+    C->c[3] = ONE;
+    C->G[0][1][0] = ONE/RCONST(3.0);
+    C->G[0][2][0] = -ONE/RCONST(3.0);
+    C->G[0][2][1] = TWO/RCONST(3.0);
+    C->G[0][3][1] = -TWO/RCONST(3.0);
+    C->G[0][3][2] = ONE;
+
+    C->G[1][3][0] = ONE/TWO;
+    C->G[1][3][2] = -ONE/TWO;
+    C->q = 3;
+    C->p = 0;
+    break;
+
+  case(MRI_GARK_ESDIRK46a):   /* A. Sandu, SINUM 57:2300-2327, 2019 */
+    C = MRIStepCoupling_Alloc(2,11);
+    C->c[1]  = ONE/RCONST(5.0);
+    C->c[2]  = ONE/RCONST(5.0);
+    C->c[3]  = TWO/RCONST(5.0);
+    C->c[4]  = TWO/RCONST(5.0);
+    C->c[5]  = RCONST(3.0)/RCONST(5.0);
+    C->c[6]  = RCONST(3.0)/RCONST(5.0);
+    C->c[7]  = RCONST(4.0)/RCONST(5.0);
+    C->c[8]  = RCONST(4.0)/RCONST(5.0);
+    C->c[9]  = ONE;
+    C->c[10] = ONE;
+
+    C->G[0][1][0] = ONE/RCONST(5.0);
+    C->G[0][2][0] = -ONE/RCONST(4.0);
+    C->G[0][2][2] = ONE/RCONST(4.0);
+    C->G[0][3][0] = RCONST(1771023115159.0)/RCONST(1929363690800.0);
+    C->G[0][3][2] = -RCONST(1385150376999.0)/RCONST(1929363690800.0);
+    C->G[0][4][0] = RCONST(914009.0)/RCONST(345800.0);
+    C->G[0][4][2] = -RCONST(1000459.0)/RCONST(345800.0);
+    C->G[0][4][4] = ONE/RCONST(4.0);
+    C->G[0][5][0] = RCONST(18386293581909.0)/RCONST(36657910125200.0);
+    C->G[0][5][2] = RCONST(5506531089.0)/RCONST(80566835440.0);
+    C->G[0][5][4] = -RCONST(178423463189.0)/RCONST(482340922700.0);
+    C->G[0][6][0] = RCONST(36036097.0)/RCONST(8299200.0);
+    C->G[0][6][2] = RCONST(4621.0)/RCONST(118560.0);
+    C->G[0][6][4] = -RCONST(38434367.0)/RCONST(8299200.0);
+    C->G[0][6][6] = ONE/RCONST(4.0);
+    C->G[0][7][0] = -RCONST(247809665162987.0)/RCONST(146631640500800.0);
+    C->G[0][7][2] = RCONST(10604946373579.0)/RCONST(14663164050080.0);
+    C->G[0][7][4] = RCONST(10838126175385.0)/RCONST(5865265620032.0);
+    C->G[0][7][6] = -RCONST(24966656214317.0)/RCONST(36657910125200.0);
+    C->G[0][8][0] = RCONST(38519701.0)/RCONST(11618880.0);
+    C->G[0][8][2] = RCONST(10517363.0)/RCONST(9682400.0);
+    C->G[0][8][4] = -RCONST(23284701.0)/RCONST(19364800.0);
+    C->G[0][8][6] = -RCONST(10018609.0)/RCONST(2904720.0);
+    C->G[0][8][8] = ONE/RCONST(4.0);
+    C->G[0][9][0] = -RCONST(52907807977903.0)/RCONST(33838070884800.0);
+    C->G[0][9][2] = RCONST(74846944529257.0)/RCONST(73315820250400.0);
+    C->G[0][9][4] = RCONST(365022522318171.0)/RCONST(146631640500800.0);
+    C->G[0][9][6] = -RCONST(20513210406809.0)/RCONST(109973730375600.0);
+    C->G[0][9][8] = -RCONST(2918009798.0)/RCONST(1870301537.0);
+    C->G[0][10][0] = RCONST(19.0)/RCONST(100);
+    C->G[0][10][2] = -RCONST(73.0)/RCONST(300.0);
+    C->G[0][10][4] = RCONST(127.0)/RCONST(300.0);
+    C->G[0][10][6] = RCONST(127.0)/RCONST(300.0);
+    C->G[0][10][8] = -RCONST(313.0)/RCONST(300.0);
+    C->G[0][10][10] = ONE/RCONST(4.0);
+
+    C->G[1][3][0] = -RCONST(1674554930619.0)/RCONST(964681845400.0);
+    C->G[1][3][2] = RCONST(1674554930619.0)/RCONST(964681845400.0);
+    C->G[1][4][0] = -RCONST(1007739.0)/RCONST(172900.0);
+    C->G[1][4][2] = RCONST(1007739.0)/RCONST(172900.0);
+    C->G[1][5][0] = -RCONST(8450070574289.0)/RCONST(18328955062600.0);
+    C->G[1][5][2] = -RCONST(39429409169.0)/RCONST(40283417720.0);
+    C->G[1][5][4] = RCONST(173621393067.0)/RCONST(120585230675.0);
+    C->G[1][6][0] = -RCONST(122894383.0)/RCONST(16598400.0);
+    C->G[1][6][2] = RCONST(14501.0)/RCONST(237120.0);
+    C->G[1][6][4] = RCONST(121879313.0)/RCONST(16598400.0);
+    C->G[1][7][0] = RCONST(32410002731287.0)/RCONST(15434909526400.0);
+    C->G[1][7][2] = -RCONST(46499276605921.0)/RCONST(29326328100160.0);
+    C->G[1][7][4] = -RCONST(34914135774643.0)/RCONST(11730531240064.0);
+    C->G[1][7][6] = RCONST(45128506783177.0)/RCONST(18328955062600.0);
+    C->G[1][8][0] = -RCONST(128357303.0)/RCONST(23237760.0);
+    C->G[1][8][2] = -RCONST(35433927.0)/RCONST(19364800.0);
+    C->G[1][8][4] = RCONST(71038479.0)/RCONST(38729600.0);
+    C->G[1][8][6] = RCONST(8015933.0)/RCONST(1452360.0);
+    C->G[1][9][0] = RCONST(136721604296777.0)/RCONST(67676141769600.0);
+    C->G[1][9][2] = -RCONST(349632444539303.0)/RCONST(146631640500800.0);
+    C->G[1][9][4] = -RCONST(1292744859249609.0)/RCONST(293263281001600.0);
+    C->G[1][9][6] = RCONST(8356250416309.0)/RCONST(54986865187800.0);
+    C->G[1][9][8] = RCONST(17282943803.0)/RCONST(3740603074.0);
+    C->G[1][10][0] = RCONST(3.0)/RCONST(25.0);
+    C->G[1][10][2] = -RCONST(29.0)/RCONST(300.0);
+    C->G[1][10][4] = RCONST(71.0)/RCONST(300.0);
+    C->G[1][10][6] = RCONST(71.0)/RCONST(300.0);
+    C->G[1][10][8] = -RCONST(149)/RCONST(300.0);
+
+    C->q = 4;
     C->p = 0;
     break;
 

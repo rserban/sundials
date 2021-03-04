@@ -47,10 +47,12 @@ typedef enum {
 #define MRI_GARK_ERK45a    201
 #define MRI_GARK_IRK21a    202
 #define MRI_GARK_ESDIRK34a 203
+#define MRI_GARK_ERK33a    204
+#define MRI_GARK_ESDIRK46a 205
 
 /* Utility #defines to ensure valid input IDs for MRI tables */
 #define MIN_MRI_NUM        200
-#define MAX_MRI_NUM        203
+#define MAX_MRI_NUM        205
 
 /* Default MRI coupling tables for each order */
 #define DEFAULT_MRI_TABLE_3           MIS_KW3     /* backwards-compatibility */
