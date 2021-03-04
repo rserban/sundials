@@ -32,8 +32,8 @@ set(ARKODE_examples
   "ark_kpr_Mt.cpp\;1 -3 0 -10 0\;develop"
   "ark_kpr_Mt.cpp\;0 3 0 -10 0\;develop"
   "ark_kpr_Mt.cpp\;2 4 0 -10 0\;develop"
-  "ark_advection_reaction_1D_mri.cpp\;0 0.1 5\;develop"
-  "ark_advection_reaction_1D_mri.cpp\;1 0.1 5\;develop"
+  "ark_advection_reaction_1D_mri.cpp\;\;develop"
+  "ark_diffusion_reaction_1D_mri.cpp\;\;develop"
   )
 
 # Auxiliary files to install
