@@ -98,20 +98,35 @@ using namespace std;
 // Utility data structures and classes
 // -----------------------------------------------------------------------------
 
-// User data structure
+// User data structure and default values
 struct UserData
 {
-  sunindextype N;   // number of nodes
-  sunindextype NEQ; // number of equations
-  realtype dx;      // mesh spacing
-  realtype a;       // constant forcing on u
-  realtype b;       // steady-state value of w
-  realtype au;      // advection coeff for u
-  realtype av;      // advection coeff for v
-  realtype aw;      // advection coeff for w
-  realtype ep;      // stiffness parameter
+  sunindextype N   = 201;             // number of nodes
+  sunindextype NEQ = 3 * N;           // number of equations
+  realtype     dx  = ONE / (N - 1);   // mesh spacing
+  realtype     a   = RCONST(0.6);     // constant forcing on u
+  realtype     b   = RCONST(2.0);     // steady-state value of w
+  realtype     ep  = RCONST(0.01);    // stiffness parameter
+  realtype     au  = RCONST(0.001);   // advection coeff for u
+  realtype     av  = RCONST(0.001);   // advection coeff for v
+  realtype     aw  = RCONST(0.001);   // advection coeff for w
 };
 
+
+// Problem/integrator options and default values
+struct UserOptions
+{
+  realtype T0     = ZERO;             // initial time
+  realtype Tf     = RCONST(3.0);      // final time
+  int      Nt     = 10;               // number of output times
+  int      method = 3;                // MRI method
+  int      order  = 3;                // method order
+  int      m      = 5;                // time scale separation
+  realtype hs     = RCONST(0.1);      // slow time step
+  realtype hf     = hs / m;           // fast time step
+  realtype reltol = RCONST(1.0e-8);   // relative tolerance
+  realtype abstol = RCONST(1.0e-12);  // absolute tolerance
+};
 
 // Output data structure
 struct OutputData
@@ -157,23 +172,16 @@ static int JacReaction(realtype t, N_Vector y, N_Vector fy, SUNMatrix J,
 // Problem evolution functions
 // -----------------------------------------------------------------------------
 
-static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
-                     realtype T0, realtype Tf, int Nt, UserData *udata);
+static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts);
 
-static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
-                     realtype reltol, realtype abstol, realtype T0, realtype Tf,
-                     int Nt, UserData *udata);
+static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts);
 
-static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
-                    realtype abstol, realtype T0, realtype Tf, int Nt,
-                    UserData *udata);
+static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts);
 
 static int LTStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
                         realtype dTout, realtype tout, N_Vector y, realtype *t);
 
-static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
-                    realtype abstol, realtype T0, realtype Tf, int Nt,
-                    UserData *udata);
+static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts);
 
 static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
                         realtype dTout, realtype tout, N_Vector y, realtype *t);
@@ -181,6 +189,10 @@ static int SMStepEvolve(void *arkode_mem, void *inner_arkode_mem, realtype hs,
 // -----------------------------------------------------------------------------
 // Output and utility functions
 // -----------------------------------------------------------------------------
+
+// Read the command line inputs
+static int ReadInputs(int *argc, char ***argv, UserData *udata,
+                      UserOptions *uopts);
 
 // Set the initial condition
 static int SetIC(N_Vector y, void *user_data);
@@ -206,112 +218,46 @@ static int check_retval(void *returnvalue, const char *funcname, int opt);
 
 int main(int argc, char *argv[])
 {
-  // Reusable error flag
-  int retval;
-
-  // General problem settings
-  realtype     T0  = ZERO;            // initial time
-  realtype     Tf  = RCONST(3.0);     // final time
-  int          Nt  = 10;              // number of output times
-  sunindextype N   = 201;             // number of spatial nodes
-  sunindextype NEQ = 3 * N;           // number of equations
-  int          method;                // integration method
-  int          mri_order = 3;         // MRI method order
-  int          m;                     // time scale separation
-  realtype     hf;                    // fast time step
-  realtype     hs;                    // slow time step
-  realtype     dx = ONE / (N-1);      // mesh spacing
-  realtype     a  = RCONST(0.6);      // problem parameters
-  realtype     b  = RCONST(2.0);
-  realtype     ep = RCONST(1.0e-2);
-  realtype     au = RCONST(0.001);
-  realtype     av = RCONST(0.001);
-  realtype     aw = RCONST(0.001);
-  realtype reltol = RCONST(1.0e-8);   // relative tolerance
-  realtype abstol = RCONST(1.0e-12);  // absolute tolerance
-
   // Start timer
   Timer overall;
   overall.start();
 
-  // Retrieve command-line options: method, slow step size, and scale separation
-  if (argc < 4)
-  {
-    cerr << "ERROR: enter method (int), hs (real), and m (int) \n" << endl;
-    return -1;
-  }
-  method = stoi(argv[1]);
-#if defined(SUNDIALS_SINGLE_PRECISION)
-  hs = stof(argv[2]);
-#elif defined(SUNDIALS_EXTENDED_PRECISION)
-  hs = stod(argv[2]);
-#elif defined(SUNDIALS_DOUBLE_PRECISION)
-  hs = stold(argv[2]);
-#endif
-  m = stoi(argv[3]);
+  // Reusable error flag
+  int retval;
 
-  if (argc > 4)
-  {
-    mri_order = stoi(argv[4]);
-  }
+  // Create user data, options, and output structures
+  UserData    udata;
+  UserOptions uopts;
 
-  // Check arguments for validity
-  if (method < 0)
-  {
-    cerr << "ERROR: method must be >= 0" << endl;
-    return -1;
-  }
-
-  if (hs <= ZERO)
-  {
-    cerr << "ERROR: hs must be > 0" << endl;
-    return -1;
-  }
-
-  if (m < 0)
-  {
-    cerr << "ERROR: m must be > 0" << endl;
-    return -1;
-  }
-
-  // Set the fast step size
-  hf = hs / m;
+  // Parse command line inputs
+  retval = ReadInputs(&argc, &argv, &udata, &uopts);
+  if (check_retval(&retval, "ReadInputs", 1)) return 1;
 
   // Initial problem output
   cout << endl;
   cout << "1D Advection-Reaction (Brusselator) test problem:" << endl;
-  cout << "  time domain: [" << T0 << "," << Tf << "]" << endl;
+  cout << "  time domain: [" << uopts.T0 << "," << uopts.Tf << "]" << endl;
   cout << "  spatial domain: [" << 0 << "," << 1 << "]" << endl;
-  cout << "    nodes = " << N << " (NEQ = " << NEQ << ")" << endl;
-  cout << "    dx    = " << dx << endl;
+  cout << "    nodes = " << udata.N << " (NEQ = " << udata.NEQ << ")" << endl;
+  cout << "    dx    = " << udata.dx << endl;
   cout << "  problem parameters:" << endl;
-  cout << "    a  = " << a  << endl;
-  cout << "    b  = " << b  << endl;
-  cout << "    ep = " << ep << endl;
+  cout << "    a  = " << udata.a  << endl;
+  cout << "    b  = " << udata.b  << endl;
+  cout << "    ep = " << udata.ep << endl;
   cout << "  advection coefficients:" << endl;
-  cout << "    au = " << au << endl;
-  cout << "    av = " << av << endl;
-  cout << "    aw = " << aw << endl;
+  cout << "    au = " << udata.au << endl;
+  cout << "    av = " << udata.av << endl;
+  cout << "    aw = " << udata.aw << endl;
   cout << "  integrator settings:" << endl;
-  cout << "    hs     = " << hs << endl;
-  cout << "    hf     = " << hf << endl;
-  cout << "    m      = " << m << endl;
+  cout << "    hs     = " << uopts.hs << endl;
+  cout << "    hf     = " << uopts.hf << endl;
+  cout << "    m      = " << uopts.m  << endl;
+  cout << "    reltol = " << uopts.reltol << endl;
+  cout << "    abstol = " << uopts.abstol << endl;
   cout << endl;
 
-  // Initialize user data
-  UserData udata;
-  udata.N   = N;
-  udata.NEQ = NEQ;
-  udata.a   = a;
-  udata.b   = b;
-  udata.au  = au;
-  udata.av  = av;
-  udata.aw  = aw;
-  udata.ep  = ep;
-  udata.dx  = dx;
-
   // Create solution vector
-  N_Vector y = N_VNew_Serial(NEQ);
+  N_Vector y = N_VNew_Serial(udata.NEQ);
   if (check_retval((void *)y, "N_VNew_Serial", 0)) return 1;
 
   // Set initial condition
@@ -319,27 +265,26 @@ int main(int argc, char *argv[])
   if (check_retval(&retval, "SetIC", 1)) return 1;
 
   // Evolve with the desired method
-  switch (method)
+  switch (uopts.method)
   {
   case(0):
     cout << "Integrating with ARKStep" << endl << endl;
-    retval = EvolveARK(y, hs, reltol, abstol, T0, Tf, Nt, &udata);
+    retval = EvolveARK(y, &udata, &uopts);
     if (check_retval(&retval, "EvolvARK", 1)) return 1;
     break;
   case(1):
     cout << "Integrating with Lie-Trotter splitting" << endl << endl;
-    retval = EvolveLT(y, hs, hf, reltol, abstol, T0, Tf, Nt, &udata);
+    retval = EvolveLT(y, &udata, &uopts);
     if (check_retval(&retval, "EvolveLT", 1)) return 1;
     break;
   case(2):
     cout << "Integrating with Strang-Marchuk splitting" << endl << endl;
-    retval = EvolveSM(y, hs, hf, reltol, abstol, T0, Tf, Nt, &udata);
+    retval = EvolveSM(y, &udata, &uopts);
     if (check_retval(&retval, "EvolveSM", 1)) return 1;
     break;
   case(3):
     cout << "Integrating with MRIStep, ";
-    retval = EvolveMRI(mri_order, y, hs, hf, reltol, abstol, T0, Tf, Nt,
-                       &udata);
+    retval = EvolveMRI(y, &udata, &uopts);
     if (check_retval(&retval, "EvolveMRI", 1)) return 1;
     break;
   default:
@@ -352,7 +297,7 @@ int main(int argc, char *argv[])
 
   // Output total runtime
   overall.stop();
-  cout << "  Total:     " << overall.total() << endl;
+  cout << endl << "Total Runtime: " << overall.total() << endl;
 
   return 0;
 }
@@ -363,14 +308,13 @@ int main(int argc, char *argv[])
 // -----------------------------------------------------------------------------
 
 
-static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
-                     realtype T0, realtype Tf, int Nt, UserData *udata)
+static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts)
 {
   // Reusable error flag
   int retval;
 
   // Integrator data and settings
-  void *arkode_mem = ARKStepCreate(RhsAdvection, RhsReaction, T0, y);
+  void *arkode_mem = ARKStepCreate(RhsAdvection, RhsReaction, uopts->T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
 
   // Set method order to use
@@ -378,11 +322,11 @@ static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
   if (check_retval(&retval, "ARKStepSetOrder",1)) return 1;
 
   // Set the step size
-  retval = ARKStepSetFixedStep(arkode_mem, h);
+  retval = ARKStepSetFixedStep(arkode_mem, uopts->hs);
   if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
 
   // Specify fast tolerances
-  retval = ARKStepSStolerances(arkode_mem, reltol, abstol);
+  retval = ARKStepSStolerances(arkode_mem, uopts->reltol, uopts->abstol);
   if (check_retval(&retval, "ARKStepSStolerances", 1)) return 1;
 
   // Initialize matrix and linear solver data structures
@@ -422,11 +366,11 @@ static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
-  realtype dTout = (Tf - T0) / Nt;
+  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
-  realtype t    = T0;
-  realtype tout = T0 + dTout;
+  realtype t    = uopts->T0;
+  realtype tout = uopts->T0 + dTout;
 
   // Output the initial condition
   retval = WriteOutput(t, y, &outdata);
@@ -435,7 +379,7 @@ static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < Nt; iout++)
+  for (int iout = 0; iout < uopts->Nt; iout++)
   {
     // Stop at output time (do not interpolate)
     retval = ARKStepSetStopTime(arkode_mem, tout);
@@ -453,7 +397,7 @@ static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
 
     // Update output time
     tout += dTout;
-    tout = (tout > Tf) ? Tf : tout;
+    tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
@@ -469,7 +413,7 @@ static int EvolveARK(N_Vector y, realtype h, realtype reltol, realtype abstol,
   if (check_retval(&retval, "OutputStats", 1)) return 1;
 
   cout << "Timing:" << endl;
-  cout << "  Evolution: " << evolve.total()  << endl;
+  cout << "  Evolution: " << evolve.total() << endl;
 
   // Clean up
   ARKStepFree(&arkode_mem); // Free integrator memory
@@ -521,9 +465,7 @@ static int OutputStatsARK(void *arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
-                     realtype reltol, realtype abstol, realtype T0, realtype Tf,
-                     int Nt, UserData *udata)
+static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts)
 {
   // Reusable error flag
   int retval;
@@ -533,14 +475,14 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   // -------------------------
 
   // Implicit reactions
-  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
+  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, uopts->T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
 
   // Set fast method table
   ARKodeButcherTable B;
   realtype gamma, beta;
 
-  switch (mri_order)
+  switch (uopts->order)
   {
   case(2):
     // sdirk-2-2
@@ -590,15 +532,15 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
     break;
   }
 
-  retval = ARKStepSetTables(inner_arkode_mem, mri_order, 0, B, NULL);
+  retval = ARKStepSetTables(inner_arkode_mem, uopts->order, 0, B, NULL);
   if (check_retval(&retval, "ARKStepSetTables", 1)) return 1;
 
   // Set the fast step size
-  retval = ARKStepSetFixedStep(inner_arkode_mem, hf);
+  retval = ARKStepSetFixedStep(inner_arkode_mem, uopts->hf);
   if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
 
   // Specify fast tolerances
-  retval = ARKStepSStolerances(inner_arkode_mem, reltol, abstol);
+  retval = ARKStepSStolerances(inner_arkode_mem, uopts->reltol, uopts->abstol);
   if (check_retval(&retval, "ARKStepSStolerances", 1)) return 1;
 
   // Initialize matrix and linear solver data structures
@@ -629,7 +571,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   // -------------------------
 
   // Explicit slow (default MIS method)
-  void *arkode_mem = MRIStepCreate(RhsAdvection, T0, y, MRISTEP_ARKSTEP,
+  void *arkode_mem = MRIStepCreate(RhsAdvection, uopts->T0, y, MRISTEP_ARKSTEP,
                                    inner_arkode_mem);
   if (check_retval((void *)arkode_mem, "MRIStepCreate", 0)) return 1;
 
@@ -637,7 +579,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   MRIStepCoupling C;
   ARKodeButcherTable Bc;
 
-  switch (mri_order)
+  switch (uopts->order)
   {
   case(2):
     // MRI-GARK-ERK22
@@ -668,7 +610,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   if (check_retval(&retval, "MRIStepSetCoupling", 1)) return 1;
 
   // Set the slow step size
-  retval = MRIStepSetFixedStep(arkode_mem, hs);
+  retval = MRIStepSetFixedStep(arkode_mem, uopts->hs);
   if (check_retval(&retval, "MRIStepSetFixedStep", 1)) return 1;
 
   // Set maximum number of steps taken by solver
@@ -689,11 +631,11 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
-  realtype dTout = (Tf - T0) / Nt;
+  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
-  realtype t    = T0;
-  realtype tout = T0 + dTout;
+  realtype t    = uopts->T0;
+  realtype tout = uopts->T0 + dTout;
 
   // Output the initial condition
   retval = WriteOutput(t, y, &outdata);
@@ -702,7 +644,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < Nt; iout++)
+  for (int iout = 0; iout < uopts->Nt; iout++)
   {
     // Stop at output time (do not interpolate)
     retval = MRIStepSetStopTime(arkode_mem, tout);
@@ -720,7 +662,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
 
     // Update output time
     tout += dTout;
-    tout = (tout > Tf) ? Tf : tout;
+    tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
@@ -736,7 +678,7 @@ static int EvolveMRI(int mri_order, N_Vector y, realtype hs, realtype hf,
   if (check_retval(&retval, "OutputStats", 1)) return 1;
 
   cout << "Timing:" << endl;
-  cout << "  Evolution: " << evolve.total()  << endl;
+  cout << "  Evolution: " << evolve.total() << endl;
 
   // Clean up
   ARKStepFree(&inner_arkode_mem);   // Free integrator memory
@@ -799,9 +741,7 @@ static int OutputStatsMRI(void *arkode_mem, void* inner_arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
-                    realtype abstol, realtype T0, realtype Tf, int Nt,
-                    UserData *udata)
+static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts)
 {
   // Reusable error flag
   int retval;
@@ -811,7 +751,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   // -------------------------
 
   // Implicit reactions
-  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
+  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, uopts->T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
 
   // Set method order to use
@@ -819,11 +759,11 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "ARKStepSetOrder",1)) return 1;
 
   // Set the fast step size
-  retval = ARKStepSetFixedStep(inner_arkode_mem, hf);
+  retval = ARKStepSetFixedStep(inner_arkode_mem, uopts->hf);
   if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
 
   // Specify fast tolerances
-  retval = ARKStepSStolerances(inner_arkode_mem, reltol, abstol);
+  retval = ARKStepSStolerances(inner_arkode_mem, uopts->reltol, uopts->abstol);
   if (check_retval(&retval, "ARKStepSStolerances", 1)) return 1;
 
   // Initialize matrix and linear solver data structures
@@ -854,7 +794,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   // -------------------------
 
   // Integrator data and settings
-  void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, T0, y);
+  void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, uopts->T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
 
   // attach expicit Euler
@@ -870,7 +810,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "ARKStepSetTables", 1)) return 1;
 
   // Set the step size
-  retval = ARKStepSetFixedStep(arkode_mem, hs);
+  retval = ARKStepSetFixedStep(arkode_mem, uopts->hs);
   if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
 
   // Attach user data to fast integrator
@@ -891,11 +831,11 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
-  realtype dTout = (Tf - T0) / Nt;
+  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
-  realtype t    = T0;
-  realtype tout = T0 + dTout;
+  realtype t    = uopts->T0;
+  realtype tout = uopts->T0 + dTout;
 
   // Output the initial condition
   retval = WriteOutput(t, y, &outdata);
@@ -904,11 +844,12 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < Nt; iout++)
+  for (int iout = 0; iout < uopts->Nt; iout++)
   {
     // Advance in time
     evolve.start();
-    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, hs, dTout, tout, y, &t);
+    retval = LTStepEvolve(arkode_mem, inner_arkode_mem, uopts->hs, dTout, tout,
+                          y, &t);
     evolve.stop();
     if (check_retval(&retval, "LTStepEvolve", 1)) break;
 
@@ -918,7 +859,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
 
     // Update output time
     tout += dTout;
-    tout = (tout > Tf) ? Tf : tout;
+    tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
@@ -934,7 +875,7 @@ static int EvolveLT(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "OutputStats", 1)) return 1;
 
   cout << "Timing:" << endl;
-  cout << "  Evolution: " << evolve.total()  << endl;
+  cout << "  Evolution: " << evolve.total() << endl;
 
   // Clean up
   ARKStepFree(&arkode_mem);    // Free integrator memory
@@ -1037,9 +978,7 @@ static int OutputStatsLT(void *arkode_mem, void* inner_arkode_mem)
 // -----------------------------------------------------------------------------
 
 
-static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
-                    realtype abstol, realtype T0, realtype Tf, int Nt,
-                    UserData *udata)
+static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts)
 {
   // Reusable error flag
   int retval;
@@ -1049,7 +988,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   // -------------------------
 
   // Implicit reactions
-  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, T0, y);
+  void *inner_arkode_mem = ARKStepCreate(NULL, RhsReaction, uopts->T0, y);
   if (check_retval((void *) inner_arkode_mem, "ARKStepCreate", 0)) return 1;
 
   // Set method order to use
@@ -1057,11 +996,11 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "ARKStepSetOrder",1)) return 1;
 
   // Set the fast step size
-  retval = ARKStepSetFixedStep(inner_arkode_mem, hf);
+  retval = ARKStepSetFixedStep(inner_arkode_mem, uopts->hf);
   if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
 
   // Specify fast tolerances
-  retval = ARKStepSStolerances(inner_arkode_mem, reltol, abstol);
+  retval = ARKStepSStolerances(inner_arkode_mem, uopts->reltol, uopts->abstol);
   if (check_retval(&retval, "ARKStepSStolerances", 1)) return 1;
 
   // Initialize matrix and linear solver data structures
@@ -1092,7 +1031,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   // -------------------------
 
   // Integrator data and settings
-  void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, T0, y);
+  void *arkode_mem = ARKStepCreate(RhsAdvection, NULL, uopts->T0, y);
   if (check_retval((void *) arkode_mem, "ARKStepCreate", 0)) return 1;
 
   // Set method order to use
@@ -1100,7 +1039,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "ARKStepSetOrder",1)) return 1;
 
   // Set the step size
-  retval = ARKStepSetFixedStep(arkode_mem, hs / TWO);
+  retval = ARKStepSetFixedStep(arkode_mem, uopts->hs / TWO);
   if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
 
   // Attach user data to fast integrator
@@ -1121,11 +1060,11 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "OpenOutput", 1)) return 1;
 
   // Time between outputs
-  realtype dTout = (Tf - T0) / Nt;
+  realtype dTout = (uopts->Tf - uopts->T0) / uopts->Nt;
 
   // Set initial time and first output time
-  realtype t    = T0;
-  realtype tout = T0 + dTout;
+  realtype t    = uopts->T0;
+  realtype tout = uopts->T0 + dTout;
 
   // Output the initial condition
   retval = WriteOutput(t, y, &outdata);
@@ -1134,11 +1073,12 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   // Main time-stepping
   Timer evolve;
 
-  for (int iout = 0; iout < Nt; iout++)
+  for (int iout = 0; iout < uopts->Nt; iout++)
   {
     // Advance in time
     evolve.start();
-    retval = SMStepEvolve(arkode_mem, inner_arkode_mem, hs, dTout, tout, y, &t);
+    retval = SMStepEvolve(arkode_mem, inner_arkode_mem, uopts->hs, dTout, tout,
+                          y, &t);
     evolve.stop();
     if (check_retval(&retval, "SMStepEvolve", 1)) break;
 
@@ -1148,7 +1088,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
 
     // Update output time
     tout += dTout;
-    tout = (tout > Tf) ? Tf : tout;
+    tout = (tout > uopts->Tf) ? uopts->Tf : tout;
   }
 
   // Close output
@@ -1164,7 +1104,7 @@ static int EvolveSM(N_Vector y, realtype hs, realtype hf, realtype reltol,
   if (check_retval(&retval, "OutputStats", 1)) return 1;
 
   cout << "Timing:" << endl;
-  cout << "  Evolution: " << evolve.total()  << endl;
+  cout << "  Evolution: " << evolve.total() << endl;
 
   // Clean up
   ARKStepFree(&arkode_mem);  // Free integrator memory
@@ -1544,6 +1484,123 @@ static int CloseOutput(OutputData *outdata)
 // -----------------------------------------------------------------------------
 // Private helper functions
 // -----------------------------------------------------------------------------
+
+
+// Read command line inputs
+static int ReadInputs(int *argc, char ***argv, UserData *udata,
+                      UserOptions *uopts)
+{
+  // Check for input args
+  int arg_idx = 1;
+
+  while (arg_idx < (*argc))
+  {
+    string arg = (*argv)[arg_idx++];
+
+    if (arg == "--mesh")
+    {
+      udata->N = stoi((*argv)[arg_idx++]);
+      if (udata->N < 3)
+      {
+        cerr << "ERROR: number of mesh points must be >= 3" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--Tf")
+    {
+      uopts->Tf = stod((*argv)[arg_idx++]);
+      if (uopts->Tf <= ZERO)
+      {
+        cerr << "ERROR: Tf must be > 0" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--Nt")
+    {
+      uopts->Nt = stoi((*argv)[arg_idx++]);
+      if (uopts->Nt < 1)
+      {
+        cerr << "ERROR: Nt must be > 0" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--method")
+    {
+      uopts->method = stoi((*argv)[arg_idx++]);
+      if (uopts->method < 0)
+      {
+        cerr << "ERROR: method must be >= 0" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--order")
+    {
+      uopts->order = stoi((*argv)[arg_idx++]);
+      if (uopts->order < 2 || uopts->order > 4)
+      {
+        cerr << "ERROR: order must be > 1 and < 5" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--m")
+    {
+      uopts->m = stoi((*argv)[arg_idx++]);
+      if (uopts->m < 1)
+      {
+        cerr << "ERROR: m must be > 0" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--hs")
+    {
+      uopts->hs = stod((*argv)[arg_idx++]);
+      if (uopts->hs < ZERO)
+      {
+        cerr << "ERROR: hs must be > 0" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--rtol")
+    {
+      uopts->reltol = stod((*argv)[arg_idx++]);
+      if (uopts->reltol < ZERO)
+      {
+        cerr << "ERROR: rtol must be > 0" << endl;
+        return -1;
+      }
+    }
+    else if (arg == "--atol")
+    {
+      uopts->abstol = stod((*argv)[arg_idx++]);
+      if (uopts->abstol < ZERO)
+      {
+        cerr << "ERROR: atol must be > 0" << endl;
+        return -1;
+      }
+    }
+    // Help
+    // else if (arg == "--help")
+    // {
+    //   InputHelp();
+    //   return -1;
+    // }
+    // Unknown input
+    else
+    {
+      cerr << "ERROR: Invalid input " << arg << endl;
+      // InputHelp();
+      return -1;
+    }
+  }
+
+  // Recompute total number of unknowns, mesh spacing, and hf
+  udata->NEQ = 3 * udata->N;
+  udata->dx  = ONE / (udata->N - 1);
+  uopts->hf  = uopts->hs / uopts->m;
+
+  // Return success
+  return 0;
+}
 
 
 // Check function return value...
