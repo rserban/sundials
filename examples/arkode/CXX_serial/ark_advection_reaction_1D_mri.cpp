@@ -360,7 +360,8 @@ static int EvolveARK(N_Vector y, UserData *udata, UserOptions *uopts,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = ARKStepSetMaxNumSteps(arkode_mem, 100000000);
+  retval = ARKStepSetMaxNumSteps(arkode_mem,
+                                 TWO * ceil(outdata->dTout / uopts->hs));
   if (check_retval(&retval, "ARKStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
@@ -618,7 +619,8 @@ static int EvolveMRI(N_Vector y, UserData *udata, UserOptions *uopts,
   if (check_retval(&retval, "MRIStepSetFixedStep", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 100000000);
+  retval = MRIStepSetMaxNumSteps(arkode_mem,
+                                 TWO * ceil(outdata->dTout / uopts->hs));
   if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
 
   // Pass udata to user functions
@@ -819,7 +821,8 @@ static int EvolveLT(N_Vector y, UserData *udata, UserOptions *uopts,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 100000000);
+  retval = MRIStepSetMaxNumSteps(arkode_mem,
+                                 TWO * ceil(outdata->dTout / uopts->hs));
   if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
@@ -1045,7 +1048,8 @@ static int EvolveSM(N_Vector y, UserData *udata, UserOptions *uopts,
   if (check_retval(&retval, "ARKStepSetUserData", 1)) return 1;
 
   // Set maximum number of steps taken by solver
-  retval = MRIStepSetMaxNumSteps(arkode_mem, 100000000);
+  retval = MRIStepSetMaxNumSteps(arkode_mem,
+                                 TWO * ceil(TWO * outdata->dTout / uopts->hs));
   if (check_retval(&retval, "MRIStepSetMaxNumSteps", 1)) return 1;
 
   // -------------
