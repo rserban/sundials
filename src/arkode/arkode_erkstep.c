@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -589,27 +589,29 @@ int erkStep_Init(void* arkode_mem, int init_type)
   f(t,y).
 
   This will be called in one of three 'modes':
-    0 -> called at the beginning of a simulation
-    1 -> called at the end of a successful step
-    2 -> called elsewhere (e.g. for dense output)
+    ARK_FULLRHS_START -> called at the beginning of a simulation
+                         or after post processing at step
+    ARK_FULLRHS_END   -> called at the end of a successful step
+    ARK_FULLRHS_OTHER -> called elsewhere (e.g. for dense output)
 
-  If it is called in mode 0, we store the vectors f(t,y) in F[0]
-  for possible reuse in the first stage of the subsequent time step.
+  If it is called in ARK_FULLRHS_START mode, we store the vectors
+  f(t,y) in F[0] for possible reuse in the first stage of the
+  subsequent time step.
 
-  If it is called in mode 1 and the method coefficients
+  If it is called in ARK_FULLRHS_END mode and the method coefficients
   support it, we may just copy vectors F[stages] to fill f instead
   of calling f().
 
-  Mode 2 is only called for dense output in-between steps, so we
-  strive to store the intermediate parts so that they do not
-  interfere with the other two modes.
+  ARK_FULLRHS_OTHER mode is only called for dense output in-between
+  steps, so we strive to store the intermediate parts so that they
+  do not interfere with the other two modes.
   ---------------------------------------------------------------*/
-int erkStep_FullRHS(void* arkode_mem, realtype t,
-                    N_Vector y, N_Vector f, int mode)
+int erkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
+                    int mode)
 {
+  int retval;
   ARKodeMem ark_mem;
   ARKodeERKStepMem step_mem;
-  int i, s, retval;
   booleantype recomputeRHS;
 
   /* access ARKodeERKStepMem structure */
@@ -620,10 +622,10 @@ int erkStep_FullRHS(void* arkode_mem, realtype t,
   /* perform RHS functions contingent on 'mode' argument */
   switch(mode) {
 
-  /* Mode 0: called at the beginning of a simulation
+  /* ARK_FULLRHS_START: called at the beginning of a simulation
      Store the vectors f(t,y) in F[0] for possible reuse
      in the first stage of the subsequent time step */
-  case 0:
+  case ARK_FULLRHS_START:
 
     /* call f */
     retval = step_mem->f(t, y, step_mem->F[0], ark_mem->user_data);
@@ -640,18 +642,16 @@ int erkStep_FullRHS(void* arkode_mem, realtype t,
     break;
 
 
-  /* Mode 1: called at the end of a successful step
-     If the method coefficients support it, we just copy the last stage RHS vectors
-     to fill f instead of calling f(t,y).
+  /* ARK_FULLRHS_END: called at the end of a successful step
+     If the method coefficients support it, we just copy the last stage RHS
+     vectors to fill f instead of calling f(t,y).
      Copy the results to F[0] if the coefficients support it. */
-  case 1:
+  case ARK_FULLRHS_END:
 
-    /* determine if explicit/implicit RHS functions need to be recomputed */
+    /* determine if explicit RHS function needs to be recomputed */
     recomputeRHS = SUNFALSE;
-    s = step_mem->B->stages;
-    for (i=0; i<s; i++)
-      if (SUNRabs(step_mem->B->b[i] - step_mem->B->A[s-1][i])>TINY)
-        recomputeRHS = SUNTRUE;
+    if (SUNRabs(step_mem->B->c[step_mem->stages - 1] - ONE) > TINY)
+      recomputeRHS = SUNTRUE;
 
     /* base RHS calls on recomputeRHS argument */
     if (recomputeRHS) {
@@ -674,10 +674,10 @@ int erkStep_FullRHS(void* arkode_mem, realtype t,
 
     break;
 
-  /*  Mode 2: called for dense output in-between steps
+  /*  ARK_FULLRHS_OTHER: called for dense output in-between steps
       store the intermediate calculations in such a way as to not
       interfere with the other two modes */
-  default:
+  case ARK_FULLRHS_OTHER:
 
     /* call f */
     retval = step_mem->f(t, y, f, ark_mem->user_data);
@@ -689,6 +689,12 @@ int erkStep_FullRHS(void* arkode_mem, realtype t,
     }
 
     break;
+
+  default:
+    /* return with RHS failure if unknown mode is passed */
+    arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKode::ERKStep",
+                    "erkStep_FullRHS", "Unknown full RHS mode");
+    return(ARK_RHSFUNC_FAIL);
   }
 
   return(ARK_SUCCESS);
@@ -950,7 +956,7 @@ int erkStep_SetButcherTable(ARKodeMem ark_mem)
     embedding order q > 0 (all -- if adaptive time-stepping enabled)
     stages > 0 (all)
 
-  Returns ARK_SUCCESS if tables pass, ARK_ILL_INPUT otherwise.
+  Returns ARK_SUCCESS if tables pass, ARK_INVALID_TABLE otherwise.
   ---------------------------------------------------------------*/
 int erkStep_CheckButcherTable(ARKodeMem ark_mem)
 {
@@ -969,35 +975,35 @@ int erkStep_CheckButcherTable(ARKodeMem ark_mem)
 
   /* check that stages > 0 */
   if (step_mem->stages < 1) {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKode::ERKStep",
+    arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKode::ERKStep",
                     "erkStep_CheckButcherTable",
                     "stages < 1!");
-    return(ARK_ILL_INPUT);
+    return(ARK_INVALID_TABLE);
   }
 
   /* check that method order q > 0 */
   if (step_mem->q < 1) {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKode::ERKStep",
+    arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKode::ERKStep",
                     "erkStep_CheckButcherTable",
                     "method order < 1!");
-    return(ARK_ILL_INPUT);
+    return(ARK_INVALID_TABLE);
   }
 
   /* check that embedding order p > 0 */
   if ((step_mem->p < 1) && (!ark_mem->fixedstep)) {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKode::ERKStep",
+    arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKode::ERKStep",
                     "erkStep_CheckButcherTable",
                     "embedding order < 1!");
-    return(ARK_ILL_INPUT);
+    return(ARK_INVALID_TABLE);
   }
 
   /* check that embedding exists */
   if ((step_mem->p > 0) && (!ark_mem->fixedstep)) {
     if (step_mem->B->d == NULL) {
-      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKode::ERKStep",
+      arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKode::ERKStep",
                       "erkStep_CheckButcherTable",
                       "no embedding!");
-      return(ARK_ILL_INPUT);
+      return(ARK_INVALID_TABLE);
     }
   }
 
@@ -1008,10 +1014,10 @@ int erkStep_CheckButcherTable(ARKodeMem ark_mem)
       if (SUNRabs(step_mem->B->A[i][j]) > tol)
         okay = SUNFALSE;
   if (!okay) {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKode::ERKStep",
+    arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKode::ERKStep",
                     "erkStep_CheckButcherTable",
                     "Ae Butcher table is implicit!");
-    return(ARK_ILL_INPUT);
+    return(ARK_INVALID_TABLE);
   }
 
   return(ARK_SUCCESS);

@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -795,11 +795,20 @@ int arkEvolve(ARKodeMem ark_mem, realtype tout, N_Vector yout,
     if (ark_mem->fixedstep) {
       ark_mem->h = ark_mem->hin;
       ark_mem->next_h = ark_mem->h;
+
+      /* patch for 'fixedstep' + 'tstop' use case:
+         limit fixed step size if step would overtake tstop */
+      if ( ark_mem->tstopset ) {
+        if ( (ark_mem->tcur + ark_mem->h - ark_mem->tstop)*ark_mem->h > ZERO ) {
+          ark_mem->h = (ark_mem->tstop - ark_mem->tcur) *
+            (ONE-FOUR*ark_mem->uround);
+        }
+      }
     }
 
     /* Looping point for step attempts */
     dsm = ZERO;
-    ncf = nef = constrfails = 0;
+    ncf = nef = constrfails = ark_mem->last_kflag = 0;
     nflag = FIRST_CALL;
     for(;;) {
 
@@ -842,6 +851,13 @@ int arkEvolve(ARKodeMem ark_mem, realtype tout, N_Vector yout,
       ark_mem->eta = SUNMIN(ark_mem->eta, ark_mem->hadapt_mem->etamax);
       ark_mem->eta = SUNMAX(ark_mem->eta, ark_mem->hmin / SUNRabs(ark_mem->h));
       ark_mem->eta /= SUNMAX(ONE, SUNRabs(ark_mem->h) * ark_mem->hmax_inv*ark_mem->eta);
+
+      /* if ignoring temporal error test result (XBraid) force step to pass */
+      if (ark_mem->force_pass) {
+        ark_mem->last_kflag = kflag;
+        kflag = ARK_SUCCESS;
+        break;
+      }
 
       /* break attempt loop on successful step */
       if (kflag == ARK_SUCCESS)  break;
@@ -928,6 +944,7 @@ int arkEvolve(ARKodeMem ark_mem, realtype tout, N_Vector yout,
         istate = ARK_TSTOP_RETURN;
         break;
       }
+      /* limit upcoming step if it will overcome tstop */
       if ( (ark_mem->tcur + ark_mem->hprime - ark_mem->tstop)*ark_mem->h > ZERO ) {
         ark_mem->hprime = (ark_mem->tstop - ark_mem->tcur) *
           (ONE-FOUR*ark_mem->uround);
@@ -1263,7 +1280,7 @@ int arkInit(ARKodeMem ark_mem, realtype t0, N_Vector y0,
     ark_mem->next_h = ZERO;
 
     /* Tolerance scale factor */
-    ark_mem->tolsf  = ONE;
+    ark_mem->tolsf = ONE;
 
     /* Adaptivity counters */
     ark_mem->hadapt_mem->nst_acc = 0;
@@ -1784,8 +1801,8 @@ int arkInitialSetup(ARKodeMem ark_mem, realtype tout)
 
   /* Call fullrhs (used in estimating initial step, explicit steppers, Hermite
      interpolation module, and possibly (but not always) arkRootCheck1) */
-  retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur,
-                                 ark_mem->yn, ark_mem->fn, 0);
+  retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur, ark_mem->yn,
+                                 ark_mem->fn, ARK_FULLRHS_START);
   if (retval != 0) return(ARK_RHSFUNC_FAIL);
 
   /* Fill initial interpolation data (if needed) */
@@ -1906,8 +1923,8 @@ int arkStopTests(ARKodeMem ark_mem, realtype tout, N_Vector yout,
          and roots were found in the previous step, then compute the full rhs
          for possible use in arkRootCheck2 (not always necessary) */
       if (!(ark_mem->call_fullrhs) && irfndp != 0) {
-        retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur,
-                                       ark_mem->yn, ark_mem->fn, 1);
+        retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur, ark_mem->yn,
+                                       ark_mem->fn, ARK_FULLRHS_END);
         if (retval != 0) {
           arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKode", "arkStopTests",
                           MSG_ARK_RHSFUNC_FAILED);
@@ -2207,9 +2224,8 @@ int arkYddNorm(ARKodeMem ark_mem, realtype hg, realtype *yddnrm)
   N_VLinearSum(hg, ark_mem->fn, ONE, ark_mem->yn, ark_mem->ycur);
 
   /* compute y', via the ODE RHS routine */
-  retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur+hg,
-                                 ark_mem->ycur,
-                                 ark_mem->tempv1, 2);
+  retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur + hg, ark_mem->ycur,
+                                 ark_mem->tempv1, ARK_FULLRHS_OTHER);
   if (retval != 0) return(ARK_RHSFUNC_FAIL);
 
   /* difference new f and original f to estimate y'' */
@@ -2268,9 +2284,8 @@ int arkCompleteStep(ARKodeMem ark_mem, realtype dsm)
 
   /* call fullrhs if needed */
   if (ark_mem->call_fullrhs) {
-    mode = (ark_mem->ProcessStep != NULL) ? 0 : 1;
-    retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur,
-                                   ark_mem->ycur,
+    mode = (ark_mem->ProcessStep != NULL) ? ARK_FULLRHS_START : ARK_FULLRHS_END;
+    retval = ark_mem->step_fullrhs(ark_mem, ark_mem->tcur, ark_mem->ycur,
                                    ark_mem->fn, mode);
     if (retval != 0) return(ARK_RHSFUNC_FAIL);
   }
@@ -2352,6 +2367,7 @@ int arkHandleFailure(ARKodeMem ark_mem, int flag)
   case ARK_CONSTR_FAIL:
     arkProcessError(ark_mem, ARK_CONSTR_FAIL, "ARKode", "ARKode",
                     MSG_ARK_FAILED_CONSTR, ark_mem->tcur);
+    break;
   case ARK_MASSSOLVE_FAIL:
     arkProcessError(ark_mem, ARK_MASSSOLVE_FAIL, "ARKode", "ARKode",
                     MSG_ARK_MASSSOLVE_FAIL);
@@ -2384,10 +2400,15 @@ int arkHandleFailure(ARKodeMem ark_mem, int flag)
   case ARK_POSTPROCESS_STAGE_FAIL:
     arkProcessError(ark_mem, ARK_POSTPROCESS_STAGE_FAIL, "ARKode", "ARKode",
                     MSG_ARK_POSTPROCESS_STAGE_FAIL, ark_mem->tcur);
+    break;
   case ARK_INTERP_FAIL:
     arkProcessError(ark_mem, ARK_INTERP_FAIL, "ARKode", "ARKode",
                     "At t = %Lg the interpolation module failed unrecoverably",
                     (long double) ark_mem->tcur);
+    break;
+  case ARK_INVALID_TABLE:
+    arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKode", "ARKode",
+                    "ARKode was provided an invalid method table");
     break;
   default:
     /* This return should never happen */
@@ -2844,8 +2865,8 @@ int arkCheckTemporalError(ARKodeMem ark_mem, int *nflagPtr, int *nefPtr, realtyp
 
   /* consider change of step size for next step attempt (may be
      larger/smaller than current step, depending on dsm) */
-  ttmp = (dsm < ONE) ? ark_mem->tn + ark_mem->h : ark_mem->tn;
-  nsttmp = (dsm < ONE) ? ark_mem->nst+1 : ark_mem->nst;
+  ttmp = (dsm <= ONE) ? ark_mem->tn + ark_mem->h : ark_mem->tn;
+  nsttmp = (dsm <= ONE) ? ark_mem->nst+1 : ark_mem->nst;
   retval = arkAdapt((void*) ark_mem, hadapt_mem, ark_mem->ycur, ttmp,
                     ark_mem->h, dsm*ark_mem->hadapt_mem->bias, nsttmp);
   if (retval != ARK_SUCCESS)  return(ARK_ERR_FAILURE);
