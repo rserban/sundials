@@ -162,6 +162,7 @@ $tar $tarfile $distrobase/src/sundials/CMakeLists.txt                           
 $tar $tarfile $distrobase/src/sundials/fmod/CMakeLists.txt                        || exit 1
 $tar $tarfile $distrobase/src/sundials/fmod/fsundials_futils_mod.{c,f90}          || exit 1
 $tar $tarfile $distrobase/src/sundials/fmod/fsundials_linearsolver_mod.{c,f90}    || exit 1
+$tar $tarfile $distrobase/src/sundials/fmod/fsundials_math_mod.{c,f90}            || exit 1
 $tar $tarfile $distrobase/src/sundials/fmod/fsundials_matrix_mod.{c,f90}          || exit 1
 $tar $tarfile $distrobase/src/sundials/fmod/fsundials_nonlinearsolver_mod.{c,f90} || exit 1
 $tar $tarfile $distrobase/src/sundials/fmod/fsundials_nvector_mod.{c,f90}         || exit 1
