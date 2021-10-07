@@ -98,11 +98,15 @@ $tar $tarfile $distrobase/src/arkode/fcmix/farksparsemass.c    || exit 1
 
 echo "   --- Add arkode F2003 interface to $tarfile"
 
-$tar $tarfile $distrobase/src/arkode/fmod/CMakeLists.txt || exit 1
-$tar $tarfile $distrobase/src/arkode/fmod/farkode_mod.{c,f90} || exit 1
-$tar $tarfile $distrobase/src/arkode/fmod/farkode_arkstep_mod.{c,f90} || exit 1
-$tar $tarfile $distrobase/src/arkode/fmod/farkode_erkstep_mod.{c,f90} || exit 1
-$tar $tarfile $distrobase/src/arkode/fmod/farkode_mristep_mod.{c,f90} || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/CMakeLists.txt          || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_mod.c           || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_mod.f90         || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_arkstep_mod.c   || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_arkstep_mod.f90 || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_erkstep_mod.c   || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_erkstep_mod.f90 || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_mristep_mod.c   || exit 1
+$tar $tarfile $distrobase/src/arkode/fmod/farkode_mristep_mod.f90 || exit 1
 
 echo "   --- Add arkode examples to $tarfile"
 
@@ -151,12 +155,15 @@ $tar $tarfile $distrobase/examples/arkode/C_parhyp/ark_diurnal_kry_ph.out || exi
 
 $tar $tarfile $distrobase/examples/arkode/C_petsc/CMakeLists.txt         || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_petsc/README                 || exit 1
-$tar $tarfile $distrobase/examples/arkode/C_petsc/ark_petsc_ex25.{c,out} || exit 1
+$tar $tarfile $distrobase/examples/arkode/C_petsc/ark_petsc_ex25.c       || exit 1
+$tar $tarfile $distrobase/examples/arkode/C_petsc/ark_petsc_ex25.out     || exit 1
 
 $tar $tarfile $distrobase/examples/arkode/C_serial/CMakeLists.txt                 || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_serial/README                         || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_serial/ark_analytic.c                 || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_serial/ark_analytic.out               || exit 1
+$tar $tarfile $distrobase/examples/arkode/C_serial/ark_analytic_mels.c            || exit 1
+$tar $tarfile $distrobase/examples/arkode/C_serial/ark_analytic_mels.out          || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_serial/ark_analytic_nonlin.c          || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_serial/ark_analytic_nonlin.out        || exit 1
 $tar $tarfile $distrobase/examples/arkode/C_serial/ark_brusselator.c              || exit 1
@@ -213,19 +220,24 @@ $tar $tarfile $distrobase/examples/arkode/C_serial/plot_sol.py                  
 $tar $tarfile $distrobase/examples/arkode/C_serial/plot_sol_log.py                || exit 1
 
 basedir=$distrobase/examples/arkode/CXX_parallel
-$tar $tarfile $basedir/CMakeLists.txt                                              || exit 1
-$tar $tarfile $basedir/README                                                      || exit 1
-$tar $tarfile $basedir/plot_heat2D_p.py                                            || exit 1
-$tar $tarfile $basedir/ark_heat2D_p.cpp                                            || exit 1
-$tar $tarfile $basedir/ark_heat2D_p_--np_2_2.out                                   || exit 1
-$tar $tarfile $basedir/plot_brusselator1D.py                                       || exit 1
-$tar $tarfile $basedir/ark_brusselator1D.h                                         || exit 1
-$tar $tarfile $basedir/ark_brusselator1D_task_local_nls.cpp                        || exit 1
+$tar $tarfile $basedir/CMakeLists.txt                                                              || exit 1
+$tar $tarfile $basedir/README                                                                      || exit 1
+$tar $tarfile $basedir/plot_heat2D_p.py                                                            || exit 1
+$tar $tarfile $basedir/ark_heat2D_p.cpp                                                            || exit 1
+$tar $tarfile $basedir/ark_heat2D_p_--np_2_2.out                                                   || exit 1
+$tar $tarfile $basedir/plot_brusselator1D.py                                                       || exit 1
+$tar $tarfile $basedir/ark_brusselator1D.h                                                         || exit 1
+$tar $tarfile $basedir/ark_brusselator1D_task_local_nls.cpp                                        || exit 1
 $tar $tarfile $basedir/ark_brusselator1D_task_local_nls_--monitor.out                              || exit 1
 $tar $tarfile $basedir/ark_brusselator1D_task_local_nls_--monitor_--global-nls.out                 || exit 1
 $tar $tarfile $basedir/ark_brusselator1D_task_local_nls_--monitor_--explicit_--tf_1.out            || exit 1
 $tar $tarfile $basedir/ark_brusselator1D_task_local_nls.USE_CUDA_NVEC_--monitor.out                || exit 1
 $tar $tarfile $basedir/ark_brusselator1D_task_local_nls.USE_CUDA_NVEC_--monitor_--global-nls.out   || exit 1
+$tar $tarfile $basedir/ark_diffusion_reaction_p.cpp                                                || exit 1
+$tar $tarfile $basedir/ark_diffusion_reaction_p_--np_2_2_--imex.out                                || exit 1
+$tar $tarfile $basedir/ark_diffusion_reaction_p_--np_2_2_--mri-arkstep.out                         || exit 1
+$tar $tarfile $basedir/ark_diffusion_reaction_p_--np_2_2_--mri-cvode-global.out                    || exit 1
+$tar $tarfile $basedir/ark_diffusion_reaction_p_--np_2_2_--mri-cvode-local.out                     || exit 1
 
 $tar $tarfile $distrobase/examples/arkode/CXX_parhyp/CMakeLists.txt                     || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_parhyp/README                             || exit 1
@@ -263,9 +275,9 @@ $tar $tarfile $distrobase/examples/arkode/CXX_superludist/ark_brusselator1D_FEM_
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/CMakeLists.txt                                                || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/README.md                                                     || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_hypre_pfmg_xbraid.cpp                              || exit 1
-$tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_hypre_pfmg_xbraid_--np_2_2_2_--x_print_level_0.out || exit 1
+$tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_hypre_pfmg_xbraid_--np_2_1_2_--x_print_level_0.out || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_p_xbraid.cpp                                       || exit 1
-$tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_p_xbraid_--np_2_2_2_--x_print_level_0.out          || exit 1
+$tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_p_xbraid_--np_2_1_2_--x_print_level_0.out          || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_xbraid.cpp                                         || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/ark_heat2D_xbraid_--x_print_level_0.out                       || exit 1
 $tar $tarfile $distrobase/examples/arkode/CXX_xbraid/plot_heat2D.py                                                || exit 1
