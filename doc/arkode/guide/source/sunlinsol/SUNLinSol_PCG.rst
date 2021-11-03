@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -322,6 +322,7 @@ The SUNLinSol_PCG module defines the *content* field of a
    struct _SUNLinearSolverContent_PCG {
      int maxl;
      int pretype;
+     booleantype zeroguess;
      int numiters;
      realtype resnorm;
      int last_flag;
@@ -418,7 +419,11 @@ The SUNLinSol_PCG module defines implementations of all
 
 * ``SUNLinSolSetScalingVectors_PCG`` -- since PCG only supports
   symmetric scaling, the second ``N_Vector`` argument to this function
-  is ignored
+  is ignored.
+
+* ``SUNLinSolSetZeroGuess_PCG`` -- note the solver assumes a non-zero guess by
+  default and the zero guess flag is reset to ``SUNFALSE`` after each call to
+  :c:func:`SUNLinSolSolve_PCG`.
 
 * ``SUNLinSolSetup_PCG``
 

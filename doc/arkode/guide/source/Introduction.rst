@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -106,6 +106,74 @@ preconditioner routines.
 
 Changes from previous versions
 --------------------------------
+
+Changes in 4.8.0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The RAJA NVECTOR implementation has been updated to support the SYCL backend
+in addition to the CUDA and HIP backend. Users can choose the backend when
+configuring SUNDIALS by using the ``SUNDIALS_RAJA_BACKENDS`` CMake variable.
+This module remains experimental and is subject to change from version to
+version.
+
+A new SUNMatrix and SUNLinearSolver implementation were added to interface
+with the Intel oneAPI Math Kernel Library (oneMKL). Both the matrix and the
+linear solver support general dense linear systems as well as block diagonal
+linear systems. See :ref:`SUNLinSol_OneMklDense` for more details. This module
+is experimental and is subject to change from version to version.
+
+Added a new *optional* function to the SUNLinearSolver API,
+:c:func:`SUNLinSolSetZeroGuess`, to indicate that the next call to
+:c:func:`SUNLinSolSolve` will be made with a zero initial guess. SUNLinearSolver
+implementations that do not use the :c:func:`SUNLinSolNewEmpty` constructor
+will, at a minimum, need set the ``setzeroguess`` function pointer in the linear
+solver ``ops`` structure to ``NULL``. The SUNDIALS iterative linear solver
+implementations have been updated to leverage this new set function to remove
+one dot product per solve.
+
+ARKODE now supports a new "matrix-embedded" SUNLinearSolver type.  This type
+supports user-supplied SUNLinearSolver implementations that set up and solve
+the specified linear system at each linear solve call.  Any matrix-related data
+structures are held internally to the linear solver itself, and are not
+provided by the SUNDIALS package.
+
+Support for user-defined inner (fast) integrators has been to the MRIStep
+module. See :ref:`MRIStep.CustomInnerStepper` for more information on providing
+a user-defined integration method.
+
+Added the functions :c:func:`ARKStepSetNlsRhsFn()` and
+:c:func:`MRIStepSetNlsRhsFn()` to supply an alternative implicit right-hand side
+function for use within nonlinear system function evaluations.
+
+The installed SUNDIALSConfig.cmake file now supports the ``COMPONENTS`` option
+to ``find_package``. The exported targets no longer have IMPORTED_GLOBAL set.
+
+A bug was fixed in :c:func:`SUNMatCopyOps` where the matrix-vector product setup
+function pointer was not copied.
+
+A bug was fixed in the SPBCGS and SPTFQMR solvers for the case where a non-zero
+initial guess and a solution scaling vector are provided. This fix only impacts
+codes using SPBCGS or SPTFQMR as standalone solvers as all SUNDIALS packages
+utilize a zero initial guess.
+
+A bug was fixed in the ARKODE stepper modules where the stop time may be passed
+after resetting the integrator.
+
+
+Changes in 4.7.0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A new NVECTOR implementation based on the SYCL abstraction layer has been added
+targeting Intel GPUs. At present the only SYCL compiler supported is the DPC++
+(Intel oneAPI) compiler. See :ref:`NVectors.SYCL` for more details. This module
+is considered experimental and is subject to major changes even in minor
+releases.
+
+A new SUNMatrix and SUNLinearSolver implementation were added to interface
+with the MAGMA linear algebra library. Both the matrix and the linear solver
+support general dense linear systems as well as block diagonal linear systems,
+and both are targeted at GPUs (AMD or NVIDIA). See :ref:`SUNLinSol_MagmaDense`
+for more details.
 
 Changes in 4.6.1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1208,7 +1276,7 @@ BSD license anymore.
 BSD 3-Clause License
 ^^^^^^^^^^^^^^^^^^^^
 
-Copyright (c) 2002-2020, Lawrence Livermore National Security and Southern
+Copyright (c) 2002-2021, Lawrence Livermore National Security and Southern
 Methodist University.
 
 All rights reserved.

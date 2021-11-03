@@ -2,7 +2,7 @@
  * Programmer(s): Slaven Peles, and Cody J. Balos @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -304,7 +304,7 @@ int check_ans(realtype ans, N_Vector plusX, sunindextype local_length)
 
   /* check vector data */
   for (i = 0; i < local_length; i++) {
-    failure += FNEQ(Xdata[i], ans);
+    failure += SUNRCompare(Xdata[i], ans);
   }
 
   return (failure > ZERO) ? (1) : (0);
@@ -363,7 +363,7 @@ double max_time(N_Vector plusX, double time)
   return(maxt);
 }
 
-void sync_device()
+void sync_device(N_Vector x)
 {
   /* sync with GPU */
   cudaDeviceSynchronize();

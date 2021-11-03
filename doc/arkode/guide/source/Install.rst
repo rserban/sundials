@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -441,6 +441,14 @@ illustration only.
 
    Default: ``-O3 -DNDEBUG``
 
+:index:`CMAKE_CXX_STANDARD <CMAKE_CXX_STANDARD (CMake option)>`
+   The C++ standard to build C++ parts of SUNDIALS with.
+
+   Default: 11
+
+   Note: Options are 98, 11, 14, 17, 20. This option is only used when a
+   C++ compiler is required.
+
 :index:`CMAKE_Fortran_COMPILER <CMAKE_Fortran_COMPILER (CMake option)>`
    Fortran compiler
 
@@ -623,6 +631,24 @@ illustration only.
       ``LD_LIBRARY_PATH`` prior to searching default system
       paths.
 
+:index:`ENABLE_MAGMA <ENABLE_MAGMA (CMake option)>`
+   Enable MAGMA support.
+
+   Default: ``OFF``
+
+   .. note:: Setting this option to ``ON`` will trigger additional options
+             related to MAGMA.
+
+:index:`MAGMA_DIR <MAGMA_DIR (CMake option)>`
+   Path to the root of a MAGMA installation.
+
+   Default: none
+
+:index:`SUNDIALS_MAGMA_BACKENDS <SUNDIALS_MAGMA_BACKENDS (CMake option)>`
+   Which MAGMA backend to use under the SUNDIALS MAGMA interface.
+
+   Default: ``CUDA``
+
 :index:`ENABLE_MPI <ENABLE_MPI (CMake option)>`
    Enable MPI support. This will build the parallel nvector
    and the MPI-aware version of the ManyVector library.
@@ -665,6 +691,11 @@ illustration only.
 
    .. note:: This option is triggered only if MPI is enabled (``ENABLE_MPI`` is ``ON``).
 
+:index:`ENABLE_ONEMKL <ENABLE_ONEMKL (CMake option)>`
+   Enable oneMKL support.
+
+   Default: ``OFF``
+
 :index:`ENABLE_OPENMP <ENABLE_OPENMP (CMake option)>`
    Enable OpenMP support (build the OpenMP NVector)
 
@@ -702,7 +733,7 @@ illustration only.
 
    Default: ``OFF``
 
-:index:`ENABLE_RAJA <RAJA_ENABLE (CMake option)>`
+:index:`ENABLE_RAJA <ENABLE_RAJA (CMake option)>`
    Enable RAJA support.
 
    Default: OFF
@@ -712,7 +743,7 @@ illustration only.
 
 :index:`SUNDIALS_RAJA_BACKENDS <SUNDIALS_RAJA_BACKENDS (CMake option)>`
    If building SUNDIALS with RAJA support, this sets the RAJA
-   backend to target. Values supported are CUDA and HIP.
+   backend to target. Values supported are CUDA, HIP, or SYCL.
 
    Default: CUDA
 
@@ -773,6 +804,18 @@ illustration only.
 
    Default: Pthread
 
+:index:`ENABLE_SYCL <ENABLE_SYCL (CMake option)>`
+   Enable SYCL support.
+
+   Default: OFF
+
+   .. note::
+
+      At present the only supported SYCL compiler is the DPC++ (Intel oneAPI)
+      compiler. CMake does not currently support autodetection of SYCL compilers
+      and ``CMAKE_CXX_COMPILER`` must be set to a valid SYCL compiler i.e.,
+      ``dpcpp`` in order to build with SYCL support.
+
 :index:`SUNDIALS_BUILD_WITH_MONITORING <SUNDIALS_BUILD_WITH_MONITORING (CMake option)>`
    Build SUNDIALS with capabilties for fine-grained monitoring of solver progress
    and statistics. This is primarily useful for debugging.
@@ -781,14 +824,6 @@ illustration only.
 
    Note: Building with monitoring may result in minor performance degradation
    even if monitoring is not utilized.
-
-:index:`CMAKE_CXX_STANDARD <CMAKE_CXX_STANDARD (CMake option)>`
-   The C++ standard to build C++ parts of SUNDIALS with.
-
-   Default: 11
-
-   Note: Options are 99, 11, 14, 17. This option only used when a
-   C++ compiler is required.
 
 :index:`SUNDIALS_F77_FUNC_CASE <SUNDIALS_F77_FUNC_CASE (CMake option)>`
    Specify the case to use in the Fortran name-mangling scheme,
@@ -1098,12 +1133,14 @@ RAJA is a performance portability layer developed by Lawrence
 Livermore National Laboratory and can be obtained from
 `https://github.com/LLNL/RAJA <https://github.com/LLNL/RAJA>`_.
 SUNDIALS RAJA modules and examples have been tested with RAJA
-version 0.12.1. Building SUNDIALS RAJA modules requires a CUDA-enabled
-RAJA installation. To enable RAJA, set ``ENABLE_CUDA`` and
-``ENABLE_RAJA`` to ``ON``. If RAJA is installed in a nonstandard
+version 0.14.0. Building SUNDIALS RAJA modules requires a CUDA, HIP, or SYCL
+enabled RAJA installation. To enable RAJA, set ``ENABLE_RAJA`` to ``ON``, set
+``SUNDIALS_RAJA_BACKENDS`` to the desired backend (``CUDA``, ``HIP``, or
+``SYCL``), and set ``ENABLE_CUDA``, ``ENABLE_HIP``, or ``ENABLE_SYCL`` to
+``ON`` depending on the selected backend. If RAJA is installed in a nonstandard
 location you will be prompted to set the variable ``RAJA_DIR`` with
 the path to the RAJA CMake configuration file. To enable building the
-RAJA examples set ``EXAMPLES_ENABLE_CUDA`` to ``ON``.
+RAJA examples set ``EXAMPLES_ENABLE_CXX`` to ``ON``.
 
 
 .. _Installation.CMake.ExternalLibraries.XBraid:
@@ -1289,7 +1326,7 @@ configuration file to build against SUNDIALS in their own CMake project.
   # When using the cmake CLI command, this can be done like so:
   #   cmake -D SUNDIALS_DIR=/path/to/sundials/installation
 
-  find_project(SUNDIALS REQUIRED)
+  find_package(SUNDIALS REQUIRED)
 
   add_executable(myexec main.c)
 
@@ -1379,10 +1416,18 @@ configuration file to build against SUNDIALS in their own CMake project.
    |                              +--------------+----------------------------------------------+
    |                              | Headers      | ``nvector/nvector_cuda.h``                   |
    +------------------------------+--------------+----------------------------------------------+
+   | HIP                          | Libraries    | ``libsundials_nvechip.LIB``                  |
+   |                              +--------------+----------------------------------------------+
+   |                              | Headers      | ``nvector/nvector_hip.h``                    |
+   +------------------------------+--------------+----------------------------------------------+
    | RAJA                         | Libraries    | ``libsundials_nveccudaraja.LIB``             |
    |                              |              | ``libsundials_nvechipraja.LIB``              |
    |                              +--------------+----------------------------------------------+
    |                              | Headers      | ``nvector/nvector_raja.h``                   |
+   +------------------------------+--------------+----------------------------------------------+
+   | SYCL                         | Libraries    | ``libsundials_nvecsycl.LIB``                 |
+   |                              +--------------+----------------------------------------------+
+   |                              | Headers      | ``nvector/nvector_sycl.h``                   |
    +------------------------------+--------------+----------------------------------------------+
    | MANYVECTOR                   | Libraries    | ``libsundials_nvecmanyvector.LIB``           |
    |                              +--------------+----------------------------------------------+

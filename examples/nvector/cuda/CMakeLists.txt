@@ -2,7 +2,7 @@
 # Programmer(s): Slaven Peles @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -21,7 +21,7 @@
 set(nvector_cuda_examples
   "test_nvector_cuda\;3 32 0\;\;\;"
   "test_nvector_cuda\;500 128 0\;\;\;"
-  "test_nvector_cuda\;1000 -1 0\;\;\;"
+  "test_nvector_cuda\;1000 0 0\;\;\;"
   )
 
 # Dependencies for nvector examples
@@ -88,7 +88,7 @@ foreach(example_tuple ${nvector_cuda_examples})
     install(FILES ${example}.cu
       ../test_nvector.c
       ../test_nvector.h
-      ${SUNDIALS_SOURCE_DIR}/examples/utilities/custom_memory_helper.h
+      ${SUNDIALS_SOURCE_DIR}/examples/utilities/custom_memory_helper_gpu.h
       ${SUNDIALS_SOURCE_DIR}/src/sundials/sundials_nvector.c
       DESTINATION ${EXAMPLES_INSTALL_PATH}/nvector/cuda)
   endif()

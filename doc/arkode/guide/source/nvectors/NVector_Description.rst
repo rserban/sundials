@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -33,11 +33,13 @@ The generic ``N_Vector`` type is a pointer to a structure that has an
 implementation-dependent *content* field containing the description
 and actual data of the vector, and an *ops* field pointing to a
 structure with generic vector operations. The type ``N_Vector`` is
-defined as:
+defined as
+
+.. c:type:: typedef struct _generic_N_Vector *N_Vector
+
+and the generic structure is defined as
 
 .. code-block:: c
-
-   typedef struct _generic_N_Vector *N_Vector;
 
    struct _generic_N_Vector {
       void *content;
@@ -65,21 +67,21 @@ defined as
       void         (*nvconst)(realtype, N_Vector);
       void         (*nvprod)(N_Vector, N_Vector, N_Vector);
       void         (*nvdiv)(N_Vector, N_Vector, N_Vector);
-      void  	     (*nvscale)(realtype, N_Vector, N_Vector);
-      void  	     (*nvabs)(N_Vector, N_Vector);
-      void	       (*nvinv)(N_Vector, N_Vector);
-      void	       (*nvaddconst)(N_Vector, realtype, N_Vector);
-      realtype	   (*nvdotprod)(N_Vector, N_Vector);
-      realtype	   (*nvmaxnorm)(N_Vector);
-      realtype	   (*nvwrmsnorm)(N_Vector, N_Vector);
-      realtype	   (*nvwrmsnormmask)(N_Vector, N_Vector, N_Vector);
-      realtype	   (*nvmin)(N_Vector);
-      realtype	   (*nvwl2norm)(N_Vector, N_Vector);
-      realtype	   (*nvl1norm)(N_Vector);
-      void	       (*nvcompare)(realtype, N_Vector, N_Vector);
+      void         (*nvscale)(realtype, N_Vector, N_Vector);
+      void         (*nvabs)(N_Vector, N_Vector);
+      void         (*nvinv)(N_Vector, N_Vector);
+      void         (*nvaddconst)(N_Vector, realtype, N_Vector);
+      realtype     (*nvdotprod)(N_Vector, N_Vector);
+      realtype     (*nvmaxnorm)(N_Vector);
+      realtype     (*nvwrmsnorm)(N_Vector, N_Vector);
+      realtype     (*nvwrmsnormmask)(N_Vector, N_Vector, N_Vector);
+      realtype     (*nvmin)(N_Vector);
+      realtype     (*nvwl2norm)(N_Vector, N_Vector);
+      realtype     (*nvl1norm)(N_Vector);
+      void         (*nvcompare)(realtype, N_Vector, N_Vector);
       booleantype  (*nvinvtest)(N_Vector, N_Vector);
       booleantype  (*nvconstrmask)(N_Vector, N_Vector, N_Vector);
-      realtype	   (*nvminquotient)(N_Vector, N_Vector);
+      realtype     (*nvminquotient)(N_Vector, N_Vector);
       int          (*nvlinearcombination)(int, realtype *, N_Vector *, N_Vector);
       int          (*nvscaleaddmulti)(int, realtype *, N_Vector, N_Vector *, N_Vector *);
       int          (*nvdotprodmulti)(int, N_Vector, N_Vector *,  realtype *);
@@ -205,24 +207,26 @@ Vector Identifications associated with vector kernels supplied with SUNDIALS
 
 .. cssclass:: table-bordered
 
-===========================  =====================================================  ==============
-Vector ID                    Vector type                                            ID Value
-===========================  =====================================================  ==============
-SUNDIALS_NVEC_SERIAL         Serial                                                 0
-SUNDIALS_NVEC_PARALLEL       Distributed memory parallel (MPI)                      1
-SUNDIALS_NVEC_OPENMP         OpenMP shared memory parallel                          2
-SUNDIALS_NVEC_PTHREADS       PThreads shared memory parallel                        3
-SUNDIALS_NVEC_PARHYP         *hypre* ParHyp parallel vector                         4
-SUNDIALS_NVEC_PETSC          PETSc parallel vector                                  5
-SUNDIALS_NVEC_CUDA           CUDA parallel vector                                   6
-SUNDIALS_NVEC_RAJA           RAJA parallel vector                                   7
-SUNDIALS_NVEC_OPENMPDEV      OpenMP parallel vector with device offloading          8
-SUNDIALS_NVEC_TRILINOS       Trilinos Tpetra vector                                 9
-SUNDIALS_NVEC_MANYVECTOR     "ManyVector" vector                                    10
-SUNDIALS_NVEC_MPIMANYVECTOR  MPI-enabled "ManyVector" vector                        11
-SUNDIALS_NVEC_MPIPLUSX       MPI+X vector                                           12
-SUNDIALS_NVEC_CUSTOM         User-provided custom vector                            13
-===========================  =====================================================  ==============
+===========================  ====================================  ========
+Vector ID                    Vector type                           ID Value
+===========================  ====================================  ========
+SUNDIALS_NVEC_SERIAL         Serial                                0
+SUNDIALS_NVEC_PARALLEL       Distributed memory parallel (MPI)     1
+SUNDIALS_NVEC_OPENMP         OpenMP shared memory parallel         2
+SUNDIALS_NVEC_PTHREADS       PThreads shared memory parallel       3
+SUNDIALS_NVEC_PARHYP         *hypre* ParHyp parallel vector        4
+SUNDIALS_NVEC_PETSC          PETSc parallel vector                 5
+SUNDIALS_NVEC_CUDA           CUDA vector                           6
+SUNDIALS_NVEC_HIP            HIP vector                            7
+SUNDIALS_NVEC_SYCL           SYCL vector                           8
+SUNDIALS_NVEC_RAJA           RAJA vector                           9
+SUNDIALS_NVEC_OPENMPDEV      OpenMP vector with device offloading  10
+SUNDIALS_NVEC_TRILINOS       Trilinos Tpetra vector                11
+SUNDIALS_NVEC_MANYVECTOR     "ManyVector" vector                   12
+SUNDIALS_NVEC_MPIMANYVECTOR  MPI-enabled "ManyVector" vector       13
+SUNDIALS_NVEC_MPIPLUSX       MPI+X vector                          14
+SUNDIALS_NVEC_CUSTOM         User-provided custom vector           15
+===========================  ====================================  ========
 
 
 .. _NVector.custom_implementation:

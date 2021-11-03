@@ -2,7 +2,7 @@
  * Programmer(s): Alan C. Hindmarsh and Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -657,24 +657,33 @@ int CVodeSetConstraints(void *cvode_mem, N_Vector constraints)
 int CVodeSetUseIntegratorFusedKernels(void *cvode_mem, booleantype onoff)
 {
   CVodeMem cv_mem;
+#ifdef SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS
+  N_Vector_ID id;
+#endif
 
   if (cvode_mem==NULL) {
-    cvProcessError(NULL, CV_MEM_NULL, "CVODE", "CVodeSetUseIntegratorFusedKernels", MSGCV_NO_MEM);
+    cvProcessError(NULL, CV_MEM_NULL, "CVODE",
+                   "CVodeSetUseIntegratorFusedKernels", MSGCV_NO_MEM);
     return(CV_MEM_NULL);
   }
 
   cv_mem = (CVodeMem) cvode_mem;
 
 #ifdef SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS
+  id = N_VGetVectorID(cv_mem->cv_ewt);
   if (!cv_mem->cv_MallocDone ||
-      N_VGetVectorID(cv_mem->cv_ewt) != SUNDIALS_NVEC_CUDA) {
-    cvProcessError(cv_mem, CV_ILL_INPUT, "CVODE", "CVodeSetUseIntegratorFusedKernels", MSGCV_BAD_NVECTOR);
+      (id != SUNDIALS_NVEC_CUDA && id != SUNDIALS_NVEC_HIP)) {
+    cvProcessError(cv_mem, CV_ILL_INPUT, "CVODE",
+                   "CVodeSetUseIntegratorFusedKernels",
+                   "Fused Kernels not supported for the provided vector");
     return(CV_MEM_NULL);
   }
   cv_mem->cv_usefused = onoff;
   return(CV_SUCCESS);
 #else
-  cvProcessError(cv_mem, CV_ILL_INPUT, "CVODE", "CVodeSetUseIntegratorFusedKernels", "CVODE was not built with fused integrator kernels enabled");
+  cvProcessError(cv_mem, CV_ILL_INPUT, "CVODE",
+                 "CVodeSetUseIntegratorFusedKernels",
+                 "CVODE was not built with fused integrator kernels enabled");
   return(CV_ILL_INPUT);
 #endif
 }

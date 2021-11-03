@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -310,6 +310,7 @@ The SUNLinSol_SPGMR module defines the *content* field of a
      int pretype;
      int gstype;
      int max_restarts;
+     booleantype zeroguess;
      int numiters;
      realtype resnorm;
      int last_flag;
@@ -451,6 +452,10 @@ The SUNLinSol_SPGMR module defines implementations of all
 * ``SUNLinSolSetPreconditioner_SPGMR``
 
 * ``SUNLinSolSetScalingVectors_SPGMR``
+
+* ``SUNLinSolSetZeroGuess_SPGMR`` -- note the solver assumes a non-zero guess by
+  default and the zero guess flag is reset to ``SUNFALSE`` after each call to
+  :c:func:`SUNLinSolSolve_SPGMR`.
 
 * ``SUNLinSolSetup_SPGMR``
 

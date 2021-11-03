@@ -3,7 +3,7 @@
  *                Daniel R. Reynolds @ SMU
  * -----------------------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -884,7 +884,7 @@ int MRIStepGetLastInnerStepFlag(void *arkode_mem, int *flag)
   if (retval != ARK_SUCCESS) return(retval);
 
   /* get the last return value from the inner stepper */
-  *flag = step_mem->inner_retval;
+  *flag = step_mem->stepper->last_flag;
 
   return(ARK_SUCCESS);
 }

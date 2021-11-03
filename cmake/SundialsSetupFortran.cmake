@@ -2,7 +2,7 @@
 # Programmer(s): Radu Serban, David Gardner, Cody J. Balos @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -257,7 +257,7 @@ if(NEED_FORTRAN_NAME_MANGLING)
       "SET(CMAKE_C_FLAGS_RELWITHDEBUGINFO \"${CMAKE_C_FLAGS_RELWITHDEBUGINFO}\")\n"
       "SET(CMAKE_C_FLAGS_MINSIZE \"${CMAKE_C_FLAGS_MINSIZE}\")\n"
       "ADD_EXECUTABLE(ctest2 ctest2.c)\n"
-      "FIND_LIBRARY(FLIB flib ${FortranTest_DIR})\n"
+      "FIND_LIBRARY(FLIB flib \"${FortranTest_DIR}\")\n"
       "TARGET_LINK_LIBRARIES(ctest2 \${FLIB})\n")
 
     set(options my_sub my_sub_ my_sub__ MY_SUB MY_SUB_ MY_SUB__)

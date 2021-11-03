@@ -3,7 +3,7 @@
 # Programmer(s): David J. Gardner @ LLNL
 # -------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -14,7 +14,7 @@
 # -------------------------------------------------------------------------------
 # Script that sets up the environment for SUNDIALS testing on Lassen.
 #
-# Usage: source env.quartz.sh <real type> <index size> <compiler spec> \
+# Usage: source env.lassen.sh <real type> <index size> <compiler spec> \
 #                             <build type>
 #
 # Required Inputs:
@@ -91,9 +91,9 @@ case "$compilername" in
     xl)
         module load xl/${compilerversion}
         if [ $? -ne 0 ]; then return 1; fi
-        export CC=$(which xlc)
-        export CXX=$(which xlc++)
-        export FC=$(which xlf2003)
+        export CC=$(which xlc_r)
+        export CXX=$(which xlc++_r)
+        export FC=$(which xlf2003_r)
         FORTRAN_STATUS=OFF # Build issues with F2003 interface
         ;;
     pgi)
@@ -152,4 +152,4 @@ export OMP_NUM_THREADS=20
 # CUDA settings
 module load cuda
 export CUDA_STATUS=ON
-export CUDA_ARCH=sm_70
+export CUDA_ARCH=70

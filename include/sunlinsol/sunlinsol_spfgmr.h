@@ -5,7 +5,7 @@
  *    Hilari C. Tiedeman @ SMU
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -50,6 +50,7 @@ struct _SUNLinearSolverContent_SPFGMR {
   int pretype;
   int gstype;
   int max_restarts;
+  booleantype zeroguess;
   int numiters;
   realtype resnorm;
   int last_flag;
@@ -111,6 +112,8 @@ SUNDIALS_EXPORT int SUNLinSolSetPreconditioner_SPFGMR(SUNLinearSolver S,
 SUNDIALS_EXPORT int SUNLinSolSetScalingVectors_SPFGMR(SUNLinearSolver S,
                                                       N_Vector s1,
                                                       N_Vector s2);
+SUNDIALS_EXPORT int SUNLinSolSetZeroGuess_SPFGMR(SUNLinearSolver S,
+                                                 booleantype onoff);
 SUNDIALS_EXPORT int SUNLinSolSetup_SPFGMR(SUNLinearSolver S, SUNMatrix A);
 SUNDIALS_EXPORT int SUNLinSolSolve_SPFGMR(SUNLinearSolver S, SUNMatrix A,
                                           N_Vector x, N_Vector b, realtype tol);

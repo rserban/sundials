@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -516,9 +516,11 @@ other SUNNonlinSol implementations are built. The
 implementation-dependent *content* field and an *ops*
 field. The type ``SUNNonlinearSolver`` is defined as follows:
 
-.. code-block:: c
+.. c:type:: typedef struct _generic_SUNNonlinearSolver *SUNNonlinearSolver
 
-   typedef struct _generic_SUNNonlinearSolver *SUNNonlinearSolver;
+and the generic structure is defined as
+
+.. code-block:: c
 
    struct _generic_SUNNonlinearSolver {
      void *content;

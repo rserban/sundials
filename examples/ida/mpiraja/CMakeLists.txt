@@ -2,7 +2,7 @@
 # Programmer(s): Slaven Peles and Cody J. Balos @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -22,21 +22,11 @@ set(IDA_examples
   "idaHeat2D_kry_p_mpiraja\;1\;4\;develop"
   )
 
-if(MPI_C_COMPILER)
-  # use MPI wrapper as the compiler
-  set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
-  set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+if(SUNDIALS_RAJA_BACKENDS MATCHES "CUDA")
+  set(_lang CUDA)
+else()
+  set(_lang CXX)
 endif()
-
-include_directories(${MPI_CXX_INCLUDE_PATH})
-
-# Specify libraries to link against
-set(IDA_LIB sundials_ida)
-set(NVECS_LIB sundials_nvecmpiplusx sundials_nvecraja)
-
-# Set-up linker flags and link libraries
-set(SUNDIALS_LIBS ${IDA_LIB} ${NVECS_LIB} ${EXTRA_LINK_LIBS})
-
 
 # Add the build and install targets for each IDA example
 foreach(example_tuple ${IDA_examples})
@@ -48,10 +38,22 @@ foreach(example_tuple ${IDA_examples})
   list(GET example_tuple 3 example_type)
 
   # add example source files
-  set_source_files_properties(${example}.cpp PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(${example}.cpp PROPERTIES LANGUAGE ${_lang})
+
   add_executable(${example} ${example}.cpp)
 
   set_target_properties(${example} PROPERTIES FOLDER "Examples")
+
+  target_include_directories(${example} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
+
+  # libraries to link against
+  target_link_libraries(${example}
+    PRIVATE
+    sundials_ida
+    sundials_nvecmpiplusx
+    sundials_nvecraja
+    ${MPI_CXX_LIBRARIES}
+    ${EXTRA_LINK_LIBS})
 
   # add example to regression tests
   sundials_add_test(${example} ${example}
@@ -59,9 +61,6 @@ foreach(example_tuple ${IDA_examples})
     ANSWER_DIR ${CMAKE_CURRENT_SOURCE_DIR}
     ANSWER_FILE ${example}.out
     EXAMPLE_TYPE ${example_type})
-
-  # libraries to link against
-  target_link_libraries(${example} PRIVATE ${SUNDIALS_LIBS} ${MPI_CXX_LIBRARIES})
 
   # install example source and out files
   if(EXAMPLES_INSTALL)

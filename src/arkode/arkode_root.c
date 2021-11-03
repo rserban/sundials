@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -68,6 +68,7 @@ int arkRootInit(ARKodeMem ark_mem, int nrtfn, ARKRootFn g)
     ark_mem->root_mem->rootdir   = NULL;
     ark_mem->root_mem->gfun      = NULL;
     ark_mem->root_mem->nrtfn     = 0;
+    ark_mem->root_mem->irfnd     = 0;
     ark_mem->root_mem->gactive   = NULL;
     ark_mem->root_mem->mxgnull   = 1;
     ark_mem->root_mem->root_data = ark_mem->user_data;

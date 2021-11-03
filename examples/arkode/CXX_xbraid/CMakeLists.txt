@@ -2,7 +2,7 @@
 # Programmer(s): David J. Gardner @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -19,13 +19,13 @@
 
 # Examples using SUNDIALS linear solvers
 set(ARKODE_examples
-  "ark_heat2D_xbraid\;--x_print_level 0\;1\;8\;develop"
-  "ark_heat2D_p_xbraid\;--np 2 2 2 --x_print_level 0\;1\;8\;develop"
+  "ark_heat2D_xbraid\;--x_print_level 0\;1\;4\;develop"
+  "ark_heat2D_p_xbraid\;--np 2 1 2 --x_print_level 0\;1\;4\;develop"
   )
 
 if(ENABLE_HYPRE AND HYPRE_FOUND)
   set(ARKODE_examples_hypre
-    "ark_heat2D_hypre_pfmg_xbraid\;--np 2 2 2 --x_print_level 0\;1\;8\;develop"
+    "ark_heat2D_hypre_pfmg_xbraid\;--np 2 1 2 --x_print_level 0\;1\;4\;develop"
     )
 endif()
 

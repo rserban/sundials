@@ -2,7 +2,7 @@
 # Programmer(s): Daniel R. Reynolds @ SMU
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -19,7 +19,6 @@
 
 # Examples using SUNDIALS MPIManyVector module
 set(nvector_mpimanyvector_examples
-  "test_nvector_mpimanyvector_serial\;1000 100 0\;1\;1\;"     # run parallel on 1 procs
   "test_nvector_mpimanyvector_parallel1\;1000 200 0\;1\;4\;"  # run parallel on 4 procs
   "test_nvector_mpimanyvector_parallel2\;200 1000 0\;1\;4\;"  # run parallel on 4 procs
   )

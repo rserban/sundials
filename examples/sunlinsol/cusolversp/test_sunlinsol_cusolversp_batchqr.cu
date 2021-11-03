@@ -2,7 +2,7 @@
  * Programmer(s): Cody J.Balos @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
   /* Run Tests */
   fails += Test_SUNLinSolInitialize(LS, 0);
   fails += Test_SUNLinSolSetup(LS, dA, 0);
-  fails += Test_SUNLinSolSolve(LS, dA, d_x, d_b, 1000*UNIT_ROUNDOFF, 0);
+  fails += Test_SUNLinSolSolve(LS, dA, d_x, d_b, 1000*UNIT_ROUNDOFF, SUNTRUE, 0);
 
   fails += Test_SUNLinSolGetType(LS, SUNLINEARSOLVER_DIRECT, 0);
   fails += Test_SUNLinSolGetID(LS, SUNLINEARSOLVER_CUSOLVERSP_BATCHQR, 0);
@@ -254,7 +254,7 @@ int check_vector(N_Vector X, N_Vector Y, realtype tol)
 
   /* check vector data */
   for(i=0; i < local_length; i++)
-    failure += FNEQ(Xdata[i], Ydata[i], tol);
+    failure += SUNRCompareTol(Xdata[i], Ydata[i], tol);
 
   if (failure > ZERO) {
     maxerr = ZERO;

@@ -2,7 +2,7 @@
  * Programmer(s): Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -414,6 +414,9 @@ typedef struct IDAMemRec {
      correctors have been allocated */
   booleantype simMallocDone;
   booleantype stgMallocDone;
+
+  IDAResFn nls_res;          /* F(t,y(t),y'(t))=0; used in the nonlinear
+                                solver */
 
   /*------------------
     Linear Solver Data

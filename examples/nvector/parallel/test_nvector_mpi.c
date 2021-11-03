@@ -2,7 +2,7 @@
  * Programmer(s): David J. Gardner @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
   fails += Test_N_VLinearCombinationVectorArray(V, local_length, myid);
 
   /* local reduction operations */
-  printf("\nTesting local reduction operations:\n\n");
+  if (myid == 0) printf("\nTesting local reduction operations:\n\n");
 
   fails += Test_N_VDotProdLocal(X, Y, local_length, myid);
   fails += Test_N_VMaxNormLocal(X, local_length, myid);
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
   fails += Test_N_VMinQuotientLocal(X, Y, local_length, myid);
 
   /* XBraid interface operations */
-  printf("\nTesting XBraid interface operations:\n\n");
+  if (myid == 0) printf("\nTesting XBraid interface operations:\n\n");
 
   fails += Test_N_VBufSize(X, local_length, myid);
   fails += Test_N_VBufPack(X, local_length, myid);
@@ -261,7 +261,7 @@ int check_ans(realtype ans, N_Vector X, sunindextype local_length)
 
   /* check vector data */
   for (i = 0; i < local_length; i++) {
-    failure += FNEQ(Xdata[i], ans);
+    failure += SUNRCompare(Xdata[i], ans);
   }
 
   return (failure > ZERO) ? (1) : (0);
@@ -304,7 +304,7 @@ double max_time(N_Vector X, double time)
   return(maxt);
 }
 
-void sync_device()
+void sync_device(N_Vector x)
 {
   /* not running on GPU, just return */
   return;

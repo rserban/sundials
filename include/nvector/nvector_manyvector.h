@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -77,6 +77,8 @@ SUNDIALS_EXPORT sunindextype N_VGetNumSubvectors_ManyVector(N_Vector v);
 
 /* standard vector operations */
 SUNDIALS_EXPORT N_Vector_ID N_VGetVectorID_ManyVector(N_Vector v);
+SUNDIALS_EXPORT void N_VPrint_ManyVector(N_Vector v);
+SUNDIALS_EXPORT void N_VPrintFile_ManyVector(N_Vector v, FILE *outfile);
 SUNDIALS_EXPORT N_Vector N_VCloneEmpty_ManyVector(N_Vector w);
 SUNDIALS_EXPORT N_Vector N_VClone_ManyVector(N_Vector w);
 SUNDIALS_EXPORT void N_VDestroy_ManyVector(N_Vector v);

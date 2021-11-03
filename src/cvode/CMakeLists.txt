@@ -3,7 +3,7 @@
 #                Radu Serban, and Cody J. Balos @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -48,18 +48,44 @@ add_prefix(${SUNDIALS_SOURCE_DIR}/include/cvode/ cvode_HEADERS)
 
 # Build fused kernel libraries
 if(SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS)
-  sundials_add_library(sundials_cvode_fused_cuda
-    SOURCES
-      cvode_fused_cuda.cu
-    LINK_LIBRARIES
-      PRIVATE sundials_nveccuda
-    OUTPUT_NAME
-      sundials_cvode_fused_cuda
-    VERSION
-      ${cvodelib_VERSION}
-    SOVERSION
-      ${cvodelib_SOVERSION}
-  )
+
+  if(BUILD_NVECTOR_CUDA)
+
+    set_source_files_properties(cvode_fused_gpu.cpp PROPERTIES
+      LANGUAGE CUDA)
+
+    sundials_add_library(sundials_cvode_fused_cuda
+      SOURCES
+        cvode_fused_gpu.cpp
+      COMPILE_DEFINITIONS
+        PRIVATE USE_CUDA
+      LINK_LIBRARIES
+        PRIVATE sundials_nveccuda
+      OUTPUT_NAME
+        sundials_cvode_fused_cuda
+      VERSION
+        ${cvodelib_VERSION}
+      SOVERSION
+        ${cvodelib_SOVERSION}
+      )
+  endif()
+
+  if(BUILD_NVECTOR_HIP)
+    sundials_add_library(sundials_cvode_fused_hip
+      SOURCES
+        cvode_fused_gpu.cpp
+      COMPILE_DEFINITIONS
+        PRIVATE USE_HIP
+      LINK_LIBRARIES
+        PRIVATE sundials_nvechip
+      OUTPUT_NAME
+        sundials_cvode_fused_hip
+      VERSION
+        ${cvodelib_VERSION}
+      SOVERSION
+        ${cvodelib_SOVERSION}
+      )
+  endif()
 
   sundials_add_library(sundials_cvode_fused_stubs
     SOURCES
@@ -79,6 +105,10 @@ endif()
 sundials_add_library(sundials_cvode
   SOURCES
     ${cvode_SOURCES}
+  HEADERS
+    ${cvode_HEADERS}
+  INCLUDE_SUBDIR
+    cvode
   OBJECT_LIBRARIES
     sundials_generic_obj
     sundials_nvecserial_obj
@@ -105,10 +135,7 @@ sundials_add_library(sundials_cvode
     ${cvodelib_SOVERSION}
 )
 
-# Install the CVODE header files
-install(FILES ${cvode_HEADERS} DESTINATION include/cvode)
-
-#
+# Finished CVODE
 message(STATUS "Added CVODE module")
 
 # Add F2003 module if the interface is enabled

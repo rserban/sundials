@@ -2,7 +2,7 @@
 # Programmer(s): Cody J. Balos @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -56,6 +56,11 @@ sundials_option(CMAKE_CUDA_ARCHITECTURES STRING "Target CUDA architecture" "70"
 # -------------------------------------------------------------
 sundials_option(ENABLE_HIP BOOL "Enable HIP support" OFF)
 
+# -------------------------------------------------------------
+# Enable SYCL support?
+# -------------------------------------------------------------
+sundials_option(ENABLE_SYCL BOOL "Enable SYCL support" OFF)
+
 # ---------------------------------------------------------------
 # Enable LAPACK support?
 # ---------------------------------------------------------------
@@ -66,6 +71,22 @@ sundials_option(LAPACK_LIBRARIES STRING "Lapack and Blas libraries" "${LAPACK_LI
 
 sundials_option(LAPACK_WORKS BOOL "Set to ON to force CMake to accept a given LAPACK configuration" OFF
                 SHOW_IF ENABLE_LAPACK
+                ADVANCED)
+
+# ---------------------------------------------------------------
+# Enable MAGMA support?
+# ---------------------------------------------------------------
+sundials_option(ENABLE_MAGMA BOOL "Enable MAGMA support" OFF)
+
+sundials_option(MAGMA_DIR PATH "Path to the root of a MAGMA installation" "${MAGMA_DIR}"
+                SHOW_IF ENABLE_MAGMA)
+
+sundials_option(SUNDIALS_MAGMA_BACKENDS STRING "Which MAGMA backend to use under the SUNDIALS MAGMA interfaces (CUDA, HIP)" "CUDA"
+                OPTIONS "CUDA;HIP"
+                SHOW_IF ENABLE_MAGMA)
+
+sundials_option(MAGMA_WORKS BOOL "Set to ON to force CMake to accept a given MAGMA configuration" OFF
+                SHOW_IF ENABLE_MAGMA
                 ADVANCED)
 
 # ---------------------------------------------------------------
@@ -172,8 +193,8 @@ sundials_option(ENABLE_RAJA BOOL "Enable RAJA support" OFF)
 sundials_option(RAJA_DIR PATH "Path to root of RAJA installation" "${RAJA_DIR}"
                 SHOW_IF ENABLE_RAJA)
 
-sundials_option(SUNDIALS_RAJA_BACKENDS STRING "Which RAJA backend under the SUNDIALS RAJA interfaces (CUDA, HIP)" "CUDA"
-                OPTIONS "CUDA;HIP"
+sundials_option(SUNDIALS_RAJA_BACKENDS STRING "Which RAJA backend under the SUNDIALS RAJA interfaces (CUDA, HIP, SYCL)" "CUDA"
+                OPTIONS "CUDA;HIP;SYCL"
                 SHOW_IF ENABLE_RAJA)
 
 # ---------------------------------------------------------------
@@ -231,5 +252,15 @@ sundials_option(XBRAID_INCLUDES STRING "Semi-colon separated list of XBraid incl
                 ADVANCED)
 
 sundials_option(XBRAID_WORKS BOOL "Set to ON to force CMake to accept a given XBraid configuration" OFF
-                DEPENDS_ON ENABLE_XBRAID
+                SHOW_IF ENABLE_XBRAID
+                ADVANCED)
+
+# -------------------------------------------------------------
+# Enable oneMKL support?
+# -------------------------------------------------------------
+
+sundials_option(ENABLE_ONEMKL BOOL "Enable oneMKL support" OFF)
+
+sundials_option(ONEMKL_WORKS BOOL "Set to ON to force CMake to accept a given oneMKL configuration" OFF
+                SHOW_IF ENABLE_ONEMKL
                 ADVANCED)

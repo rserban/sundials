@@ -3,7 +3,7 @@
  *                Daniel R. Reynolds @ SMU
  * -----------------------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -51,6 +51,7 @@
 #include <limits>
 #include <chrono>
 #include <cmath>
+#include <string>
 
 #include "cvode/cvode.h"               // access to CVODE
 #include "nvector/nvector_serial.h"    // access to the serial N_Vector

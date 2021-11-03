@@ -2,7 +2,7 @@
    Programmer(s): Daniel R. Reynolds @ SMU
    ----------------------------------------------------------------
    SUNDIALS Copyright Start
-   Copyright (c) 2002-2020, Lawrence Livermore National Security
+   Copyright (c) 2002-2021, Lawrence Livermore National Security
    and Southern Methodist University.
    All rights reserved.
 
@@ -159,11 +159,11 @@
            Report UCRL-ID-141558, LLNL, 2000.
 
 .. [HS2017] A.C. Hindmarsh and R. Serban. User Documentation for CVODE
-            v5.6.1. Technical Report UCRL-SM-208108, LLNL, 2020.
+            v5.8.0. Technical Report UCRL-SM-208108, LLNL, 2021.
 
 .. [HSR2017] A.C. Hindmarsh, R. Serban and D.R. Reynolds. Example
-             Programs for CVODE v5.6.1. Technical Report
-             UCRL-SM-208110, LLNL, 2020.
+             Programs for CVODE v5.8.0. Technical Report
+             UCRL-SM-208110, LLNL, 2021.
 
 .. [HT1998] A.C. Hindmarsh and A.G. Taylor.  PVODE and KINSOL:
             Parallel Software for Differential and Nonlinear
@@ -208,12 +208,16 @@
               Accelerated Picard Method for Nonlinear Systems Related to
               Variably Saturated Flow, *Adv. Wat. Resour.*, 38:92-101, 2012.
 
+.. [MAGMA2010] S. Tomov, J. Dongarra, and M. Baboulin
+               Towards dense linear algebra for hybrid GPU accelerated manycore systems.
+               Parallel Matrix Algorithms and Applications, 36:232--240, 2010.
+
 .. [oneAPI] `Intel oneAPI Programming Guide
              <https://software.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top.html>`_.
 
 .. [R2018] D.R. Reynolds. ARKode Example Documentation. Technical
            Report, Southern Methodist University Center for Scientific
-           Computation, 2020.
+           Computation, 2021.
 
 .. [ROCm] `AMD ROCm Documentation
           <https://rocmdocs.amd.com/en/latest/index.html>`_.

@@ -14,7 +14,7 @@
 function print_usage
 {
     # Location of tarballs
-    cd ../..
+    cd ..
     location=`pwd`
     cd -
 
@@ -28,7 +28,7 @@ function print_usage
     echo ""
     echo "Notes: If the module is not specified, all tarballs are created."
     echo "       This script must be executed from within its directory."
-    echo "       Tarballs will be created in $location"
+    echo "       Tarballs will be created in $location/tarballs"
     echo ""
     exit 1
 }
@@ -43,13 +43,13 @@ function print_usage
 # VERSION NUMBERS
 #---------------------------------------------------------
 
-SUN_VER="5.6.1"
-CV_VER="5.6.1"
-CVS_VER="5.6.1"
-IDA_VER="5.6.1"
-IDAS_VER="4.6.1"
-KIN_VER="5.6.1"
-ARK_VER="4.6.1"
+SUN_VER="5.8.0"
+CV_VER="5.8.0"
+CVS_VER="5.8.0"
+IDA_VER="5.8.0"
+IDAS_VER="4.8.0"
+KIN_VER="5.8.0"
+ARK_VER="4.8.0"
 
 #---------------------------------------------------------
 # Test if the script is executed from within its directory
@@ -204,16 +204,19 @@ cp $sundialsdir/doc/Makefile.in $tmpdir/doc/ || exit 1
 cp $sundialsdir/CMakeLists.txt $tmpdir/      || exit 1
 
 # Make install guide and copy to $tmpdir
-echo -e "--- SUNDIALS Common Installation documentation"
-cd $sundialsdir/doc/sundials || exit 1
+if [ $doc = "T" ]; then
+    echo -e "--- SUNDIALS Common Installation documentation"
+    cd $sundialsdir/doc/sundials || exit 1
 
-# cleanup, make install guide, copy, and cleanup
-make QUIET= purge    || exit 1
-make QUIET= in_g_pdf || exit 1
-cp $sundialsdir/doc/sundials/install_guide.pdf $tmpdir/INSTALL_GUIDE.pdf || exit 1
-make QUIET= purge    || exit 1
+    # cleanup, make install guide, copy, and cleanup
+    make QUIET= purge    || exit 1
+    make QUIET= in_g_pdf || exit 1
+    cp $sundialsdir/doc/sundials/install_guide.pdf $tmpdir/INSTALL_GUIDE.pdf || exit 1
+    make QUIET= purge    || exit 1
 
-cd -
+    cd -
+fi
+
 cp -r $sundialsdir/cmake $tmpdir/ || exit 1
 cp -r $sundialsdir/test $tmpdir/   || exit 1
 
@@ -365,8 +368,8 @@ if [ $do_sundials = "T" ]; then
     filename="sundials-"$SUN_VER
 
     tarfile=$filename".tar"
-    echo "$scriptdir/shared $tarfile $distrobase $tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    echo "$scriptdir/shared $tarfile $distrobase $doc $tar"
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/arkode $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/cvode  $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/cvodes $tarfile $distrobase $doc $tar || exit 1
@@ -389,7 +392,7 @@ if [ $do_arkode = "T" ]; then
     filename="arkode-"$ARK_VER
 
     tarfile=$filename".tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/arkode $tarfile $distrobase $doc $tar || exit 1
     gzip $tarfile || exit 1
 fi
@@ -403,7 +406,7 @@ if [ $do_cvode = "T" ]; then
     filename="cvode-"$CV_VER
 
     tarfile=$filename".tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/cvode  $tarfile $distrobase $doc $tar || exit 1
     gzip $tarfile || exit 1
 fi
@@ -417,7 +420,7 @@ if [ $do_cvodes = "T" ]; then
     filename="cvodes-"$CVS_VER
 
     tarfile=$filename".tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/cvodes $tarfile $distrobase $doc $tar || exit 1
     gzip $tarfile || exit 1
 fi
@@ -431,7 +434,7 @@ if [ $do_ida = "T" ]; then
     filename="ida-"$IDA_VER
 
     tarfile=$filename".tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/ida    $tarfile $distrobase $doc $tar || exit 1
     gzip $tarfile || exit 1
 fi
@@ -445,7 +448,7 @@ if [ $do_idas = "T" ]; then
     filename="idas-"$IDAS_VER
 
     tarfile=$filename".tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/idas   $tarfile $distrobase $doc $tar || exit 1
     gzip $tarfile || exit 1
 fi
@@ -459,7 +462,7 @@ if [ $do_kinsol = "T" ]; then
     filename="kinsol-"$KIN_VER
 
     tarfile=$filename".tar"
-    $scriptdir/shared $tarfile $distrobase $tar      || exit 1
+    $scriptdir/shared $tarfile $distrobase $doc $tar || exit 1
     $scriptdir/kinsol $tarfile $distrobase $doc $tar || exit 1
     gzip $tarfile || exit 1
 fi

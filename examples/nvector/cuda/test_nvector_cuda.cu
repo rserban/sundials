@@ -2,7 +2,7 @@
  * Programmer(s): Slaven Peles, and Cody J. Balos @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -23,7 +23,7 @@
 #include <nvector/nvector_serial.h>
 #include <nvector/nvector_cuda.h>
 
-#include "custom_memory_helper.h"
+#include "custom_memory_helper_gpu.h"
 #include "test_nvector.h"
 
 /* Private custom allocator functions */
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
   /* check input and set vector length */
   if (argc < 4){
-    printf("ERROR: THREE (3) Inputs required: vector length, CUDA threads per block (-1 for default), print timing \n");
+    printf("ERROR: THREE (3) Inputs required: vector length, CUDA threads per block (0 for default), print timing \n");
     return(-1);
   }
 
@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
   }
 
   threadsPerBlock = (int) atoi(argv[2]);
-  if (threadsPerBlock != -1 && threadsPerBlock % 32) {
-    printf("ERROR: CUDA threads per block must be -1 to use the default or a multiple of 32\n");
+  if (threadsPerBlock < 0 || threadsPerBlock % 32) {
+    printf("ERROR: CUDA threads per block must be 0 to use the default or a multiple of 32\n");
     return(-1);
   }
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
   /* test with all policy variants */
   for (policy=DEFAULT_POL; policy<=GRID_STRIDE; ++policy) {
-    int actualThreadsPerBlock = (threadsPerBlock == -1) ? 256 : threadsPerBlock;
+    int actualThreadsPerBlock = threadsPerBlock ? threadsPerBlock : 256;
     SUNCudaExecPolicy* stream_exec_policy = NULL;
     SUNCudaExecPolicy* reduce_exec_policy = NULL;
     cudaStreamCreate(&stream);
@@ -366,7 +366,7 @@ int check_ans(realtype ans, N_Vector X, sunindextype length)
 
   /* check vector data */
   for (i = 0; i < length; i++) {
-    if (failure += FNEQ(Xdata[i], ans)) {
+    if (failure += SUNRCompare(Xdata[i], ans)) {
       printf("check_ans fail: Xdata[%ld] = %f, expected Xdata[%ld] = %f\n",
              (long int)i, Xdata[i], (long int)i, ans);
     }
@@ -416,7 +416,7 @@ double max_time(N_Vector X, double time)
   return(time);
 }
 
-void sync_device()
+void sync_device(N_Vector x)
 {
   /* sync with GPU */
   cudaDeviceSynchronize();
