@@ -63,6 +63,7 @@
 // Inform SWIG of the SUNDIALS_EXPORT macro
 #define SUNDIALS_EXPORT
 #define SUNDIALS_DEPRECATED_EXPORT
+#define SUNDIALS_DEPRECATED_EXPORT_MSG(msg)
 #define SUNDIALS_STATIC_INLINE
 
 
@@ -100,3 +101,4 @@
 ! SUNDIALS Copyright End
 ! ---------------------------------------------------------------
 %}
+

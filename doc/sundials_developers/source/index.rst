@@ -12,8 +12,9 @@
    SUNDIALS Copyright End
    -----------------------------------------------------------------------------
 
+#########################
 SUNDIALS Developers Guide
-=========================
+#########################
 
 .. toctree::
    :maxdepth: 2
@@ -22,6 +23,8 @@ SUNDIALS Developers Guide
    getting_started/index
    style_guide/index
    development/index
+   testing/index
+   benchmarks/index
    pull_requests/index
    releases/index
    appendix/index
