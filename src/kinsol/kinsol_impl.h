@@ -23,6 +23,7 @@
 #include <stdarg.h>
 
 #include <kinsol/kinsol.h>
+#include <kinsol/kinsol_py.h>
 #include "sundials_context_impl.h"
 #include "sundials_iterative_impl.h"
 
@@ -46,6 +47,19 @@ extern "C" {
 
 #define OMEGA_MIN RCONST(0.00001)
 #define OMEGA_MAX RCONST(0.9)
+
+/*
+ * -----------------------------------------------------------------
+ * Types : struct _KINPyUserFunctionRegistry
+ * -----------------------------------------------------------------
+ *
+ * -----------------------------------------------------------------
+ */
+struct _KINPyUserFunctionRegistry
+{
+  KINPySysFn _KINPySysFn_;
+};
+typedef struct _KINPyUserFunctionRegistry KINPyUserFunctionRegistry;
 
 /*
  * -----------------------------------------------------------------

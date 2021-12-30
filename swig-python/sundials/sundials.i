@@ -14,8 +14,13 @@
 // Swig interface file
 // ---------------------------------------------------------------
 
+%include <typemaps.i>
+
 // Inform SWIG of the SUNDIALS_EXPORT macro
 #define SUNDIALS_EXPORT
+#define SUNDIALS_DEPRECATED_EXPORT
+#define SUNDIALS_DEPRECATED_EXPORT_MSG(msg)
+#define SUNDIALS_STATIC_INLINE static inline
 
 // Inform SWIG of the configure-provided types
 #define SUNDIALS_INT32_T
@@ -37,36 +42,34 @@
 %apply (int DIM1, double* IN_ARRAY1) {(sunindextype vec_length, realtype *v_data)}
 %apply (int* DIM1, double** ARGOUTVIEW_ARRAY1) {(sunindextype *length, realtype **data)}
 
+// Handle SUNContext mapping
+%ignore SUNContext_Create;
+%ignore SUNContext_Free;
+%ignore SUNContext_GetProfiler;
+%ignore SUNContext_SetProfiler;
+
 // Include generic sundials stuff
 %{
+#include "sundials/sundials_config.h"
+#include "sundials/sundials_context.h"
 #include "sundials/sundials_types.h"
-#include "sundials/sundials_nvector.h"  
+#include "sundials/sundials_nvector.h"
 #include "sundials/sundials_matrix.h"
 #include "sundials/sundials_iterative.h"
 #include "sundials/sundials_linearsolver.h"
 #include "sundials/sundials_nonlinearsolver.h"
-#include "nvector_pyhelp.h"
 %}
 %include "sundials/sundials_types.h"
+%include "sundials/sundials_context.h"
 %include "sundials/sundials_nvector.h"
 %include "sundials/sundials_matrix.h"
 %include "sundials/sundials_iterative.h"
 %include "sundials/sundials_linearsolver.h"
 %include "sundials/sundials_nonlinearsolver.h"
-%include "nvector_pyhelp.h"
 
 // Include implementations of generics
 %include "../nvector/nvector.i"
 %include "../nvector/nvector_serial.i"
-
-// Include helper to get vector data
-%{
-void N_VGetData(N_Vector v, sunindextype *length, realtype **data)
-{
-  *length = N_VGetLength(v);
-  *data = N_VGetArrayPointer(v);
-}  
-%}
 
 // Insert SUNDIALS copyright into generated C files.
 %insert(begin)

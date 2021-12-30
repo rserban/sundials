@@ -47,12 +47,15 @@ public:
       SUNContext_Create(comm, &sunctx_);
    }
 
-   operator SUNContext() { return sunctx_; }
 
    ~Context()
    {
       SUNContext_Free(&sunctx_);
    }
+
+   SUNContext get() { return sunctx_; }
+
+   operator SUNContext() { return sunctx_; }
 
 private:
    SUNContext sunctx_;

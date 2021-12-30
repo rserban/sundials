@@ -25,6 +25,7 @@ set(kinsol_SOURCES
   kinsol_io.c
   kinsol_ls.c
   kinsol_spils.c
+  kinsol_py.c
   )
 
 # Add variable kinsol_HEADERS with the exported KINSOL header files
@@ -34,6 +35,7 @@ set(kinsol_HEADERS
   kinsol_direct.h
   kinsol_ls.h
   kinsol_spils.h
+  kinsol_py.h
   )
 
 # Add prefix with complete path to the KINSOL header files

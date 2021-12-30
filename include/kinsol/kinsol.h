@@ -94,6 +94,7 @@ typedef void (*KINInfoHandlerFn)(const char *module, const char *function,
  * Exported Functions
  * ------------------- */
 
+
 /* Creation function */
 SUNDIALS_EXPORT void *KINCreate(SUNContext sunctx);
 

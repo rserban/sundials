@@ -14,7 +14,7 @@
 // Swig interface file
 // ---------------------------------------------------------------
 
-%module(directors="1") kinsol
+%module kinsol
 
 %include "stdint.i"
 
@@ -39,25 +39,22 @@ import_array();
 
 // ---------------------
 // KINSOL specific stuff
-// --------------------- 
+// ---------------------
 
 // KINInit cannot be called from Python.
 // Instead, users should call KINInitPy.
-%ignore KINInit;
+// %ignore KINInit;
 
 // We hijack KINSetUserData to pass out director class
 // objects. So, hide the function from users.
-%ignore KINSetUserData;
+// %ignore KINSetUserData;
 
 %{
 #include "kinsol/kinsol.h"
+#include "kinsol/kinsol_py.h"
 #include "kinsol/kinsol_bbdpre.h"
 #include "kinsol/kinsol_ls.h"
-#include "callbacks.h"
 %}
-
-// KINSysPyFn is a 'director' class
-%feature("director") KINSysPyFn;
 
 // Apply typemap for Get functions that use an argout variable
 %typemap(in, numinputs=0) realtype* (realtype temp) {
@@ -73,27 +70,41 @@ import_array();
   $result = SWIG_Python_AppendOutput($result, PyLong_FromLong(*$1));
 }
 
+// a typemap for the callback, it expects the argument to be an integer
+// whose value is the address of an appropriate callback function
+%typemap(in) KINPySysFn {
+  $1 = (KINPySysFn)PyLong_AsVoidPtr($input);
+}
+%typemap(in) KINPyCallbackFn {
+  $1 = (KINPyCallbackFn)PyLong_AsVoidPtr($input);
+}
+
 // Process definitions from these files
 %include "kinsol/kinsol.h"
+%include "kinsol/kinsol_py.h"
 %include "kinsol/kinsol_bbdpre.h"
 %include "kinsol/kinsol_ls.h"
-%include "callbacks.h"
 
-// Insert helper code for setting sysfn
 %pythoncode
 %{
-def WrapPythonSysFn(user_sysfun):
-  caller = KINSysFnCaller()
-  caller.setFn(KINSysPyFnPyChild(user_sysfun).__disown__())
-  return caller
 
-# inherits from the C++ KinSysPyFn class
-class KINSysPyFnPyChild(KINSysPyFn):
-  def __init__(self, user_sysfun):
-    KINSysPyFn.__init__(self)
-    self.user_sysfun = user_sysfun
+import ctypes
 
-  def actual_sysfun(self, y, g, user_data):
-    self.user_sysfun(y, g, user_data)
-    return 0
+# We provide the ctypes for all the callback functions in KINSol here as
+# a convenience to our users. They could always define it themselves too.
+class cfunctypes():
+  KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int)
+
+def RegisterFn(py_callback, py_callback_type):
+  f_in = py_callback_type(py_callback)
+  f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+  if py_callback_type == cfunctypes.KINSysFn:
+    return _kinsol.KINPyRegisterKINSysFn(f_in_ptr)
+
+def RegisterNumbaFn(py_callback, py_callback_type):
+  f = py_callback.ctypes
+  f_ptr = ctypes.cast(f, ctypes.c_void_p).value
+
+  if py_callback_type == cfunctypes.KINSysFn:
+    return  _kinsol.KINPyRegisterKINSysFn(f_ptr)
 %}

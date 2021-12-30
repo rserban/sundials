@@ -90,10 +90,22 @@ class _SwigNonDynamicMeta(type):
     __setattr__ = _swig_setattr_nondynamic_class_variable(type.__setattr__)
 
 
-import weakref
-
 SUNFALSE = _kinsol.SUNFALSE
 SUNTRUE = _kinsol.SUNTRUE
+class Context(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+
+    def __init__(self, comm=None):
+        _kinsol.Context_swiginit(self, _kinsol.new_Context(comm))
+    __swig_destroy__ = _kinsol.delete_Context
+
+    def get(self):
+        return _kinsol.Context_get(self)
+
+# Register Context in _kinsol:
+_kinsol.Context_swigregister(Context)
+
 SUNDIALS_NVEC_SERIAL = _kinsol.SUNDIALS_NVEC_SERIAL
 SUNDIALS_NVEC_PARALLEL = _kinsol.SUNDIALS_NVEC_PARALLEL
 SUNDIALS_NVEC_OPENMP = _kinsol.SUNDIALS_NVEC_OPENMP
@@ -101,6 +113,8 @@ SUNDIALS_NVEC_PTHREADS = _kinsol.SUNDIALS_NVEC_PTHREADS
 SUNDIALS_NVEC_PARHYP = _kinsol.SUNDIALS_NVEC_PARHYP
 SUNDIALS_NVEC_PETSC = _kinsol.SUNDIALS_NVEC_PETSC
 SUNDIALS_NVEC_CUDA = _kinsol.SUNDIALS_NVEC_CUDA
+SUNDIALS_NVEC_HIP = _kinsol.SUNDIALS_NVEC_HIP
+SUNDIALS_NVEC_SYCL = _kinsol.SUNDIALS_NVEC_SYCL
 SUNDIALS_NVEC_RAJA = _kinsol.SUNDIALS_NVEC_RAJA
 SUNDIALS_NVEC_OPENMPDEV = _kinsol.SUNDIALS_NVEC_OPENMPDEV
 SUNDIALS_NVEC_TRILINOS = _kinsol.SUNDIALS_NVEC_TRILINOS
@@ -117,6 +131,7 @@ class N_Vector_Ops(object):
     nvdestroy = property(_kinsol.N_Vector_Ops_nvdestroy_get, _kinsol.N_Vector_Ops_nvdestroy_set)
     nvspace = property(_kinsol.N_Vector_Ops_nvspace_get, _kinsol.N_Vector_Ops_nvspace_set)
     nvgetarraypointer = property(_kinsol.N_Vector_Ops_nvgetarraypointer_get, _kinsol.N_Vector_Ops_nvgetarraypointer_set)
+    nvgetdevicearraypointer = property(_kinsol.N_Vector_Ops_nvgetdevicearraypointer_get, _kinsol.N_Vector_Ops_nvgetdevicearraypointer_set)
     nvsetarraypointer = property(_kinsol.N_Vector_Ops_nvsetarraypointer_get, _kinsol.N_Vector_Ops_nvsetarraypointer_set)
     nvgetcommunicator = property(_kinsol.N_Vector_Ops_nvgetcommunicator_get, _kinsol.N_Vector_Ops_nvgetcommunicator_set)
     nvgetlength = property(_kinsol.N_Vector_Ops_nvgetlength_get, _kinsol.N_Vector_Ops_nvgetlength_set)
@@ -158,6 +173,11 @@ class N_Vector_Ops(object):
     nvminquotientlocal = property(_kinsol.N_Vector_Ops_nvminquotientlocal_get, _kinsol.N_Vector_Ops_nvminquotientlocal_set)
     nvwsqrsumlocal = property(_kinsol.N_Vector_Ops_nvwsqrsumlocal_get, _kinsol.N_Vector_Ops_nvwsqrsumlocal_set)
     nvwsqrsummasklocal = property(_kinsol.N_Vector_Ops_nvwsqrsummasklocal_get, _kinsol.N_Vector_Ops_nvwsqrsummasklocal_set)
+    nvdotprodmultilocal = property(_kinsol.N_Vector_Ops_nvdotprodmultilocal_get, _kinsol.N_Vector_Ops_nvdotprodmultilocal_set)
+    nvdotprodmultiallreduce = property(_kinsol.N_Vector_Ops_nvdotprodmultiallreduce_get, _kinsol.N_Vector_Ops_nvdotprodmultiallreduce_set)
+    nvbufsize = property(_kinsol.N_Vector_Ops_nvbufsize_get, _kinsol.N_Vector_Ops_nvbufsize_set)
+    nvbufpack = property(_kinsol.N_Vector_Ops_nvbufpack_get, _kinsol.N_Vector_Ops_nvbufpack_set)
+    nvbufunpack = property(_kinsol.N_Vector_Ops_nvbufunpack_get, _kinsol.N_Vector_Ops_nvbufunpack_set)
     nvprint = property(_kinsol.N_Vector_Ops_nvprint_get, _kinsol.N_Vector_Ops_nvprint_set)
     nvprintfile = property(_kinsol.N_Vector_Ops_nvprintfile_get, _kinsol.N_Vector_Ops_nvprintfile_set)
 
@@ -173,6 +193,7 @@ class N_Vector(object):
     __repr__ = _swig_repr
     content = property(_kinsol.N_Vector_content_get, _kinsol.N_Vector_content_set)
     ops = property(_kinsol.N_Vector_ops_get, _kinsol.N_Vector_ops_set)
+    sunctx = property(_kinsol.N_Vector_sunctx_get, _kinsol.N_Vector_sunctx_set)
 
     def __init__(self):
         _kinsol.N_Vector_swiginit(self, _kinsol.new_N_Vector())
@@ -182,8 +203,8 @@ class N_Vector(object):
 _kinsol.N_Vector_swigregister(N_Vector)
 
 
-def N_VNewEmpty():
-    return _kinsol.N_VNewEmpty()
+def N_VNewEmpty(sunctx):
+    return _kinsol.N_VNewEmpty(sunctx)
 
 def N_VFreeEmpty(v):
     return _kinsol.N_VFreeEmpty(v)
@@ -208,6 +229,9 @@ def N_VSpace(v, lrw, liw):
 
 def N_VGetArrayPointer(v):
     return _kinsol.N_VGetArrayPointer(v)
+
+def N_VGetDeviceArrayPointer(v):
+    return _kinsol.N_VGetDeviceArrayPointer(v)
 
 def N_VSetArrayPointer(v_data, v):
     return _kinsol.N_VSetArrayPointer(v_data, v)
@@ -332,6 +356,21 @@ def N_VConstrMaskLocal(c, x, m):
 def N_VMinQuotientLocal(num, denom):
     return _kinsol.N_VMinQuotientLocal(num, denom)
 
+def N_VDotProdMultiLocal(nvec, x, Y, dotprods):
+    return _kinsol.N_VDotProdMultiLocal(nvec, x, Y, dotprods)
+
+def N_VDotProdMultiAllReduce(nvec_total, x, sum):
+    return _kinsol.N_VDotProdMultiAllReduce(nvec_total, x, sum)
+
+def N_VBufSize(x, size):
+    return _kinsol.N_VBufSize(x, size)
+
+def N_VBufPack(x, buf):
+    return _kinsol.N_VBufPack(x, buf)
+
+def N_VBufUnpack(x, buf):
+    return _kinsol.N_VBufUnpack(x, buf)
+
 def N_VNewVectorArray(count):
     return _kinsol.N_VNewVectorArray(count)
 
@@ -356,6 +395,8 @@ def N_VPrint(v):
 def N_VPrintFile(v, outfile):
     return _kinsol.N_VPrintFile(v, outfile)
 SUNMATRIX_DENSE = _kinsol.SUNMATRIX_DENSE
+SUNMATRIX_MAGMADENSE = _kinsol.SUNMATRIX_MAGMADENSE
+SUNMATRIX_ONEMKLDENSE = _kinsol.SUNMATRIX_ONEMKLDENSE
 SUNMATRIX_BAND = _kinsol.SUNMATRIX_BAND
 SUNMATRIX_SPARSE = _kinsol.SUNMATRIX_SPARSE
 SUNMATRIX_SLUNRLOC = _kinsol.SUNMATRIX_SLUNRLOC
@@ -387,6 +428,7 @@ class SUNMatrix(object):
     __repr__ = _swig_repr
     content = property(_kinsol.SUNMatrix_content_get, _kinsol.SUNMatrix_content_set)
     ops = property(_kinsol.SUNMatrix_ops_get, _kinsol.SUNMatrix_ops_set)
+    sunctx = property(_kinsol.SUNMatrix_sunctx_get, _kinsol.SUNMatrix_sunctx_set)
 
     def __init__(self):
         _kinsol.SUNMatrix_swiginit(self, _kinsol.new_SUNMatrix())
@@ -396,8 +438,8 @@ class SUNMatrix(object):
 _kinsol.SUNMatrix_swigregister(SUNMatrix)
 
 
-def SUNMatNewEmpty():
-    return _kinsol.SUNMatNewEmpty()
+def SUNMatNewEmpty(sunctx):
+    return _kinsol.SUNMatNewEmpty(sunctx)
 
 def SUNMatFreeEmpty(A):
     return _kinsol.SUNMatFreeEmpty(A)
@@ -443,23 +485,60 @@ PREC_NONE = _kinsol.PREC_NONE
 PREC_LEFT = _kinsol.PREC_LEFT
 PREC_RIGHT = _kinsol.PREC_RIGHT
 PREC_BOTH = _kinsol.PREC_BOTH
+SUN_PREC_NONE = _kinsol.SUN_PREC_NONE
+SUN_PREC_LEFT = _kinsol.SUN_PREC_LEFT
+SUN_PREC_RIGHT = _kinsol.SUN_PREC_RIGHT
+SUN_PREC_BOTH = _kinsol.SUN_PREC_BOTH
 MODIFIED_GS = _kinsol.MODIFIED_GS
 CLASSICAL_GS = _kinsol.CLASSICAL_GS
+SUN_MODIFIED_GS = _kinsol.SUN_MODIFIED_GS
+SUN_CLASSICAL_GS = _kinsol.SUN_CLASSICAL_GS
+
+def SUNModifiedGS(v, h, k, p, new_vk_norm):
+    return _kinsol.SUNModifiedGS(v, h, k, p, new_vk_norm)
 
 def ModifiedGS(v, h, k, p, new_vk_norm):
     return _kinsol.ModifiedGS(v, h, k, p, new_vk_norm)
 
+def SUNClassicalGS(v, h, k, p, new_vk_norm, stemp, vtemp):
+    return _kinsol.SUNClassicalGS(v, h, k, p, new_vk_norm, stemp, vtemp)
+
 def ClassicalGS(v, h, k, p, new_vk_norm, stemp, vtemp):
     return _kinsol.ClassicalGS(v, h, k, p, new_vk_norm, stemp, vtemp)
+
+def SUNQRfact(n, h, q, job):
+    return _kinsol.SUNQRfact(n, h, q, job)
 
 def QRfact(n, h, q, job):
     return _kinsol.QRfact(n, h, q, job)
 
+def SUNQRsol(n, h, q, b):
+    return _kinsol.SUNQRsol(n, h, q, b)
+
 def QRsol(n, h, q, b):
     return _kinsol.QRsol(n, h, q, b)
+
+def SUNQRAdd_MGS(Q, R, df, m, mMax, QRdata):
+    return _kinsol.SUNQRAdd_MGS(Q, R, df, m, mMax, QRdata)
+
+def SUNQRAdd_ICWY(Q, R, df, m, mMax, QRdata):
+    return _kinsol.SUNQRAdd_ICWY(Q, R, df, m, mMax, QRdata)
+
+def SUNQRAdd_ICWY_SB(Q, R, df, m, mMax, QRdata):
+    return _kinsol.SUNQRAdd_ICWY_SB(Q, R, df, m, mMax, QRdata)
+
+def SUNQRAdd_CGS2(Q, R, df, m, mMax, QRdata):
+    return _kinsol.SUNQRAdd_CGS2(Q, R, df, m, mMax, QRdata)
+
+def SUNQRAdd_DCGS2(Q, R, df, m, mMax, QRdata):
+    return _kinsol.SUNQRAdd_DCGS2(Q, R, df, m, mMax, QRdata)
+
+def SUNQRAdd_DCGS2_SB(Q, R, df, m, mMax, QRdata):
+    return _kinsol.SUNQRAdd_DCGS2_SB(Q, R, df, m, mMax, QRdata)
 SUNLINEARSOLVER_DIRECT = _kinsol.SUNLINEARSOLVER_DIRECT
 SUNLINEARSOLVER_ITERATIVE = _kinsol.SUNLINEARSOLVER_ITERATIVE
 SUNLINEARSOLVER_MATRIX_ITERATIVE = _kinsol.SUNLINEARSOLVER_MATRIX_ITERATIVE
+SUNLINEARSOLVER_MATRIX_EMBEDDED = _kinsol.SUNLINEARSOLVER_MATRIX_EMBEDDED
 SUNLINEARSOLVER_BAND = _kinsol.SUNLINEARSOLVER_BAND
 SUNLINEARSOLVER_DENSE = _kinsol.SUNLINEARSOLVER_DENSE
 SUNLINEARSOLVER_KLU = _kinsol.SUNLINEARSOLVER_KLU
@@ -473,6 +552,8 @@ SUNLINEARSOLVER_SPTFQMR = _kinsol.SUNLINEARSOLVER_SPTFQMR
 SUNLINEARSOLVER_SUPERLUDIST = _kinsol.SUNLINEARSOLVER_SUPERLUDIST
 SUNLINEARSOLVER_SUPERLUMT = _kinsol.SUNLINEARSOLVER_SUPERLUMT
 SUNLINEARSOLVER_CUSOLVERSP_BATCHQR = _kinsol.SUNLINEARSOLVER_CUSOLVERSP_BATCHQR
+SUNLINEARSOLVER_MAGMADENSE = _kinsol.SUNLINEARSOLVER_MAGMADENSE
+SUNLINEARSOLVER_ONEMKLDENSE = _kinsol.SUNLINEARSOLVER_ONEMKLDENSE
 SUNLINEARSOLVER_CUSTOM = _kinsol.SUNLINEARSOLVER_CUSTOM
 class SUNLinearSolver_Ops(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
@@ -482,6 +563,7 @@ class SUNLinearSolver_Ops(object):
     setatimes = property(_kinsol.SUNLinearSolver_Ops_setatimes_get, _kinsol.SUNLinearSolver_Ops_setatimes_set)
     setpreconditioner = property(_kinsol.SUNLinearSolver_Ops_setpreconditioner_get, _kinsol.SUNLinearSolver_Ops_setpreconditioner_set)
     setscalingvectors = property(_kinsol.SUNLinearSolver_Ops_setscalingvectors_get, _kinsol.SUNLinearSolver_Ops_setscalingvectors_set)
+    setzeroguess = property(_kinsol.SUNLinearSolver_Ops_setzeroguess_get, _kinsol.SUNLinearSolver_Ops_setzeroguess_set)
     initialize = property(_kinsol.SUNLinearSolver_Ops_initialize_get, _kinsol.SUNLinearSolver_Ops_initialize_set)
     setup = property(_kinsol.SUNLinearSolver_Ops_setup_get, _kinsol.SUNLinearSolver_Ops_setup_set)
     solve = property(_kinsol.SUNLinearSolver_Ops_solve_get, _kinsol.SUNLinearSolver_Ops_solve_set)
@@ -504,6 +586,7 @@ class SUNLinearSolver(object):
     __repr__ = _swig_repr
     content = property(_kinsol.SUNLinearSolver_content_get, _kinsol.SUNLinearSolver_content_set)
     ops = property(_kinsol.SUNLinearSolver_ops_get, _kinsol.SUNLinearSolver_ops_set)
+    sunctx = property(_kinsol.SUNLinearSolver_sunctx_get, _kinsol.SUNLinearSolver_sunctx_set)
 
     def __init__(self):
         _kinsol.SUNLinearSolver_swiginit(self, _kinsol.new_SUNLinearSolver())
@@ -513,8 +596,8 @@ class SUNLinearSolver(object):
 _kinsol.SUNLinearSolver_swigregister(SUNLinearSolver)
 
 
-def SUNLinSolNewEmpty():
-    return _kinsol.SUNLinSolNewEmpty()
+def SUNLinSolNewEmpty(sunctx):
+    return _kinsol.SUNLinSolNewEmpty(sunctx)
 
 def SUNLinSolFreeEmpty(S):
     return _kinsol.SUNLinSolFreeEmpty(S)
@@ -533,6 +616,9 @@ def SUNLinSolSetPreconditioner(S, P_data, Pset, Psol):
 
 def SUNLinSolSetScalingVectors(S, s1, s2):
     return _kinsol.SUNLinSolSetScalingVectors(S, s1, s2)
+
+def SUNLinSolSetZeroGuess(S, onoff):
+    return _kinsol.SUNLinSolSetZeroGuess(S, onoff)
 
 def SUNLinSolInitialize(S):
     return _kinsol.SUNLinSolInitialize(S)
@@ -613,6 +699,7 @@ class SUNNonlinearSolver(object):
     __repr__ = _swig_repr
     content = property(_kinsol.SUNNonlinearSolver_content_get, _kinsol.SUNNonlinearSolver_content_set)
     ops = property(_kinsol.SUNNonlinearSolver_ops_get, _kinsol.SUNNonlinearSolver_ops_set)
+    sunctx = property(_kinsol.SUNNonlinearSolver_sunctx_get, _kinsol.SUNNonlinearSolver_sunctx_set)
 
     def __init__(self):
         _kinsol.SUNNonlinearSolver_swiginit(self, _kinsol.new_SUNNonlinearSolver())
@@ -622,8 +709,8 @@ class SUNNonlinearSolver(object):
 _kinsol.SUNNonlinearSolver_swigregister(SUNNonlinearSolver)
 
 
-def SUNNonlinSolNewEmpty():
-    return _kinsol.SUNNonlinSolNewEmpty()
+def SUNNonlinSolNewEmpty(sunctx):
+    return _kinsol.SUNNonlinSolNewEmpty(sunctx)
 
 def SUNNonlinSolFreeEmpty(NLS):
     return _kinsol.SUNNonlinSolFreeEmpty(NLS)
@@ -676,26 +763,14 @@ SUN_NLS_VECTOROP_ERR = _kinsol.SUN_NLS_VECTOROP_ERR
 SUN_NLS_EXT_FAIL = _kinsol.SUN_NLS_EXT_FAIL
 SUN_NLS_MSG_RESIDUAL = _kinsol.SUN_NLS_MSG_RESIDUAL
 
-def N_VGetData(v):
-    return _kinsol.N_VGetData(v)
+def N_VNew_Serial(vec_length, sunctx):
+    return _kinsol.N_VNew_Serial(vec_length, sunctx)
 
-def N_VNew_Serial(vec_length):
-    return _kinsol.N_VNew_Serial(vec_length)
+def N_VNewEmpty_Serial(vec_length, sunctx):
+    return _kinsol.N_VNewEmpty_Serial(vec_length, sunctx)
 
-def N_VNewEmpty_Serial(vec_length):
-    return _kinsol.N_VNewEmpty_Serial(vec_length)
-
-def N_VMake_Serial(vec_length):
-    return _kinsol.N_VMake_Serial(vec_length)
-
-def N_VCloneVectorArray_Serial(count, w):
-    return _kinsol.N_VCloneVectorArray_Serial(count, w)
-
-def N_VCloneVectorArrayEmpty_Serial(count, w):
-    return _kinsol.N_VCloneVectorArrayEmpty_Serial(count, w)
-
-def N_VDestroyVectorArray_Serial(vs, count):
-    return _kinsol.N_VDestroyVectorArray_Serial(vs, count)
+def N_VMake_Serial(vec_length, sunctx):
+    return _kinsol.N_VMake_Serial(vec_length, sunctx)
 
 def N_VGetLength_Serial(v):
     return _kinsol.N_VGetLength_Serial(v)
@@ -820,6 +895,15 @@ def N_VWSqrSumLocal_Serial(x, w):
 def N_VWSqrSumMaskLocal_Serial(x, w, id):
     return _kinsol.N_VWSqrSumMaskLocal_Serial(x, w, id)
 
+def N_VBufSize_Serial(x, size):
+    return _kinsol.N_VBufSize_Serial(x, size)
+
+def N_VBufPack_Serial(x, buf):
+    return _kinsol.N_VBufPack_Serial(x, buf)
+
+def N_VBufUnpack_Serial(x, buf):
+    return _kinsol.N_VBufUnpack_Serial(x, buf)
+
 def N_VEnableFusedOps_Serial(v, tf):
     return _kinsol.N_VEnableFusedOps_Serial(v, tf)
 
@@ -852,6 +936,15 @@ def N_VEnableScaleAddMultiVectorArray_Serial(v, tf):
 
 def N_VEnableLinearCombinationVectorArray_Serial(v, tf):
     return _kinsol.N_VEnableLinearCombinationVectorArray_Serial(v, tf)
+
+def N_VCloneVectorArray_Serial(count, w):
+    return _kinsol.N_VCloneVectorArray_Serial(count, w)
+
+def N_VCloneVectorArrayEmpty_Serial(count, w):
+    return _kinsol.N_VCloneVectorArrayEmpty_Serial(count, w)
+
+def N_VDestroyVectorArray_Serial(vs, count):
+    return _kinsol.N_VDestroyVectorArray_Serial(vs, count)
 KIN_SUCCESS = _kinsol.KIN_SUCCESS
 KIN_INITIAL_GUESS_OK = _kinsol.KIN_INITIAL_GUESS_OK
 KIN_STEP_LT_STPTOL = _kinsol.KIN_STEP_LT_STPTOL
@@ -872,6 +965,11 @@ KIN_SYSFUNC_FAIL = _kinsol.KIN_SYSFUNC_FAIL
 KIN_FIRST_SYSFUNC_ERR = _kinsol.KIN_FIRST_SYSFUNC_ERR
 KIN_REPTD_SYSFUNC_ERR = _kinsol.KIN_REPTD_SYSFUNC_ERR
 KIN_VECTOROP_ERR = _kinsol.KIN_VECTOROP_ERR
+KIN_CONTEXT_ERR = _kinsol.KIN_CONTEXT_ERR
+KIN_ORTH_MGS = _kinsol.KIN_ORTH_MGS
+KIN_ORTH_ICWY = _kinsol.KIN_ORTH_ICWY
+KIN_ORTH_CGS2 = _kinsol.KIN_ORTH_CGS2
+KIN_ORTH_DCGS2 = _kinsol.KIN_ORTH_DCGS2
 KIN_ETACHOICE1 = _kinsol.KIN_ETACHOICE1
 KIN_ETACHOICE2 = _kinsol.KIN_ETACHOICE2
 KIN_ETACONSTANT = _kinsol.KIN_ETACONSTANT
@@ -880,8 +978,11 @@ KIN_LINESEARCH = _kinsol.KIN_LINESEARCH
 KIN_PICARD = _kinsol.KIN_PICARD
 KIN_FP = _kinsol.KIN_FP
 
-def KINCreate():
-    return _kinsol.KINCreate()
+def KINCreate(sunctx):
+    return _kinsol.KINCreate(sunctx)
+
+def KINInit(kinmem, func, tmpl):
+    return _kinsol.KINInit(kinmem, func, tmpl)
 
 def KINSol(kinmem, uu, strategy, u_scale, f_scale):
     return _kinsol.KINSol(kinmem, uu, strategy, u_scale, f_scale)
@@ -901,14 +1002,29 @@ def KINSetInfoHandlerFn(kinmem, ihfun, ih_data):
 def KINSetInfoFile(kinmem, infofp):
     return _kinsol.KINSetInfoFile(kinmem, infofp)
 
-def KINSetPrintLevel(kinmemm, printfl):
-    return _kinsol.KINSetPrintLevel(kinmemm, printfl)
+def KINSetUserData(kinmem, user_data):
+    return _kinsol.KINSetUserData(kinmem, user_data)
+
+def KINSetPrintLevel(kinmem, printfl):
+    return _kinsol.KINSetPrintLevel(kinmem, printfl)
+
+def KINSetDamping(kinmem, beta):
+    return _kinsol.KINSetDamping(kinmem, beta)
 
 def KINSetMAA(kinmem, maa):
     return _kinsol.KINSetMAA(kinmem, maa)
 
+def KINSetOrthAA(kinmem, orthaa):
+    return _kinsol.KINSetOrthAA(kinmem, orthaa)
+
+def KINSetDelayAA(kinmem, delay):
+    return _kinsol.KINSetDelayAA(kinmem, delay)
+
 def KINSetDampingAA(kinmem, beta):
     return _kinsol.KINSetDampingAA(kinmem, beta)
+
+def KINSetReturnNewest(kinmem, ret_newest):
+    return _kinsol.KINSetReturnNewest(kinmem, ret_newest)
 
 def KINSetNumMaxIters(kinmem, mxiter):
     return _kinsol.KINSetNumMaxIters(kinmem, mxiter)
@@ -993,6 +1109,15 @@ def KINFree(kinmem):
 
 def KINSetJacTimesVecSysFn(kinmem, jtimesSysFn):
     return _kinsol.KINSetJacTimesVecSysFn(kinmem, jtimesSysFn)
+
+def KINSetDebugFile(kinmem, debugfp):
+    return _kinsol.KINSetDebugFile(kinmem, debugfp)
+
+def KINPyRegisterFn(f, name):
+    return _kinsol.KINPyRegisterFn(f, name)
+
+def KINPyRegisterKINSysFn(f):
+    return _kinsol.KINPyRegisterKINSysFn(f)
 KINBBDPRE_SUCCESS = _kinsol.KINBBDPRE_SUCCESS
 KINBBDPRE_PDATA_NULL = _kinsol.KINBBDPRE_PDATA_NULL
 KINBBDPRE_FUNC_UNRECVR = _kinsol.KINBBDPRE_FUNC_UNRECVR
@@ -1056,72 +1181,27 @@ def KINGetLastLinFlag(kinmem):
 
 def KINGetLinReturnFlagName(flag):
     return _kinsol.KINGetLinReturnFlagName(flag)
-class KINSysPyFn(object):
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    __swig_destroy__ = _kinsol.delete_KINSysPyFn
-
-    def actual_sysfun(self, y, g, udata):
-        return _kinsol.KINSysPyFn_actual_sysfun(self, y, g, udata)
-
-    def __init__(self):
-        if self.__class__ == KINSysPyFn:
-            _self = None
-        else:
-            _self = self
-        _kinsol.KINSysPyFn_swiginit(self, _kinsol.new_KINSysPyFn(_self, ))
-    def __disown__(self):
-        self.this.disown()
-        _kinsol.disown_KINSysPyFn(self)
-        return weakref.proxy(self)
-
-# Register KINSysPyFn in _kinsol:
-_kinsol.KINSysPyFn_swigregister(KINSysPyFn)
-
-class KINSysFnCaller(object):
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-
-    def __init__(self):
-        _kinsol.KINSysFnCaller_swiginit(self, _kinsol.new_KINSysFnCaller())
-    __swig_destroy__ = _kinsol.delete_KINSysFnCaller
-
-    def cleanup(self):
-        return _kinsol.KINSysFnCaller_cleanup(self)
-
-    def setFn(self, cb):
-        return _kinsol.KINSysFnCaller_setFn(self, cb)
-
-    def setArgs(self, y, g, udata=None):
-        return _kinsol.KINSysFnCaller_setArgs(self, y, g, udata)
-
-    def call(self):
-        return _kinsol.KINSysFnCaller_call(self)
-
-# Register KINSysFnCaller in _kinsol:
-_kinsol.KINSysFnCaller_swigregister(KINSysFnCaller)
 
 
-def KINPyInterfaceSysFn(y, g, user_data):
-    return _kinsol.KINPyInterfaceSysFn(y, g, user_data)
+import ctypes
 
-def KINInitPy(kmem, caller, y):
-    return _kinsol.KINInitPy(kmem, caller, y)
+# We provide the ctypes for all the callback functions in KINSol here as
+# a convenience to our users. They could always define it themselves too.
+class cfunctypes():
+  KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int)
 
-def WrapPythonSysFn(user_sysfun):
-  caller = KINSysFnCaller()
-  caller.setFn(KINSysPyFnPyChild(user_sysfun).__disown__())
-  return caller
+def RegisterFn(py_callback, py_callback_type):
+  f_in = py_callback_type(py_callback)
+  f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+  if py_callback_type == cfunctypes.KINSysFn:
+    return _kinsol.KINPyRegisterKINSysFn(f_in_ptr)
 
-# inherits from the C++ KinSysPyFn class
-class KINSysPyFnPyChild(KINSysPyFn):
-  def __init__(self, user_sysfun):
-    KINSysPyFn.__init__(self)
-    self.user_sysfun = user_sysfun
+def RegisterNumbaFn(py_callback, py_callback_type):
+  f = py_callback.ctypes
+  f_ptr = ctypes.cast(f, ctypes.c_void_p).value
 
-  def actual_sysfun(self, y, g, user_data):
-    self.user_sysfun(y, g, user_data)
-    return 0
+  if py_callback_type == cfunctypes.KINSysFn:
+    return  _kinsol.KINPyRegisterKINSysFn(f_ptr)
 
 
 
