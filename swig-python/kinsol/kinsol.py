@@ -1113,11 +1113,8 @@ def KINSetJacTimesVecSysFn(kinmem, jtimesSysFn):
 def KINSetDebugFile(kinmem, debugfp):
     return _kinsol.KINSetDebugFile(kinmem, debugfp)
 
-def KINPyRegisterFn(f, name):
-    return _kinsol.KINPyRegisterFn(f, name)
-
-def KINPyRegisterKINSysFn(f):
-    return _kinsol.KINPyRegisterKINSysFn(f)
+def KINPyRegisterKINPySysFn(f):
+    return _kinsol.KINPyRegisterKINPySysFn(f)
 KINBBDPRE_SUCCESS = _kinsol.KINBBDPRE_SUCCESS
 KINBBDPRE_PDATA_NULL = _kinsol.KINBBDPRE_PDATA_NULL
 KINBBDPRE_FUNC_UNRECVR = _kinsol.KINBBDPRE_FUNC_UNRECVR
@@ -1188,20 +1185,20 @@ import ctypes
 # We provide the ctypes for all the callback functions in KINSol here as
 # a convenience to our users. They could always define it themselves too.
 class cfunctypes():
-  KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int)
+  KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object)
 
 def RegisterFn(py_callback, py_callback_type):
   f_in = py_callback_type(py_callback)
   f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
   if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegisterKINSysFn(f_in_ptr)
+    return _kinsol.KINPyRegisterKINPySysFn(f_in_ptr)
 
 def RegisterNumbaFn(py_callback, py_callback_type):
   f = py_callback.ctypes
   f_ptr = ctypes.cast(f, ctypes.c_void_p).value
 
   if py_callback_type == cfunctypes.KINSysFn:
-    return  _kinsol.KINPyRegisterKINSysFn(f_ptr)
+    return  _kinsol.KINPyRegisterKINPySysFn(f_ptr)
 
 
 

@@ -28,14 +28,66 @@ import kinsol as kin
 import numpy as np
 import numba as nb
 from numba import cfunc
+from timeit import default_timer as timer
+
+class Problem():
+
+  def __init__(self):
+    # constants
+    self.NEQ    = 3     # number of equations
+    self.Y10    = 1.0   # initial y components
+    self.Y20    = 0.0
+    self.Y30    = 0.0
+    self.TOL    = 1e-10 # function tolerance
+    self.DSTEP  = 0.1   # size of the single time step used
+    self.PRIORS = 2
+
+  def funcRoberts(self, y, y_len, g, g_len, udata):
+    y1 = y[0]
+    y2 = y[1]
+    y3 = y[2]
+
+    yd1 = self.DSTEP * (-0.04*y1 + 1.0e4*y2*y3)
+    yd3 = self.DSTEP * 3.0e2*y2*y2
+
+    g[0] = yd1 + self.Y10
+    g[1] = -yd1 - yd3 + self.Y20
+    g[2] = yd3 + self.Y30
+
+    return 0
+
+
+def funcRobertsCtypes(y, y_len, g, g_len, udata):
+  # constants
+  NEQ    = udata.NEQ   # number of equations
+  Y10    = udata.Y10   # initial y components
+  Y20    = udata.Y20
+  Y30    = udata.Y30
+  TOL    = udata.TOL   # function tolerance
+  DSTEP  = udata.DSTEP # size of the single time step used
+  PRIORS = udata.PRIORS
+
+  y1 = y[0]
+  y2 = y[1]
+  y3 = y[2]
+
+  yd1 = DSTEP * (-0.04*y1 + 1.0e4*y2*y3)
+  yd3 = DSTEP * 3.0e2*y2*y2
+
+  g[0] = yd1 + Y10
+  g[1] = -yd1 - yd3 + Y20
+  g[2] = yd3 + Y30
+
+  return 0
+
 
 SysFnSpec = nb.types.int32(nb.types.CPointer(nb.types.double),
                            nb.types.int32,
                            nb.types.CPointer(nb.types.double),
-                           nb.types.int32)
-
+                           nb.types.int32,
+                           nb.types.CPointer(nb.types.void))
 @cfunc(SysFnSpec)
-def funcRoberts(y, y_len, g, g_len):
+def funcRobertsNumba(y, y_len, g, g_len, udata):
   # constants
   NEQ    = 3     # number of equations
   Y10    = 1.0   # initial y components
@@ -58,34 +110,11 @@ def funcRoberts(y, y_len, g, g_len):
 
   return 0
 
-class Problem:
 
-  def __init__(self):
-    # constants
-    self.NEQ    = 3     # number of equations
-    self.Y10    = 1.0   # initial y components
-    self.Y20    = 0.0
-    self.Y30    = 0.0
-    self.TOL    = 1e-10 # function tolerance
-    self.DSTEP  = 0.1   # size of the single time step used
-    self.PRIORS = 2
-
-  def funcRoberts(self, y, y_len, g, g_len):
-    y1 = y[0]
-    y2 = y[1]
-    y3 = y[2]
-
-    yd1 = self.DSTEP * (-0.04*y1 + 1.0e4*y2*y3)
-    yd3 = self.DSTEP * 3.0e2*y2*y2
-
-    g[0] = yd1 + self.Y10
-    g[1] = -yd1 - yd3 + self.Y20
-    g[2] = yd3 + self.Y30
-
-    return 0
-
-
-def solve():
+def solve(problem, callback_option):
+  print("------------------------------------------------------------\n")
+  print("------------------------------------------------------------\n")
+  print("Using callback option %d\n" % callback_option)
   print("Example problem from chemical kinetics solving")
   print("the first time step in a Backward Euler solution for the")
   print("following three rate equations:")
@@ -96,19 +125,19 @@ def solve():
   print("conditions: y1 = 1.0, y2 = y3 = 0.")
   print("Solution method: Anderson accelerated fixed point iteration.\n")
 
+  start = timer()
+
+  sunctx = kin.Context().get()
+
   # --------------------------------------
   # Create vectors for solution and scales
   # --------------------------------------
-  problem = Problem()
 
-  # SUNDIALS context
-  sunctx = kin.Context().get()
-
-  # data arrays
+  # Underlying data arrays for the vectors
   y = np.zeros(problem.NEQ)
   scale = np.zeros(problem.NEQ)
 
-  # create N_Vector objects
+  # Create N_Vector objects
   sunvec_y = kin.N_VMake_Serial(y, sunctx)
   sunvec_scale = kin.N_VMake_Serial(scale, sunctx)
 
@@ -118,26 +147,39 @@ def solve():
 
   kmem = kin.KINCreate(sunctx)
 
-  # set number of prior residuals used in Anderson acceleration
+  # Set number of prior residuals used in Anderson acceleration.
   flag = kin.KINSetMAA(kmem, problem.PRIORS)
   if flag < 0: raise RuntimeError(f'KINSetMAA returned {flag}')
 
-  # kin.KINSetUserData(kmem, ctypes.cast(ctypes.pointer(ctypes.py_object(problem)), ctypes.c_void_p).value)
+  kin.KINSetUserData(kmem, problem)
 
-  # Have to wrap the python system function so that it is callable from C
-  # Use numba.cfunc for the best performance:
-  sysfn = kin.RegisterNumbaFn(funcRoberts, kin.cfunctypes.KINSysFn)
+  #----------------------------------------------------------------------------
+  # It is required to wrap the python system function so that it is callable
+  # from C. The kin.Register<>Fn functions can be used to do this. There are a
+  # few options:
+  #----------------------------------------------------------------------------
 
-  # Or, if you need access to problem data, fallback to using ctypes and a lambda to capture the problem class instance:
-  # sysfn = kin.RegisterFn(lambda y,y_len,g,g_len: problem.funcRoberts(y,y_len,g,g_len), kin.cfunctypes.KINSysFn)
+  # (1) Use a numba.cfunc to try and achieve the best performance.
+  #     The drawback here is that the numba functions cannot access the problem data.
+  if callback_option == 1:
+    sysfn = kin.RegisterNumbaFn(funcRobertsNumba, kin.cfunctypes.KINSysFn)
+
+  # (2) Use ctypes instead.
+  #     The drawback here is slower performance.
+  if callback_option == 2:
+    sysfn = kin.RegisterFn(funcRobertsCtypes, kin.cfunctypes.KINSysFn)
+
+  # (3) Note, with ctypes, you can even pass a capturing lambda:
+  if callback_option == 3:
+    sysfn = kin.RegisterFn(lambda y,y_len,g,g_len,udata: problem.funcRoberts(y,y_len,g,g_len,udata), kin.cfunctypes.KINSysFn)
 
   # initialize the solver
   flag = kin.KINInit(kmem, sysfn, sunvec_y)
   if flag < 0: raise RuntimeError(f'KINInitPy returned {flag}')
 
-  # -------------------
-  # Set optional inputs
-  # -------------------
+  # --------------------------
+  # Set KINSOL optional inputs
+  # --------------------------
 
   # specify stopping tolerance based on residual
   fnormtol = problem.TOL
@@ -187,6 +229,9 @@ def solve():
   kin.N_VDestroy(sunvec_y)
   kin.N_VDestroy(sunvec_scale)
 
+  end = timer()
+  print("\nElapsed time: %g\n" % (end - start))
+
 
 def PrintFinalStats(kmem):
   flag, nni = kin.KINGetNumNonlinSolvIters(kmem)
@@ -194,8 +239,10 @@ def PrintFinalStats(kmem):
   flag, nfe = kin.KINGetNumFuncEvals(kmem)
   if flag < 0: raise RuntimeError(f'KINGetNumFuncEvals returned {flag}')
 
-  print('\nFinal Statistics.. \n')
+  print('\nFinal Statistics...')
   print('nni      = %6ld     nfe     = %6ld' % (nni, nfe))
 
 if __name__ == '__main__':
-  solve()
+  solve(Problem(), 1)
+  solve(Problem(), 2)
+  solve(Problem(), 3)

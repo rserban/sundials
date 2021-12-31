@@ -24,13 +24,16 @@
 extern "C" {
 #endif
 
-typedef void* KINPyCallbackFn;
-SUNDIALS_EXPORT KINPyCallbackFn KINPyRegisterFn(KINPyCallbackFn f, const char* name);
+typedef int (*KINPySysFn)(realtype* uu, sunindextype uu_len, realtype* fval, sunindextype fval_len, void* user_data);
+SUNDIALS_EXPORT KINSysFn KINPyRegisterKINPySysFn(KINPySysFn f);
 
-typedef int (*KINPySysFn)(double* uu, int uu_len, double* fval, int fval_len);
-SUNDIALS_STATIC_INLINE KINSysFn KINPyRegisterKINSysFn(KINPySysFn f) {
-  return ((KINSysFn) KINPyRegisterFn((KINPyCallbackFn) f, "KINPySysFn"));
-}
+// typedef void (*KINErrHandlerFn)(int error_code,
+//                                 const char *module, const char *function,
+//                                 char *msg, void *user_data);
+// SUNDIALS_EXPORT KINErrHandlerFn();
+
+// typedef void (*KINInfoHandlerFn)(const char *module, const char *function,
+//                                  char *msg, void *user_data);
 
 #ifdef __cplusplus  /* wrapper to enable C++ usage */
 }

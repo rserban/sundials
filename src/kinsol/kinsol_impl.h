@@ -50,19 +50,6 @@ extern "C" {
 
 /*
  * -----------------------------------------------------------------
- * Types : struct _KINPyUserFunctionRegistry
- * -----------------------------------------------------------------
- *
- * -----------------------------------------------------------------
- */
-struct _KINPyUserFunctionRegistry
-{
-  KINPySysFn _KINPySysFn_;
-};
-typedef struct _KINPyUserFunctionRegistry KINPyUserFunctionRegistry;
-
-/*
- * -----------------------------------------------------------------
  * Types : struct KINMemRec and struct *KINMem
  * -----------------------------------------------------------------
  * A variable declaration of type struct *KINMem denotes a

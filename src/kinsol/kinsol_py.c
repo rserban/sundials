@@ -8,19 +8,26 @@
 
 #include <sundials/sundials_math.h>
 #include <kinsol/kinsol_py.h>
-#include "kinsol_impl.h"
 
-static KINPyUserFunctionRegistry kin_pyfnregistry;
+struct KINPyUserFunctionRegistry;
+static struct KINPyUserFunctionRegistry kin_pyfnregistry;
+
+/*
+ * Can we autogenerate the below??
+ */
+
+struct KINPyUserFunctionRegistry
+{
+  KINPySysFn _KINPySysFn_;
+};
 
 int KINPySysFnDirector(N_Vector uu, N_Vector fval, void* user_data)
 {
-  return kin_pyfnregistry._KINPySysFn_(N_VGetArrayPointer(uu), N_VGetLength(uu), N_VGetArrayPointer(fval), N_VGetLength(fval));
+  return kin_pyfnregistry._KINPySysFn_(N_VGetArrayPointer(uu), N_VGetLength(uu), N_VGetArrayPointer(fval), N_VGetLength(fval), user_data);
 }
 
-KINPyCallbackFn KINPyRegisterFn(KINPyCallbackFn f, const char* name)
+KINSysFn KINPyRegisterKINPySysFn(KINPySysFn f)
 {
-  if (strcmp(name, "KINPySysFn") == 0) {
-    kin_pyfnregistry._KINPySysFn_ = (KINPySysFn) f;
-    return ((KINPyCallbackFn) KINPySysFnDirector);
-  }
+  kin_pyfnregistry._KINPySysFn_ = (KINPySysFn) f;
+  return KINPySysFnDirector;
 }
