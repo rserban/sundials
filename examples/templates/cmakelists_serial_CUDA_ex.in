@@ -2,7 +2,7 @@
 # Programmer(s): Slaven Peles and Cody Balos @ LLNL
 # -----------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -19,31 +19,40 @@
 # -----------------------------------------------------------------
 
 # Set the minimum required cmake version
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION @CMAKE_VERSION@)
 
 # Set cache variables for compilers and flags
 set(CMAKE_C_COMPILER
-  @CMAKE_C_COMPILER@
+  @_EXAMPLES_C_COMPILER@
   CACHE FILEPATH "C compiler")
 
 set(CMAKE_C_FLAGS
   "@CMAKE_C_FLAGS@"
   CACHE STRING "C compiler flags")
 
+if("@CMAKE_C_STANDARD@")
+  set(CMAKE_C_STANDARD "@CMAKE_C_STANDARD@"
+    CACHE STRING "C standard")
+endif()
+
 set(CMAKE_CXX_COMPILER
-  @CMAKE_CXX_COMPILER@
+  @_EXAMPLES_CXX_COMPILER@
   CACHE FILEPATH "C++ compiler")
 
 set(CMAKE_CXX_FLAGS
   "@CMAKE_CXX_FLAGS@"
   CACHE STRING "C++ compiler flags")
 
+set(CMAKE_CXX_STANDARD
+  @CMAKE_CXX_STANDARD@
+  CACHE STRING "C++ standard")
+
 set(CMAKE_CUDA_COMPILER
   @CMAKE_CUDA_COMPILER@
   CACHE FILEPATH "CUDA compiler")
 
 set(CMAKE_CUDA_HOST_COMPILER
-  @CMAKE_CXX_COMPILER@
+  @_EXAMPLES_CUDA_HOST_COMPILER@
   CACHE FILEPATH "CUDA host compiler")
 
 # Specify project name and languages
@@ -77,17 +86,23 @@ find_library(SUNDIALS_NVEC_LIB
   sundials_nveccuda ${SUNDIALS_LIBRARY_DIR}
   DOC "NVECTOR_CUDA library")
 
+find_library(SUNDIALS_CUSPARSEMAT_LIB
+  sundials_sunmatrixcusparse ${SUNDIALS_LIBRARY_DIR}
+  DOC "SUNMATRIX_CUSPARSE library")
+
 find_library(SUNDIALS_CUSOLVERSP_LIB
   sundials_sunlinsolcusolversp
   ${SUNDIALS_LIBRARY_DIR}
   DOC "SUNLINSOL_CUSOLVERSP linear solver library")
 
-# Set additional libraries
-set(SUNDIALS_EXTRA_LIBS -L${SUNDIALS_LIBRARY_DIR} @SUNMAT_LIB@ @LIBS@ CACHE STRING "Additional libraries")
-
 # For SUNDIALS module examples the solver library is not needed
 if(NOT SUNDIALS_SOLVER_LIB)
   set(SUNDIALS_SOLVER_LIB "")
+endif()
+
+# For some examples the SUNDIALS_CUSPARSEMAT_LIB library is not needed
+if(NOT SUNDIALS_CUSPARSEMAT_LIB)
+  set(SUNDIALS_CUSPARSEMAT_LIB "")
 endif()
 
 # For some examples the SUNLINSOL_CUSOLVERSP library is not needed
@@ -95,10 +110,15 @@ if(NOT SUNDIALS_CUSOLVERSP_LIB)
   set(SUNDIALS_CUSOLVERSP_LIB "")
 endif()
 
+# Set additional libraries
+set(SUNDIALS_EXTRA_LIBS -L${SUNDIALS_LIBRARY_DIR} @LIBS@ CACHE STRING "Additional libraries")
+
 # List of SUNDIALS libraries
 set(SUNDIALS_LIBRARIES
+  -L${SUNDIALS_LIBRARY_DIR}
   ${SUNDIALS_SOLVER_LIB}
   ${SUNDIALS_NVEC_LIB}
+  ${SUNDIALS_CUSPARSEMAT_LIB}
   ${SUNDIALS_EXTRA_LIBS})
 
 # ------------------------------------------------------------------------------
@@ -142,6 +162,7 @@ endif()
 set(SUNDIALS_LIBRARIES
   ${SUNDIALS_SOLVER_LIB}
   ${SUNDIALS_NVEC_LIB}
+  ${SUNDIALS_CUSPARSEMAT_LIB}
   ${SUNDIALS_CUSOLVERSP_LIB}
   ${SUNDIALS_EXTRA_LIBS})
 

@@ -1,6 +1,17 @@
 /* -----------------------------------------------------------------
- * Programmer(s): Carol S. Woodward @ LLNL.  Adapted from the file
- *    kinRoboKin_dns.c by Radu Serban @ LLNL
+ * Programmer(s): Carol S. Woodward @ LLNL.
+ * -----------------------------------------------------------------
+ * Based on kinRoboKin_dns.c by Radu Serban @ LLNL
+ * -----------------------------------------------------------------
+ * SUNDIALS Copyright Start
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
+ * and Southern Methodist University.
+ * All rights reserved.
+ *
+ * See the top-level LICENSE and NOTICE files for details.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SUNDIALS Copyright End
  * -----------------------------------------------------------------
  * This example solves a nonlinear system from robot kinematics.
  *
@@ -8,7 +19,7 @@
  *             C.A. Floudas, P.M. Pardalos et al.
  *             Kluwer Academic Publishers, 1999.
  * Test problem 6 from Section 14.1, Chapter 14
- * 
+ *
  * The nonlinear system is solved by KINSOL using the SUPERLU_MT linear
  * solver.
  *
@@ -30,7 +41,7 @@
 
 /* Problem Constants */
 
-#define NVAR  8              /* variables */ 
+#define NVAR  8              /* variables */
 #define NEQ   3*NVAR         /* equations + bounds */
 
 #define FTOL   RCONST(1.e-5) /* function tolerance */
@@ -47,7 +58,7 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
                void *user_data, N_Vector tmp1, N_Vector tmp2);
 static void PrintOutput(N_Vector y);
 static void PrintFinalStats(void *kmem);
-static int check_flag(void *flagvalue, const char *funcname, int opt);
+static int check_retval(void *retvalvalue, const char *funcname, int opt);
 
 /*
  *--------------------------------------------------------------------
@@ -57,9 +68,10 @@ static int check_flag(void *flagvalue, const char *funcname, int opt);
 
 int main()
 {
+  SUNContext sunctx;
   realtype fnormtol, scsteptol;
   N_Vector y, scale, constraints;
-  int mset, flag, i;
+  int mset, retval, i;
   void *kmem;
   SUNMatrix J;
   SUNLinearSolver LS;
@@ -75,64 +87,68 @@ int main()
   printf("8 variables; -1 <= x_i <= 1\n");
   printf("KINSOL problem size: 8 + 2*8 = 24 \n\n");
 
+  /* Create the SUNDIALS context that all SUNDIALS objects require */
+  retval = SUNContext_Create(NULL, &sunctx);
+  if (check_retval(&retval, "SUNContext_Create", 1)) return(1);
+
   /* Create vectors for solution, scales, and constraints */
 
-  y = N_VNew_Serial(NEQ);
-  if (check_flag((void *)y, "N_VNew_Serial", 0)) return(1);
+  y = N_VNew_Serial(NEQ, sunctx);
+  if (check_retval((void *)y, "N_VNew_Serial", 0)) return(1);
 
-  scale = N_VNew_Serial(NEQ);
-  if (check_flag((void *)scale, "N_VNew_Serial", 0)) return(1);
+  scale = N_VNew_Serial(NEQ, sunctx);
+  if (check_retval((void *)scale, "N_VNew_Serial", 0)) return(1);
 
-  constraints = N_VNew_Serial(NEQ);
-  if (check_flag((void *)constraints, "N_VNew_Serial", 0)) return(1);
+  constraints = N_VNew_Serial(NEQ, sunctx);
+  if (check_retval((void *)constraints, "N_VNew_Serial", 0)) return(1);
 
   /* Initialize and allocate memory for KINSOL */
 
-  kmem = KINCreate();
-  if (check_flag((void *)kmem, "KINCreate", 0)) return(1);
+  kmem = KINCreate(sunctx);
+  if (check_retval((void *)kmem, "KINCreate", 0)) return(1);
 
-  flag = KINInit(kmem, func, y); /* y passed as a template */
-  if (check_flag(&flag, "KINInit", 1)) return(1);
+  retval = KINInit(kmem, func, y); /* y passed as a template */
+  if (check_retval(&retval, "KINInit", 1)) return(1);
 
   /* Set optional inputs */
 
   N_VConst(ZERO,constraints);
   for (i = NVAR+1; i <= NEQ; i++) Ith(constraints, i) = ONE;
-  
-  flag = KINSetConstraints(kmem, constraints);
-  if (check_flag(&flag, "KINSetConstraints", 1)) return(1);
 
-  fnormtol  = FTOL; 
-  flag = KINSetFuncNormTol(kmem, fnormtol);
-  if (check_flag(&flag, "KINSetFuncNormTol", 1)) return(1);
+  retval = KINSetConstraints(kmem, constraints);
+  if (check_retval(&retval, "KINSetConstraints", 1)) return(1);
+
+  fnormtol  = FTOL;
+  retval = KINSetFuncNormTol(kmem, fnormtol);
+  if (check_retval(&retval, "KINSetFuncNormTol", 1)) return(1);
 
   scsteptol = STOL;
-  flag = KINSetScaledStepTol(kmem, scsteptol);
-  if (check_flag(&flag, "KINSetScaledStepTol", 1)) return(1);
-  
+  retval = KINSetScaledStepTol(kmem, scsteptol);
+  if (check_retval(&retval, "KINSetScaledStepTol", 1)) return(1);
+
   /* Create sparse SUNMatrix */
   nnz = 56; /* number of nonzeros in the Jacobian */
-  J = SUNSparseMatrix(NEQ, NEQ, nnz, CSC_MAT);
-  if(check_flag((void *)J, "SUNSparseMatrix", 0)) return(1);
+  J = SUNSparseMatrix(NEQ, NEQ, nnz, CSC_MAT, sunctx);
+  if(check_retval((void *)J, "SUNSparseMatrix", 0)) return(1);
 
   /* Create SuperLUMT solver object */
   num_threads = 2; /* number fo threads to use */
-  LS = SUNLinSol_SuperLUMT(y, J, num_threads);
-  if(check_flag((void *)LS, "SUNLinSol_SuperLUMT", 0)) return(1);
+  LS = SUNLinSol_SuperLUMT(y, J, num_threads, sunctx);
+  if(check_retval((void *)LS, "SUNLinSol_SuperLUMT", 0)) return(1);
 
   /* Attach the SuperLU_MT linear solver */
-  flag = KINSetLinearSolver(kmem, LS, J);
-  if(check_flag(&flag, "KINSetLinearSolver", 1)) return(1);
+  retval = KINSetLinearSolver(kmem, LS, J);
+  if(check_retval(&retval, "KINSetLinearSolver", 1)) return(1);
 
   /* Set the Jacobian function */
-  flag = KINSetJacFn(kmem, jac);
-  if (check_flag(&flag, "KINSetJacFn", 1)) return(1);
+  retval = KINSetJacFn(kmem, jac);
+  if (check_retval(&retval, "KINSetJacFn", 1)) return(1);
 
   /* Indicate exact Newton */
 
   mset = 1;
-  flag = KINSetMaxSetupCalls(kmem, mset);
-  if (check_flag(&flag, "KINSetMaxSetupCalls", 1)) return(1);
+  retval = KINSetMaxSetupCalls(kmem, mset);
+  if (check_retval(&retval, "KINSetMaxSetupCalls", 1)) return(1);
 
   /* Initial guess */
 
@@ -145,17 +161,17 @@ int main()
   /* Call KINSol to solve problem */
 
   N_VConst(ONE,scale);
-  flag = KINSol(kmem,           /* KINSol memory block */
+  retval = KINSol(kmem,           /* KINSol memory block */
                 y,              /* initial guess on input; solution vector */
                 KIN_LINESEARCH, /* global strategy choice */
                 scale,          /* scaling vector, for the variable cc */
                 scale);         /* scaling vector for function values fval */
-  if (check_flag(&flag, "KINSol", 1)) return(1);
+  if (check_retval(&retval, "KINSol", 1)) return(1);
 
   printf("\nComputed solution:\n");
   PrintOutput(y);
 
-  /* Print final statistics and free memory */  
+  /* Print final statistics and free memory */
 
   PrintFinalStats(kmem);
 
@@ -165,12 +181,13 @@ int main()
   KINFree(&kmem);
   SUNLinSolFree(LS);
   SUNMatDestroy(J);
+  SUNContext_Free(&sunctx);
 
   return(0);
 }
 
-/* 
- * System function 
+/*
+ * System function
  */
 
 static int func(N_Vector y, N_Vector f, void *user_data)
@@ -188,20 +205,20 @@ static int func(N_Vector y, N_Vector f, void *user_data)
   yd = N_VGetArrayPointer(y);
   fd = N_VGetArrayPointer(f);
 
-  x1 = yd[0]; l1 = yd[ 8]; u1 = yd[16]; 
-  x2 = yd[1]; l2 = yd[ 9]; u2 = yd[17]; 
-  x3 = yd[2]; l3 = yd[10]; u3 = yd[18]; 
-  x4 = yd[3]; l4 = yd[11]; u4 = yd[19]; 
-  x5 = yd[4]; l5 = yd[12]; u5 = yd[20]; 
-  x6 = yd[5]; l6 = yd[13]; u6 = yd[21]; 
-  x7 = yd[6]; l7 = yd[14]; u7 = yd[22]; 
-  x8 = yd[7]; l8 = yd[15]; u8 = yd[23]; 
+  x1 = yd[0]; l1 = yd[ 8]; u1 = yd[16];
+  x2 = yd[1]; l2 = yd[ 9]; u2 = yd[17];
+  x3 = yd[2]; l3 = yd[10]; u3 = yd[18];
+  x4 = yd[3]; l4 = yd[11]; u4 = yd[19];
+  x5 = yd[4]; l5 = yd[12]; u5 = yd[20];
+  x6 = yd[5]; l6 = yd[13]; u6 = yd[21];
+  x7 = yd[6]; l7 = yd[14]; u7 = yd[22];
+  x8 = yd[7]; l8 = yd[15]; u8 = yd[23];
 
   /* Nonlinear equations */
 
-  eq1 = - 0.1238*x1 + x7 - 0.001637*x2 
+  eq1 = - 0.1238*x1 + x7 - 0.001637*x2
     - 0.9338*x4 + 0.004731*x1*x3 - 0.3578*x2*x3 - 0.3571;
-  eq2 = 0.2638*x1 - x7 - 0.07745*x2 
+  eq2 = 0.2638*x1 - x7 - 0.07745*x2
     - 0.6734*x4 + 0.2238*x1*x3 + 0.7623*x2*x3 - 0.6022;
   eq3 = 0.3578*x1 + 0.004731*x2 + x6*x8;
   eq4 = - 0.7623*x1 + 0.2238*x2 + 0.3461;
@@ -269,7 +286,7 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
   x8 = yd[7];
 
   SUNMatZero(J);
-  
+
   colptrs[0] = 0;
   colptrs[1] = 7;
   colptrs[2] = 14;
@@ -298,9 +315,9 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
 
   /* Nonlinear equations */
 
-  /* 
-     - 0.1238*x1 + x7 - 0.001637*x2 
-     - 0.9338*x4 + 0.004731*x1*x3 - 0.3578*x2*x3 - 0.3571 
+  /*
+     - 0.1238*x1 + x7 - 0.001637*x2
+     - 0.9338*x4 + 0.004731*x1*x3 - 0.3578*x2*x3 - 0.3571
   */
   /*
   IJth(J,1,1) = - 0.1238 + 0.004731*x3;
@@ -322,7 +339,7 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
   rowvals[31] = 0;
 
   /*
-    0.2638*x1 - x7 - 0.07745*x2 
+    0.2638*x1 - x7 - 0.07745*x2
     - 0.6734*x4 + 0.2238*x1*x3 + 0.7623*x2*x3 - 0.6022
   */
   /*
@@ -429,7 +446,7 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
   data[37] = 2.0*x8;
   rowvals[37] = 7;
 
-  
+
   /*
     Lower bounds ( l_i = 1 + x_i >= 0)
     l_i - 1.0 - x_i
@@ -440,7 +457,7 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
   for(i=1;i<=8;i++) {
     IJth(J,8+i,i)   = -1.0;
     IJth(J,8+i,8+i) =  1.0;
-  } 
+  }
   */
 
   data[5] = -1.0;
@@ -527,7 +544,7 @@ static int jac(N_Vector y, N_Vector f, SUNMatrix J,
 
 }
 
-/* 
+/*
  * Print solution
  */
 
@@ -541,13 +558,13 @@ static void PrintOutput(N_Vector y)
   for(i=1; i<=NVAR; i++) {
 
 #if defined(SUNDIALS_EXTENDED_PRECISION)
-    printf(" %10.6Lg   %10.6Lg   %10.6Lg\n", 
+    printf(" %10.6Lg   %10.6Lg   %10.6Lg\n",
            Ith(y,i+NVAR), Ith(y,i), Ith(y,i+2*NVAR));
 #elif defined(SUNDIALS_DOUBLE_PRECISION)
-    printf(" %10.6g   %10.6g   %10.6g\n", 
+    printf(" %10.6g   %10.6g   %10.6g\n",
            Ith(y,i+NVAR), Ith(y,i), Ith(y,i+2*NVAR));
 #else
-    printf(" %10.6g   %10.6g   %10.6g\n", 
+    printf(" %10.6g   %10.6g   %10.6g\n",
            Ith(y,i+NVAR), Ith(y,i), Ith(y,i+2*NVAR));
 #endif
 
@@ -555,22 +572,22 @@ static void PrintOutput(N_Vector y)
 
 }
 
-/* 
+/*
  * Print final statistics
  */
 
 static void PrintFinalStats(void *kmem)
 {
   long int nni, nfe, nje;
-  int flag;
-  
-  flag = KINGetNumNonlinSolvIters(kmem, &nni);
-  check_flag(&flag, "KINGetNumNonlinSolvIters", 1);
-  flag = KINGetNumFuncEvals(kmem, &nfe);
-  check_flag(&flag, "KINGetNumFuncEvals", 1);
+  int retval;
 
-  flag = KINGetNumJacEvals(kmem, &nje);
-  check_flag(&flag, "KINGetNumJacEvals", 1);
+  retval = KINGetNumNonlinSolvIters(kmem, &nni);
+  check_retval(&retval, "KINGetNumNonlinSolvIters", 1);
+  retval = KINGetNumFuncEvals(kmem, &nfe);
+  check_retval(&retval, "KINGetNumFuncEvals", 1);
+
+  retval = KINGetNumJacEvals(kmem, &nje);
+  check_retval(&retval, "KINGetNumJacEvals", 1);
 
   printf("\nFinal Statistics.. \n");
   printf("nni    = %5ld    nfe   = %5ld \n", nni, nfe);
@@ -581,37 +598,37 @@ static void PrintFinalStats(void *kmem)
  * Check function return value...
  *    opt == 0 means SUNDIALS function allocates memory so check if
  *             returned NULL pointer
- *    opt == 1 means SUNDIALS function returns a flag so check if
- *             flag >= 0
+ *    opt == 1 means SUNDIALS function returns a retval so check if
+ *             retval >= 0
  *    opt == 2 means function allocates memory so check if returned
- *             NULL pointer 
+ *             NULL pointer
  */
 
-static int check_flag(void *flagvalue, const char *funcname, int opt)
+static int check_retval(void *retvalvalue, const char *funcname, int opt)
 {
-  int *errflag;
+  int *errretval;
 
   /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
-  if (opt == 0 && flagvalue == NULL) {
-    fprintf(stderr, 
+  if (opt == 0 && retvalvalue == NULL) {
+    fprintf(stderr,
             "\nSUNDIALS_ERROR: %s() failed - returned NULL pointer\n\n",
 	    funcname);
     return(1);
   }
 
-  /* Check if flag < 0 */
+  /* Check if retval < 0 */
   else if (opt == 1) {
-    errflag = (int *) flagvalue;
-    if (*errflag < 0) {
+    errretval = (int *) retvalvalue;
+    if (*errretval < 0) {
       fprintf(stderr,
-              "\nSUNDIALS_ERROR: %s() failed with flag = %d\n\n",
-	      funcname, *errflag);
-      return(1); 
+              "\nSUNDIALS_ERROR: %s() failed with retval = %d\n\n",
+	      funcname, *errretval);
+      return(1);
     }
   }
 
   /* Check if function returned NULL pointer - no memory allocated */
-  else if (opt == 2 && flagvalue == NULL) {
+  else if (opt == 2 && retvalvalue == NULL) {
     fprintf(stderr,
             "\nMEMORY_ERROR: %s() failed - returned NULL pointer\n\n",
 	    funcname);

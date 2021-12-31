@@ -3,7 +3,7 @@
  * Programmer(s): Radu Serban @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
   sunindextype local_N=0, nperpe, nrem, my_base=-1;
 
   SUNNonlinearSolver NLS, NLSB;
+  SUNContext sunctx;
 
   MPI_Comm comm;
 
@@ -144,12 +145,15 @@ int main(int argc, char *argv[])
   MPI_Comm_size(comm, &nprocs);
   MPI_Comm_rank(comm, &my_pe);
 
+  retval = SUNContext_Create(&comm, &sunctx);
+  if (check_retval(&retval, "SUNContext_Create", 1, my_pe)) MPI_Abort(comm, 1);
+
   npes = nprocs - 1; /* pe's dedicated to PDE integration */
 
   if ( npes <= 0 ) {
     if (my_pe == npes)
       fprintf(stderr, "\nMPI_ERROR(%d): number of processes must be >= 2\n\n",
-	      my_pe);
+              my_pe);
     MPI_Finalize();
     return(1);
   }
@@ -198,12 +202,12 @@ int main(int argc, char *argv[])
   abstol = ATOL;
 
   /* Allocate and initialize forward variables */
-  u = N_VNew_Parallel(comm, local_N, NEQ);
+  u = N_VNew_Parallel(comm, local_N, NEQ, sunctx);
   if (check_retval((void *)u, "N_VNew_Parallel", 0, my_pe)) MPI_Abort(comm, 1);
   SetIC(u, dx, local_N, my_base);
 
   /* Allocate CVODES memory for forward integration */
-  cvode_mem = CVodeCreate(CV_ADAMS);
+  cvode_mem = CVodeCreate(CV_ADAMS, sunctx);
   if (check_retval((void *)cvode_mem, "CVodeCreate", 0, my_pe)) MPI_Abort(comm, 1);
 
   retval = CVodeSetUserData(cvode_mem, data);
@@ -215,13 +219,19 @@ int main(int argc, char *argv[])
   retval = CVodeSStolerances(cvode_mem, reltol, abstol);
   if (check_retval(&retval, "CVodeSStolerances", 1, my_pe)) MPI_Abort(comm, 1);
 
-  /* create fixed point nonlinear solver object */
-  NLS = SUNNonlinSol_FixedPoint(u, 0);
+  /* Create fixed point nonlinear solver object */
+  NLS = SUNNonlinSol_FixedPoint(u, 0, sunctx);
   if(check_retval((void *)NLS, "SUNNonlinSol_FixedPoint", 0, my_pe)) MPI_Abort(comm, 1);
 
-  /* attach nonlinear solver object to CVode */
+  /* Attach nonlinear solver object to CVode */
   retval = CVodeSetNonlinearSolver(cvode_mem, NLS);
   if(check_retval(&retval, "CVodeSetNonlinearSolver", 1, my_pe)) MPI_Abort(comm, 1);
+
+  /* Call CVodeSetMaxNumSteps to set the maximum number of steps the
+   * solver will take in an attempt to reach the next output time
+   * during forward integration. */
+  retval = CVodeSetMaxNumSteps(cvode_mem, 2500);
+  if(check_retval(&retval, "CVodeSetMaxNumSteps", 1, my_pe)) MPI_Abort(comm, 1);
 
   /* Allocate combined forward/backward memory */
   retval = CVodeAdjInit(cvode_mem, STEPS, CV_HERMITE);
@@ -256,7 +266,7 @@ int main(int argc, char *argv[])
   }
 
   /* Allocate and initialize backward variables */
-  uB = N_VNew_Parallel(comm, local_N, NEQ+NP);
+  uB = N_VNew_Parallel(comm, local_N, NEQ+NP, sunctx);
   if (check_retval((void *)uB, "N_VNew_Parallel", 0, my_pe)) MPI_Abort(comm, 1);
   SetICback(uB, my_base);
 
@@ -274,7 +284,7 @@ int main(int argc, char *argv[])
   if (check_retval(&retval, "CVodeSStolerancesB", 1, my_pe)) MPI_Abort(comm, 1);
 
   /* create fixed point nonlinear solver object */
-  NLSB = SUNNonlinSol_FixedPoint(uB, 0);
+  NLSB = SUNNonlinSol_FixedPoint(uB, 0, sunctx);
   if(check_retval((void *)NLSB, "SUNNonlinSol_FixedPoint", 0, my_pe)) MPI_Abort(comm, 1);
 
   /* attach nonlinear solver object to CVode */
@@ -304,6 +314,8 @@ int main(int argc, char *argv[])
     free(data->z2);
   }
   free(data);
+
+  SUNContext_Free(&sunctx);
 
   MPI_Finalize();
 
@@ -703,7 +715,7 @@ static int check_retval(void *returnvalue, const char *funcname, int opt, int id
   /* Check if SUNDIALS function returned NULL pointer - no memory allocated */
   if (opt == 0 && returnvalue == NULL) {
     fprintf(stderr, "\nSUNDIALS_ERROR(%d): %s() failed - returned NULL pointer\n\n",
-	    id, funcname);
+            id, funcname);
     return(1); }
 
   /* Check if retval < 0 */
@@ -711,13 +723,13 @@ static int check_retval(void *returnvalue, const char *funcname, int opt, int id
     retval = (int *) returnvalue;
     if (*retval < 0) {
       fprintf(stderr, "\nSUNDIALS_ERROR(%d): %s() failed with retval = %d\n\n",
-	      id, funcname, *retval);
+              id, funcname, *retval);
       return(1); }}
 
   /* Check if function returned NULL pointer - no memory allocated */
   else if (opt == 2 && returnvalue == NULL) {
     fprintf(stderr, "\nMEMORY_ERROR(%d): %s() failed - returned NULL pointer\n\n",
-	    id, funcname);
+            id, funcname);
     return(1); }
 
   return(0);

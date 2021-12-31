@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -31,13 +31,42 @@ extern "C" {
 
 /* Default Butcher tables for each order */
 
-#define DEFAULT_ERK_2           HEUN_EULER_2_1_2
-#define DEFAULT_ERK_3           BOGACKI_SHAMPINE_4_2_3
-#define DEFAULT_ERK_4           ZONNEVELD_5_3_4
-#define DEFAULT_ERK_5           CASH_KARP_6_4_5
-#define DEFAULT_ERK_6           VERNER_8_5_6
-#define DEFAULT_ERK_8           FEHLBERG_13_7_8
+static const int ERKSTEP_DEFAULT_2 = ARKODE_HEUN_EULER_2_1_2;
+static const int ERKSTEP_DEFAULT_3 = ARKODE_BOGACKI_SHAMPINE_4_2_3;
+static const int ERKSTEP_DEFAULT_4 = ARKODE_ZONNEVELD_5_3_4;
+static const int ERKSTEP_DEFAULT_5 = ARKODE_CASH_KARP_6_4_5;
+static const int ERKSTEP_DEFAULT_6 = ARKODE_VERNER_8_5_6;
+static const int ERKSTEP_DEFAULT_8 = ARKODE_FEHLBERG_13_7_8;
 
+#ifndef DEFAULT_ERK_2
+/* DEPRECATED DEFAULT_ERK_2: use ERKSTEP_DEFAULT_2 */
+#define DEFAULT_ERK_2           ERKSTEP_DEFAULT_2
+#endif
+
+#ifndef DEFAULT_ERK_3
+/* DEPRECATED DEFAULT_ERK_3: use ERKSTEP_DEFAULT_3 */
+#define DEFAULT_ERK_3           ERKSTEP_DEFAULT_3
+#endif
+
+#ifndef DEFAULT_ERK_4
+/* DEPRECATED DEFAULT_ERK_4: use ERKSTEP_DEFAULT_4 */
+#define DEFAULT_ERK_4           ERKSTEP_DEFAULT_4
+#endif
+
+#ifndef DEFAULT_ERK_5
+/* DEPRECATED DEFAULT_ERK_5: use ERKSTEP_DEFAULT_5 */
+#define DEFAULT_ERK_5           ERKSTEP_DEFAULT_5
+#endif
+
+#ifndef DEFAULT_ERK_6
+/* DEPRECATED DEFAULT_ERK_6: use ERKSTEP_DEFAULT_6 */
+#define DEFAULT_ERK_6           ERKSTEP_DEFAULT_6
+#endif
+
+#ifndef DEFAULT_ERK_8
+/* DEPRECATED DEFAULT_ERK_8: use ERKSTEP_DEFAULT_8 */
+#define DEFAULT_ERK_8           ERKSTEP_DEFAULT_8
+#endif
 
 /* -------------------
  * Exported Functions
@@ -45,7 +74,7 @@ extern "C" {
 
 /* Create, Resize, and Reinitialization functions */
 SUNDIALS_EXPORT void* ERKStepCreate(ARKRhsFn f, realtype t0,
-                                    N_Vector y0);
+                                    N_Vector y0, SUNContext sunctx);
 
 SUNDIALS_EXPORT int ERKStepResize(void *arkode_mem, N_Vector ynew,
                                   realtype hscale, realtype t0,
@@ -54,6 +83,9 @@ SUNDIALS_EXPORT int ERKStepResize(void *arkode_mem, N_Vector ynew,
 
 SUNDIALS_EXPORT int ERKStepReInit(void* arkode_mem, ARKRhsFn f,
                                   realtype t0, N_Vector y0);
+
+SUNDIALS_EXPORT int ERKStepReset(void* arkode_mem, realtype tR,
+                                 N_Vector yR);
 
 /* Tolerance input functions */
 SUNDIALS_EXPORT int ERKStepSStolerances(void *arkode_mem,
@@ -72,10 +104,12 @@ SUNDIALS_EXPORT int ERKStepRootInit(void *arkode_mem, int nrtfn,
 /* Optional input functions -- must be called AFTER ERKStepCreate */
 SUNDIALS_EXPORT int ERKStepSetDefaults(void* arkode_mem);
 SUNDIALS_EXPORT int ERKStepSetOrder(void *arkode_mem, int maxord);
+SUNDIALS_EXPORT int ERKStepSetInterpolantType(void *arkode_mem, int itype);
+SUNDIALS_EXPORT int ERKStepSetInterpolantDegree(void *arkode_mem, int degree);
 SUNDIALS_EXPORT int ERKStepSetDenseOrder(void *arkode_mem, int dord);
 SUNDIALS_EXPORT int ERKStepSetTable(void *arkode_mem,
                                     ARKodeButcherTable B);
-SUNDIALS_EXPORT int ERKStepSetTableNum(void *arkode_mem, int itable);
+SUNDIALS_EXPORT int ERKStepSetTableNum(void *arkode_mem, ARKODE_ERKTableID itable);
 SUNDIALS_EXPORT int ERKStepSetCFLFraction(void *arkode_mem,
                                           realtype cfl_frac);
 SUNDIALS_EXPORT int ERKStepSetSafetyFactor(void *arkode_mem,
@@ -84,6 +118,8 @@ SUNDIALS_EXPORT int ERKStepSetErrorBias(void *arkode_mem,
                                         realtype bias);
 SUNDIALS_EXPORT int ERKStepSetMaxGrowth(void *arkode_mem,
                                         realtype mx_growth);
+SUNDIALS_EXPORT int ERKStepSetMinReduction(void *arkode_mem,
+                                           realtype eta_min);
 SUNDIALS_EXPORT int ERKStepSetFixedStepBounds(void *arkode_mem,
                                               realtype lb, realtype ub);
 SUNDIALS_EXPORT int ERKStepSetAdaptivityMethod(void *arkode_mem,
@@ -138,7 +174,9 @@ SUNDIALS_EXPORT int ERKStepSetDiagnostics(void *arkode_mem,
                                           FILE *diagfp);
 
 SUNDIALS_EXPORT int ERKStepSetPostprocessStepFn(void *arkode_mem,
-                                                ARKPostProcessStepFn ProcessStep);
+                                                ARKPostProcessFn ProcessStep);
+SUNDIALS_EXPORT int ERKStepSetPostprocessStageFn(void *arkode_mem,
+                                                 ARKPostProcessFn ProcessStage);
 
 
 /* Integrate the ODE over an interval in t */

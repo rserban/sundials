@@ -2,7 +2,7 @@
 # Programmer(s): Cody J. Balos @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -26,17 +26,18 @@ set(sundials_SOURCES
   fsundials_nvector_mod.f90
   fsundials_nvector_mod.c
   fsundials_types_mod.f90
-  fsundials_types_mod.c)
+  fsundials_types_mod.c
+  fsundials_context_mod.f90
+  fsundials_context_mod.c)
 
-if(BUILD_STATIC_LIBS)
-  add_library(sundials_fgeneric_static_obj OBJECT ${sundials_SOURCES})
-  set_target_properties(sundials_fgeneric_static_obj PROPERTIES
-    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}_STATIC)
+if(SUNDIALS_BUILD_WITH_PROFILING)
+  list(APPEND sundials_SOURCES
+    fsundials_profiler_mod.f90
+    fsundials_profiler_mod.c)
 endif()
 
-if(BUILD_SHARED_LIBS)
-  add_library(sundials_fgeneric_shared_obj OBJECT ${sundials_SOURCES})
-  set_target_properties(sundials_fgeneric_shared_obj PROPERTIES
-    POSITION_INDEPENDENT_CODE TRUE
-    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}_SHARED)
-endif()
+sundials_add_f2003_library(sundials_fgeneric_mod
+  SOURCES
+    ${sundials_SOURCES}
+  OBJECT_LIB_ONLY
+)

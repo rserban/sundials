@@ -109,6 +109,166 @@ interfacing the solver to applications written in {\F}.
 
 \section{Changes from previous versions}
 
+\subsection*{Changes in v5.8.0}
+
+The RAJA {\nvector} implementation has been updated to support the SYCL backend
+in addition to the CUDA and HIP backend. Users can choose the backend when
+configuring SUNDIALS by using the \id{SUNDIALS\_RAJA\_BACKENDS} CMake variable.
+This module remains experimental and is subject to change from version to
+version.
+
+A new {\sunmatrix} and {\sunlinsol} implementation were added to interface with
+the Intel oneAPI Math Kernel Library (oneMKL). Both the matrix and the linear
+solver support general dense linear systems as well as block diagonal linear
+systems. See Chapter \ref{ss:sunlinsol_onemkldense} for more details. This
+module is experimental and is subject to change from version to version.
+
+Added a new \textit{optional} function to the SUNLinearSolver API,
+\id{SUNLinSolSetZeroGuess}, to indicate that the next call to
+\id{SUNlinSolSolve} will be made with a zero initial guess. SUNLinearSolver
+implementations that do not use the \id{SUNLinSolNewEmpty} constructor will, at
+a minimum, need set the \id{setzeroguess} function pointer in the linear solver
+\id{ops} structure to \id{NULL}. The SUNDIALS iterative linear solver
+implementations have been updated to leverage this new set function to remove
+one dot product per solve.
+
+New {\kinsol} options have been added to apply a constant damping in the fixed
+point and Picard iterations (see \id{KINSetDamping}), to delay the start of
+Anderson acceleration with the fixed point and Picard iterations (see
+\id{KINSetDelayAA}), and to return the newest solution with the fixed point
+iteration (see \id{KINSetReturnNewest}).
+
+The installed SUNDIALSConfig.cmake file now supports the \id{COMPONENTS} option
+to \id{find\_package}. The exported targets no longer have \id{IMPORTED\_GLOBAL}
+set.
+
+A bug was fixed in \id{SUNMatCopyOps} where the matrix-vector product setup
+function pointer was not copied.
+
+A bug was fixed in the SPBCGS and SPTFQMR solvers for the case where a non-zero
+initial guess and a solution scaling vector are provided. This fix only impacts
+codes using SPBCGS or SPTFQMR as standalone solvers as all {\sundials} packages
+utilize a zero initial guess.
+
+A bug was fixed in the Picard iteration where the value of
+\id{KINSetMaxSetupCalls} would be ignored.
+
+
+\subsection*{Changes in v5.7.0}
+
+A new {\nvector} implementation based on the {\sycl} abstraction layer has been
+added targeting Intel GPUs. At present the only {\sycl} compiler supported is
+the DPC++ (Intel oneAPI) compiler. See Section \ref{ss:nvec_sycl} for more
+details. This module is considered experimental and is subject to major changes
+even in minor releases.
+
+A new {\sunmatrix} and {\sunlinsol} implementation were added to interface
+with the MAGMA linear algebra library. Both the matrix and the linear solver
+support general dense linear systems as well as block diagonal linear systems,
+and both are targeted at GPUs (AMD or NVIDIA). See Section \ref{ss:sunlinsol_magmadense}
+for more details.
+
+\subsection*{Changes in v5.6.1}
+
+Fixed a bug in the {\sundials} CMake which caused an error
+if the CMAKE\_CXX\_STANDARD and SUNDIALS\_RAJA\_BACKENDS options
+were not provided.
+
+Fixed some compiler warnings when using the IBM XL compilers.
+
+\subsection*{Changes in v5.6.0}
+
+A new {\nvector} implementation based on the AMD ROCm HIP platform has been
+added. This vector can target NVIDIA or AMD GPUs. See \ref{ss:nvec_hip} for more
+details. This module is considered experimental and is subject to change from
+version to version.
+
+The RAJA {\nvector} implementation has been updated to support the HIP backend
+in addition to the CUDA backend. Users can choose the backend when configuring
+SUNDIALS by using the \id{SUNDIALS\_RAJA\_BACKENDS} CMake variable. This module
+remains experimental and is subject to change from version to version.
+
+A new optional operation, \id{N\_VGetDeviceArrayPointer}, was added to the N\_Vector
+API. This operation is useful for N\_Vectors that utilize dual memory spaces,
+e.g. the native SUNDIALS CUDA N\_Vector.
+
+The SUNMATRIX\_CUSPARSE and SUNLINEARSOLVER\_CUSOLVERSP\_BATCHQR implementations
+no longer require the SUNDIALS CUDA N\_Vector. Instead, they require that the vector
+utilized provides the \id{N\_VGetDeviceArrayPointer} operation, and that the pointer
+returned by \id{N\_VGetDeviceArrayPointer} is a valid CUDA device pointer.
+
+\subsection*{Changes in v5.5.0}
+
+Refactored the {\sundials} build system. CMake 3.12.0 or newer is now required.
+Users will likely see deprecation warnings, but otherwise the changes
+should be fully backwards compatible for almost all users. {\sundials}
+now exports CMake targets and installs a SUNDIALSConfig.cmake file.
+
+Added support for SuperLU DIST 6.3.0 or newer.
+
+
+\subsection*{Changes in v5.4.0}
+
+A new API, \id{SUNMemoryHelper}, was added to support \textbf{GPU users} who
+have complex memory management needs such as using memory pools. This is paired
+with new constructors for the {\nveccuda} and {\nvecraja} modules that accept a
+\id{SUNMemoryHelper} object. Refer to sections
+\ref{s:gpu_model},\ref{s:sunmemory}, \ref{ss:nvec_cuda} and \ref{ss:nvec_raja}
+for more information.
+
+The \id{NVECTOR\_RAJA} module has been updated to mirror the \id{NVECTOR\_CUDA} module.
+Notably, the update adds managed memory support to the \id{NVECTOR\_RAJA} module.
+Users of the module will need to update any calls to the \id{N\_VMake\_Raja} function
+because that signature was changed. This module remains experimental and is
+subject to change from version to version.
+
+The \id{NVECTOR\_TRILINOS} module has been updated to work with Trilinos 12.18+.
+This update changes the local ordinal type to always be an \id{int}.
+
+Added support for CUDA v11.
+
+
+\subsection*{Changes in v5.3.0}
+
+Fixed a bug in the iterative linear solver modules where an error is not
+returned if the Atimes function is \id{NULL} or, if preconditioning is enabled,
+the PSolve function is \id{NULL}.
+
+Added the ability to control the {\cuda} kernel launch parameters for the
+\id{NVECTOR\_CUDA} and \id{SUNMATRIX\_CUSPARSE} modules. These modules remain
+experimental and are subject to change from version to version.
+In addition, the \id{NVECTOR\_CUDA} kernels were rewritten to be more flexible.
+Most users should see equivalent performance or some improvement, but a select
+few may observe minor performance degradation with the default settings. Users
+are encouraged to contact the {\sundials} team about any perfomance changes
+that they notice.
+
+Added new capabilities for monitoring the solve phase in the {\sunnonlinsolnewton}
+and {\sunnonlinsolfixedpoint} modules, and the {\sundials} iterative linear solver
+modules. {\sundials} must be built with the CMake option
+\id{SUNDIALS\_BUILD\_WITH\_MONITORING} to use these capabilties.
+
+Added the optional function \id{KINSetJacTimesVecSysFn} to specify an
+alternative system function for computing Jacobian-vector products with the
+internal difference quotient approximation.
+
+\subsection*{Changes in v5.2.0}
+
+Fixed a build system bug related to the Fortran 2003 interfaces when using the
+IBM XL compiler. When building the Fortran 2003 interfaces with an XL compiler
+it is recommended to set \id{CMAKE\_Fortran\_COMPILER} to \id{f2003},
+\id{xlf2003}, or \id{xlf2003\_r}.
+
+Fixed a linkage bug affecting Windows users that stemmed from dllimport/dllexport
+attributes missing on some {\sundials} API functions.
+
+Added a new \id{SUNMatrix} implementation, \id{SUNMATRIX\_CUSPARSE}, that interfaces
+to the sparse matrix implementation from the NVIDIA cuSPARSE library. In addition,
+the \id{SUNLINSOL\_CUSOLVER\_BATCHQR} linear solver has been updated to
+use this matrix, therefore, users of this module will need to update their code.
+These modules are still considered to be experimental, thus they are subject to
+breaking changes even in minor releases.
+
 \subsection*{Changes in v5.1.0}
 
 Fixed a build system bug related to finding LAPACK/BLAS.
@@ -366,7 +526,7 @@ If an {\nvector} implementation defines any of the local operations as
 to complete the computation.
 
 A new {\sunmatrix} and {\sunlinsol} implementation was added to facilitate
-the use of the {\superludist} library with SUNDIALS.
+the use of the {\superludist} library with {\sundials}.
 
 A new operation, \id{SUNMatMatvecSetup}, was added to the {\sunmatrix} API. Users
 who have implemented custom {\sunmatrix} modules will need to at least update
@@ -548,7 +708,7 @@ as a backend for {\raja} currently.
   align with those used in native CMake FindMPI module are
   \id{MPI\_C\_COMPILER}, \id{MPI\_CXX\_COMPILER}, \id{MPI\_Fortran\_COMPILER},
   and \id{MPIEXEC\_EXECUTABLE}.
-\item When a Fortran name-mangling scheme is needed (e.g., \id{LAPACK\_ENABLE}
+\item When a Fortran name-mangling scheme is needed (e.g., \id{ENABLE\_LAPACK}
   is \id{ON}) the build system will infer the scheme from the Fortran
   compiler. If a Fortran compiler is not available or the inferred or default
   scheme needs to be overridden, the advanced options
@@ -640,14 +800,14 @@ with linear solver libraries.
 Specific changes include:
 \begin{itemize}
 \item Added generic SUNMATRIX module with three provided implementations:
-        dense, banded and sparse.  These replicate previous SUNDIALS Dls and
+        dense, banded and sparse.  These replicate previous {\sundials} Dls and
         Sls matrix structures in a single object-oriented API.
 \item Added example problems demonstrating use of generic SUNMATRIX modules.
 \item Added generic \id{SUNLinearSolver} module with eleven provided
         implementations: {\sundials} native dense, {\sundials} native banded,
         LAPACK dense, LAPACK band, KLU,
         SuperLU\_MT, SPGMR, SPBCGS, SPTFQMR, SPFGMR, and PCG.  These replicate
-        previous SUNDIALS generic linear solvers in a single object-oriented
+        previous {\sundials} generic linear solvers in a single object-oriented
         API.
 \item Added example problems demonstrating use of generic SUNLINEARSOLVER
         modules.
@@ -659,7 +819,7 @@ Specific changes include:
         is entirely replicated by the generic Dls/Spils interfaces and
         SUNLINEARSOLVER/SUNMATRIX modules.  The exception is CVDIAG, a
         diagonal approximate Jacobian solver available to CVODE and CVODES.
-\item Converted all SUNDIALS example problems to utilize new generic
+\item Converted all {\sundials} example problems to utilize new generic
         SUNMATRIX and SUNLINEARSOLVER objects, along with updated Dls and
         Spils linear solver interfaces.
 \item Added Spils interface routines to ARKode, CVODE, CVODES, IDA and
@@ -922,7 +1082,7 @@ details see Appendix \ref{c:install}.
 The user interface has been further refined. Several functions used
 for setting optional inputs were combined into a single one.
 Additionally, to resolve potential variable scope issues, all
-SUNDIALS solvers release user data right after its use. The build
+{\sundials} solvers release user data right after its use. The build
 system has been further improved to make it more robust.
 
 \subsection*{Changes in v2.2.1}

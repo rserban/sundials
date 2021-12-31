@@ -4,7 +4,7 @@
  *                Daniel R. Reynolds @ SMU
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -39,6 +39,7 @@ static double get_time();
 int print_time = 0;
 int print_all_ranks = 0;
 
+#define FMT "%s Time: %22.15e\n\n"
 #define PRINT_TIME(format, time) if(print_time) printf(format, time)
 
 /* ----------------------------------------------------------------------
@@ -50,7 +51,8 @@ int Test_SUNMatGetID(SUNMatrix A, SUNMatrix_ID sunid, int myid)
   SUNMatrix_ID mysunid;
 
   start_time = get_time();
-  mysunid    = SUNMatGetID(A);
+  mysunid = SUNMatGetID(A);
+  sync_device(A);
   stop_time  = get_time();
 
   if (sunid != mysunid) {
@@ -80,9 +82,10 @@ int Test_SUNMatClone(SUNMatrix A, int myid)
   realtype  tol=10*UNIT_ROUNDOFF;
   SUNMatrix B;
 
-  /* clone vector */
+  /* clone matrix */
   start_time = get_time();
   B = SUNMatClone(A);
+  sync_device(A);
   stop_time = get_time();
 
   /* check cloned matrix */
@@ -107,7 +110,7 @@ int Test_SUNMatClone(SUNMatrix A, int myid)
     return(1);
   }
 
-  failure = check_matrix(B, A, tol);
+  failure = check_matrix(A, B, tol);
   if (failure) {
     TEST_STATUS(">>> FAILED test -- SUNMatClone \n", myid);
     TEST_STATUS("    Failed SUNMatClone check \n \n", myid);
@@ -142,6 +145,7 @@ int Test_SUNMatZero(SUNMatrix A, int myid)
   /* set matrix data to zero */
   start_time = get_time();
   failure = SUNMatZero(B);
+  sync_device(B);
   stop_time = get_time();
 
   if (failure) {
@@ -186,6 +190,7 @@ int Test_SUNMatCopy(SUNMatrix A, int myid)
   /* copy matrix data */
   start_time = get_time();
   failure = SUNMatCopy(A, B);
+  sync_device(A);
   stop_time = get_time();
 
   if (failure) {
@@ -245,6 +250,7 @@ int Test_SUNMatScaleAdd(SUNMatrix A, SUNMatrix I, int myid)
   /* fill vector data */
   start_time = get_time();
   failure = SUNMatScaleAdd(NEG_ONE, B, B);
+  sync_device(B);
   stop_time = get_time();
 
   if (failure) {
@@ -271,9 +277,10 @@ int Test_SUNMatScaleAdd(SUNMatrix A, SUNMatrix I, int myid)
   }
 
   /*
-   * Case 2: different sparsity/bandwith patterns
+   * Case 2: different sparsity/bandwidth patterns
    */
-  if (is_square(A)) {
+  if (is_square(A) && SUNMatGetID(A) != SUNMATRIX_CUSPARSE
+      && SUNMatGetID(A) != SUNMATRIX_MAGMADENSE) {
 
     /* protect A and I */
     D = SUNMatClone(A);
@@ -312,6 +319,7 @@ int Test_SUNMatScaleAdd(SUNMatrix A, SUNMatrix I, int myid)
       SUNMatDestroy(D);
       return(1);
     }
+    sync_device(A);
     stop_time = get_time();
 
     failure = check_matrix(D, C, tol);
@@ -366,6 +374,7 @@ int Test_SUNMatScaleAddI(SUNMatrix A, SUNMatrix I, int myid)
   /* perform operation */
   start_time = get_time();
   failure = SUNMatScaleAddI(NEG_ONE, B);
+  sync_device(B);
   stop_time = get_time();
 
   if (failure) {
@@ -409,6 +418,7 @@ int Test_SUNMatMatvecSetup(SUNMatrix A, int myid)
 
   start_time = get_time();
   failure = SUNMatMatvecSetup(A);
+  sync_device(A);
   stop_time = get_time();
 
   if (failure) {
@@ -436,6 +446,11 @@ int Test_SUNMatMatvec(SUNMatrix A, N_Vector x, N_Vector y, int myid)
   N_Vector  z, w;
   realtype  tol=100*UNIT_ROUNDOFF;
 
+  if (A->ops->matvec == NULL) {
+    TEST_STATUS("    PASSED test -- SUNMatMatvec not implemented\n", myid);
+    return(0);
+  }
+
   /* harder tests for square matrices */
   if (is_square(A)) {
 
@@ -456,15 +471,22 @@ int Test_SUNMatMatvec(SUNMatrix A, N_Vector x, N_Vector y, int myid)
       return(1);
     }
 
-    z = N_VClone(y);
-    w = N_VClone(y);
+    z = N_VClone(y); /* will be computed with matvec */
+    w = N_VClone(y); /* will be the reference */
 
     /* Call the Setup function before the Matvec if it exists */
-    if (B->ops->matvecsetup)
-      SUNMatMatvecSetup(B);
-   
+    if (B->ops->matvecsetup) {
+      failure = SUNMatMatvecSetup(B);
+      if (failure) {
+        TEST_STATUS2(">>> FAILED test -- SUNMatMatvecSetup returned %d \n", failure, myid);
+        SUNMatDestroy(B);
+        return(1);
+      }
+    }
+
     start_time = get_time();
-    failure = SUNMatMatvec(B,x,z);
+    failure = SUNMatMatvec(B,x,z); /* z = (3A+I)x = 3y + x */
+    sync_device(B);
     stop_time = get_time();
 
     if (failure) {
@@ -473,20 +495,21 @@ int Test_SUNMatMatvec(SUNMatrix A, N_Vector x, N_Vector y, int myid)
       return(1);
     }
 
-    N_VLinearSum(THREE,y,ONE,x,w);
+    N_VLinearSum(THREE,y,ONE,x,w); /* w = 3y + x */
 
     failure = check_vector(w,z,tol);
-    
+
     SUNMatDestroy(B);
     N_VDestroy(z);
     N_VDestroy(w);
 
   } else {
 
-    z = N_VClone(y);
+    z = N_VClone(y); /* will be computed with matvec */
 
     start_time = get_time();
-    failure = SUNMatMatvec(A,x,z);
+    failure = SUNMatMatvec(A,x,z); /* z = Ax */
+    sync_device(A);
     stop_time = get_time();
 
     if (failure) {
@@ -528,6 +551,7 @@ int Test_SUNMatSpace(SUNMatrix A, int myid)
 
   start_time = get_time();
   failure = SUNMatSpace(A, &lenrw, &leniw);
+  sync_device(A);
   stop_time = get_time();
 
   if (failure) {
@@ -536,7 +560,7 @@ int Test_SUNMatSpace(SUNMatrix A, int myid)
     return(1);
   } else {
     TEST_STATUS2("    PASSED test -- SUNMatSpace lenrw=%li ", lenrw, myid);
-    TEST_STATUS2("leniw = %li\n", leniw, myid);
+    TEST_STATUS2("leniw=%li\n", leniw, myid);
   }
 
   if (myid == 0)

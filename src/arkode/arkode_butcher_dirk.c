@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -22,12 +22,6 @@
 #include <arkode/arkode_butcher_dirk.h>
 #include <sundials/sundials_math.h>
 
-#if defined(SUNDIALS_EXTENDED_PRECISION)
-#define RSYM ".32Lg"
-#else
-#define RSYM ".16g"
-#endif
-
 
 /*---------------------------------------------------------------
   Returns Butcher table structure for pre-set DIRK methods.
@@ -40,30 +34,31 @@
     SDIRK -- singly-diagonally implicit Runge Kutta
     ESDIRK -- explicit [1st stage] singly-diagonally implicit Runge Kutta
   The 'A-stable' and 'L-stable' columns are based on numerical estimates
-  of each property.  The 'QP' column denotes whether the coefficients
-  of the method are known precisely enough for use in 'long double'
-  (128-bit) calculations.
+  of each property.
+
+  The 'QP' column denotes whether the coefficients of the method are known
+  precisely enough for use in quad precision (128-bit) calculations.
 
      imeth                       type  A-stable  L-stable  QP
     ----------------------------------------------------------
-     SDIRK_2_1_2                SDIRK     Y         N       Y
-     BILLINGTON_3_3_2           SDIRK     N         N       N
-     TRBDF2_3_3_2              ESDIRK     N         N       Y
-     KVAERNO_4_2_3             ESDIRK     Y         Y       N
-     ARK324L2SA_DIRK_4_2_3*    ESDIRK     Y         Y       N
-     CASH_5_2_4                 SDIRK     Y         Y       N
-     CASH_5_3_4                 SDIRK     Y         Y       N
-     SDIRK_5_3_4                SDIRK     Y         Y       Y
-     KVAERNO_5_3_4             ESDIRK     Y         N       N
-     ARK436L2SA_DIRK_6_3_4*    ESDIRK     Y         Y       N
-     ARK437L2SA_DIRK_7_3_4*    ESDIRK     Y         Y       N
-     KVAERNO_7_4_5             ESDIRK     Y         Y       N
-     ARK548L2SA_DIRK_8_4_5*    ESDIRK     Y         Y       N
-     ARK548L2SAb_DIRK_8_4_5*   ESDIRK     Y         Y       N
+     ARKODE_SDIRK_2_1_2                SDIRK     Y         N       Y
+     ARKODE_BILLINGTON_3_3_2           SDIRK     N         N       N
+     ARKODE_TRBDF2_3_3_2              ESDIRK     N         N       Y
+     ARKODE_KVAERNO_4_2_3             ESDIRK     Y         Y       N
+     ARKODE_ARK324L2SA_DIRK_4_2_3*    ESDIRK     Y         Y       N
+     ARKODE_CASH_5_2_4                 SDIRK     Y         Y       N
+     ARKODE_CASH_5_3_4                 SDIRK     Y         Y       N
+     ARKODE_SDIRK_5_3_4                SDIRK     Y         Y       Y
+     ARKODE_KVAERNO_5_3_4             ESDIRK     Y         N       N
+     ARKODE_ARK436L2SA_DIRK_6_3_4*    ESDIRK     Y         Y       N
+     ARKODE_ARK437L2SA_DIRK_7_3_4*    ESDIRK     Y         Y       N
+     ARKODE_KVAERNO_7_4_5             ESDIRK     Y         Y       N
+     ARKODE_ARK548L2SA_DIRK_8_4_5*    ESDIRK     Y         Y       N
+     ARKODE_ARK548L2SAb_DIRK_8_4_5*   ESDIRK     Y         Y       N
     ----------------------------------------------------------
 
   ---------------------------------------------------------------*/
-ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
+ARKodeButcherTable ARKodeButcherTable_LoadDIRK(ARKODE_DIRKTableID imethod)
 {
 
   ARKodeButcherTable B;
@@ -72,7 +67,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
   /* fill in coefficients based on method name */
   switch(imethod) {
 
-  case(SDIRK_2_1_2):   /* SDIRK-2-1 (A,B stable) */
+  case(ARKODE_SDIRK_2_1_2):   /* SDIRK-2-1 (A,B stable) */
     B = ARKodeButcherTable_Alloc(2, SUNTRUE);
     B->q = 2;
     B->p = 1;
@@ -90,7 +85,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[1] = RCONST(0.0);
     break;
 
-  case(BILLINGTON_3_3_2):    /* Billington-SDIRK */
+  case(ARKODE_BILLINGTON_3_3_2):    /* Billington-SDIRK */
     B = ARKodeButcherTable_Alloc(3, SUNTRUE);
     B->q = 2;
     B->p = 3;
@@ -114,7 +109,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[2] = RCONST(1.292893218813);
     break;
 
-  case(TRBDF2_3_3_2):    /* TRBDF2-ESDIRK */
+  case(ARKODE_TRBDF2_3_3_2):    /* TRBDF2-ESDIRK */
     B = ARKodeButcherTable_Alloc(3, SUNTRUE);
     B->q = 2;
     B->p = 3;
@@ -137,7 +132,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[2] = RCONST(1.0);
     break;
 
-  case(KVAERNO_4_2_3):    /* Kvaerno(4,2,3)-ESDIRK */
+  case(ARKODE_KVAERNO_4_2_3):    /* Kvaerno(4,2,3)-ESDIRK */
     B = ARKodeButcherTable_Alloc(4, SUNTRUE);
     B->q = 3;
     B->p = 2;
@@ -165,7 +160,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[3] = RCONST(1.0);
     break;
 
-  case(ARK324L2SA_DIRK_4_2_3):    /* ARK3(2)4L[2]SA-ESDIRK */
+  case(ARKODE_ARK324L2SA_DIRK_4_2_3):    /* ARK3(2)4L[2]SA-ESDIRK */
     B = ARKodeButcherTable_Alloc(4, SUNTRUE);
     B->q = 3;
     B->p = 2;
@@ -194,7 +189,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[3] = RCONST(1.0);
     break;
 
-  case(CASH_5_2_4):    /* Cash(5,2,4)-SDIRK */
+  case(ARKODE_CASH_5_2_4):    /* Cash(5,2,4)-SDIRK */
     B = ARKodeButcherTable_Alloc(5, SUNTRUE);
     B->q = 4;
     B->p = 2;
@@ -230,7 +225,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[4] = RCONST(1.0);
     break;
 
-  case(CASH_5_3_4):    /* Cash(5,3,4)-SDIRK */
+  case(ARKODE_CASH_5_3_4):    /* Cash(5,3,4)-SDIRK */
     B = ARKodeButcherTable_Alloc(5, SUNTRUE);
     B->q = 4;
     B->p = 3;
@@ -268,7 +263,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[4] = RCONST(1.0);
     break;
 
-  case(SDIRK_5_3_4):    /* SDIRK-5-4 */
+  case(ARKODE_SDIRK_5_3_4):    /* SDIRK-5-4 */
     B = ARKodeButcherTable_Alloc(5, SUNTRUE);
     B->q = 4;
     B->p = 3;
@@ -306,7 +301,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[4] = RCONST(1.0);
     break;
 
-  case(KVAERNO_5_3_4):    /* Kvaerno(5,3,4)-ESDIRK */
+  case(ARKODE_KVAERNO_5_3_4):    /* Kvaerno(5,3,4)-ESDIRK */
     B = ARKodeButcherTable_Alloc(5, SUNTRUE);
     B->q = 4;
     B->p = 3;
@@ -342,7 +337,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[4] = RCONST(1.0);
     break;
 
-  case(ARK436L2SA_DIRK_6_3_4):    /* ARK4(3)6L[2]SA-ESDIRK */
+  case(ARKODE_ARK436L2SA_DIRK_6_3_4):    /* ARK4(3)6L[2]SA-ESDIRK */
     B = ARKodeButcherTable_Alloc(6, SUNTRUE);
     B->q = 4;
     B->p = 3;
@@ -385,7 +380,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->d[5] = RCONST(61727.0)/RCONST(225920.0);
     break;
 
-  case(ARK437L2SA_DIRK_7_3_4):    /* ARK4(3)7L[2]SA-ESDIRK */
+  case(ARKODE_ARK437L2SA_DIRK_7_3_4):    /* ARK4(3)7L[2]SA-ESDIRK */
     B = ARKodeButcherTable_Alloc(7, SUNTRUE);
     B->q = 4;
     B->p = 3;
@@ -428,7 +423,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[4] = RCONST(3.0)/RCONST(40.0);
     B->c[5] = RCONST(7.0)/RCONST(10.0);
     B->c[6] = RCONST(1.0);
- 
+
     B->d[2] = RCONST(4469248916618.0)/RCONST(8635866897933.0);
     B->d[3] = RCONST(-621260224600.0)/RCONST(4094290005349.0);
     B->d[4] = RCONST(696572312987.0)/RCONST(2942599194819.0);
@@ -436,7 +431,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->d[6] = RCONST(2441.0)/RCONST(20000.0);
     break;
 
-  case(KVAERNO_7_4_5):    /* Kvaerno(7,4,5)-ESDIRK */
+  case(ARKODE_KVAERNO_7_4_5):    /* Kvaerno(7,4,5)-ESDIRK */
     B = ARKodeButcherTable_Alloc(7, SUNTRUE);
     B->q = 5;
     B->p = 4;
@@ -487,7 +482,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[6] = RCONST(1.0);
     break;
 
-  case(ARK548L2SA_DIRK_8_4_5):    /* ARK5(4)8L[2]SA-ESDIRK */
+  case(ARKODE_ARK548L2SA_DIRK_8_4_5):    /* ARK5(4)8L[2]SA-ESDIRK */
     B = ARKodeButcherTable_Alloc(8, SUNTRUE);
     B->q = 5;
     B->p = 4;
@@ -544,7 +539,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->c[7] = RCONST(1.0);
     break;
 
-  case(ARK548L2SAb_DIRK_8_4_5):    /* ARK5(4)8L[2]SAb-ESDIRK */
+  case(ARKODE_ARK548L2SAb_DIRK_8_4_5):    /* ARK5(4)8L[2]SAb-ESDIRK */
     B = ARKodeButcherTable_Alloc(8, SUNTRUE);
     B->q = 5;
     B->p = 4;
@@ -569,7 +564,7 @@ ARKodeButcherTable ARKodeButcherTable_LoadDIRK(int imethod)
     B->A[5][4] = RCONST(961109811699.0)/RCONST(6734810228204.0);
     B->A[5][5] = RCONST(2.0)/RCONST(9.0);
     B->A[6][0] = RCONST(2036305566805.0)/RCONST(6583108094622.0);
-    B->A[6][1] = RCONST(2036305566805.0)/RCONST(6583108094622.0);           
+    B->A[6][1] = RCONST(2036305566805.0)/RCONST(6583108094622.0);
     B->A[6][2] = RCONST(-3039402635899.0)/RCONST(4450598839912.0);
     B->A[6][3] = RCONST(-1829510709469.0)/RCONST(31102090912115.0);
     B->A[6][4] = RCONST(-286320471013.0)/RCONST(6931253422520.0);

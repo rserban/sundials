@@ -218,8 +218,7 @@ specific name of the function to be called or macro to be referenced.
   To set the vector \id{u} of initial guess values, use the appropriate
   functions defined by the particular {\nvector} implementation.
 
-  For native {\sundials} vector implementations
-  (except the {\cuda} and {\raja}-based ones), use a call
+  For native {\sundials} vector implementations, use a call
   of the form \id{u = N\_VMake\_***(..., udata)} if the \id{realtype} array
   \id{udata} containing the initial values of $u$ already exists.
   Otherwise, create a new vector by making a call of the form
@@ -234,18 +233,6 @@ specific name of the function to be called or macro to be referenced.
   or {\petsc} vector. Note that calls like \id{N\_VNew\_***(...)} and
   \id{N\_VGetArrayPointer(...)} are not available for these vector wrappers.
   See \S\ref{ss:nvec_parhyp} and \S\ref{ss:nvec_petsc} for details.
-
-  If using either the {\cuda}- or {\raja}-based vector implementations
-  use a call of the form
-  \id{u = N\_VMake\_***(..., c)} where \id{c} is a pointer to a \id{suncudavec}
-  or \id{sunrajavec} vector class if this class already exists.  Otherwise,
-  create a new vector
-  by making a call of the form \id{u = N\_VNew\_***(...)}, and then set its
-  elements by accessing the underlying data where it is located
-  with a call of the form
-  \id{N\_VGetDeviceArrayPointer\_***} or \id{N\_VGetHostArrayPointer\_***}.
-  Note that the vector class will allocate memory on both the host and device
-  when instantiated.  See \S\ref{ss:nvec_cuda}-\ref{ss:nvec_raja} for details.
 
 %   If a \id{realtype} array \id{udata} containing the initial values of $u$
 %   already exists, it may be possible to do this either with a call of the form
@@ -824,8 +811,11 @@ Function-norm stopping tolerance & \id{KINSetFuncNormTol} & uround$^{1/3}$ \\
 Scaled-step stopping tolerance & \id{KINSetScaledSteptol} & $\text{uround}^{2/3}$ \\
 Inequality constraints on solution & \id{KINSetConstraints} & \id{NULL} \\
 Nonlinear system function & \id{KINSetSysFunc} & none \\
+Return the newest fixed point iteration & \id{KINSetReturnNewest} & \id{SUNFALSE} \\
+Fixed point/Picard damping parameter & \id{KINSetDamping} & 1.0 \\
 Anderson Acceleration subspace size & \id{KINSetMAA} & 0 \\
 Anderson Acceleration damping parameter & \id{KINSetDampingAA} & 1.0 \\
+Anderson Acceleration delay & \id{KINSetDelayAA} & 0 \\
 \hline
 \multicolumn{3}{|c|}{\bf KINLS linear solver interface} \\
 \hline
@@ -833,6 +823,7 @@ Jacobian function & \id{KINSetJacFn} &  DQ \\
 Preconditioner functions and data & \id{KINSetPreconditioner} & \id{NULL}, \id{NULL}, \id{NULL} \\
 Jacobian-times-vector function and data & \id{KINSetJacTimesVecFn} & internal DQ, \\
 &&\id{NULL} \\
+Jacobian-times-vector system function & \id{KINSetJacTimesVecSysFn} & \id{NULL} \\
 \hline
 \end{tabular}
 \end{table}
@@ -1747,6 +1738,86 @@ flag = KINSetSysFunc(kin\_mem, func);
   The option of changing the system function is provided for a user who wishes
   to solve several problems of the same size but with different functions.
 }
+%
+%
+\ucfunction{KINSetReturnNewest}
+{
+flag = KINSetReturnNewest(kin\_mem, ret\_newest);
+}
+{
+  The function \ID{KINSetReturnNewest} specifies if the fixed point iteration
+  should return the newest iteration or the iteration consistent with the last
+  function evaluation.
+}
+{
+  \begin{args}[ret\_newest]
+  \item[kin\_mem] (\id{void *})
+    pointer to the {\kinsol} memory block.
+  \item[ret\_newest] (\id{booleantype})
+    \begin{itemize}
+    \item[] \id{SUNTRUE} -- return the newest iteration.
+    \item[] \id{SUNFALSE} -- return the iteration consistent with the last
+      function evaluation.
+    \end{itemize}
+  \end{args}
+}
+{
+  The return value \id{flag} (of type \id{int}) is one of:
+  \begin{args}[KIN\_MEM\_NULL]
+  \item[\Id{KIN\_SUCCESS}]
+    The optional value has been successfully set.
+  \item[\Id{KIN\_MEM\_NULL}]
+    The \id{kin\_mem} pointer is \id{NULL}.
+  \end{args}
+}
+{
+  The default value of \id{ret\_newest} is \id{SUNFALSE}.
+}
+%
+%
+\ucfunction{KINSetDamping}
+{
+flag = KINSetDamping(kin\_mem, beta);
+}
+{
+  The function \ID{KINSetDamping} specifies the value of the damping parameter
+  in the fixed point or Picard iteration.
+}
+{
+  \begin{args}[kin\_mem]
+  \item[kin\_mem] (\id{void *})
+    pointer to the {\kinsol} memory block.
+  \item[beta] (\id{realtype})
+    the damping parameter value $0 < beta \leq 1.0$.
+  \end{args}
+}
+{
+  The return value \id{flag} (of type \id{int}) is one of:
+  \begin{args}[KIN\_ILL\_INPUT]
+  \item[\Id{KIN\_SUCCESS}]
+    The optional value has been successfully set.
+  \item[\Id{KIN\_MEM\_NULL}]
+    The \id{kin\_mem} pointer is \id{NULL}.
+  \item[\Id{KIN\_ILL\_INPUT}]
+    The argument \id{beta} was zero or negative.
+  \end{args}
+}
+{
+  This function sets the damping parameter value, which needs to be greater than
+  zero and less than one if damping is to be used. A value $\geq 1$ disables
+  damping.
+
+  The default value of \id{beta} is 1.0, indicating no damping.
+
+  To set the damping parameter used in Anderson acceleration see
+  \id{KINSetDampingAA}.
+
+  With the fixed point iteration the difference between successive iterations is
+  used to determine convergence. As such, when damping is enabled, the tolerance
+  used to stop the fixed point iteration is scaled by \id{beta} to account for
+  the effects of damping. If \id{beta} is extremely small (close to zero), this
+  can lead to an excessively tight tolerance.
+}
 %%
 %%
 \ucfunction{KINSetMAA}
@@ -1820,10 +1891,50 @@ flag = KINSetDampingAA(kin\_mem, beta);
   \end{args}
 }
 {
-  This function sets the damping parameter value, which needs to be greater than zero
-  and less than one if damping is to be used. A value $\geq 1$ disables damping.
+  This function sets the damping parameter value, which needs to be greater than
+  zero and less than one if damping is to be used. A value $\geq 1$ disables
+  damping.
 
   The default value of \id{beta} is 1.0, indicating no damping.
+
+  When delaying the start of Anderson acceleration with \id{KINSetDelayAA}, use
+  \id{KINSetDamping} to set the damping parameter in the fixed point or Picard
+  iterations before Anderson acceleration begins. When using Anderson
+  acceleration without delay, the value provided to \id{KINSetDampingAA} is
+  applied to all iterations and any value provided to \id{KINSetDamping} is
+  ignored.
+}
+%
+%
+\ucfunction{KINSetDelayAA}
+{
+flag = KINSetDelayAA(kin\_mem, delay);
+}
+{
+  The function \ID{KINSetDelayAA} specifies the number of iterations to delay
+  the start of Anderson acceleration.
+}
+{
+  \begin{args}[kin\_mem]
+  \item[kin\_mem] (\id{void *})
+    pointer to the {\kinsol} memory block.
+  \item[delay] (\id{long int})
+    the number of iterations to delay Anderson acceleration.
+  \end{args}
+}
+{
+  The return value \id{flag} (of type \id{int}) is one of:
+  \begin{args}[KIN\_ILL\_INPUT]
+  \item[\Id{KIN\_SUCCESS}]
+    The optional value has been successfully set.
+  \item[\Id{KIN\_MEM\_NULL}]
+    The \id{kin\_mem} pointer is \id{NULL}.
+  \item[\Id{KIN\_ILL\_INPUT}]
+    The argument \id{delay} was less than zero.
+  \end{args}
+}
+{
+  The default value of \id{delay} is 0, indicating no delay.
 }
 %%
 %%
@@ -1907,11 +2018,13 @@ the product between the Jacobian matrix $J(u)$ and a vector $v$.
 The user can supply his/her own Jacobian-times-vector approximation function,
 or use the internal difference quotient approximation
 \index{Jacobian approximation function!Jacobian times vector!difference quotient}
-that comes with the {\kinls} solver interface.  A user-defined Jacobian-vector
+that comes with the {\kinls} solver interface.
+
+A user-defined Jacobian-vector
 function must be of type \id{KINLsJacTimesVecFn} and
 can be specified through a call to \id{KINLsSetJacTimesVecFn}
 (see \S\ref{ss:jtimesFn} for specification details).
-
+%
 The pointer \id{user\_data} received through \id{KINSetUserData} (or a
 pointer to \id{NULL} if \id{user\_data} was not specified) is passed
 to the Jacobian-times-vector function \id{jtimes} each time it is
@@ -1966,6 +2079,61 @@ user-supplied functions without using global data in the program.
   this routine, and may still be used for backward-compatibility.
   However, this will be deprecated in future releases, so we recommend
   that users transition to the new routine name soon.
+}
+%%
+%%
+When using the internal difference quotient the user may optionally supply an
+alternative system function for use in the Jacobian-vector product approximation
+by calling \id{KINSetJacTimesVecSysFn}. The alternative system function should
+compute a suitable (and differentiable) approximation of the system function
+provided to \id{KINInit}. For example, as done in \cite{dorr2010numerical} when
+solving the nonlinear systems that arise in the implicit integration of ordinary
+differential equations, the alternative function may use lagged values when
+evaluating a nonlinearity to avoid differencing a potentially non-differentiable
+factor.
+%%
+%%
+\index{Jacobian approximation function!Jacobian times vector!alternative-sys}
+\ucfunctionf{KINSetJacTimesVecSysFn}
+{
+  flag = KINSetJacTimesVecSysFn(kin\_mem, jtimesSysFn);
+}
+{
+  The function \ID{KINSetJacTimesVecSysFn} specifies an alternative system
+  function for use in the internal Jacobian-vector product difference quotient
+  approximation.
+}
+{
+  \begin{args}[jtimesSysFn]
+  \item[kin\_mem] (\id{void *})
+    pointer to the {\kinsol} memory block.
+  \item[jtimesSysFn] (\Id{KINSysFn})
+    is the {\CC} function which computes the alternative system function to use
+    in Jacobian-vector product difference quotient approximations. This function
+    has the form \id{func(u, fval, user\_data)}. (For full details see
+    \S\ref{ss:sysFn}.)
+  \end{args}
+}
+{
+  The return value \id{flag} (of type \id{int}) is one of
+  \begin{args}[KINLS\_SUNLS\_FAIL]
+  \item[\Id{KINLS\_SUCCESS}]
+    The optional value has been successfully set.
+  \item[\Id{KINLS\_MEM\_NULL}]
+    The \id{kin\_mem} pointer is \id{NULL}.
+  \item[\Id{KINLS\_LMEM\_NULL}]
+    The {\kinls} linear solver has not been initialized.
+  \item[\Id{KINLS\_ILL\_INPUT}]
+    The internal difference quotient approximation is disabled.
+  \end{args}
+}
+{
+  The default is to use the system function provided to \id{KINInit} in the
+  internal difference quotient. If the input system function is \id{NULL},
+  the default is used.
+
+  This function must be called \emph{after} the {\kinls} linear solver interface
+  has been initialized through a call to \id{KINSetLinearSolver}.
 }
 
 
@@ -3609,3 +3777,67 @@ factorizations, \id{nlinsetups} calls to \id{Gcomm}, \id{npsolves} banded
 backsolve calls, and \id{nfevalsLS} right-hand side function evaluations,
 where \id{nlinsetups} is an optional {\kinsol} output and \id{npsolves} and
 \id{nfevalsLS} are linear solver optional outputs (see \S\ref{ss:optional_output}).
+
+
+%%==============================================================================
+\section{Alternative to KINSOL for difficult systems}
+\label{sss:kinalternative}
+%%==============================================================================
+
+A nonlinear system $F(u) = 0$ may be difficult to solve with {\kinsol} (or any
+other nonlinear system solver) for a variety of reasons. The possible reasons
+include high nonlinearity, small region of convergence, and lack of a good
+initial guess. For systems with such difficulties, there is an alternative
+approach that may be more successful. This is an old idea, but deserves some
+new attention.
+
+If the nonlinear system is $F(u) = 0$, consider instead the ODE system $du/dt =
+- M^{-1} F(u)$, where $M$ is a nonsingular matrix that is an approximation (even
+a crude approximation) to the system Jacobian $F_u = dF/du$. Whatever $M$ is,
+if this ODE is solved until it reaches a steady state $u^*$, then $u^*$ is a
+zero of the right-hand side of the ODE, and hence a solution to $F(u) = 0$.
+There is no issue of having a close enough initial guess.
+
+A further basis for this choice of ODE is the following: If $M$ approximates
+$F_u$, then the Jacobian of the ODE system, $-M^{-1}F_u$, is approximately equal
+to $-I$ where $I$ is the identity matrix. This means that (in a local
+approximation sense) the solution modes of the ODE behave like $\exp(-t)$, and
+that asymptotically the approach to the steady state goes as $\exp(-t)$. Of
+course, the closer $M$ is to $F_u$, the better this basis applies.
+
+Using (say) CVODE to solve the above ODE system requires, in addition to the
+objective function $F(u)$, the calculation of a suitable matrix $M$ and its
+inverse, or at least a routine that solves linear systems $Mx = b$. This is
+similar to the {\kinsol} requirement of supplying the system Jacobian $J$ (or
+solutions to $Jx = b$), but differs in that $M$ may be simpler than $J$ and
+hence easier to deal with. Depending on the nature of $M$, this may be handled
+best with a direct solver, or with a preconditioned Krylov solver. The latter
+calls for the use of a preconditioner $P$ that may be a crude approximation to
+$M$, hence even easier to solve. Note if using ARKODE, the ODE system may be
+posed in the linearly implicit from $M du/dt = -F(u)$ where $M$ is the ``mass
+matrix'' for the system. This use case requires supplying ARKODE with a function
+to evaluate $M$ or to compute its action on a vector ($Mv = w$) and attaching a
+linear solver (direct or iterative) to solve the linear systems $Mx = b$.
+
+The solution of the ODE may be made easier by solving instead the equivalent
+DAE, $M du/dt + F(u) = 0$. Applying IDA to this system requires solutions to
+linear systems whose matrix is the DAE system Jacobian, $J = F_u + \alpha M$,
+where $\alpha$ is the scalar coefficient $c_j$ supplied to the user's Jacobian
+or preconditioner routine. Selecting a preconditioned Krylov method requires an
+approximation to this Jacobian as preconditioner $P$. Given that $M$
+approximates $F_u$ (possibly crudely), the appropriate approximation to $J$ is
+$P = M + \alpha M = (1 + \alpha)M$. Again the user must supply a routine that
+solves linear systems $Px = b$, or $M x = b/(1 + \alpha)$. If M is too
+difficult to solve, than an approximation $M'$ that is easier can be
+substituted, as long as it achieves convergence. As always, there is a trade-off
+between the expense of solving $M$ and the difficulty of achieving convergence
+in the linear solver.
+
+For the solution of either the ODE or DAE system above, the chances for
+convergence can be improved with a piecewise constant choice for $M$.
+Specifically, starting from an initial guess $u_0$, an initial choice for $M$
+might be $M_0 = F_u(u_0)$, or some approximation to this Jacobian. Then one
+could integrate $M_0 du/dt + F(u) = 0$ from $t = 0$ to $t = T$ for some sizable
+value $T$, evaluate $F_u(u(T))$, and take $M_1$ to be an approximation to that
+Jacobian. Then integrate using $M_1$ from $t = T$ to $t = 2T$, and repeat the
+process until it converges to a steady state.

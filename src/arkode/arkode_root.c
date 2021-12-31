@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -23,13 +23,6 @@
 #include "arkode_impl.h"
 #include <sundials/sundials_math.h>
 #include <sundials/sundials_types.h>
-
-#if defined(SUNDIALS_EXTENDED_PRECISION)
-#define RSYM ".32Lg"
-#else
-#define RSYM ".16g"
-#endif
-
 
 
 /*---------------------------------------------------------------
@@ -68,6 +61,7 @@ int arkRootInit(ARKodeMem ark_mem, int nrtfn, ARKRootFn g)
     ark_mem->root_mem->rootdir   = NULL;
     ark_mem->root_mem->gfun      = NULL;
     ark_mem->root_mem->nrtfn     = 0;
+    ark_mem->root_mem->irfnd     = 0;
     ark_mem->root_mem->gactive   = NULL;
     ark_mem->root_mem->mxgnull   = 1;
     ark_mem->root_mem->root_data = ark_mem->user_data;
@@ -346,8 +340,7 @@ int arkRootCheck1(void* arkode_mem)
   hratio = SUNMAX(rootmem->ttol/SUNRabs(ark_mem->h), TENTH);
   smallh = hratio*ark_mem->h;
   tplus = rootmem->tlo + smallh;
-  N_VLinearSum(ONE, ark_mem->yn, smallh,
-               ark_mem->interp->fold, ark_mem->ycur);
+  N_VLinearSum(ONE, ark_mem->yn, smallh, ark_mem->fn, ark_mem->ycur);
   retval = rootmem->gfun(tplus, ark_mem->ycur, rootmem->ghi,
                          rootmem->root_data);
   rootmem->nge++;
@@ -437,8 +430,7 @@ int arkRootCheck2(void* arkode_mem)
   /*     update ark_ycur with small explicit Euler step (if tplus is past tn) */
   if ( (tplus - ark_mem->tcur)*ark_mem->h >= ZERO ) {
     /* hratio = smallh/ark_mem->h; */
-    N_VLinearSum(ONE, ark_mem->ycur, smallh,
-                 ark_mem->interp->fold, ark_mem->ycur);
+    N_VLinearSum(ONE, ark_mem->ycur, smallh, ark_mem->fn, ark_mem->ycur);
   } else {
     /*   set ark_ycur = y(tplus) via interpolation */
     (void) arkGetDky(ark_mem, tplus, 0, ark_mem->ycur);

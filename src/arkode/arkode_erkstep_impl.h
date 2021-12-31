@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -56,7 +56,6 @@ typedef struct ARKodeERKStepMemRec {
   ARKodeButcherTable B;   /* ERK Butcher table          */
 
   /* Counters */
-  long int nst_attempts;  /* num attempted steps        */
   long int nfe;           /* num fe calls               */
 
   /* Reusable arrays for fused vector operations */

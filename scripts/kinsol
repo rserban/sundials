@@ -14,6 +14,8 @@ if [ $doc = "T" ]; then
     $tar $tarfile $distrobase/doc/kinsol/kin_guide.pdf    || exit 1
     $tar $tarfile $distrobase/doc/kinsol/kin_examples.pdf || exit 1
 fi
+$tar $tarfile $distrobase/doc/kinsol/guide/Makefile   || exit 1
+$tar $tarfile $distrobase/doc/kinsol/guide/source     || exit 1
 
 $tar $tarfile $distrobase/include/kinsol/kinsol.h        || exit 1
 $tar $tarfile $distrobase/include/kinsol/kinsol_bbdpre.h || exit 1
@@ -36,65 +38,52 @@ $tar $tarfile $distrobase/src/kinsol/kinsol_ls.c          || exit 1
 $tar $tarfile $distrobase/src/kinsol/kinsol_ls_impl.h     || exit 1
 $tar $tarfile $distrobase/src/kinsol/kinsol_spils.c       || exit 1
 
-echo "   --- Add fkinsol module to $tarfile"
-
-$tar $tarfile $distrobase/src/kinsol/fcmix/CMakeLists.txt || exit 1
-
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinband.c       || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinbbd.c        || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinbbd.h        || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkindense.c      || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinjtimes.c     || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinnulllinsol.c || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinnullmatrix.c || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinpreco.c      || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinsol.c        || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinsol.h        || exit 1
-$tar $tarfile $distrobase/src/kinsol/fcmix/fkinsparse.c     || exit 1
-
 echo "   --- Add kinsol F2003 interface to $tarfile"
 
 $tar $tarfile $distrobase/src/kinsol/fmod/CMakeLists.txt      || exit 1
-$tar $tarfile $distrobase/src/kinsol/fmod/fkinsol_mod.{c,f90} || exit 1
+$tar $tarfile $distrobase/src/kinsol/fmod/fkinsol_mod.c       || exit 1
+$tar $tarfile $distrobase/src/kinsol/fmod/fkinsol_mod.f90     || exit 1
 
 echo "   --- Add kinsol examples to $tarfile"
 
 $tar $tarfile $distrobase/examples/kinsol/CMakeLists.txt || exit 1
 
-$tar $tarfile $distrobase/examples/kinsol/serial/README                    || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/CMakeLists.txt            || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_2.out      || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_2_0.5.out  || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_dns.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_dns.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_klu.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_klu.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinFoodWeb_kry.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinFoodWeb_kry.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinKrylovDemo_ls.c        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinKrylovDemo_ls.out      || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_bnd.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_bnd.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_picard_bnd.c   || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_picard_bnd.out || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_dns.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_dns.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_slu.c          || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_slu.out        || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinRoberts_fp.c           || exit 1
-$tar $tarfile $distrobase/examples/kinsol/serial/kinRoberts_fp.out         || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/README                                       || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/CMakeLists.txt                               || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--damping_fp_0.5.out          || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--m_aa_2.out                  || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--m_aa_2_--damping_aa_0.5.out || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--m_aa_2_--delay_aa_2.out     || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--m_aa_2_--orth_aa_1.out      || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--m_aa_2_--orth_aa_2.out      || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinAnalytic_fp_--m_aa_2_--orth_aa_3.out      || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_dns.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_dns.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_klu.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinFerTron_klu.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinFoodWeb_kry.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinFoodWeb_kry.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinKrylovDemo_ls.c                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinKrylovDemo_ls.out                         || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_bnd.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_bnd.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_picard_bnd.c                      || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_picard_bnd.out                    || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_picard_kry.c                      || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinLaplace_picard_kry.out                    || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_dns.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_dns.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_slu.c                             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinRoboKin_slu.out                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinRoberts_fp.c                              || exit 1
+$tar $tarfile $distrobase/examples/kinsol/serial/kinRoberts_fp.out                            || exit 1
 
 $tar $tarfile $distrobase/examples/kinsol/C_openmp/README                 || exit 1
 $tar $tarfile $distrobase/examples/kinsol/C_openmp/CMakeLists.txt         || exit 1
 $tar $tarfile $distrobase/examples/kinsol/C_openmp/kinFoodWeb_kry_omp.c   || exit 1
 $tar $tarfile $distrobase/examples/kinsol/C_openmp/kinFoodWeb_kry_omp.out || exit 1
-
-$tar $tarfile $distrobase/examples/kinsol/fcmix_serial/README             || exit 1
-$tar $tarfile $distrobase/examples/kinsol/fcmix_serial/CMakeLists.txt     || exit 1
-$tar $tarfile $distrobase/examples/kinsol/fcmix_serial/fkinDiagon_kry.f   || exit 1
-$tar $tarfile $distrobase/examples/kinsol/fcmix_serial/fkinDiagon_kry.out || exit 1
 
 $tar $tarfile $distrobase/examples/kinsol/parallel/README                   || exit 1
 $tar $tarfile $distrobase/examples/kinsol/parallel/CMakeLists.txt           || exit 1
@@ -103,14 +92,35 @@ $tar $tarfile $distrobase/examples/kinsol/parallel/kinFoodWeb_kry_bbd_p.out || e
 $tar $tarfile $distrobase/examples/kinsol/parallel/kinFoodWeb_kry_p.c       || exit 1
 $tar $tarfile $distrobase/examples/kinsol/parallel/kinFoodWeb_kry_p.out     || exit 1
 
-$tar $tarfile $distrobase/examples/kinsol/fcmix_parallel/README               || exit 1
-$tar $tarfile $distrobase/examples/kinsol/fcmix_parallel/CMakeLists.txt       || exit 1
-$tar $tarfile $distrobase/examples/kinsol/fcmix_parallel/fkinDiagon_kry_p.f   || exit 1
-$tar $tarfile $distrobase/examples/kinsol/fcmix_parallel/fkinDiagon_kry_p.out || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CUDA_mpi/README             || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CUDA_mpi/CMakeLists.txt     || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CUDA_mpi/kin_em_mpicuda.cu  || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CUDA_mpi/kin_em_mpicuda.hpp || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CUDA_mpi/kin_em_mpicuda.out || exit 1
 
-$tar $tarfile $distrobase/examples/kinsol/F2003_serial/README                   || exit 1
-$tar $tarfile $distrobase/examples/kinsol/F2003_serial/CMakeLists.txt           || exit 1
-$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinRoboKin_dns_f2003.f90 || exit 1
-$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinRoboKin_dns_f2003.out || exit 1
-$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinLaplace_bnd_f2003.f90 || exit 1
-$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinLaplace_bnd_f2003.out || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/README                           || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/CMakeLists.txt                   || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/kin_em_p.cpp                     || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/kin_em_p.hpp                     || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/kin_em_p.out                     || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/kin_heat2D_nonlin_p.hpp          || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/kin_heat2D_nonlin_p.cpp          || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parallel/kin_heat2D_nonlin_p_--np_2_2.out || exit 1
+
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/README                                    || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/CMakeLists.txt                            || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/kin_bratu2D_hypre_pfmg.hpp                || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/kin_bratu2D_hypre_pfmg.cpp                || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/kin_bratu2D_hypre_pfmg_--np_2_2.out       || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/kin_heat2D_nonlin_hypre_pfmg.hpp          || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/kin_heat2D_nonlin_hypre_pfmg.cpp          || exit 1
+$tar $tarfile $distrobase/examples/kinsol/CXX_parhyp/kin_heat2D_nonlin_hypre_pfmg_--np_2_2.out || exit 1
+
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/README                          || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/CMakeLists.txt                  || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinRoboKin_dns_f2003.f90        || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinRoboKin_dns_f2003.out        || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinLaplace_bnd_f2003.f90        || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinLaplace_bnd_f2003.out        || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinLaplace_picard_kry_f2003.f90 || exit 1
+$tar $tarfile $distrobase/examples/kinsol/F2003_serial/kinLaplace_picard_kry_f2003.out || exit 1

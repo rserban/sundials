@@ -2,7 +2,7 @@
  * Programmer(s): Cody J. Balos @ LLNL
  * -----------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -44,12 +44,6 @@
 #include <sunmatrix/sunmatrix_sparse.h> /* access to sparse SUNMatrix           */
 #include <sunlinsol/sunlinsol_klu.h>    /* access to KLU sparse direct solver   */
 #include <sundials/sundials_types.h>    /* defs. of realtype, sunindextype      */
-
-#if defined(SUNDIALS_INT64_T)
-#define DSYM "ld"
-#else
-#define DSYM "d"
-#endif
 
 /* User-defined vector and matrix accessor macro: Ith */
 
@@ -114,6 +108,7 @@ typedef struct {
 
 int main(int argc, char *argv[])
 {
+  SUNContext sunctx;
   realtype reltol, t, tout;
   N_Vector y, abstol;
   SUNMatrix A;
@@ -139,10 +134,13 @@ int main(int argc, char *argv[])
   udata.ngroups = ngroups;
   udata.neq = neq;
 
+  retval = SUNContext_Create(NULL, &sunctx);
+  if (check_retval(&retval, "CVodeInit", 1)) return(1);
+
   /* Create serial vector of length neq for I.C. and abstol */
-  y = N_VNew_Serial(neq);
+  y = N_VNew_Serial(neq, sunctx);
   if (check_retval((void *)y, "N_VNew_Serial", 0)) return(1);
-  abstol = N_VNew_Serial(neq);
+  abstol = N_VNew_Serial(neq, sunctx);
   if (check_retval((void *)abstol, "N_VNew_Serial", 0)) return(1);
 
   /* Initialize y */
@@ -164,7 +162,7 @@ int main(int argc, char *argv[])
 
   /* Call CVodeCreate to create the solver memory and specify the
    * Backward Differentiation Formula */
-  cvode_mem = CVodeCreate(CV_BDF);
+  cvode_mem = CVodeCreate(CV_BDF, sunctx);
   if (check_retval((void *)cvode_mem, "CVodeCreate", 0)) return(1);
 
   /* Call CVodeInit to initialize the integrator memory and specify the
@@ -184,11 +182,11 @@ int main(int argc, char *argv[])
 
   /* Create sparse SUNMatrix for use in linear solves */
   nnz = GROUPSIZE * GROUPSIZE * ngroups;
-  A = SUNSparseMatrix(neq, neq, nnz, CSR_MAT);
+  A = SUNSparseMatrix(neq, neq, nnz, CSR_MAT, sunctx);
   if(check_retval((void *)A, "SUNSparseMatrix", 0)) return(1);
 
   /* Create KLU solver object for use by CVode */
-  LS = SUNLinSol_KLU(y, A);
+  LS = SUNLinSol_KLU(y, A, sunctx);
   if(check_retval((void *)LS, "SUNLinSol_KLU", 0)) return(1);
 
   /* Call CVodeSetLinearSolver to attach the matrix and linear solver to CVode */
@@ -202,14 +200,14 @@ int main(int argc, char *argv[])
   /* In loop, call CVode, print results, and test for error.
      Break out of loop when NOUT preset output times have been reached.  */
   printf(" \nGroup of independent 3-species kinetics problems\n\n");
-  printf("number of groups = %"DSYM"\n\n", ngroups);
+  printf("number of groups = %lld\n\n", (long long int) ngroups);
 
   iout = 0;  tout = T1;
   while(1) {
     retval = CVode(cvode_mem, tout, y, &t, CV_NORMAL);
 
     for (groupj = 0; groupj < 1; groupj++) {
-      printf("group %"DSYM": ", groupj);
+      printf("group %lld: ", (long long int) groupj);
       PrintOutput(t, Ith(y,1+GROUPSIZE*groupj),
                      Ith(y,2+GROUPSIZE*groupj),
                      Ith(y,3+GROUPSIZE*groupj));
@@ -239,6 +237,9 @@ int main(int argc, char *argv[])
 
   /* Free the matrix memory */
   SUNMatDestroy(A);
+
+  /* Free the SUNDIALS simulation context */
+  SUNContext_Free(&sunctx);
 
   return(0);
 }

@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -23,12 +23,6 @@
 #include <sunmatrix/sunmatrix_band.h>
 #include <sunmatrix/sunmatrix_dense.h>
 #include <sunmatrix/sunmatrix_sparse.h>
-
-#if defined(SUNDIALS_EXTENDED_PRECISION)
-#define RSYM ".32Lg"
-#else
-#define RSYM ".16g"
-#endif
 
 /* constants */
 #define MIN_INC_MULT RCONST(1000.0)
@@ -53,9 +47,12 @@ static int arkLsLinSys(realtype t, N_Vector y, N_Vector fy, SUNMatrix A,
 int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
                          SUNMatrix A)
 {
-  ARKodeMem ark_mem;
-  ARKLsMem  arkls_mem;
-  int       retval, LSType;
+  ARKodeMem            ark_mem;
+  ARKLsMem             arkls_mem;
+  int                  retval;
+  SUNLinearSolver_Type LSType;
+  booleantype          iterative;    /* is the solver iterative?    */
+  booleantype          matrixbased;  /* is a matrix structure used? */
 
   /* Return immediately if either arkode_mem or LS inputs are NULL */
   if (arkode_mem == NULL) {
@@ -83,6 +80,11 @@ int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
   /* Retrieve the LS type */
   LSType = SUNLinSolGetType(LS);
 
+  /* Set flags based on LS type */
+  iterative   = (LSType != SUNLINEARSOLVER_DIRECT);
+  matrixbased = ((LSType != SUNLINEARSOLVER_ITERATIVE) &&
+                 (LSType != SUNLINEARSOLVER_MATRIX_EMBEDDED));
+
   /* Test if vector is compatible with LS interface */
   if ( (ark_mem->tempv1->ops->nvconst == NULL) ||
        (ark_mem->tempv1->ops->nvwrmsnorm == NULL) ) {
@@ -91,32 +93,42 @@ int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
     return(ARKLS_ILL_INPUT);
   }
 
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  /* Ensure that A is NULL when LS is matrix-embedded */
+  if ((LSType == SUNLINEARSOLVER_MATRIX_EMBEDDED) && (A != NULL)) {
+    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetLinearSolver",
+                    "Incompatible inputs: matrix-embedded LS requires NULL matrix");
+    return(ARKLS_ILL_INPUT);
+  }
+
+  /* Check for compatible LS type, matrix and "atimes" support */
+  if (iterative) {
+
     if (ark_mem->tempv1->ops->nvgetlength == NULL) {
       arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
                       "arkLSSetLinearSolver", MSG_LS_BAD_NVECTOR);
       return(ARKLS_ILL_INPUT);
     }
-  }
 
-  /* Check for compatible LS type, matrix and "atimes" support */
-  if ((LSType == SUNLINEARSOLVER_ITERATIVE) && (LS->ops->setatimes == NULL)) {
-    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetLinearSolver",
-                    "Incompatible inputs: iterative LS must support ATimes routine");
-    return(ARKLS_ILL_INPUT);
-  }
-  if ((LSType == SUNLINEARSOLVER_DIRECT) && (A == NULL)) {
+    if (!matrixbased && (LSType != SUNLINEARSOLVER_MATRIX_EMBEDDED) &&
+        (LS->ops->setatimes == NULL)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetLinearSolver",
+                      "Incompatible inputs: iterative LS must support ATimes routine");
+      return(ARKLS_ILL_INPUT);
+    }
+
+    if (matrixbased && (A == NULL)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetLinearSolver",
+                      "Incompatible inputs: matrix-iterative LS requires non-NULL matrix");
+      return(ARKLS_ILL_INPUT);
+    }
+
+  } else if (A == NULL) {
+
     arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetLinearSolver",
                     "Incompatible inputs: direct LS requires non-NULL matrix");
     return(ARKLS_ILL_INPUT);
-  }
-  if ((LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) && (A == NULL)) {
-    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetLinearSolver",
-                    "Incompatible inputs: matrix-iterative LS requires non-NULL matrix");
-    return(ARKLS_ILL_INPUT);
-  }
 
+  }
 
   /* Test whether time stepper module is supplied, with required routines */
   if ( (ark_mem->step_attachlinsol == NULL) ||
@@ -142,6 +154,10 @@ int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
   /* set SUNLinearSolver pointer */
   arkls_mem->LS = LS;
 
+  /* Linear solver type information */
+  arkls_mem->iterative   = iterative;
+  arkls_mem->matrixbased = matrixbased;
+
   /* Set defaults for Jacobian-related fields */
   if (A != NULL) {
     arkls_mem->jacDQ  = SUNTRUE;
@@ -157,6 +173,15 @@ int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
   arkls_mem->jtsetup  = NULL;
   arkls_mem->jtimes   = arkLsDQJtimes;
   arkls_mem->Jt_data  = ark_mem;
+  arkls_mem->Jt_f     = ark_mem->step_getimplicitrhs(arkode_mem);
+
+  if (arkls_mem->Jt_f == NULL) {
+    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
+                    "arkLSSetLinearSolver",
+                    "Time step module is missing implicit RHS fcn");
+    free(arkls_mem); arkls_mem = NULL;
+    return(ARKLS_ILL_INPUT);
+  }
 
   arkls_mem->user_linsys = SUNFALSE;
   arkls_mem->linsys      = arkLsLinSys;
@@ -208,27 +233,30 @@ int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
   }
 
   /* Allocate memory for ytemp and x */
-  arkls_mem->ytemp = N_VClone(ark_mem->tempv1);
-  if (arkls_mem->ytemp == NULL) {
+  if (!arkAllocVec(ark_mem, ark_mem->tempv1, &(arkls_mem->ytemp))) {
     arkProcessError(ark_mem, ARKLS_MEM_FAIL, "ARKLS",
                     "arkLSSetLinearSolver", MSG_LS_MEM_FAIL);
     free(arkls_mem); arkls_mem = NULL;
     return(ARKLS_MEM_FAIL);
   }
 
-  arkls_mem->x = N_VClone(ark_mem->tempv1);
-  if (arkls_mem->x == NULL) {
+  if (!arkAllocVec(ark_mem, ark_mem->tempv1, &(arkls_mem->x))) {
     arkProcessError(ark_mem, ARKLS_MEM_FAIL, "ARKLS",
                     "arkLSSetLinearSolver", MSG_LS_MEM_FAIL);
-    N_VDestroy(arkls_mem->ytemp);
+    arkFreeVec(ark_mem, &(arkls_mem->ytemp));
     free(arkls_mem); arkls_mem = NULL;
     return(ARKLS_MEM_FAIL);
   }
 
-  /* For iterative LS, compute sqrtN */
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) )
-    arkls_mem->sqrtN = SUNRsqrt( N_VGetLength(arkls_mem->ytemp) );
+  /* For iterative LS, compute default norm conversion factor */
+  if (iterative)
+    arkls_mem->nrmfac = SUNRsqrt( N_VGetLength(arkls_mem->ytemp) );
+
+  /* For matrix-based LS, enable solution scaling */
+  if (matrixbased)
+    arkls_mem->scalesol = SUNTRUE;
+  else
+    arkls_mem->scalesol = SUNFALSE;
 
   /* Attach ARKLs interface to time stepper module */
   retval = ark_mem->step_attachlinsol(arkode_mem, arkLsInitialize,
@@ -255,9 +283,12 @@ int arkLSSetLinearSolver(void *arkode_mem, SUNLinearSolver LS,
 int arkLSSetMassLinearSolver(void *arkode_mem, SUNLinearSolver LS,
                              SUNMatrix M, booleantype time_dep)
 {
-  ARKodeMem    ark_mem;
-  ARKLsMassMem arkls_mem;
-  int          retval, LSType;
+  ARKodeMem            ark_mem;
+  ARKLsMassMem         arkls_mem;
+  int                  retval;
+  SUNLinearSolver_Type LSType;
+  booleantype          iterative;    /* is the solver iterative?    */
+  booleantype          matrixbased;  /* is a matrix structure used? */
 
   /* Return immediately if either arkode_mem or LS inputs are NULL */
   if (arkode_mem == NULL) {
@@ -286,6 +317,11 @@ int arkLSSetMassLinearSolver(void *arkode_mem, SUNLinearSolver LS,
   /* Retrieve the LS type */
   LSType = SUNLinSolGetType(LS);
 
+  /* Set flags based on LS type */
+  iterative   = (LSType != SUNLINEARSOLVER_DIRECT);
+  matrixbased = ((LSType != SUNLINEARSOLVER_ITERATIVE) &&
+                 (LSType != SUNLINEARSOLVER_MATRIX_EMBEDDED));
+
   /* Test if vector is compatible with LS interface */
   if ( (ark_mem->tempv1->ops->nvconst == NULL) ||
        (ark_mem->tempv1->ops->nvwrmsnorm == NULL) ){
@@ -294,30 +330,41 @@ int arkLSSetMassLinearSolver(void *arkode_mem, SUNLinearSolver LS,
     return(ARKLS_ILL_INPUT);
   }
 
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  /* Ensure that M is NULL when LS is matrix-embedded */
+  if ((LSType == SUNLINEARSOLVER_MATRIX_EMBEDDED) && (M != NULL)) {
+    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetMassLinearSolver",
+                    "Incompatible inputs: matrix-embedded LS requires NULL matrix");
+    return(ARKLS_ILL_INPUT);
+  }
+
+  /* Check for compatible LS type, matrix and "atimes" support */
+  if (iterative) {
+
     if (ark_mem->tempv1->ops->nvgetlength == NULL) {
       arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
                       "arkLSSetLinearSolver", MSG_LS_BAD_NVECTOR);
       return(ARKLS_ILL_INPUT);
     }
-  }
 
-  /* Check for compatible LS type, matrix and "atimes" support */
-  if ((LSType == SUNLINEARSOLVER_ITERATIVE) && (LS->ops->setatimes == NULL)) {
-    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetMassLinearSolver",
-                    "Incompatible inputs: iterative LS must support ATimes routine");
-    return(ARKLS_ILL_INPUT);
-  }
-  if ((LSType == SUNLINEARSOLVER_DIRECT) && (M == NULL)) {
+    if (!matrixbased && (LSType != SUNLINEARSOLVER_MATRIX_EMBEDDED) &&
+        (LS->ops->setatimes == NULL)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetMassLinearSolver",
+                      "Incompatible inputs: iterative LS must support ATimes routine");
+      return(ARKLS_ILL_INPUT);
+    }
+
+    if (matrixbased && (M == NULL)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetMassLinearSolver",
+                      "Incompatible inputs: matrix-iterative LS requires non-NULL matrix");
+      return(ARKLS_ILL_INPUT);
+    }
+
+  } else if (M == NULL) {
+
     arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetMassLinearSolver",
                     "Incompatible inputs: direct LS requires non-NULL matrix");
     return(ARKLS_ILL_INPUT);
-  }
-  if ((LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) && (M == NULL)) {
-    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetMassLinearSolver",
-                    "Incompatible inputs: matrix-iterative LS requires non-NULL matrix");
-    return(ARKLS_ILL_INPUT);
+
   }
 
   /* Test whether time stepper module is supplied, with required routines */
@@ -339,8 +386,14 @@ int arkLSSetMassLinearSolver(void *arkode_mem, SUNLinearSolver LS,
   }
   memset(arkls_mem, 0, sizeof(struct ARKLsMassMemRec));
 
-  /* set SUNLinearSolver pointer; flag indicating time-dependence */
+  /* set SUNLinearSolver pointer */
   arkls_mem->LS = LS;
+
+  /* Linear solver type information */
+  arkls_mem->iterative   = iterative;
+  arkls_mem->matrixbased = matrixbased;
+
+  /* Set flag indicating time-dependence */
   arkls_mem->time_dependent = time_dep;
 
   /* Set mass-matrix routines to NULL */
@@ -387,43 +440,46 @@ int arkLSSetMassLinearSolver(void *arkode_mem, SUNLinearSolver LS,
     }
   }
 
-  /* When using a non-NULL SUNMatrix object, store pointer to M and create M_lu */
+  /* When using a non-NULL SUNMatrix object, store pointer to M and, for direct
+     linear solvers, create M_lu to store the factorization of M */
   if (M != NULL) {
     arkls_mem->M = M;
-    arkls_mem->M_lu = SUNMatClone(M);
-    if (arkls_mem->M_lu == NULL) {
-      arkProcessError(ark_mem, ARKLS_MEM_FAIL, "ARKLS",
-                      "arkLSSetMassLinearSolver", MSG_LS_MEM_FAIL);
-      free(arkls_mem); arkls_mem = NULL;
-      return(ARKLS_MEM_FAIL);
+    if (!iterative) {
+      arkls_mem->M_lu = SUNMatClone(M);
+      if (arkls_mem->M_lu == NULL) {
+        arkProcessError(ark_mem, ARKLS_MEM_FAIL, "ARKLS",
+                        "arkLSSetMassLinearSolver", MSG_LS_MEM_FAIL);
+        free(arkls_mem); arkls_mem = NULL;
+        return(ARKLS_MEM_FAIL);
+      }
+    } else {
+      arkls_mem->M_lu = M;
     }
   }
 
   /* Allocate memory for x */
-  arkls_mem->x = N_VClone(ark_mem->tempv1);
-  if (arkls_mem->x == NULL) {
+  if (!arkAllocVec(ark_mem, ark_mem->tempv1, &(arkls_mem->x))) {
     arkProcessError(ark_mem, ARKLS_MEM_FAIL, "ARKLS",
                     "arkLSSetMassLinearSolver", MSG_LS_MEM_FAIL);
-    SUNMatDestroy(arkls_mem->M_lu);
+    if (!iterative) SUNMatDestroy(arkls_mem->M_lu);
     free(arkls_mem); arkls_mem = NULL;
     return(ARKLS_MEM_FAIL);
   }
 
-  /* For iterative LS, compute sqrtN */
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) )
-    arkls_mem->sqrtN = SUNRsqrt( N_VGetLength(arkls_mem->x) );
+  /* For iterative LS, compute default norm conversion factor */
+  if (iterative)
+    arkls_mem->nrmfac = SUNRsqrt( N_VGetLength(arkls_mem->x) );
 
   /* Attach ARKLs interface to time stepper module */
   retval = ark_mem->step_attachmasssol(arkode_mem, arkLsMassInitialize,
                                        arkLsMassSetup, arkLsMTimes,
                                        arkLsMassSolve, arkLsMassFree,
-                                       LSType, arkls_mem);
+                                       time_dep, LSType, arkls_mem);
   if (retval != ARK_SUCCESS) {
     arkProcessError(ark_mem, retval, "ARKLS", "arkLSSetMassLinearSolver",
                     "Failed to attach to time stepper module");
     N_VDestroy(arkls_mem->x);
-    SUNMatDestroy(arkls_mem->M_lu);
+    if (!iterative) SUNMatDestroy(arkls_mem->M_lu);
     free(arkls_mem); arkls_mem = NULL;
     return(retval);
   }
@@ -532,21 +588,77 @@ int arkLSSetEpsLin(void *arkode_mem, realtype eplifac)
 
 
 /*---------------------------------------------------------------
-  arkLSSetMaxStepsBetweenJac specifies the maximum number of
-  time steps to wait before recomputing the Jacobian matrix
-  and/or preconditioner.
+  arkLSSetNormFactor sets or computes the factor to use when
+  converting from the integrator tolerance (WRMS norm) to the
+  linear solver tolerance (L2 norm).
   ---------------------------------------------------------------*/
-int arkLSSetMaxStepsBetweenJac(void *arkode_mem, long int msbj)
+int arkLSSetNormFactor(void *arkode_mem, realtype nrmfac)
 {
   ARKodeMem ark_mem;
   ARKLsMem  arkls_mem;
   int       retval;
 
   /* access ARKLsMem structure; store input and return */
-  retval = arkLs_AccessLMem(arkode_mem, "arkLSSetMaxStepsBetweenJac",
+  retval = arkLs_AccessLMem(arkode_mem, "arkLSSetNormFactor",
+                            &ark_mem, &arkls_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  if (nrmfac > ZERO) {
+    /* set user-provided factor */
+    arkls_mem->nrmfac = nrmfac;
+  } else if (nrmfac < ZERO) {
+    /* compute factor for WRMS norm with dot product */
+    N_VConst(ONE, ark_mem->tempv1);
+    arkls_mem->nrmfac = SUNRsqrt(N_VDotProd(ark_mem->tempv1, ark_mem->tempv1));
+  } else {
+    /* compute default factor for WRMS norm from vector legnth */
+    arkls_mem->nrmfac = SUNRsqrt(N_VGetLength(ark_mem->tempv1));
+  }
+
+  return(ARKLS_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  arkLSSetJacEvalFrequency specifies the frequency for
+  recomputing the Jacobian matrix and/or preconditioner.
+  ---------------------------------------------------------------*/
+int arkLSSetJacEvalFrequency(void *arkode_mem, long int msbj)
+{
+  ARKodeMem ark_mem;
+  ARKLsMem  arkls_mem;
+  int       retval;
+
+  /* access ARKLsMem structure; store input and return */
+  retval = arkLs_AccessLMem(arkode_mem, "arkLSSetJacEvalFrequency",
                             &ark_mem, &arkls_mem);
   if (retval != ARK_SUCCESS)  return(retval);
   arkls_mem->msbj = (msbj <= ZERO) ? ARKLS_MSBJ : msbj;
+
+  return(ARKLS_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  arkLSSetLinearSolutionScaling enables or disables scaling the
+  linear solver solution to account for changes in gamma.
+  ---------------------------------------------------------------*/
+int arkLSSetLinearSolutionScaling(void *arkode_mem, booleantype onoff)
+{
+  ARKodeMem ark_mem;
+  ARKLsMem  arkls_mem;
+  int       retval;
+
+  /* access ARKLsMem structure; store input and return */
+  retval = arkLs_AccessLMem(arkode_mem, "arkLSSetLinearSolutionScaling",
+                            &ark_mem, &arkls_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  /* check for valid solver type */
+  if (!(arkls_mem->matrixbased)) return(ARKLS_ILL_INPUT);
+
+  /* set solution scaling flag */
+  arkls_mem->scalesol = onoff;
 
   return(ARKLS_SUCCESS);
 }
@@ -562,8 +674,8 @@ int arkLSSetPreconditioner(void *arkode_mem,
 {
   ARKodeMem ark_mem;
   ARKLsMem  arkls_mem;
-  PSetupFn  arkls_psetup;
-  PSolveFn  arkls_psolve;
+  SUNPSetupFn  arkls_psetup;
+  SUNPSolveFn  arkls_psolve;
   int       retval;
 
   /* access ARKLsMem structure */
@@ -636,6 +748,54 @@ int arkLSSetJacTimes(void *arkode_mem,
     arkls_mem->jtsetup  = NULL;
     arkls_mem->jtimes   = arkLsDQJtimes;
     arkls_mem->Jt_data  = ark_mem;
+    arkls_mem->Jt_f     = ark_mem->step_getimplicitrhs(arkode_mem);
+
+    if (arkls_mem->Jt_f == NULL) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
+                      "arkLSSetJacTimes",
+                      "Time step module is missing implicit RHS fcn");
+      return(ARKLS_ILL_INPUT);
+    }
+  }
+
+  return(ARKLS_SUCCESS);
+}
+
+/*---------------------------------------------------------------
+  arkLSSetJacTimesRhsFn specifies an alternative user-supplied
+  ODE right-hand side function to use in the internal finite
+  difference Jacobian-vector product.
+  ---------------------------------------------------------------*/
+int arkLSSetJacTimesRhsFn(void *arkode_mem, ARKRhsFn jtimesRhsFn)
+{
+  ARKodeMem ark_mem;
+  ARKLsMem  arkls_mem;
+  int       retval;
+
+  /* access ARKLsMem structure */
+  retval = arkLs_AccessLMem(arkode_mem, "arkLSSetJacTimesRhsFn",
+                            &ark_mem, &arkls_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  /* check if using internal finite difference approximation */
+  if (!(arkls_mem->jtimesDQ)) {
+    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLSSetJacTimesRhsFn",
+                    "Internal finite-difference Jacobian-vector product is disabled.");
+    return(ARKLS_ILL_INPUT);
+  }
+
+  /* store function pointers for RHS function (NULL implies use ODE RHS) */
+  if (jtimesRhsFn != NULL) {
+    arkls_mem->Jt_f = jtimesRhsFn;
+  } else {
+    arkls_mem->Jt_f = ark_mem->step_getimplicitrhs(arkode_mem);
+
+    if (arkls_mem->Jt_f == NULL) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
+                      "arkLSSetJacTimesRhsFn",
+                      "Time step module is missing implicit RHS fcn");
+      return(ARKLS_ILL_INPUT);
+    }
   }
 
   return(ARKLS_SUCCESS);
@@ -1022,6 +1182,38 @@ int arkLSSetMassEpsLin(void *arkode_mem, realtype eplifac)
 
 
 /*---------------------------------------------------------------
+  arkLSSetMassNormFactor sets or computes the factor to use when
+  converting from the integrator tolerance (WRMS norm) to the
+  linear solver tolerance (L2 norm).
+  ---------------------------------------------------------------*/
+int arkLSSetMassNormFactor(void *arkode_mem, realtype nrmfac)
+{
+  ARKodeMem     ark_mem;
+  ARKLsMassMem  arkls_mem;
+  int           retval;
+
+  /* access ARKLsMem structure; store input and return */
+  retval = arkLs_AccessMassMem(arkode_mem, "arkLSSetMassNormFactor",
+                               &ark_mem, &arkls_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  if (nrmfac > ZERO) {
+    /* set user-provided factor */
+    arkls_mem->nrmfac = nrmfac;
+  } else if (nrmfac < ZERO) {
+    /* compute factor for WRMS norm with dot product */
+    N_VConst(ONE, ark_mem->tempv1);
+    arkls_mem->nrmfac = SUNRsqrt(N_VDotProd(ark_mem->tempv1, ark_mem->tempv1));
+  } else {
+    /* compute default factor for WRMS norm from vector legnth */
+    arkls_mem->nrmfac = SUNRsqrt(N_VGetLength(ark_mem->tempv1));
+  }
+
+  return(ARKLS_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
   arkLSSetMassPreconditioner specifies the user-supplied
   preconditioner setup and solve routines.
   ---------------------------------------------------------------*/
@@ -1031,8 +1223,8 @@ int arkLSSetMassPreconditioner(void *arkode_mem,
 {
   ARKodeMem    ark_mem;
   ARKLsMassMem arkls_mem;
-  PSetupFn     arkls_mpsetup;
-  PSolveFn     arkls_mpsolve;
+  SUNPSetupFn     arkls_mpsetup;
+  SUNPSolveFn     arkls_mpsolve;
   int          retval;
 
   /* access ARKLsMassMem structure */
@@ -1175,7 +1367,7 @@ int arkLSGetMassWorkSpace(void *arkode_mem, long int *lenrw,
   }
 
   /* add SUNMatrix size (only account for the one owned by Ls interface) */
-  if (arkls_mem->M_lu)
+  if (!(arkls_mem->iterative) && arkls_mem->M_lu)
     if (arkls_mem->M_lu->ops->space) {
       retval = SUNMatSpace(arkls_mem->M_lu, &lrw, &liw);
       if (retval == 0) {
@@ -1326,6 +1518,24 @@ int arkLSGetNumMassConvFails(void *arkode_mem, long int *nmcfails)
                                &ark_mem, &arkls_mem);
   if (retval != ARK_SUCCESS)  return(retval);
   *nmcfails = arkls_mem->ncfl;
+  return(ARKLS_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  arkLSGetMassMatrix returns the current mass matrix.
+  ---------------------------------------------------------------*/
+int arkLSGetCurrentMassMatrix(void *arkode_mem, SUNMatrix *M)
+{
+  ARKodeMem    ark_mem;
+  ARKLsMassMem arkls_mem;
+  int          retval;
+
+  /* access ARKLsMassMem structure; set output value and return */
+  retval = arkLs_AccessMassMem(arkode_mem, "arkLSGetCurrentMassMatrix",
+                               &ark_mem, &arkls_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+  *M = arkls_mem->M;
   return(ARKLS_SUCCESS);
 }
 
@@ -1532,9 +1742,9 @@ int arkLsPSolve(void *arkode_mem, N_Vector r, N_Vector z,
   ---------------------------------------------------------------*/
 int arkLsMTimes(void *arkode_mem, N_Vector v, N_Vector z)
 {
-  ARKodeMem       ark_mem;
-  ARKLsMassMem    arkls_mem;
-  int             retval;
+  ARKodeMem    ark_mem;
+  ARKLsMassMem arkls_mem;
+  int          retval;
 
   /* access ARKLsMassMem structure */
   retval = arkLs_AccessMassMem(arkode_mem, "arkLsMTimes",
@@ -1543,27 +1753,39 @@ int arkLsMTimes(void *arkode_mem, N_Vector v, N_Vector z)
 
   /* perform multiply by either calling the user-supplied routine
      (default), or asking the SUNMatrix to do the multiply */
-  retval = -1;
   if (arkls_mem->mtimes) {
 
-    /* call user-supplied mtimes routine and increment counter */
+    /* call user-supplied mtimes routine, increment counter and return */
     retval = arkls_mem->mtimes(v, z, ark_mem->tcur,
                                arkls_mem->mt_data);
+    if (retval == 0) {
+      arkls_mem->nmtimes++;
+    } else {
+      arkProcessError(ark_mem, retval, "ARKLS", "arkLsMTimes",
+                      "Error in user mass matrix-vector product routine");
+    }
+    return(retval);
 
   } else if (arkls_mem->M) {
 
-    if (arkls_mem->M->ops->matvec)
+    /* try to ask SUNMatrix to do the multiply; increment counter and return */
+    if (arkls_mem->M->ops->matvec) {
       retval = SUNMatMatvec(arkls_mem->M, v, z);
+      if (retval == 0) {
+        arkls_mem->nmtimes++;
+      } else {
+        arkProcessError(ark_mem, retval, "ARKLS", "arkLsMTimes",
+                        "Error in SUNMatrix mass matrix-vector product routine");
+      }
+      return(retval);
+    }
 
   }
 
-  if (retval == 0) {
-    arkls_mem->nmtimes++;
-  } else {
-    arkProcessError(ark_mem, retval, "ARKLS", "arkLsMTimes",
-                    "Missing mass matrix-vector product routine");
-  }
-  return(retval);
+  /* if we made it here, then no matrix-vector product is available */
+  arkProcessError(ark_mem, retval, "ARKLS", "arkLsMTimes",
+                  "Missing mass matrix-vector product routine");
+  return(-1);
 }
 
 
@@ -1721,7 +1943,7 @@ int arkLsDenseDQJac(realtype t, N_Vector y, N_Vector fy,
   int          retval = 0;
 
   /* access matrix dimension */
-  N = SUNDenseMatrix_Rows(Jac);
+  N = SUNDenseMatrix_Columns(Jac);
 
   /* Rename work vector for readibility */
   ftemp = tmp1;
@@ -1893,7 +2115,6 @@ int arkLsDQJtimes(N_Vector v, N_Vector Jv, realtype t,
 {
   ARKodeMem ark_mem;
   ARKLsMem  arkls_mem;
-  ARKRhsFn  fi;
   realtype  sig, siginv;
   int       iter, retval;
 
@@ -1905,22 +2126,13 @@ int arkLsDQJtimes(N_Vector v, N_Vector Jv, realtype t,
   /* Initialize perturbation to 1/||v|| */
   sig = ONE/N_VWrmsNorm(v, ark_mem->ewt);
 
-  /* Access implicit RHS function */
-  fi = ark_mem->step_getimplicitrhs(arkode_mem);
-  if (fi == NULL) {
-    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
-                    "arkLsDQJtimes",
-                    "Time step module is missing implicit RHS fcn");
-    return(ARKLS_ILL_INPUT);
-  }
-
   for (iter=0; iter<MAX_DQITERS; iter++) {
 
     /* Set work = y + sig*v */
     N_VLinearSum(sig, v, ONE, y, work);
 
     /* Set Jv = f(tn, y+sig*v) */
-    retval = fi(t, work, Jv, ark_mem->user_data);
+    retval = arkls_mem->Jt_f(t, work, Jv, ark_mem->user_data);
     arkls_mem->nfeDQ++;
     if (retval == 0) break;
     if (retval < 0)  return(-1);
@@ -1980,8 +2192,8 @@ static int arkLsLinSys(realtype t, N_Vector y, N_Vector fy, SUNMatrix A,
     /* Call jac() routine to update J */
     *jcur = SUNTRUE;
 
-    /* Clear the linear system matrix if necessary */
-    if (SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_DIRECT) {
+    /* Clear the linear system matrix if necessary (direct linear solvers) */
+    if (!(arkls_mem->iterative)) {
       retval = SUNMatZero(A);
       if (retval) {
         arkProcessError(ark_mem, ARKLS_SUNMAT_FAIL, "ARKLS",
@@ -2036,7 +2248,7 @@ static int arkLsLinSys(realtype t, N_Vector y, N_Vector fy, SUNMatrix A,
 
 /*---------------------------------------------------------------
   arkLsInitialize performs remaining initializations specific
-  to the iterative linear solver interface (and solver itself)
+  to the linear solver interface (and solver itself)
   ---------------------------------------------------------------*/
 int arkLsInitialize(void* arkode_mem)
 {
@@ -2151,11 +2363,20 @@ int arkLsInitialize(void* arkode_mem)
       }
     }
 
-    /* initialize mass matrix linear solver  */
-    retval = arkLsMassInitialize(arkode_mem);
-    if (retval != ARKLS_SUCCESS) {
-      arkls_mem->last_flag = retval;
-      return(retval);
+    /* If either system or mass matrix solver is matrix-embedded, then both must be */
+    if ((SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED) &&
+        (SUNLinSolGetType(arkls_massmem->LS) != SUNLINEARSOLVER_MATRIX_EMBEDDED)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLsInitialize",
+                      "mismatched matrix-embedded LS types (system and mass must match)");
+      arkls_mem->last_flag = ARKLS_ILL_INPUT;
+      return(ARKLS_ILL_INPUT);
+    }
+    if ((SUNLinSolGetType(arkls_mem->LS) != SUNLINEARSOLVER_MATRIX_EMBEDDED) &&
+        (SUNLinSolGetType(arkls_massmem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLsInitialize",
+                      "mismatched matrix-embedded LS types (system and mass must match)");
+      arkls_mem->last_flag = ARKLS_ILL_INPUT;
+      return(ARKLS_ILL_INPUT);
     }
   }
 
@@ -2169,12 +2390,18 @@ int arkLsInitialize(void* arkode_mem)
     arkls_mem->Jt_data = ark_mem;
   }
 
-  /* if A is NULL and psetup is not present, then arkLsSetup does
+  /* If A is NULL and psetup is not present, then arkLsSetup does
      not need to be called, so set the lsetup function to NULL (if possible) */
   if ( (arkls_mem->A == NULL) &&
        (arkls_mem->pset == NULL) &&
        (ark_mem->step_disablelsetup != NULL) )
     ark_mem->step_disablelsetup(arkode_mem);
+
+  /* When using a matrix-embedded linear solver, disable lsetup call and solution scaling */
+  if (SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED) {
+    ark_mem->step_disablelsetup(arkode_mem);
+    arkls_mem->scalesol = SUNFALSE;
+  }
 
   /* Call LS initialize routine, and return result */
   arkls_mem->last_flag = SUNLinSolInitialize(arkls_mem->LS);
@@ -2208,9 +2435,15 @@ int arkLsSetup(void* arkode_mem, int convfail, realtype tpred,
   int          retval;
 
   /* access ARKLsMem structure */
-  retval = arkLs_AccessLMem(arkode_mem, "arkLsInitialize",
+  retval = arkLs_AccessLMem(arkode_mem, "arkLsSetup",
                             &ark_mem, &arkls_mem);
   if (retval != ARK_SUCCESS)  return(retval);
+
+  /* Immediately return when using matrix-embedded linear solver */
+  if (SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED) {
+    arkls_mem->last_flag = ARKLS_SUCCESS;
+    return(arkls_mem->last_flag);
+  }
 
   /* Set ARKLs time and N_Vector pointers to current time,
      solution and rhs */
@@ -2227,12 +2460,12 @@ int arkLsSetup(void* arkode_mem, int convfail, realtype tpred,
     return(arkls_mem->last_flag);
   }
 
-  /* Use nst, gamma/gammap, and convfail to set J/P eval. flag jok;
+  /* Use initsetup, gamma/gammap, and convfail to set J/P eval. flag jok;
      Note: the "ARK_FAIL_BAD_J" test is asking whether the nonlinear
      solver converged due to a bad system Jacobian AND our gamma was
      fine, indicating that the J and/or P were invalid */
-  arkls_mem->jbad = (ark_mem->nst == 0) ||
-    (ark_mem->nst > arkls_mem->nstlj + arkls_mem->msbj) ||
+  arkls_mem->jbad = (ark_mem->initsetup) ||
+    (ark_mem->nst >= arkls_mem->nstlj + arkls_mem->msbj) ||
     ((convfail == ARK_FAIL_BAD_J) && (!dgamma_fail)) ||
     (convfail == ARK_FAIL_OTHER);
 
@@ -2246,7 +2479,7 @@ int arkLsSetup(void* arkode_mem, int convfail, realtype tpred,
     M = ((ARKLsMassMem) ark_step_massmem)->M;
 
     /* Setup mass matrix linear solver (including recomputation of mass matrix) */
-    arkls_mem->last_flag = arkLsMassSetup(arkode_mem, vtemp1, vtemp2, vtemp3);
+    arkls_mem->last_flag = arkLsMassSetup(arkode_mem, tpred, vtemp1, vtemp2, vtemp3);
     if (arkls_mem->last_flag) {
       arkProcessError(ark_mem, ARKLS_SUNMAT_FAIL, "ARKLS", "arkLsSetup",
                       "Error setting up mass-matrix linear solver");
@@ -2329,10 +2562,10 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
   realtype    bnorm, resnorm;
   ARKodeMem   ark_mem;
   ARKLsMem    arkls_mem;
-  realtype    gamma, gamrat, delta, deltar, ewt_mean;
+  realtype    gamma, gamrat, delta, deltar, rwt_mean;
   booleantype dgamma_fail, *jcur;
   long int    nps_inc;
-  int         nli_inc, retval, LSType;
+  int         nli_inc, retval;
 
 
   /* access ARKLsMem structure */
@@ -2346,14 +2579,10 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
   arkls_mem->ycur = ynow;
   arkls_mem->fcur = fnow;
 
-  /* Retrieve the LS type */
-  LSType = SUNLinSolGetType(arkls_mem->LS);
-
   /* If the linear solver is iterative:
      test norm(b), if small, return x = 0 or x = b;
      set linear solver tolerance (in left/right scaled 2-norm) */
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  if (arkls_mem->iterative) {
     deltar = arkls_mem->eplifac * eRNrm;
     bnorm = N_VWrmsNorm(b, ark_mem->rwt);
     if (bnorm <= deltar) {
@@ -2361,7 +2590,8 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
       arkls_mem->last_flag = ARKLS_SUCCESS;
       return(arkls_mem->last_flag);
     }
-    delta = deltar * arkls_mem->sqrtN;
+    /* Adjust tolerance for 2-norm */
+    delta = deltar * arkls_mem->nrmfac;
   } else {
     delta = bnorm = ZERO;
   }
@@ -2369,8 +2599,8 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
   /* Set scaling vectors for LS to use (if applicable) */
   if (arkls_mem->LS->ops->setscalingvectors) {
     retval = SUNLinSolSetScalingVectors(arkls_mem->LS,
-                                        ark_mem->ewt,
-                                        ark_mem->rwt);
+                                        ark_mem->rwt,
+                                        ark_mem->ewt);
     if (retval != SUNLS_SUCCESS) {
       arkProcessError(ark_mem, ARKLS_SUNLS_FAIL, "ARKLS", "arkLsSolve",
                       "Error in call to SUNLinSolSetScalingVectors");
@@ -2381,29 +2611,31 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
   /* If solver is iterative and does not support scaling vectors, update the
      tolerance in an attempt to account for ewt/rwt vectors.  We make the
      following assumptions:
-       1. rwt = ewt (i.e. the units of solution and residual are the same)
-       2. ewt_i = ewt_mean, for i=0,...,n-1 (i.e. the solution units are identical)
-       3. the linear solver uses a basic 2-norm to measure convergence
-     Hence (using the notation from sunlinsol_spgmr.h, with S = diag(ewt)),
+       1. rwt_i = rwt_mean, for i=0,...,n-1 (i.e. the residual units are identical)
+       2. the linear solver uses a basic 2-norm to measure convergence
+     Hence (using the notation from sunlinsol_spgmr.h, with S = diag(rwt)),
            || bbar - Abar xbar ||_2 < tol
        <=> || S b - S A x ||_2 < tol
        <=> || S (b - A x) ||_2 < tol
-       <=> \sum_{i=0}^{n-1} (ewt_i (b - A x)_i)^2 < tol^2
-       <=> ewt_mean^2 \sum_{i=0}^{n-1} (b - A x_i)^2 < tol^2
-       <=> \sum_{i=0}^{n-1} (b - A x_i)^2 < tol^2 / ewt_mean^2
-       <=> || b - A x ||_2 < tol / ewt_mean
-     So we compute ewt_mean = ||ewt||_RMS and scale the desired tolerance accordingly. */
-  } else if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-              (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+       <=> \sum_{i=0}^{n-1} (rwt_i (b - A x)_i)^2 < tol^2
+       <=> rwt_mean^2 \sum_{i=0}^{n-1} (b - A x_i)^2 < tol^2
+       <=> \sum_{i=0}^{n-1} (b - A x_i)^2 < tol^2 / rwt_mean^2
+       <=> || b - A x ||_2 < tol / rwt_mean
+     So we compute rwt_mean = ||rwt||_RMS and scale the desired tolerance accordingly. */
+  } else if (arkls_mem->iterative) {
 
     N_VConst(ONE, arkls_mem->x);
-    ewt_mean = N_VWrmsNorm(ark_mem->ewt, arkls_mem->x);
-    delta /= ewt_mean;
+    rwt_mean = N_VWrmsNorm(ark_mem->rwt, arkls_mem->x);
+    delta /= rwt_mean;
 
   }
 
   /* Set initial guess x = 0 to LS */
   N_VConst(ZERO, arkls_mem->x);
+
+  /* Set zero initial guess flag */
+  retval = SUNLinSolSetZeroGuess(arkls_mem->LS, SUNTRUE);
+  if (retval != SUNLS_SUCCESS) return(-1);
 
   /* Store previous nps value in nps_inc */
   nps_inc = arkls_mem->nps;
@@ -2427,8 +2659,7 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
 
   /* If using a direct or matrix-iterative solver, scale the correction to
      account for change in gamma (this is only beneficial if M==I) */
-  if ( (LSType == SUNLINEARSOLVER_DIRECT) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  if (arkls_mem->scalesol) {
     arkls_mem->last_flag = ark_mem->step_getgammas(arkode_mem, &gamma, &gamrat,
                                                    &jcur, &dgamma_fail);
     if (arkls_mem->last_flag != ARK_SUCCESS) {
@@ -2442,8 +2673,7 @@ int arkLsSolve(void* arkode_mem, N_Vector b, realtype tnow,
   /* Retrieve statistics from iterative linear solvers */
   resnorm = ZERO;
   nli_inc = 0;
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  if (arkls_mem->iterative) {
     if (arkls_mem->LS->ops->resnorm)
       resnorm = SUNLinSolResNorm(arkls_mem->LS);
     if (arkls_mem->LS->ops->numiters)
@@ -2562,7 +2792,7 @@ int arkLsFree(void* arkode_mem)
 
 /*---------------------------------------------------------------
   arkLsMassInitialize performs remaining initializations specific
-  to the iterative linear solver interface (and solver itself)
+  to the mass matrix solver interface (and solver itself)
   ---------------------------------------------------------------*/
 int arkLsMassInitialize(void *arkode_mem)
 {
@@ -2578,15 +2808,9 @@ int arkLsMassInitialize(void *arkode_mem)
   /* reset counters */
   arkLsInitializeMassCounters(arkls_mem);
 
-  /* perform checks for mass matrix constructor or mass matrix-vector product routine exist */
-  if (arkls_mem->M == NULL) {
-    if (arkls_mem->mtimes == NULL) {
-      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLsMassInitialize",
-                      "Missing user-provided mass matrix-vector product routine");
-      arkls_mem->last_flag = ARKLS_ILL_INPUT;
-      return(arkls_mem->last_flag);
-    }
-  } else {
+  /* perform checks for matrix-based mass system */
+  if (arkls_mem->M != NULL) {
+    /* check for user-provided mass matrix constructor */
     if (arkls_mem->mass == NULL) {
       arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
                       "arkLsMassInitialize",
@@ -2594,6 +2818,23 @@ int arkLsMassInitialize(void *arkode_mem)
       arkls_mem->last_flag = ARKLS_ILL_INPUT;
       return(arkls_mem->last_flag);
     }
+    /* check that someone can perform matrix-vector product */
+    if ((arkls_mem->mtimes == NULL) && (arkls_mem->M->ops->matvec == NULL)) {
+      arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS",
+                      "arkLsMassInitialize",
+                      "No available mass matrix-vector product routine");
+      arkls_mem->last_flag = ARKLS_ILL_INPUT;
+      return(arkls_mem->last_flag);
+    }
+  }
+
+  /* perform checks for matrix-free mass system */
+  if ((arkls_mem->M == NULL) && (arkls_mem->mtimes == NULL) &&
+      (SUNLinSolGetType(arkls_mem->LS) != SUNLINEARSOLVER_MATRIX_EMBEDDED)) {
+    arkProcessError(ark_mem, ARKLS_ILL_INPUT, "ARKLS", "arkLsMassInitialize",
+                    "Missing user-provided mass matrix-vector product routine");
+    arkls_mem->last_flag = ARKLS_ILL_INPUT;
+    return(arkls_mem->last_flag);
   }
 
   /* ensure that a mass matrix solver exists */
@@ -2614,6 +2855,10 @@ int arkLsMassInitialize(void *arkode_mem)
        (ark_mem->step_disablemsetup != NULL) )
     ark_mem->step_disablemsetup(arkode_mem);
 
+  /* When using a matrix-embedded linear solver, disable lsetup call */
+  if (SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED)
+    ark_mem->step_disablemsetup(arkode_mem);
+
   /* Call LS initialize routine */
   arkls_mem->last_flag = SUNLinSolInitialize(arkls_mem->LS);
   return(arkls_mem->last_flag);
@@ -2623,7 +2868,7 @@ int arkLsMassInitialize(void *arkode_mem)
 /*---------------------------------------------------------------
   arkLsMassSetup calls the LS 'setup' routine.
   ---------------------------------------------------------------*/
-int arkLsMassSetup(void *arkode_mem, N_Vector vtemp1,
+int arkLsMassSetup(void *arkode_mem, realtype t, N_Vector vtemp1,
                    N_Vector vtemp2, N_Vector vtemp3)
 {
   ARKodeMem    ark_mem;
@@ -2636,17 +2881,30 @@ int arkLsMassSetup(void *arkode_mem, N_Vector vtemp1,
                                &ark_mem, &arkls_mem);
   if (retval != ARK_SUCCESS)  return(retval);
 
+  /* Immediately return when using matrix-embedded linear solver */
+  if (SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED) {
+    arkls_mem->last_flag = ARKLS_SUCCESS;
+    return(arkls_mem->last_flag);
+  }
+
+  /* if the most recent setup essentially matches the current time,
+     just return with success */
+  if (SUNRabs(arkls_mem->msetuptime - t) < FUZZ_FACTOR*ark_mem->uround) {
+    arkls_mem->last_flag = ARKLS_SUCCESS;
+    return(arkls_mem->last_flag);
+  }
+
   /* Determine whether to call user-provided mtsetup routine */
   call_mtsetup = SUNFALSE;
   if ( (arkls_mem->mtsetup) &&
-       (arkls_mem->time_dependent || (!arkls_mem->nmtsetup)) )
+       (arkls_mem->time_dependent || (arkls_mem->nmtsetup == 0)) )
     call_mtsetup = SUNTRUE;
 
   /* call user-provided mtsetup routine if applicable */
   if (call_mtsetup) {
-    arkls_mem->last_flag = arkls_mem->mtsetup(ark_mem->tcur,
-                                              arkls_mem->mt_data);
+    arkls_mem->last_flag = arkls_mem->mtsetup(t, arkls_mem->mt_data);
     arkls_mem->nmtsetup++;
+    arkls_mem->msetuptime = t;
     if (arkls_mem->last_flag != 0) {
       arkProcessError(ark_mem, arkls_mem->last_flag, "ARKLS",
                       "arkLsMassSetup", MSG_LS_MTSETUP_FAILED);
@@ -2667,14 +2925,14 @@ int arkLsMassSetup(void *arkode_mem, N_Vector vtemp1,
     /*** matrix-based ***/
 
     /* If mass matrix is not time dependent, and if it has been set up
-       previously, just reuse existing M and M_lu */
-    if (!arkls_mem->time_dependent && arkls_mem->nmsetups) {
+       previously, then just reuse existing matrix and factorization */
+    if (!arkls_mem->time_dependent && (arkls_mem->nmsetups > 0)) {
       arkls_mem->last_flag = ARKLS_SUCCESS;
       return(arkls_mem->last_flag);
     }
 
-    /* Clear the mass matrix if necessary */
-    if (SUNLinSolGetType(arkls_mem->LS) == SUNLINEARSOLVER_DIRECT) {
+    /* Clear the mass matrix if necessary (direct linear solvers) */
+    if (!(arkls_mem->iterative)) {
       retval = SUNMatZero(arkls_mem->M);
       if (retval) {
         arkProcessError(ark_mem, ARKLS_SUNMAT_FAIL, "ARKLS",
@@ -2684,9 +2942,10 @@ int arkLsMassSetup(void *arkode_mem, N_Vector vtemp1,
       }
     }
 
-    retval = arkls_mem->mass(ark_mem->tcur, arkls_mem->M,
-                             arkls_mem->M_data,
+    /* Call user-supplied routine to fill the mass matrix */
+    retval = arkls_mem->mass(t, arkls_mem->M, arkls_mem->M_data,
                              vtemp1, vtemp2, vtemp3);
+    arkls_mem->msetuptime = t;
     if (retval < 0) {
       arkProcessError(ark_mem, ARKLS_MASSFUNC_UNRECVR, "ARKLS",
                       "arkLsMassSetup",  MSG_LS_MASSFUNC_FAILED);
@@ -2698,17 +2957,19 @@ int arkLsMassSetup(void *arkode_mem, N_Vector vtemp1,
       return(1);
     }
 
-    /* Copy M into M_lu for factorization */
-    retval = SUNMatCopy(arkls_mem->M, arkls_mem->M_lu);
-    if (retval) {
-      arkProcessError(ark_mem, ARKLS_SUNMAT_FAIL, "ARKLS",
-                      "arkLsMassSetup",  MSG_LS_SUNMAT_FAILED);
-      arkls_mem->last_flag = ARKLS_SUNMAT_FAIL;
-      return(arkls_mem->last_flag);
+    /* Copy M into M_lu for factorization (direct linear solvers) */
+    if (!(arkls_mem->iterative)) {
+      retval = SUNMatCopy(arkls_mem->M, arkls_mem->M_lu);
+      if (retval) {
+        arkProcessError(ark_mem, ARKLS_SUNMAT_FAIL, "ARKLS",
+                        "arkLsMassSetup",  MSG_LS_SUNMAT_FAILED);
+        arkls_mem->last_flag = ARKLS_SUNMAT_FAIL;
+        return(arkls_mem->last_flag);
+      }
     }
 
     /* signal call to matvec setup routine only if the user didn't provide
-     * mtimes and the SUNMatrix implements the matvecsetup routine */
+       mtimes and the SUNMatrix implements the matvecsetup routine */
     if ((!arkls_mem->mtimes) && (arkls_mem->M->ops->matvecsetup))
       call_mvsetup = SUNTRUE;
     else
@@ -2754,20 +3015,16 @@ int arkLsMassSolve(void *arkode_mem, N_Vector b, realtype nlscoef)
   ARKodeMem    ark_mem;
   ARKLsMassMem arkls_mem;
   long int     nps_inc;
-  int          nli_inc, retval, LSType;
+  int          nli_inc, retval;
 
   /* access ARKLsMassMem structure */
   retval = arkLs_AccessMassMem(arkode_mem, "arkLsMassSolve",
                                &ark_mem, &arkls_mem);
   if (retval != ARK_SUCCESS)  return(retval);
 
-  /* Retrieve the LS type */
-  LSType = SUNLinSolGetType(arkls_mem->LS);
-
-  /* Set input tolerance for iterative solvers */
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
-    delta = arkls_mem->eplifac * nlscoef * arkls_mem->sqrtN;
+  /* Set input tolerance for iterative solvers (in 2-norm) */
+  if (arkls_mem->iterative) {
+    delta = arkls_mem->eplifac * nlscoef * arkls_mem->nrmfac;
   } else {
     delta = ZERO;
   }
@@ -2778,8 +3035,8 @@ int arkLsMassSolve(void *arkode_mem, N_Vector b, realtype nlscoef)
   /* Set scaling vectors for LS to use (if applicable) */
   if (arkls_mem->LS->ops->setscalingvectors) {
     retval = SUNLinSolSetScalingVectors(arkls_mem->LS,
-                                        ark_mem->ewt,
-                                        ark_mem->rwt);
+                                        ark_mem->rwt,
+                                        ark_mem->ewt);
     if (retval != SUNLS_SUCCESS) {
       arkProcessError(ark_mem, ARKLS_SUNLS_FAIL, "ARKLS", "arkLsMassSolve",
                       "Error in call to SUNLinSolSetScalingVectors");
@@ -2801,8 +3058,7 @@ int arkLsMassSolve(void *arkode_mem, N_Vector b, realtype nlscoef)
        <=> \sum_{i=0}^{n-1} (b - A x_i)^2 < tol^2 / rwt_mean^2
        <=> || b - A x ||_2 < tol / rwt_mean
      So we compute rwt_mean = ||rwt||_RMS and scale the desired tolerance accordingly. */
-  } else if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-              (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  } else if (arkls_mem->iterative) {
 
     N_VConst(ONE, arkls_mem->x);
     rwt_mean = N_VWrmsNorm(ark_mem->rwt, arkls_mem->x);
@@ -2812,6 +3068,10 @@ int arkLsMassSolve(void *arkode_mem, N_Vector b, realtype nlscoef)
 
   /* Set initial guess x = 0 for LS */
   N_VConst(ZERO, arkls_mem->x);
+
+  /* Set zero initial guess flag */
+  retval = SUNLinSolSetZeroGuess(arkls_mem->LS, SUNTRUE);
+  if (retval != SUNLS_SUCCESS) return(-1);
 
   /* Store previous nps value in nps_inc */
   nps_inc = arkls_mem->nps;
@@ -2825,8 +3085,7 @@ int arkLsMassSolve(void *arkode_mem, N_Vector b, realtype nlscoef)
   /* Retrieve statistics from iterative linear solvers */
   resnorm = ZERO;
   nli_inc = 0;
-  if ( (LSType == SUNLINEARSOLVER_ITERATIVE) ||
-       (LSType == SUNLINEARSOLVER_MATRIX_ITERATIVE) ) {
+  if (arkls_mem->iterative) {
     if (arkls_mem->LS->ops->resnorm)
       resnorm = SUNLinSolResNorm(arkls_mem->LS);
     if (arkls_mem->LS->ops->numiters)
@@ -2906,11 +3165,15 @@ int arkLsMassFree(void *arkode_mem)
   arkls_mem = (ARKLsMassMem) ark_step_massmem;
 
   /* detach ARKLs interface routines from LS object (ignore return values) */
-  if (arkls_mem->LS->ops->setatimes)
-    SUNLinSolSetATimes(arkls_mem->LS, NULL, NULL);
+  if (arkls_mem->LS) {
+    if (arkls_mem->LS->ops) {
+      if (arkls_mem->LS->ops->setatimes)
+        SUNLinSolSetATimes(arkls_mem->LS, NULL, NULL);
 
-  if (arkls_mem->LS->ops->setpreconditioner)
-    SUNLinSolSetPreconditioner(arkls_mem->LS, NULL, NULL, NULL);
+      if (arkls_mem->LS->ops->setpreconditioner)
+        SUNLinSolSetPreconditioner(arkls_mem->LS, NULL, NULL, NULL);
+    }
+  }
 
   /* Free N_Vector memory */
   if (arkls_mem->x) {
@@ -2918,11 +3181,11 @@ int arkLsMassFree(void *arkode_mem)
     arkls_mem->x = NULL;
   }
 
-  /* Free M_lu memory */
-  if (arkls_mem->M_lu) {
+  /* Free M_lu memory (direct linear solvers) */
+  if (!(arkls_mem->iterative) && arkls_mem->M_lu) {
     SUNMatDestroy(arkls_mem->M_lu);
-    arkls_mem->M_lu = NULL;
   }
+  arkls_mem->M_lu = NULL;
 
   /* Nullify other N_Vector pointers */
   arkls_mem->ycur = NULL;
@@ -2963,15 +3226,16 @@ int arkLsInitializeCounters(ARKLsMem arkls_mem)
 
 int arkLsInitializeMassCounters(ARKLsMassMem arkls_mem)
 {
-  arkls_mem->nmsetups = 0;
-  arkls_mem->nmsolves = 0;
-  arkls_mem->nmtsetup = 0;
-  arkls_mem->nmtimes  = 0;
-  arkls_mem->nmvsetup = 0;
-  arkls_mem->npe      = 0;
-  arkls_mem->nli      = 0;
-  arkls_mem->nps      = 0;
-  arkls_mem->ncfl     = 0;
+  arkls_mem->nmsetups   = 0;
+  arkls_mem->nmsolves   = 0;
+  arkls_mem->nmtsetup   = 0;
+  arkls_mem->nmtimes    = 0;
+  arkls_mem->nmvsetup   = 0;
+  arkls_mem->npe        = 0;
+  arkls_mem->nli        = 0;
+  arkls_mem->nps        = 0;
+  arkls_mem->ncfl       = 0;
+  arkls_mem->msetuptime = -BIG_REAL;
   return(0);
 }
 

@@ -1,6 +1,7 @@
 # /
 /.project
-/build
+/build*
+/TPLs
 /autom4te.cache
 /.settings
 /.cproject
@@ -8,9 +9,10 @@
 *.kdev4
 *.directory
 /.pydevproject
+/tarballs
 
 # custom test environment setup script
-/test/env.sh
+/test/env/env.sh
 
 # directories and files created by testing scripts
 /test/build_*
@@ -45,11 +47,12 @@
 /doc/*/*.out
 /doc/*/*.log
 
-# directories created by ARKode's Sphinx documentation system
-/doc/arkode/SphinxDocs/extra_packages/sphinx-bootstrap-theme
-/doc/arkode/SphinxDocs/extra_packages/sphinx-fortran
-/doc/arkode/SphinxDocs/guide/build
-/doc/arkode/SphinxDocs/examples/build
+# directories created by Sphinx documentation
+/doc/*/guide/build/
+/doc/*/examples/build/
+/doc/build/
+/doc/*/build/
+/doc/shared/__pycache__
 
 # PDFs of user guides and example docs
 /doc/*/*_guide.pdf
@@ -64,8 +67,12 @@
 /test/spack/.spack-env/view/.spack/*
 !/test/spack/.spack-env/view/.spack/projections.yaml
 
+# uberenv
+uberenv_libs
+
 # swig
 /swig/swig
 
 # editor files
 .vscode
+

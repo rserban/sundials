@@ -2,7 +2,7 @@
  * Programmer(s): Daniel R. Reynolds @ SMU
  *---------------------------------------------------------------
  * SUNDIALS Copyright Start
- * Copyright (c) 2002-2020, Lawrence Livermore National Security
+ * Copyright (c) 2002-2021, Lawrence Livermore National Security
  * and Southern Methodist University.
  * All rights reserved.
  *
@@ -78,7 +78,7 @@ static int fi(realtype t, N_Vector y, N_Vector ydot, void *user_data);
 static int check_flag(void *flagvalue, const char *funcname, int opt);
 
 /* Main Program */
-int main()
+int main(int argc, char *argv[])
 {
   /* general problem parameters */
   realtype T0 = RCONST(0.0);     /* initial time */
@@ -93,16 +93,27 @@ int main()
   int maxcor = 10;               /* maximum # of nonlinear iterations/step */
   realtype a, b, ep, u0, v0, w0;
   realtype rdata[3];
+  int monitor = 0;               /* turn on/off monitoring */
 
   /* general problem variables */
   int flag;                       /* reusable error-checking flag */
   N_Vector y = NULL;              /* empty vector for storing solution */
   SUNNonlinearSolver NLS = NULL;  /* empty nonlinear solver object */
   void *arkode_mem = NULL;        /* empty ARKode memory structure */
-  FILE *UFID;
+  FILE *UFID, *INFOFID;
   realtype t, tout;
   int iout;
   long int nst, nst_a, nfe, nfi, nni, ncfn, netf;
+
+  /* Create SUNDIALS context */
+  SUNContext ctx = NULL;
+  flag = SUNContext_Create(NULL, &ctx);
+  if (check_flag(&flag, "SUNContext_Create", 1)) return 1;
+
+  /* read inputs */
+  if (argc == 2) {
+    monitor = atoi(argv[1]);
+  }
 
   /* set up the test problem according to the desired test */
   if (test == 1) {
@@ -134,11 +145,15 @@ int main()
   printf("    problem parameters:  a = %"GSYM",  b = %"GSYM",  ep = %"GSYM"\n",a,b,ep);
   printf("    reltol = %.1"ESYM",  abstol = %.1"ESYM"\n\n",reltol,abstol);
 
+  /* Open up info output file */
+  INFOFID = NULL;
+  if (monitor) INFOFID = fopen("ark_brusselator_fp-info.txt","w");
+
   /* Initialize data structures */
   rdata[0] = a;    /* set user data  */
   rdata[1] = b;
   rdata[2] = ep;
-  y = N_VNew_Serial(NEQ);           /* Create serial vector for solution */
+  y = N_VNew_Serial(NEQ, ctx);           /* Create serial vector for solution */
   if (check_flag((void *)y, "N_VNew_Serial", 0)) return 1;
   NV_Ith_S(y,0) = u0;               /* Set initial conditions */
   NV_Ith_S(y,1) = v0;
@@ -147,12 +162,18 @@ int main()
   /* Call ARKStepCreate to initialize the ARK timestepper module and
      specify the right-hand side functions in y'=fe(t,y)+fi(t,y),
      the inital time T0, and the initial dependent variable vector y. */
-  arkode_mem = ARKStepCreate(fe, fi, T0, y);
+  arkode_mem = ARKStepCreate(fe, fi, T0, y, ctx);
   if (check_flag((void *)arkode_mem, "ARKStepCreate", 0)) return 1;
 
   /* Initialize fixed-point nonlinear solver and attach to ARKStep */
-  NLS = SUNNonlinSol_FixedPoint(y, fp_m);
+  NLS = SUNNonlinSol_FixedPoint(y, fp_m, ctx);
   if (check_flag((void *)NLS, "SUNNonlinSol_FixedPoint", 0)) return 1;
+  if (monitor) {
+    flag = SUNNonlinSolSetPrintLevel_FixedPoint(NLS, 1);
+    if (check_flag(&flag, "SUNNonlinSolSetPrintLevel_Newton", 1)) return(1);
+    flag = SUNNonlinSolSetInfoFile_FixedPoint(NLS, INFOFID);
+    if (check_flag(&flag, "SUNNonlinSolSetPrintLevel_Newton", 1)) return(1);
+  }
   flag = ARKStepSetNonlinearSolver(arkode_mem, NLS);
   if (check_flag(&flag, "ARKStepSetNonlinearSolver", 1)) return 1;
 
@@ -196,6 +217,7 @@ int main()
   }
   printf("   ----------------------------------------------\n");
   fclose(UFID);
+  if (monitor) fclose(INFOFID);
 
   /* Print some final statistics */
   flag = ARKStepGetNumSteps(arkode_mem, &nst);
@@ -222,6 +244,8 @@ int main()
   N_VDestroy(y);               /* Free y vector */
   ARKStepFree(&arkode_mem);    /* Free integrator memory */
   SUNNonlinSolFree(NLS);       /* Free NLS object */
+  SUNContext_Free(&ctx);       /* Free context */
+
   return 0;
 }
 

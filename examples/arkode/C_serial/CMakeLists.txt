@@ -3,7 +3,7 @@
 #                David J. Gardner @ LLNL
 # ---------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2020, Lawrence Livermore National Security
+# Copyright (c) 2002-2021, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -15,32 +15,53 @@
 # CMakeLists.txt file for ARKODE serial examples
 # ---------------------------------------------------------------
 
-# Example lists are tuples "name\;type" where the type is
+# Example lists are tuples "name\;args\;type" where the type is
 # 'develop' for examples excluded from 'make test' in releases
 
 # Examples using SUNDIALS linear solvers
 set(ARKODE_examples
-  "ark_analytic\;"
-  "ark_analytic_nonlin\;develop"
-  "ark_brusselator\;develop"
-  "ark_brusselator_fp\;develop"
-  "ark_brusselator1D\;develop"
-  "ark_heat1D\;develop"
-  "ark_heat1D_adapt\;develop"
-  "ark_KrylovDemo_prec\;develop"
-  "ark_robertson\;develop"
-  "ark_robertson_constraints\;develop"
-  "ark_robertson_root\;develop"
-  "ark_brusselator_mri\;develop"
-  "ark_onewaycouple_mri\;develop"
-  "ark_twowaycouple_mri\;develop"
-  "ark_reaction_diffusion_mri\;develop"
-  "ark_brusselator_1D_mri\;develop"
+  "ark_analytic\;\;"
+  "ark_analytic_mels\;\;develop"
+  "ark_analytic_nonlin\;\;develop"
+  "ark_brusselator\;\;develop"
+  "ark_brusselator_fp\;\;develop"
+  "ark_brusselator1D\;\;develop"
+  "ark_heat1D\;\;develop"
+  "ark_heat1D_adapt\;\;develop"
+  "ark_KrylovDemo_prec\;\;develop"
+  "ark_KrylovDemo_prec\;1\;develop"
+  "ark_KrylovDemo_prec\;2\;develop"
+  "ark_robertson\;\;develop"
+  "ark_robertson_constraints\;\;develop"
+  "ark_robertson_root\;\;develop"
+  "ark_brusselator_mri\;\;develop"
+  "ark_onewaycouple_mri\;\;develop"
+  "ark_twowaycouple_mri\;\;develop"
+  "ark_reaction_diffusion_mri\;\;develop"
+  "ark_brusselator_1D_mri\;\;develop"
+  "ark_kpr_mri\;\;develop"
+  "ark_kpr_mri\;0 0.002\;develop"
+  "ark_kpr_mri\;1 0.002\;develop"
+  "ark_kpr_mri\;2 0.005\;develop"
+  "ark_kpr_mri\;3 0.01\;develop"
+  "ark_kpr_mri\;4 0.002\;develop"
+  "ark_kpr_mri\;5 0.002\;develop"
+  "ark_kpr_mri\;6 0.005\;develop"
+  "ark_kpr_mri\;7 0.001\;develop"
+  "ark_kpr_mri\;8 0.001\;develop"
+  "ark_kpr_mri\;9 0.001\;develop"
+  "ark_brusselator1D_imexmri\;0 0.001\;develop"
+  "ark_brusselator1D_imexmri\;2 0.001\;develop"
+  "ark_brusselator1D_imexmri\;3 0.001\;develop"
+  "ark_brusselator1D_imexmri\;4 0.001\;develop"
+  "ark_brusselator1D_imexmri\;5 0.001\;develop"
+  "ark_brusselator1D_imexmri\;6 0.001\;develop"
+  "ark_brusselator1D_imexmri\;7 0.001\;develop"
   )
 
-# Examples using LAPACK linear solvers
-set(ARKODE_examples_BL
-  )
+if(SUNDIALS_BUILD_WITH_MONITORING)
+  list(APPEND ARKODE_examples "ark_brusselator_fp\;1\;develop")
+endif()
 
 # Examples using KLU linear solver
 set(ARKODE_examples_KLU
@@ -62,15 +83,9 @@ set(ARKODE_extras
   plot_sol_log.py
   )
 
-# Specify libraries to link against (through the target that was used to
-# generate them) based on the value of the variable LINK_LIBRARY_TYPE
-if(LINK_LIBRARY_TYPE MATCHES "static")
-  set(ARKODE_LIB sundials_arkode_static)
-  set(NVECS_LIB sundials_nvecserial_static)
-else()
-  set(ARKODE_LIB sundials_arkode_shared)
-  set(NVECS_LIB sundials_nvecserial_shared)
-endif()
+# Specify libraries to link against
+set(ARKODE_LIB sundials_arkode)
+set(NVECS_LIB sundials_nvecserial)
 
 # Set-up linker flags and link libraries
 set(SUNDIALS_LIBS ${ARKODE_LIB} ${NVECS_LIB} ${EXTRA_LINK_LIBS})
@@ -81,96 +96,51 @@ foreach(example_tuple ${ARKODE_examples})
 
   # parse the example tuple
   list(GET example_tuple 0 example)
-  list(GET example_tuple 1 example_type)
+  list(GET example_tuple 1 example_args)
+  list(GET example_tuple 2 example_type)
 
-  # example source files
-  add_executable(${example} ${example}.c)
+  if (NOT TARGET ${example})
+    # example source files
+    add_executable(${example} ${example}.c)
 
-  set_target_properties(${example} PROPERTIES FOLDER "Examples")
+    # folder for IDEs
+    set_target_properties(${example} PROPERTIES FOLDER "Examples")
+
+    # libraries to link against
+    target_link_libraries(${example} ${SUNDIALS_LIBS})
+  endif()
+
+  # check if example args are provided and set the test name
+  if("${example_args}" STREQUAL "")
+    set(test_name ${example})
+  else()
+    string(REGEX REPLACE " " "_" test_name ${example}_${example_args})
+  endif()
 
   # add example to regression tests
-  sundials_add_test(${example} ${example}
+  sundials_add_test(${test_name} ${example}
+    TEST_ARGS ${example_args}
     ANSWER_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-    ANSWER_FILE ${example}.out
+    ANSWER_FILE ${test_name}.out
     EXAMPLE_TYPE ${example_type})
-
-  # libraries to link against
-  target_link_libraries(${example} ${SUNDIALS_LIBS})
 
   # install example source and out files
   if(EXAMPLES_INSTALL)
-    install(FILES ${example}.c ${example}.out
+    install(FILES ${example}.c ${test_name}.out
       DESTINATION ${EXAMPLES_INSTALL_PATH}/arkode/C_serial)
   endif()
 
 endforeach(example_tuple ${ARKODE_examples})
 
 
-# Add the build and install targets for each LAPACK example (if needed)
-if(LAPACK_FOUND)
-
-  # Sundials LAPACK linear solver modules
-  if(LINK_LIBRARY_TYPE MATCHES "static")
-    set(SUNLINSOLLAPACK_LIBS
-      sundials_sunlinsollapackband_static
-      sundials_sunlinsollapackdense_static)
-  else()
-    set(SUNLINSOLLAPACK_LIBS
-      sundials_sunlinsollapackband_shared
-      sundials_sunlinsollapackdense_shared)
-  endif()
-
-  # LAPACK libraries
-  list(APPEND SUNLINSOLLAPACK_LIBS ${LAPACK_LIBRARIES})
-
-  # BLAS libraries
-  if(BLAS_FOUND)
-    list(APPEND SUNLINSOLLAPACK_LIBS ${BLAS_LIBRARIES})
-  endif(BLAS_FOUND)
-
-  foreach(example_tuple ${ARKODE_examples_BL})
-
-    # parse the example tuple
-    list(GET example_tuple 0 example)
-    list(GET example_tuple 1 example_type)
-
-    # example source files
-    add_executable(${example} ${example}.c)
-
-    set_target_properties(${example} PROPERTIES FOLDER "Examples")
-
-    # add example to regression tests
-    sundials_add_test(${example} ${example}
-      ANSWER_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-      ANSWER_FILE ${example}.out
-      EXAMPLE_TYPE ${example_type})
-
-    # libraries to link against
-    target_link_libraries(${example} ${SUNDIALS_LIBS} ${SUNLINSOLLAPACK_LIBS})
-
-    # install example source and out files
-    if(EXAMPLES_INSTALL)
-      install(FILES ${example}.c ${example}.out
-        DESTINATION ${EXAMPLES_INSTALL_PATH}/arkode/C_serial)
-    endif()
-
-  endforeach(example_tuple ${ARKODE_examples_BL})
-
-endif(LAPACK_FOUND)
-
-
 # Add the build and install targets for each KLU example (if needed)
-if(KLU_FOUND)
+if(BUILD_SUNLINSOL_KLU)
 
   # Sundials KLU linear solver module
-  if(LINK_LIBRARY_TYPE MATCHES "static")
-    set(SUNLINSOLKLU_LIBS sundials_sunlinsolklu_static)
-  else()
-    set(SUNLINSOLKLU_LIBS sundials_sunlinsolklu_shared)
-  endif()
+  set(SUNLINSOLKLU_LIBS sundials_sunlinsolklu)
 
   # KLU libraries
-  list(APPEND SUNLINSOLKLU_LIBS ${KLU_LIBRARIES})
+  list(APPEND SUNLINSOLKLU_LIBS)
 
   foreach(example_tuple ${ARKODE_examples_KLU})
 
@@ -200,26 +170,17 @@ if(KLU_FOUND)
 
   endforeach(example_tuple ${ARKODE_examples_KLU})
 
-endif(KLU_FOUND)
+endif()
 
 
 # Add the build and install targets for each SuperLU_MT example (if needed)
-if(SUPERLUMT_FOUND)
+if(BUILD_SUNLINSOL_SUPERLUMT)
 
   # Sundials SuperLU_MT linear solver module
-  if(LINK_LIBRARY_TYPE MATCHES "static")
-    set(SUNLINSOLSLUMT_LIBS sundials_sunlinsolsuperlumt_static)
-  else()
-    set(SUNLINSOLSLUMT_LIBS sundials_sunlinsolsuperlumt_shared)
-  endif()
+  set(SUNLINSOLSLUMT_LIBS sundials_sunlinsolsuperlumt)
 
   # SuperLU_MT libraries
   list(APPEND SUNLINSOLSLUMT_LIBS ${SUPERLUMT_LIBRARIES})
-
-  # BLAS libraries
-  if(BLAS_FOUND)
-    list(APPEND SUNLINSOLSLUMT_LIBS ${BLAS_LIBRARIES})
-  endif(BLAS_FOUND)
 
   foreach(example_tuple ${ARKODE_examples_SUPERLUMT})
 
@@ -249,7 +210,7 @@ if(SUPERLUMT_FOUND)
 
   endforeach(example_tuple ${ARKODE_examples_SUPERLUMT})
 
-endif(SUPERLUMT_FOUND)
+endif()
 
 
 # create Makfile and CMakeLists.txt for examples
@@ -269,19 +230,13 @@ if(EXAMPLES_INSTALL)
 
   examples2string(ARKODE_examples EXAMPLES)
 
-  if(LAPACK_FOUND)
-    examples2string(ARKODE_examples_BL EXAMPLES_BL)
-  else()
-    set(EXAMPLES_BL "")
-  endif()
-
-  if(KLU_FOUND)
+  if(BUILD_SUNLINSOL_KLU)
     examples2string(ARKODE_examples_KLU EXAMPLES_KLU)
   else()
     set(EXAMPLES_KLU "")
   endif()
 
-  if(SUPERLUMT_FOUND)
+  if(BUILD_SUNLINSOL_SUPERLUMT)
     examples2string(ARKODE_examples_SUPERLUMT EXAMPLES_SLUMT)
     if (SUNDIALS_SUPERLUMT_THREAD_TYPE STREQUAL "PTHREAD")
       set(THREAD_LIBRARY_SLUMT ${CMAKE_THREAD_LIBS_INIT})
@@ -327,9 +282,9 @@ if(EXAMPLES_INSTALL)
       DESTINATION ${EXAMPLES_INSTALL_PATH}/arkode/C_serial
       RENAME Makefile
       )
-  endif(UNIX)
+  endif()
 
   # add test_install target
   sundials_add_test_install(arkode C_serial EXECUTABLE ark_analytic)
 
-endif(EXAMPLES_INSTALL)
+endif()
