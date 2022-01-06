@@ -154,6 +154,8 @@ class N_Vector_Ops(object):
     nvinvtest = property(_kinsol.N_Vector_Ops_nvinvtest_get, _kinsol.N_Vector_Ops_nvinvtest_set)
     nvconstrmask = property(_kinsol.N_Vector_Ops_nvconstrmask_get, _kinsol.N_Vector_Ops_nvconstrmask_set)
     nvminquotient = property(_kinsol.N_Vector_Ops_nvminquotient_get, _kinsol.N_Vector_Ops_nvminquotient_set)
+    nvarrayview = property(_kinsol.N_Vector_Ops_nvarrayview_get, _kinsol.N_Vector_Ops_nvarrayview_set)
+    nvdevicearrayview = property(_kinsol.N_Vector_Ops_nvdevicearrayview_get, _kinsol.N_Vector_Ops_nvdevicearrayview_set)
     nvlinearcombination = property(_kinsol.N_Vector_Ops_nvlinearcombination_get, _kinsol.N_Vector_Ops_nvlinearcombination_set)
     nvscaleaddmulti = property(_kinsol.N_Vector_Ops_nvscaleaddmulti_get, _kinsol.N_Vector_Ops_nvscaleaddmulti_set)
     nvdotprodmulti = property(_kinsol.N_Vector_Ops_nvdotprodmulti_get, _kinsol.N_Vector_Ops_nvdotprodmulti_set)
@@ -298,6 +300,12 @@ def N_VConstrMask(c, x, m):
 
 def N_VMinQuotient(num, denom):
     return _kinsol.N_VMinQuotient(num, denom)
+
+def N_VArrayView(A):
+    return _kinsol.N_VArrayView(A)
+
+def N_VDeviceArrayView(A):
+    return _kinsol.N_VDeviceArrayView(A)
 
 def N_VLinearCombination(nvec, c, X, z):
     return _kinsol.N_VLinearCombination(nvec, c, X, z)
@@ -1809,18 +1817,16 @@ def RegisterFn(py_callback, py_callback_tuple):
   try:
     return kinpy_register_fn(f_in_ptr)
   except:
-    raise ValueError("Unknown function type encountered")
+    raise ValueError("Unknown callback function encountered")
 
-def RegisterNumbaFn(py_callback, py_callback_type):
-  f = py_callback.ctypes
-  f_ptr = ctypes.cast(f, ctypes.c_void_p).value
-
-  if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegister_KINPySysFn(f_ptr)
-  elif py_callback_type == cfunctypes.KINErrHandlerFn:
-    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_ptr)
-  else:
-    raise ValueError("Unknown function type encountered")
+def RegisterNumbaFn(py_callback, py_callback_tuple):
+  _, kinpy_register_fn = py_callback_tuple
+  f_in = py_callback.ctypes
+  f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+  try:
+    return kinpy_register_fn(f_in_ptr)
+  except:
+    raise ValueError("Unknown callback function encountered")
 
 
 

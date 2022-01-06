@@ -141,6 +141,10 @@ struct _generic_N_Vector_Ops {
    * These operations provide default implementations that may be overriden.
    */
 
+  /* OPTIONAL functions for language interfaces */
+  int (*nvarrayview)(N_Vector, sunindextype*, realtype**);
+  int (*nvdevicearrayview)(N_Vector, sunindextype*, realtype**);
+
   /* OPTIONAL fused vector operations */
   int (*nvlinearcombination)(int, realtype*, N_Vector*, N_Vector);
   int (*nvscaleaddmulti)(int, realtype*, N_Vector, N_Vector*, N_Vector*);
@@ -243,6 +247,10 @@ SUNDIALS_EXPORT realtype N_VMinQuotient(N_Vector num, N_Vector denom);
 /*
  * OPTIONAL operations with default implementations.
  */
+
+/* language interface functions */
+SUNDIALS_EXPORT int N_VArrayView(N_Vector A, sunindextype* length, realtype** array);
+SUNDIALS_EXPORT int N_VDeviceArrayView(N_Vector A, sunindextype* length, realtype** array);
 
 /* fused vector operations */
 SUNDIALS_EXPORT int N_VLinearCombination(int nvec, realtype* c, N_Vector* X,

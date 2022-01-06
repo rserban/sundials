@@ -24,6 +24,9 @@
 // Typemap for input arrays (e.g. this effects N_VMake functions)
 %apply (int DIM1, double* IN_ARRAY1) {(sunindextype vec_length, realtype *v_data)}
 
+// Typemape for output arrays (e.g. N_VArrayView)
+%apply (int* DIM1, double** ARGOUTVIEW_ARRAY1) {(sunindextype* length, realtype** array)}
+
 // include the header file in the swig wrapper
 %{
 #include "sundials/sundials_nvector.h"

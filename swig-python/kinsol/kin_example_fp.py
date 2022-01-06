@@ -138,13 +138,17 @@ def solve(problem, callback_option):
   # Create vectors for solution and scales
   # --------------------------------------
 
-  # Underlying data arrays for the vectors
+  # Underlying data arrays for the solution vector
   y = np.zeros(problem.NEQ)
-  scale = np.zeros(problem.NEQ)
 
   # Create N_Vector objects
   sunvec_y = kin.N_VMake_Serial(y, sunctx)
-  sunvec_scale = kin.N_VMake_Serial(scale, sunctx)
+  sunvec_scale = kin.N_VNew_Serial(problem.NEQ, sunctx)
+  kin.N_VConst(0.0, sunvec_scale)
+
+  # Underlying data array for the scale vector
+  flag, scale = kin.N_VArrayView(sunvec_scale)
+  print(scale)
 
   # -----------------------------------------
   # Initialize and allocate memory for KINSOL

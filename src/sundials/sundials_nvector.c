@@ -515,7 +515,25 @@ realtype N_VMinQuotient(N_Vector num, N_Vector denom)
   return(result);
 }
 
+/* -----------------------------------------------------------------
+ * OPTIONAL functions for language interfaces
+ * -----------------------------------------------------------------*/
 
+int N_VArrayView(N_Vector v, sunindextype* length, realtype** array)
+{
+  int ier = 0;
+  *length = N_VGetLength(v);
+  *array = N_VGetArrayPointer(v);
+  return ier;
+}
+
+int N_VDeviceArrayView(N_Vector v, sunindextype* length, realtype** array)
+{
+  int ier = 0;
+  *length = N_VGetLength(v);
+  *array = N_VGetDeviceArrayPointer(v);
+  return ier;
+}
 
 /* -----------------------------------------------------------------
  * OPTIONAL fused vector operations

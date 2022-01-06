@@ -88,9 +88,8 @@ import_array();
   $1 = &argp1;
 }
 
-// A typemap for the callback, it expects the argument to be an integer
+// A typemap for a callback, it expects the argument to be an integer
 // whose value is the address of an appropriate callback function
-
 %define %callback_function(name)
 %typemap(in) name {
   $1 = (name)PyLong_AsVoidPtr($input);
