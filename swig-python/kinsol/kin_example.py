@@ -86,7 +86,7 @@ SysFnSpec = nb.types.int32(nb.types.CPointer(nb.types.double),
                            nb.types.CPointer(nb.types.double),
                            nb.types.int32,
                            nb.types.CPointer(nb.types.void))
-@cfunc(SysFnSpec)
+@cfunc(SysFnSpec, nopython=True)
 def funcRobertsNumba(y, y_len, g, g_len, udata):
   # constants
   NEQ    = 3     # number of equations
@@ -151,27 +151,28 @@ def solve(problem, callback_option):
   flag = kin.KINSetMAA(kmem, problem.PRIORS)
   if flag < 0: raise RuntimeError(f'KINSetMAA returned {flag}')
 
+  # Attach the problem object as the kinsol user_data so that
+  # it is provided to the callback functions.
   kin.KINSetUserData(kmem, problem)
 
   #----------------------------------------------------------------------------
-  # It is required to wrap the python system function so that it is callable
-  # from C. The kin.Register<>Fn functions can be used to do this. There are a
-  # few options:
+  # It is required to wrap Python callback functions so that they are callable
+  # from C. The kin.Register<>Fn functions should be used to do this. There are
+  # a few options:
   #----------------------------------------------------------------------------
 
-  # (1) Use a numba.cfunc to try and achieve the best performance.
-  #     The drawback here is that the numba functions cannot access the problem data.
+  # (1) Use ctypes.
   if callback_option == 1:
-    sysfn = kin.RegisterNumbaFn(funcRobertsNumba, kin.cfunctypes.KINSysFn)
-
-  # (2) Use ctypes instead.
-  #     The drawback here is slower performance.
-  if callback_option == 2:
     sysfn = kin.RegisterFn(funcRobertsCtypes, kin.cfunctypes.KINSysFn)
 
-  # (3) Note, with ctypes, you can even pass a capturing lambda:
-  if callback_option == 3:
+  # (2) Note, with ctypes, you can even pass a capturing lambda:
+  if callback_option == 2:
     sysfn = kin.RegisterFn(lambda y,y_len,g,g_len,udata: problem.funcRoberts(y,y_len,g,g_len,udata), kin.cfunctypes.KINSysFn)
+
+  # (3) Use a numba.cfunc to try and achieve the best performance.
+  #     The drawback here is that the numba functions cannot access the problem data.
+  if callback_option == 3:
+    sysfn = kin.RegisterNumbaFn(funcRobertsNumba, kin.cfunctypes.KINSysFn)
 
   # initialize the solver
   flag = kin.KINInit(kmem, sysfn, sunvec_y)
@@ -225,9 +226,9 @@ def solve(problem, callback_option):
   # Free memory
   # -----------
 
-  # kin.KINFree(kmem)
   kin.N_VDestroy(sunvec_y)
   kin.N_VDestroy(sunvec_scale)
+  kin.KINFree(kmem)
 
   end = timer()
   print("\nElapsed time: %g\n" % (end - start))
@@ -242,7 +243,9 @@ def PrintFinalStats(kmem):
   print('\nFinal Statistics...')
   print('nni      = %6ld     nfe     = %6ld' % (nni, nfe))
 
+
 if __name__ == '__main__':
+  funcRobertsNumba(np.zeros(3), 3, np.zeros(3), 3, None) # force compilation
   solve(Problem(), 1)
   solve(Problem(), 2)
   solve(Problem(), 3)

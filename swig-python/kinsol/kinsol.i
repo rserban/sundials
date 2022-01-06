@@ -41,14 +41,6 @@ import_array();
 // KINSOL specific stuff
 // ---------------------
 
-// KINInit cannot be called from Python.
-// Instead, users should call KINInitPy.
-// %ignore KINInit;
-
-// We hijack KINSetUserData to pass out director class
-// objects. So, hide the function from users.
-// %ignore KINSetUserData;
-
 %{
 #include "kinsol/kinsol.h"
 #include "kinsol/kinsol_py.h"
@@ -80,10 +72,24 @@ import_array();
 // that swig does will fail. One potential problem with this is that the
 // user data (a python) object could go out of scope and be deleted.
 // The user must make sure that the object is not out of scope before
-// KINSOL is done.
+// KINSOL is done currently.
 %typemap(in) (void *user_data) {
   $1 = (void *) $input;
-};
+}
+
+// Since KINCreate returns a void* not void**, we have
+// to get the address of the kinmem passed into KINFree.
+// This typemap extracts the void* kinmem and then takes
+// it address.
+%typemap(in) (void **kinmem) {
+  void* argp1 = 0;
+  int res1 = 0;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_void, 0 | 0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "KINFree" "', argument " "1"" of type '" "void **""'");
+  }
+  $1 = &argp1;
+}
 
 // Process definitions from these files
 %include "kinsol/kinsol.h"

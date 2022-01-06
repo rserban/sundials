@@ -17106,17 +17106,19 @@ fail:
 SWIGINTERN PyObject *_wrap_KINFree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   void **arg1 = (void **) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
   PyObject *swig_obj[1] ;
   
   if (!args) SWIG_fail;
   swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_p_void, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "KINFree" "', argument " "1"" of type '" "void **""'"); 
+  {
+    void* argp1 = 0;
+    int res1 = 0;
+    res1 = SWIG_ConvertPtr(swig_obj[0], &argp1, SWIGTYPE_p_void, 0 | 0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "KINFree" "', argument " "1"" of type '" "void **""'");
+    }
+    arg1 = &argp1;
   }
-  arg1 = reinterpret_cast< void ** >(argp1);
   KINFree(arg1);
   resultobj = SWIG_Py_Void();
   return resultobj;
