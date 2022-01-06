@@ -90,15 +90,14 @@ import_array();
 
 // A typemap for the callback, it expects the argument to be an integer
 // whose value is the address of an appropriate callback function
-%typemap(in) KINPySysFn {
-  $1 = (KINPySysFn)PyLong_AsVoidPtr($input);
-}
 
-// A typemap for the callback, it expects the argument to be an integer
-// whose value is the address of an appropriate callback function
-%typemap(in) KINPyErrHandlerFn {
-  $1 = (KINPyErrHandlerFn)PyLong_AsVoidPtr($input);
+%define %callback_function(name)
+%typemap(in) name {
+  $1 = (name)PyLong_AsVoidPtr($input);
 }
+%enddef
+
+%include "kinsol_callbacks.i"
 
 // Process definitions from these files
 %include "kinsol/kinsol.h"
@@ -114,29 +113,30 @@ import ctypes
 # We provide the ctypes for all the callback functions in KINSol here as
 # a convenience to our users. They could always define it themselves too.
 class cfunctypes():
-  KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object)
-  KINErrHandlerFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object)
+  KINSysFn = [ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object),
+               _kinsol.KINPyRegister_KINPySysFn]
 
-def RegisterFn(py_callback, py_callback_type):
+  KINErrHandlerFn = [ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object),
+                     _kinsol.KINPyRegister_KINPyErrHandlerFn]
+
+
+
+def RegisterFn(py_callback, py_callback_tuple):
+  py_callback_type, kinpy_register_fn = py_callback_tuple
   f_in = py_callback_type(py_callback)
   f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+  try:
+    return kinpy_register_fn(f_in_ptr)
+  except:
+    raise ValueError("Unknown callback function encountered")
 
-  if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegister_KINPySysFn(f_in_ptr)
-  elif py_callback_type == cfunctypes.KINErrHandlerFn:
-    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_in_ptr)
-  else:
-    raise ValueError("Unknown function type encountered")
-
-def RegisterNumbaFn(py_callback, py_callback_type):
-  f = py_callback.ctypes
-  f_ptr = ctypes.cast(f, ctypes.c_void_p).value
-
-  if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegister_KINPySysFn(f_ptr)
-  elif py_callback_type == cfunctypes.KINErrHandlerFn:
-    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_ptr)
-  else:
-    raise ValueError("Unknown function type encountered")
+def RegisterNumbaFn(py_callback, py_callback_tuple):
+  _, kinpy_register_fn = py_callback_tuple
+  f_in = py_callback.ctypes
+  f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+  try:
+    return kinpy_register_fn(f_in_ptr)
+  except:
+    raise ValueError("Unknown callback function encountered")
 
 %}

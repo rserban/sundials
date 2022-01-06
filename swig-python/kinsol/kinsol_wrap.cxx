@@ -2927,10 +2927,6 @@ namespace swig {
 #include "sundials/sundials_config.h"
 #include "sundials/sundials_context.h"
 #include "sundials/sundials_types.h"
-#include "sundials/sundials_nvector.h"
-// #include "sundials/sundials_matrix.h"
-#include "sundials/sundials_iterative.h"
-#include "sundials/sundials_linearsolver.h"
 #include "sundials/sundials_nonlinearsolver.h"
 
 
@@ -2939,6 +2935,10 @@ SWIGINTERNINLINE PyObject*
 {
   return PyInt_FromLong((long) value);
 }
+
+
+#include "sundials/sundials_nvector.h"
+#include "nvector/nvector_serial.h"
 
 
 SWIGINTERN int
@@ -3095,63 +3095,11 @@ SWIG_AsVal_int (PyObject * obj, int *val)
 }
 
 
-#include "sundials/sundials_matrix.h"
-#include "sunmatrix/sunmatrix_dense.h"
-
-
 #if NPY_API_VERSION < 0x00000007
 #define NPY_ARRAY_DEFAULT NPY_DEFAULT
 #define NPY_ARRAY_FARRAY  NPY_FARRAY
 #define NPY_FORTRANORDER  NPY_FORTRAN
 #endif
-
-
-SWIGINTERN swig_type_info*
-SWIG_pchar_descriptor(void)
-{
-  static int init = 0;
-  static swig_type_info* info = 0;
-  if (!init) {
-    info = SWIG_TypeQuery("_p_char");
-    init = 1;
-  }
-  return info;
-}
-
-
-SWIGINTERNINLINE PyObject *
-SWIG_FromCharPtrAndSize(const char* carray, size_t size)
-{
-  if (carray) {
-    if (size > INT_MAX) {
-      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
-      return pchar_descriptor ? 
-	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
-    } else {
-#if PY_VERSION_HEX >= 0x03000000
-#if defined(SWIG_PYTHON_STRICT_BYTE_CHAR)
-      return PyBytes_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
-#else
-      return PyUnicode_DecodeUTF8(carray, static_cast< Py_ssize_t >(size), "surrogateescape");
-#endif
-#else
-      return PyString_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
-#endif
-    }
-  } else {
-    return SWIG_Py_Void();
-  }
-}
-
-
-SWIGINTERNINLINE PyObject * 
-SWIG_FromCharPtr(const char *cptr)
-{ 
-  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
-}
-
-
-#include "nvector/nvector_serial.h"
 
 
 /* Macros to extract array attributes.
@@ -3625,12 +3573,63 @@ SWIG_FromCharPtr(const char *cptr)
 
 
 
+#include "sundials/sundials_matrix.h"
+#include "sunmatrix/sunmatrix_dense.h"
+
+
+#include "sundials/sundials_iterative.h"
+#include "sundials/sundials_linearsolver.h"
 #include "sunlinsol/sunlinsol_dense.h"
 #include "sunlinsol/sunlinsol_pcg.h"
 #include "sunlinsol/sunlinsol_spbcgs.h"
 #include "sunlinsol/sunlinsol_spfgmr.h"
 #include "sunlinsol/sunlinsol_spgmr.h"
 #include "sunlinsol/sunlinsol_sptfqmr.h"
+
+
+SWIGINTERN swig_type_info*
+SWIG_pchar_descriptor(void)
+{
+  static int init = 0;
+  static swig_type_info* info = 0;
+  if (!init) {
+    info = SWIG_TypeQuery("_p_char");
+    init = 1;
+  }
+  return info;
+}
+
+
+SWIGINTERNINLINE PyObject *
+SWIG_FromCharPtrAndSize(const char* carray, size_t size)
+{
+  if (carray) {
+    if (size > INT_MAX) {
+      swig_type_info* pchar_descriptor = SWIG_pchar_descriptor();
+      return pchar_descriptor ? 
+	SWIG_InternalNewPointerObj(const_cast< char * >(carray), pchar_descriptor, 0) : SWIG_Py_Void();
+    } else {
+#if PY_VERSION_HEX >= 0x03000000
+#if defined(SWIG_PYTHON_STRICT_BYTE_CHAR)
+      return PyBytes_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
+#else
+      return PyUnicode_DecodeUTF8(carray, static_cast< Py_ssize_t >(size), "surrogateescape");
+#endif
+#else
+      return PyString_FromStringAndSize(carray, static_cast< Py_ssize_t >(size));
+#endif
+    }
+  } else {
+    return SWIG_Py_Void();
+  }
+}
+
+
+SWIGINTERNINLINE PyObject * 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+}
 
 
 #include "kinsol/kinsol.h"
@@ -9037,6 +9036,2071 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_N_VNew_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  sunindextype arg1 ;
+  SUNContext arg2 = (SUNContext) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  N_Vector result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VNew_Serial", 2, 2, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VNew_Serial" "', argument " "1"" of type '" "sunindextype""'");
+  } 
+  arg1 = static_cast< sunindextype >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__SUNContext, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VNew_Serial" "', argument " "2"" of type '" "SUNContext""'"); 
+  }
+  arg2 = reinterpret_cast< SUNContext >(argp2);
+  result = (N_Vector)N_VNew_Serial(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VNewEmpty_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  sunindextype arg1 ;
+  SUNContext arg2 = (SUNContext) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  N_Vector result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VNewEmpty_Serial", 2, 2, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VNewEmpty_Serial" "', argument " "1"" of type '" "sunindextype""'");
+  } 
+  arg1 = static_cast< sunindextype >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__SUNContext, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VNewEmpty_Serial" "', argument " "2"" of type '" "SUNContext""'"); 
+  }
+  arg2 = reinterpret_cast< SUNContext >(argp2);
+  result = (N_Vector)N_VNewEmpty_Serial(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VMake_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  sunindextype arg1 ;
+  realtype *arg2 = (realtype *) 0 ;
+  SUNContext arg3 = (SUNContext) 0 ;
+  PyArrayObject *array1 = NULL ;
+  int is_new_object1 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[2] ;
+  N_Vector result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VMake_Serial", 2, 2, swig_obj)) SWIG_fail;
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0],
+      NPY_DOUBLE,
+      &is_new_object1);
+    if (!array1 || !require_dimensions(array1, 1) ||
+      !require_size(array1, size, 1)) SWIG_fail;
+    arg1 = (int) array_size(array1,0);
+    arg2 = (double*) array_data(array1);
+  }
+  res3 = SWIG_ConvertPtr(swig_obj[1], &argp3,SWIGTYPE_p__SUNContext, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VMake_Serial" "', argument " "3"" of type '" "SUNContext""'"); 
+  }
+  arg3 = reinterpret_cast< SUNContext >(argp3);
+  result = (N_Vector)N_VMake_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object1 && array1)
+    {
+      Py_DECREF(array1); 
+    }
+  }
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VGetLength_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  sunindextype result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VGetLength_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (sunindextype)N_VGetLength_Serial(arg1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VPrint_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VPrint_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  N_VPrint_Serial(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VPrintFile_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  FILE *arg2 = (FILE *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VPrintFile_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VPrintFile_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_FILE, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VPrintFile_Serial" "', argument " "2"" of type '" "FILE *""'"); 
+  }
+  arg2 = reinterpret_cast< FILE * >(argp2);
+  N_VPrintFile_Serial(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VGetVectorID_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  N_Vector_ID result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VGetVectorID_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (N_Vector_ID)N_VGetVectorID_Serial(arg1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VCloneEmpty_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  N_Vector result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VCloneEmpty_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (N_Vector)N_VCloneEmpty_Serial(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VClone_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  N_Vector result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VClone_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (N_Vector)N_VClone_Serial(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VDestroy_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDestroy_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  N_VDestroy_Serial(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VSpace_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  sunindextype *arg2 = (sunindextype *) 0 ;
+  sunindextype *arg3 = (sunindextype *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VSpace_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VSpace_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VSpace_Serial" "', argument " "2"" of type '" "sunindextype *""'"); 
+  }
+  arg2 = reinterpret_cast< sunindextype * >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VSpace_Serial" "', argument " "3"" of type '" "sunindextype *""'"); 
+  }
+  arg3 = reinterpret_cast< sunindextype * >(argp3);
+  N_VSpace_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VGetArrayPointer_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  realtype *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VGetArrayPointer_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (realtype *)N_VGetArrayPointer_Serial(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VSetArrayPointer_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  realtype *arg1 = (realtype *) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VSetArrayPointer_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VSetArrayPointer_Serial" "', argument " "1"" of type '" "realtype *""'"); 
+  }
+  arg1 = reinterpret_cast< realtype * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VSetArrayPointer_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  N_VSetArrayPointer_Serial(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VLinearSum_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  realtype arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  realtype arg3 ;
+  N_Vector arg4 = (N_Vector) 0 ;
+  N_Vector arg5 = (N_Vector) 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  double val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject *swig_obj[5] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VLinearSum_Serial", 5, 5, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearSum_Serial" "', argument " "1"" of type '" "realtype""'");
+  } 
+  arg1 = static_cast< realtype >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VLinearSum_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "N_VLinearSum_Serial" "', argument " "3"" of type '" "realtype""'");
+  } 
+  arg3 = static_cast< realtype >(val3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VLinearSum_Serial" "', argument " "4"" of type '" "N_Vector""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector >(argp4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VLinearSum_Serial" "', argument " "5"" of type '" "N_Vector""'"); 
+  }
+  arg5 = reinterpret_cast< N_Vector >(argp5);
+  N_VLinearSum_Serial(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VConst_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  realtype arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VConst_Serial", 2, 2, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VConst_Serial" "', argument " "1"" of type '" "realtype""'");
+  } 
+  arg1 = static_cast< realtype >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VConst_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  N_VConst_Serial(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VProd_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VProd_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VProd_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VProd_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VProd_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  N_VProd_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VDiv_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VDiv_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDiv_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VDiv_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VDiv_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  N_VDiv_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VScale_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  realtype arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VScale_Serial", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScale_Serial" "', argument " "1"" of type '" "realtype""'");
+  } 
+  arg1 = static_cast< realtype >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VScale_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScale_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  N_VScale_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VAbs_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VAbs_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VAbs_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VAbs_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  N_VAbs_Serial(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VInv_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VInv_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VInv_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VInv_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  N_VInv_Serial(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VAddConst_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  realtype arg2 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VAddConst_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VAddConst_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VAddConst_Serial" "', argument " "2"" of type '" "realtype""'");
+  } 
+  arg2 = static_cast< realtype >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VAddConst_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  N_VAddConst_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VDotProd_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VDotProd_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDotProd_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VDotProd_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (realtype)N_VDotProd_Serial(arg1,arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VMaxNorm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  realtype result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VMaxNorm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (realtype)N_VMaxNorm_Serial(arg1);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWrmsNorm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNorm_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWrmsNorm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNorm_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (realtype)N_VWrmsNorm_Serial(arg1,arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWrmsNormMask_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNormMask_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWrmsNormMask_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNormMask_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWrmsNormMask_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  result = (realtype)N_VWrmsNormMask_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VMin_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  realtype result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VMin_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (realtype)N_VMin_Serial(arg1);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWL2Norm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWL2Norm_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWL2Norm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWL2Norm_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (realtype)N_VWL2Norm_Serial(arg1,arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VL1Norm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  realtype result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VL1Norm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  result = (realtype)N_VL1Norm_Serial(arg1);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VCompare_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  realtype arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  double val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VCompare_Serial", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VCompare_Serial" "', argument " "1"" of type '" "realtype""'");
+  } 
+  arg1 = static_cast< realtype >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VCompare_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VCompare_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  N_VCompare_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VInvTest_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VInvTest_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VInvTest_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VInvTest_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (int)N_VInvTest_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VConstrMask_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VConstrMask_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VConstrMask_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VConstrMask_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VConstrMask_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  result = (int)N_VConstrMask_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VMinQuotient_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VMinQuotient_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VMinQuotient_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VMinQuotient_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (realtype)N_VMinQuotient_Serial(arg1,arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VLinearCombination_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  realtype *arg2 = (realtype *) 0 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  N_Vector arg4 = (N_Vector) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject *swig_obj[4] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VLinearCombination_Serial", 4, 4, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearCombination_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VLinearCombination_Serial" "', argument " "2"" of type '" "realtype *""'"); 
+  }
+  arg2 = reinterpret_cast< realtype * >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VLinearCombination_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VLinearCombination_Serial" "', argument " "4"" of type '" "N_Vector""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector >(argp4);
+  result = (int)N_VLinearCombination_Serial(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VScaleAddMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  realtype *arg2 = (realtype *) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  N_Vector *arg4 = (N_Vector *) 0 ;
+  N_Vector *arg5 = (N_Vector *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject *swig_obj[5] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VScaleAddMulti_Serial", 5, 5, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScaleAddMulti_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VScaleAddMulti_Serial" "', argument " "2"" of type '" "realtype *""'"); 
+  }
+  arg2 = reinterpret_cast< realtype * >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScaleAddMulti_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VScaleAddMulti_Serial" "', argument " "4"" of type '" "N_Vector *""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector * >(argp4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VScaleAddMulti_Serial" "', argument " "5"" of type '" "N_Vector *""'"); 
+  }
+  arg5 = reinterpret_cast< N_Vector * >(argp5);
+  result = (int)N_VScaleAddMulti_Serial(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VDotProdMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  realtype *arg4 = (realtype *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject *swig_obj[4] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VDotProdMulti_Serial", 4, 4, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VDotProdMulti_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VDotProdMulti_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VDotProdMulti_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VDotProdMulti_Serial" "', argument " "4"" of type '" "realtype *""'"); 
+  }
+  arg4 = reinterpret_cast< realtype * >(argp4);
+  result = (int)N_VDotProdMulti_Serial(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VLinearSumVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  realtype arg2 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  realtype arg4 ;
+  N_Vector *arg5 = (N_Vector *) 0 ;
+  N_Vector *arg6 = (N_Vector *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  double val4 ;
+  int ecode4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  PyObject *swig_obj[6] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VLinearSumVectorArray_Serial", 6, 6, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "2"" of type '" "realtype""'");
+  } 
+  arg2 = static_cast< realtype >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "4"" of type '" "realtype""'");
+  } 
+  arg4 = static_cast< realtype >(val4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "5"" of type '" "N_Vector *""'"); 
+  }
+  arg5 = reinterpret_cast< N_Vector * >(argp5);
+  res6 = SWIG_ConvertPtr(swig_obj[5], &argp6,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "6"" of type '" "N_Vector *""'"); 
+  }
+  arg6 = reinterpret_cast< N_Vector * >(argp6);
+  result = (int)N_VLinearSumVectorArray_Serial(arg1,arg2,arg3,arg4,arg5,arg6);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VScaleVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  realtype *arg2 = (realtype *) 0 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  N_Vector *arg4 = (N_Vector *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject *swig_obj[4] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VScaleVectorArray_Serial", 4, 4, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScaleVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VScaleVectorArray_Serial" "', argument " "2"" of type '" "realtype *""'"); 
+  }
+  arg2 = reinterpret_cast< realtype * >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScaleVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VScaleVectorArray_Serial" "', argument " "4"" of type '" "N_Vector *""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector * >(argp4);
+  result = (int)N_VScaleVectorArray_Serial(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VConstVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  realtype arg2 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VConstVectorArray_Serial", 3, 3, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VConstVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VConstVectorArray_Serial" "', argument " "2"" of type '" "realtype""'");
+  } 
+  arg2 = static_cast< realtype >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VConstVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  result = (int)N_VConstVectorArray_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWrmsNormVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  N_Vector *arg2 = (N_Vector *) 0 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  realtype *arg4 = (realtype *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject *swig_obj[4] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNormVectorArray_Serial", 4, 4, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "2"" of type '" "N_Vector *""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector * >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "4"" of type '" "realtype *""'"); 
+  }
+  arg4 = reinterpret_cast< realtype * >(argp4);
+  result = (int)N_VWrmsNormVectorArray_Serial(arg1,arg2,arg3,arg4);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWrmsNormMaskVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  N_Vector *arg2 = (N_Vector *) 0 ;
+  N_Vector *arg3 = (N_Vector *) 0 ;
+  N_Vector arg4 = (N_Vector) 0 ;
+  realtype *arg5 = (realtype *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject *swig_obj[5] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNormMaskVectorArray_Serial", 5, 5, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "2"" of type '" "N_Vector *""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector * >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "4"" of type '" "N_Vector""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector >(argp4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "5"" of type '" "realtype *""'"); 
+  }
+  arg5 = reinterpret_cast< realtype * >(argp5);
+  result = (int)N_VWrmsNormMaskVectorArray_Serial(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VScaleAddMultiVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  int arg2 ;
+  realtype *arg3 = (realtype *) 0 ;
+  N_Vector *arg4 = (N_Vector *) 0 ;
+  N_Vector **arg5 = (N_Vector **) 0 ;
+  N_Vector **arg6 = (N_Vector **) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  PyObject *swig_obj[6] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VScaleAddMultiVectorArray_Serial", 6, 6, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "3"" of type '" "realtype *""'"); 
+  }
+  arg3 = reinterpret_cast< realtype * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "4"" of type '" "N_Vector *""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector * >(argp4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "5"" of type '" "N_Vector **""'"); 
+  }
+  arg5 = reinterpret_cast< N_Vector ** >(argp5);
+  res6 = SWIG_ConvertPtr(swig_obj[5], &argp6,SWIGTYPE_p_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "6"" of type '" "N_Vector **""'"); 
+  }
+  arg6 = reinterpret_cast< N_Vector ** >(argp6);
+  result = (int)N_VScaleAddMultiVectorArray_Serial(arg1,arg2,arg3,arg4,arg5,arg6);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VLinearCombinationVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  int arg2 ;
+  realtype *arg3 = (realtype *) 0 ;
+  N_Vector **arg4 = (N_Vector **) 0 ;
+  N_Vector *arg5 = (N_Vector *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject *swig_obj[5] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VLinearCombinationVectorArray_Serial", 5, 5, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "3"" of type '" "realtype *""'"); 
+  }
+  arg3 = reinterpret_cast< realtype * >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "4"" of type '" "N_Vector **""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector ** >(argp4);
+  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "5"" of type '" "N_Vector *""'"); 
+  }
+  arg5 = reinterpret_cast< N_Vector * >(argp5);
+  result = (int)N_VLinearCombinationVectorArray_Serial(arg1,arg2,arg3,arg4,arg5);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWSqrSumLocal_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWSqrSumLocal_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWSqrSumLocal_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWSqrSumLocal_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (realtype)N_VWSqrSumLocal_Serial(arg1,arg2);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VWSqrSumMaskLocal_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject *swig_obj[3] ;
+  realtype result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VWSqrSumMaskLocal_Serial", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWSqrSumMaskLocal_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWSqrSumMaskLocal_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWSqrSumMaskLocal_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  result = (realtype)N_VWSqrSumMaskLocal_Serial(arg1,arg2,arg3);
+  resultobj = SWIG_From_double(static_cast< double >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VBufSize_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  sunindextype *arg2 = (sunindextype *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VBufSize_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VBufSize_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VBufSize_Serial" "', argument " "2"" of type '" "sunindextype *""'"); 
+  }
+  arg2 = reinterpret_cast< sunindextype * >(argp2);
+  result = (int)N_VBufSize_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VBufPack_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *arg2 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VBufPack_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VBufPack_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VBufPack_Serial" "', argument " "2"" of type '" "void *""'"); 
+  }
+  result = (int)N_VBufPack_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VBufUnpack_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  void *arg2 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VBufUnpack_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VBufUnpack_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VBufUnpack_Serial" "', argument " "2"" of type '" "void *""'"); 
+  }
+  result = (int)N_VBufUnpack_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableFusedOps_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableFusedOps_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableFusedOps_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableFusedOps_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableFusedOps_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableLinearCombination_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableLinearCombination_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableLinearCombination_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableLinearCombination_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableLinearCombination_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableScaleAddMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableScaleAddMulti_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableScaleAddMulti_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableScaleAddMulti_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableScaleAddMulti_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableDotProdMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableDotProdMulti_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableDotProdMulti_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableDotProdMulti_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableDotProdMulti_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableLinearSumVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableLinearSumVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableLinearSumVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableLinearSumVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableLinearSumVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableScaleVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableScaleVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableScaleVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableScaleVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableScaleVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableConstVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableConstVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableConstVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableConstVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableConstVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableWrmsNormVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableWrmsNormVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableWrmsNormVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableWrmsNormVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableWrmsNormVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableWrmsNormMaskVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableWrmsNormMaskVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableWrmsNormMaskVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableWrmsNormMaskVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableWrmsNormMaskVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableScaleAddMultiVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableScaleAddMultiVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableScaleAddMultiVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableScaleAddMultiVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableScaleAddMultiVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VEnableLinearCombinationVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector arg1 = (N_Vector) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VEnableLinearCombinationVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableLinearCombinationVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableLinearCombinationVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)N_VEnableLinearCombinationVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VCloneVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  N_Vector *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VCloneVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VCloneVectorArray_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VCloneVectorArray_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (N_Vector *)N_VCloneVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VCloneVectorArrayEmpty_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  N_Vector *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VCloneVectorArrayEmpty_Serial", 2, 2, swig_obj)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VCloneVectorArrayEmpty_Serial" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = static_cast< int >(val1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VCloneVectorArrayEmpty_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  result = (N_Vector *)N_VCloneVectorArrayEmpty_Serial(arg1,arg2);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_N_VDestroyVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  N_Vector *arg1 = (N_Vector *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "N_VDestroyVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDestroyVectorArray_Serial" "', argument " "1"" of type '" "N_Vector *""'"); 
+  }
+  arg1 = reinterpret_cast< N_Vector * >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VDestroyVectorArray_Serial" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  N_VDestroyVectorArray_Serial(arg1,arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_SUNMatrix_Ops_getid_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   _generic_SUNMatrix_Ops *arg1 = (_generic_SUNMatrix_Ops *) 0 ;
@@ -13457,3440 +15521,6 @@ SWIGINTERN PyObject *_wrap_SUNLinSolFree(PyObject *SWIGUNUSEDPARM(self), PyObjec
   arg1 = reinterpret_cast< SUNLinearSolver >(argp1);
   result = (int)SUNLinSolFree(arg1);
   resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_gettype_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  SUNNonlinearSolver_Type (*arg2)(SUNNonlinearSolver) = (SUNNonlinearSolver_Type (*)(SUNNonlinearSolver)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_gettype_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_gettype_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__SUNNonlinearSolver_Type);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_gettype_set" "', argument " "2"" of type '" "SUNNonlinearSolver_Type (*)(SUNNonlinearSolver)""'"); 
-    }
-  }
-  if (arg1) (arg1)->gettype = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_gettype_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  SUNNonlinearSolver_Type (*result)(SUNNonlinearSolver) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_gettype_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (SUNNonlinearSolver_Type (*)(SUNNonlinearSolver)) ((arg1)->gettype);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__SUNNonlinearSolver_Type);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_initialize_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver) = (int (*)(SUNNonlinearSolver)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_initialize_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_initialize_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_initialize_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver)""'"); 
-    }
-  }
-  if (arg1) (arg1)->initialize = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_initialize_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_initialize_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver)) ((arg1)->initialize);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setup_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,N_Vector,void *) = (int (*)(SUNNonlinearSolver,N_Vector,void *)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setup_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setup_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setup_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,N_Vector,void *)""'"); 
-    }
-  }
-  if (arg1) (arg1)->setup = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setup_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,N_Vector,void *) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setup_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,N_Vector,void *)) ((arg1)->setup);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p_void__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_solve_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *) = (int (*)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_solve_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_solve_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_double_int_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_solve_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *)""'"); 
-    }
-  }
-  if (arg1) (arg1)->solve = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_solve_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_solve_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *)) ((arg1)->solve);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_double_int_p_void__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_free_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver) = (int (*)(SUNNonlinearSolver)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_free_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_free_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_free_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver)""'"); 
-    }
-  }
-  if (arg1) (arg1)->free = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_free_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_free_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver)) ((arg1)->free);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setsysfn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolSysFn) = (int (*)(SUNNonlinearSolver,SUNNonlinSolSysFn)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setsysfn_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setsysfn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setsysfn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolSysFn)""'"); 
-    }
-  }
-  if (arg1) (arg1)->setsysfn = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setsysfn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,SUNNonlinSolSysFn) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setsysfn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolSysFn)) ((arg1)->setsysfn);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsetupfn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolLSetupFn) = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSetupFn)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setlsetupfn_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsetupfn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_int_p_int_p_void__int__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setlsetupfn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolLSetupFn)""'"); 
-    }
-  }
-  if (arg1) (arg1)->setlsetupfn = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsetupfn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,SUNNonlinSolLSetupFn) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsetupfn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSetupFn)) ((arg1)->setlsetupfn);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_int_p_int_p_void__int__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsolvefn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolLSolveFn) = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSolveFn)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setlsolvefn_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsolvefn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p_void__int__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setlsolvefn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolLSolveFn)""'"); 
-    }
-  }
-  if (arg1) (arg1)->setlsolvefn = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsolvefn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,SUNNonlinSolLSolveFn) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsolvefn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSolveFn)) ((arg1)->setlsolvefn);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p_void__int__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setctestfn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *) = (int (*)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setctestfn_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setctestfn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setctestfn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *)""'"); 
-    }
-  }
-  if (arg1) (arg1)->setctestfn = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setctestfn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setctestfn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *)) ((arg1)->setctestfn);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int_p_void__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setmaxiters_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,int) = (int (*)(SUNNonlinearSolver,int)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setmaxiters_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setmaxiters_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_int__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setmaxiters_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,int)""'"); 
-    }
-  }
-  if (arg1) (arg1)->setmaxiters = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setmaxiters_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,int) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setmaxiters_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,int)) ((arg1)->setmaxiters);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_int__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumiters_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,long *) = (int (*)(SUNNonlinearSolver,long *)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_getnumiters_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumiters_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_getnumiters_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,long *)""'"); 
-    }
-  }
-  if (arg1) (arg1)->getnumiters = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumiters_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,long *) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumiters_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,long *)) ((arg1)->getnumiters);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getcuriter_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,int *) = (int (*)(SUNNonlinearSolver,int *)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_getcuriter_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getcuriter_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_int__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_getcuriter_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,int *)""'"); 
-    }
-  }
-  if (arg1) (arg1)->getcuriter = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getcuriter_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,int *) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getcuriter_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,int *)) ((arg1)->getcuriter);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_int__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumconvfails_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  int (*arg2)(SUNNonlinearSolver,long *) = (int (*)(SUNNonlinearSolver,long *)) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_getnumconvfails_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumconvfails_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_getnumconvfails_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,long *)""'"); 
-    }
-  }
-  if (arg1) (arg1)->getnumconvfails = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumconvfails_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int (*result)(SUNNonlinearSolver,long *) = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumconvfails_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  result = (int (*)(SUNNonlinearSolver,long *)) ((arg1)->getnumconvfails);
-  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_SUNNonlinearSolver_Ops(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "new_SUNNonlinearSolver_Ops", 0, 0, 0)) SWIG_fail;
-  result = (_generic_SUNNonlinearSolver_Ops *)new _generic_SUNNonlinearSolver_Ops();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_SUNNonlinearSolver_Ops(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SUNNonlinearSolver_Ops" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
-  delete arg1;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *SUNNonlinearSolver_Ops_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *SUNNonlinearSolver_Ops_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  return SWIG_Python_InitShadowInstance(args);
-}
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_content_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  void *arg2 = (void *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_content_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_content_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, SWIG_POINTER_DISOWN);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinearSolver_content_set" "', argument " "2"" of type '" "void *""'"); 
-  }
-  if (arg1) (arg1)->content = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_content_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  void *result = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_content_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  result = (void *) ((arg1)->content);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_ops_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  SUNNonlinearSolver_Ops arg2 = (SUNNonlinearSolver_Ops) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_ops_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_ops_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinearSolver_ops_set" "', argument " "2"" of type '" "SUNNonlinearSolver_Ops""'"); 
-  }
-  arg2 = reinterpret_cast< SUNNonlinearSolver_Ops >(argp2);
-  if (arg1) (arg1)->ops = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_ops_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  SUNNonlinearSolver_Ops result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_ops_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  result = (SUNNonlinearSolver_Ops) ((arg1)->ops);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_sunctx_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  SUNContext arg2 = (SUNContext) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_sunctx_set", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_sunctx_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__SUNContext, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinearSolver_sunctx_set" "', argument " "2"" of type '" "SUNContext""'"); 
-  }
-  arg2 = reinterpret_cast< SUNContext >(argp2);
-  if (arg1) (arg1)->sunctx = arg2;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_sunctx_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  SUNContext result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_sunctx_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  result = (SUNContext) ((arg1)->sunctx);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__SUNContext, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_new_SUNNonlinearSolver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "new_SUNNonlinearSolver", 0, 0, 0)) SWIG_fail;
-  result = (_generic_SUNNonlinearSolver *)new _generic_SUNNonlinearSolver();
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver, SWIG_POINTER_NEW |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_delete_SUNNonlinearSolver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, SWIG_POINTER_DISOWN |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SUNNonlinearSolver" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
-  }
-  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
-  delete arg1;
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *SUNNonlinearSolver_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *obj;
-  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
-  SWIG_TypeNewClientData(SWIGTYPE_p__generic_SUNNonlinearSolver, SWIG_NewClientData(obj));
-  return SWIG_Py_Void();
-}
-
-SWIGINTERN PyObject *SUNNonlinearSolver_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  return SWIG_Python_InitShadowInstance(args);
-}
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolNewEmpty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNContext arg1 = (SUNContext) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  SUNNonlinearSolver result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__SUNContext, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolNewEmpty" "', argument " "1"" of type '" "SUNContext""'"); 
-  }
-  arg1 = reinterpret_cast< SUNContext >(argp1);
-  result = (SUNNonlinearSolver)SUNNonlinSolNewEmpty(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolFreeEmpty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolFreeEmpty" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  SUNNonlinSolFreeEmpty(arg1);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolGetType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  SUNNonlinearSolver_Type result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetType" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  result = (SUNNonlinearSolver_Type)SUNNonlinSolGetType(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolInitialize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolInitialize" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  result = (int)SUNNonlinSolInitialize(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSetup(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *arg3 = (void *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  int res3 ;
-  PyObject *swig_obj[3] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetup", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetup" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolSetup" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2],SWIG_as_voidptrptr(&arg3), 0, 0);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SUNNonlinSolSetup" "', argument " "3"" of type '" "void *""'"); 
-  }
-  result = (int)SUNNonlinSolSetup(arg1,arg2,arg3);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSolve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  N_Vector arg4 = (N_Vector) 0 ;
-  realtype arg5 ;
-  int arg6 ;
-  void *arg7 = (void *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  double val5 ;
-  int ecode5 = 0 ;
-  int val6 ;
-  int ecode6 = 0 ;
-  int res7 ;
-  PyObject *swig_obj[7] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSolve", 7, 7, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSolve" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolSolve" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SUNNonlinSolSolve" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "SUNNonlinSolSolve" "', argument " "4"" of type '" "N_Vector""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector >(argp4);
-  ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "SUNNonlinSolSolve" "', argument " "5"" of type '" "realtype""'");
-  } 
-  arg5 = static_cast< realtype >(val5);
-  ecode6 = SWIG_AsVal_int(swig_obj[5], &val6);
-  if (!SWIG_IsOK(ecode6)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "SUNNonlinSolSolve" "', argument " "6"" of type '" "int""'");
-  } 
-  arg6 = static_cast< int >(val6);
-  res7 = SWIG_ConvertPtr(swig_obj[6],SWIG_as_voidptrptr(&arg7), 0, 0);
-  if (!SWIG_IsOK(res7)) {
-    SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "SUNNonlinSolSolve" "', argument " "7"" of type '" "void *""'"); 
-  }
-  result = (int)SUNNonlinSolSolve(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolFree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  int result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolFree" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  result = (int)SUNNonlinSolFree(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSetSysFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  SUNNonlinSolSysFn arg2 = (SUNNonlinSolSysFn) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetSysFn", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetSysFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetSysFn" "', argument " "2"" of type '" "SUNNonlinSolSysFn""'"); 
-    }
-  }
-  result = (int)SUNNonlinSolSetSysFn(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSetLSetupFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  SUNNonlinSolLSetupFn arg2 = (SUNNonlinSolLSetupFn) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetLSetupFn", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetLSetupFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_int_p_int_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetLSetupFn" "', argument " "2"" of type '" "SUNNonlinSolLSetupFn""'"); 
-    }
-  }
-  result = (int)SUNNonlinSolSetLSetupFn(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSetLSolveFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  SUNNonlinSolLSolveFn arg2 = (SUNNonlinSolLSolveFn) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetLSolveFn", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetLSolveFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_N_Vector_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetLSolveFn" "', argument " "2"" of type '" "SUNNonlinSolLSolveFn""'"); 
-    }
-  }
-  result = (int)SUNNonlinSolSetLSolveFn(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSetConvTestFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  SUNNonlinSolConvTestFn arg2 = (SUNNonlinSolConvTestFn) 0 ;
-  void *arg3 = (void *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res3 ;
-  PyObject *swig_obj[3] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetConvTestFn", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetConvTestFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  {
-    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int);
-    if (!SWIG_IsOK(res)) {
-      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetConvTestFn" "', argument " "2"" of type '" "SUNNonlinSolConvTestFn""'"); 
-    }
-  }
-  res3 = SWIG_ConvertPtr(swig_obj[2],SWIG_as_voidptrptr(&arg3), 0, 0);
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SUNNonlinSolSetConvTestFn" "', argument " "3"" of type '" "void *""'"); 
-  }
-  result = (int)SUNNonlinSolSetConvTestFn(arg1,arg2,arg3);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolSetMaxIters(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetMaxIters", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetMaxIters" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SUNNonlinSolSetMaxIters" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)SUNNonlinSolSetMaxIters(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolGetNumIters(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  long *arg2 = (long *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolGetNumIters", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetNumIters" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_long, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolGetNumIters" "', argument " "2"" of type '" "long *""'"); 
-  }
-  arg2 = reinterpret_cast< long * >(argp2);
-  result = (int)SUNNonlinSolGetNumIters(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolGetCurIter(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  int *arg2 = (int *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolGetCurIter", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetCurIter" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolGetCurIter" "', argument " "2"" of type '" "int *""'"); 
-  }
-  arg2 = reinterpret_cast< int * >(argp2);
-  result = (int)SUNNonlinSolGetCurIter(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_SUNNonlinSolGetNumConvFails(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
-  long *arg2 = (long *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolGetNumConvFails", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetNumConvFails" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
-  }
-  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_long, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolGetNumConvFails" "', argument " "2"" of type '" "long *""'"); 
-  }
-  arg2 = reinterpret_cast< long * >(argp2);
-  result = (int)SUNNonlinSolGetNumConvFails(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VNew_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  sunindextype arg1 ;
-  SUNContext arg2 = (SUNContext) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  N_Vector result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VNew_Serial", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VNew_Serial" "', argument " "1"" of type '" "sunindextype""'");
-  } 
-  arg1 = static_cast< sunindextype >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__SUNContext, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VNew_Serial" "', argument " "2"" of type '" "SUNContext""'"); 
-  }
-  arg2 = reinterpret_cast< SUNContext >(argp2);
-  result = (N_Vector)N_VNew_Serial(arg1,arg2);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VNewEmpty_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  sunindextype arg1 ;
-  SUNContext arg2 = (SUNContext) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  N_Vector result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VNewEmpty_Serial", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VNewEmpty_Serial" "', argument " "1"" of type '" "sunindextype""'");
-  } 
-  arg1 = static_cast< sunindextype >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__SUNContext, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VNewEmpty_Serial" "', argument " "2"" of type '" "SUNContext""'"); 
-  }
-  arg2 = reinterpret_cast< SUNContext >(argp2);
-  result = (N_Vector)N_VNewEmpty_Serial(arg1,arg2);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VMake_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  sunindextype arg1 ;
-  realtype *arg2 = (realtype *) 0 ;
-  SUNContext arg3 = (SUNContext) 0 ;
-  PyArrayObject *array1 = NULL ;
-  int is_new_object1 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[2] ;
-  N_Vector result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VMake_Serial", 2, 2, swig_obj)) SWIG_fail;
-  {
-    npy_intp size[1] = {
-      -1
-    };
-    array1 = obj_to_array_contiguous_allow_conversion(swig_obj[0],
-      NPY_DOUBLE,
-      &is_new_object1);
-    if (!array1 || !require_dimensions(array1, 1) ||
-      !require_size(array1, size, 1)) SWIG_fail;
-    arg1 = (int) array_size(array1,0);
-    arg2 = (double*) array_data(array1);
-  }
-  res3 = SWIG_ConvertPtr(swig_obj[1], &argp3,SWIGTYPE_p__SUNContext, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VMake_Serial" "', argument " "3"" of type '" "SUNContext""'"); 
-  }
-  arg3 = reinterpret_cast< SUNContext >(argp3);
-  result = (N_Vector)N_VMake_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  {
-    if (is_new_object1 && array1)
-    {
-      Py_DECREF(array1); 
-    }
-  }
-  return resultobj;
-fail:
-  {
-    if (is_new_object1 && array1)
-    {
-      Py_DECREF(array1); 
-    }
-  }
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VGetLength_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  sunindextype result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VGetLength_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (sunindextype)N_VGetLength_Serial(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VPrint_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VPrint_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  N_VPrint_Serial(arg1);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VPrintFile_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  FILE *arg2 = (FILE *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VPrintFile_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VPrintFile_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_FILE, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VPrintFile_Serial" "', argument " "2"" of type '" "FILE *""'"); 
-  }
-  arg2 = reinterpret_cast< FILE * >(argp2);
-  N_VPrintFile_Serial(arg1,arg2);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VGetVectorID_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  N_Vector_ID result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VGetVectorID_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (N_Vector_ID)N_VGetVectorID_Serial(arg1);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VCloneEmpty_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  N_Vector result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VCloneEmpty_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (N_Vector)N_VCloneEmpty_Serial(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VClone_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  N_Vector result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VClone_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (N_Vector)N_VClone_Serial(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VDestroy_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDestroy_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  N_VDestroy_Serial(arg1);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VSpace_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  sunindextype *arg2 = (sunindextype *) 0 ;
-  sunindextype *arg3 = (sunindextype *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VSpace_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VSpace_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VSpace_Serial" "', argument " "2"" of type '" "sunindextype *""'"); 
-  }
-  arg2 = reinterpret_cast< sunindextype * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_int, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VSpace_Serial" "', argument " "3"" of type '" "sunindextype *""'"); 
-  }
-  arg3 = reinterpret_cast< sunindextype * >(argp3);
-  N_VSpace_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VGetArrayPointer_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  realtype *result = 0 ;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VGetArrayPointer_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (realtype *)N_VGetArrayPointer_Serial(arg1);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VSetArrayPointer_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  realtype *arg1 = (realtype *) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VSetArrayPointer_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VSetArrayPointer_Serial" "', argument " "1"" of type '" "realtype *""'"); 
-  }
-  arg1 = reinterpret_cast< realtype * >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VSetArrayPointer_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  N_VSetArrayPointer_Serial(arg1,arg2);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VLinearSum_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  realtype arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  realtype arg3 ;
-  N_Vector arg4 = (N_Vector) 0 ;
-  N_Vector arg5 = (N_Vector) 0 ;
-  double val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  double val3 ;
-  int ecode3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  PyObject *swig_obj[5] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VLinearSum_Serial", 5, 5, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearSum_Serial" "', argument " "1"" of type '" "realtype""'");
-  } 
-  arg1 = static_cast< realtype >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VLinearSum_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  ecode3 = SWIG_AsVal_double(swig_obj[2], &val3);
-  if (!SWIG_IsOK(ecode3)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "N_VLinearSum_Serial" "', argument " "3"" of type '" "realtype""'");
-  } 
-  arg3 = static_cast< realtype >(val3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VLinearSum_Serial" "', argument " "4"" of type '" "N_Vector""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector >(argp4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VLinearSum_Serial" "', argument " "5"" of type '" "N_Vector""'"); 
-  }
-  arg5 = reinterpret_cast< N_Vector >(argp5);
-  N_VLinearSum_Serial(arg1,arg2,arg3,arg4,arg5);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VConst_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  realtype arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  double val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VConst_Serial", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VConst_Serial" "', argument " "1"" of type '" "realtype""'");
-  } 
-  arg1 = static_cast< realtype >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VConst_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  N_VConst_Serial(arg1,arg2);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VProd_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VProd_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VProd_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VProd_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VProd_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  N_VProd_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VDiv_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VDiv_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDiv_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VDiv_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VDiv_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  N_VDiv_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VScale_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  realtype arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  double val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VScale_Serial", 3, 3, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScale_Serial" "', argument " "1"" of type '" "realtype""'");
-  } 
-  arg1 = static_cast< realtype >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VScale_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScale_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  N_VScale_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VAbs_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VAbs_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VAbs_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VAbs_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  N_VAbs_Serial(arg1,arg2);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VInv_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VInv_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VInv_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VInv_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  N_VInv_Serial(arg1,arg2);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VAddConst_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  realtype arg2 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VAddConst_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VAddConst_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VAddConst_Serial" "', argument " "2"" of type '" "realtype""'");
-  } 
-  arg2 = static_cast< realtype >(val2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VAddConst_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  N_VAddConst_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VDotProd_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VDotProd_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDotProd_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VDotProd_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (realtype)N_VDotProd_Serial(arg1,arg2);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VMaxNorm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  realtype result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VMaxNorm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (realtype)N_VMaxNorm_Serial(arg1);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWrmsNorm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNorm_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWrmsNorm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNorm_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (realtype)N_VWrmsNorm_Serial(arg1,arg2);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWrmsNormMask_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNormMask_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWrmsNormMask_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNormMask_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWrmsNormMask_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  result = (realtype)N_VWrmsNormMask_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VMin_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  realtype result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VMin_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (realtype)N_VMin_Serial(arg1);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWL2Norm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWL2Norm_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWL2Norm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWL2Norm_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (realtype)N_VWL2Norm_Serial(arg1,arg2);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VL1Norm_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  PyObject *swig_obj[1] ;
-  realtype result;
-  
-  if (!args) SWIG_fail;
-  swig_obj[0] = args;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VL1Norm_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  result = (realtype)N_VL1Norm_Serial(arg1);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VCompare_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  realtype arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  double val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VCompare_Serial", 3, 3, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_double(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VCompare_Serial" "', argument " "1"" of type '" "realtype""'");
-  } 
-  arg1 = static_cast< realtype >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VCompare_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VCompare_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  N_VCompare_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_Py_Void();
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VInvTest_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VInvTest_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VInvTest_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VInvTest_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (int)N_VInvTest_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VConstrMask_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VConstrMask_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VConstrMask_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VConstrMask_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VConstrMask_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  result = (int)N_VConstrMask_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VMinQuotient_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VMinQuotient_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VMinQuotient_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VMinQuotient_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (realtype)N_VMinQuotient_Serial(arg1,arg2);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VLinearCombination_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  realtype *arg2 = (realtype *) 0 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  N_Vector arg4 = (N_Vector) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  PyObject *swig_obj[4] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VLinearCombination_Serial", 4, 4, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearCombination_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VLinearCombination_Serial" "', argument " "2"" of type '" "realtype *""'"); 
-  }
-  arg2 = reinterpret_cast< realtype * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VLinearCombination_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VLinearCombination_Serial" "', argument " "4"" of type '" "N_Vector""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector >(argp4);
-  result = (int)N_VLinearCombination_Serial(arg1,arg2,arg3,arg4);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VScaleAddMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  realtype *arg2 = (realtype *) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  N_Vector *arg4 = (N_Vector *) 0 ;
-  N_Vector *arg5 = (N_Vector *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  PyObject *swig_obj[5] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VScaleAddMulti_Serial", 5, 5, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScaleAddMulti_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VScaleAddMulti_Serial" "', argument " "2"" of type '" "realtype *""'"); 
-  }
-  arg2 = reinterpret_cast< realtype * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScaleAddMulti_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VScaleAddMulti_Serial" "', argument " "4"" of type '" "N_Vector *""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector * >(argp4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VScaleAddMulti_Serial" "', argument " "5"" of type '" "N_Vector *""'"); 
-  }
-  arg5 = reinterpret_cast< N_Vector * >(argp5);
-  result = (int)N_VScaleAddMulti_Serial(arg1,arg2,arg3,arg4,arg5);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VDotProdMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  realtype *arg4 = (realtype *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  PyObject *swig_obj[4] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VDotProdMulti_Serial", 4, 4, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VDotProdMulti_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VDotProdMulti_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VDotProdMulti_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VDotProdMulti_Serial" "', argument " "4"" of type '" "realtype *""'"); 
-  }
-  arg4 = reinterpret_cast< realtype * >(argp4);
-  result = (int)N_VDotProdMulti_Serial(arg1,arg2,arg3,arg4);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VLinearSumVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  realtype arg2 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  realtype arg4 ;
-  N_Vector *arg5 = (N_Vector *) 0 ;
-  N_Vector *arg6 = (N_Vector *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  double val4 ;
-  int ecode4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  void *argp6 = 0 ;
-  int res6 = 0 ;
-  PyObject *swig_obj[6] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VLinearSumVectorArray_Serial", 6, 6, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "2"" of type '" "realtype""'");
-  } 
-  arg2 = static_cast< realtype >(val2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  ecode4 = SWIG_AsVal_double(swig_obj[3], &val4);
-  if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "4"" of type '" "realtype""'");
-  } 
-  arg4 = static_cast< realtype >(val4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "5"" of type '" "N_Vector *""'"); 
-  }
-  arg5 = reinterpret_cast< N_Vector * >(argp5);
-  res6 = SWIG_ConvertPtr(swig_obj[5], &argp6,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res6)) {
-    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "N_VLinearSumVectorArray_Serial" "', argument " "6"" of type '" "N_Vector *""'"); 
-  }
-  arg6 = reinterpret_cast< N_Vector * >(argp6);
-  result = (int)N_VLinearSumVectorArray_Serial(arg1,arg2,arg3,arg4,arg5,arg6);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VScaleVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  realtype *arg2 = (realtype *) 0 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  N_Vector *arg4 = (N_Vector *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  PyObject *swig_obj[4] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VScaleVectorArray_Serial", 4, 4, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScaleVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VScaleVectorArray_Serial" "', argument " "2"" of type '" "realtype *""'"); 
-  }
-  arg2 = reinterpret_cast< realtype * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScaleVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VScaleVectorArray_Serial" "', argument " "4"" of type '" "N_Vector *""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector * >(argp4);
-  result = (int)N_VScaleVectorArray_Serial(arg1,arg2,arg3,arg4);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VConstVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  realtype arg2 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  double val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VConstVectorArray_Serial", 3, 3, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VConstVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  ecode2 = SWIG_AsVal_double(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VConstVectorArray_Serial" "', argument " "2"" of type '" "realtype""'");
-  } 
-  arg2 = static_cast< realtype >(val2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VConstVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  result = (int)N_VConstVectorArray_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWrmsNormVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  N_Vector *arg2 = (N_Vector *) 0 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  realtype *arg4 = (realtype *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  PyObject *swig_obj[4] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNormVectorArray_Serial", 4, 4, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "2"" of type '" "N_Vector *""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VWrmsNormVectorArray_Serial" "', argument " "4"" of type '" "realtype *""'"); 
-  }
-  arg4 = reinterpret_cast< realtype * >(argp4);
-  result = (int)N_VWrmsNormVectorArray_Serial(arg1,arg2,arg3,arg4);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWrmsNormMaskVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  N_Vector *arg2 = (N_Vector *) 0 ;
-  N_Vector *arg3 = (N_Vector *) 0 ;
-  N_Vector arg4 = (N_Vector) 0 ;
-  realtype *arg5 = (realtype *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  PyObject *swig_obj[5] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWrmsNormMaskVectorArray_Serial", 5, 5, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "2"" of type '" "N_Vector *""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector * >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "3"" of type '" "N_Vector *""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "4"" of type '" "N_Vector""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector >(argp4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VWrmsNormMaskVectorArray_Serial" "', argument " "5"" of type '" "realtype *""'"); 
-  }
-  arg5 = reinterpret_cast< realtype * >(argp5);
-  result = (int)N_VWrmsNormMaskVectorArray_Serial(arg1,arg2,arg3,arg4,arg5);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VScaleAddMultiVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  int arg2 ;
-  realtype *arg3 = (realtype *) 0 ;
-  N_Vector *arg4 = (N_Vector *) 0 ;
-  N_Vector **arg5 = (N_Vector **) 0 ;
-  N_Vector **arg6 = (N_Vector **) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  void *argp6 = 0 ;
-  int res6 = 0 ;
-  PyObject *swig_obj[6] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VScaleAddMultiVectorArray_Serial", 6, 6, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "3"" of type '" "realtype *""'"); 
-  }
-  arg3 = reinterpret_cast< realtype * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "4"" of type '" "N_Vector *""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector * >(argp4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "5"" of type '" "N_Vector **""'"); 
-  }
-  arg5 = reinterpret_cast< N_Vector ** >(argp5);
-  res6 = SWIG_ConvertPtr(swig_obj[5], &argp6,SWIGTYPE_p_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res6)) {
-    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "N_VScaleAddMultiVectorArray_Serial" "', argument " "6"" of type '" "N_Vector **""'"); 
-  }
-  arg6 = reinterpret_cast< N_Vector ** >(argp6);
-  result = (int)N_VScaleAddMultiVectorArray_Serial(arg1,arg2,arg3,arg4,arg5,arg6);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VLinearCombinationVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  int arg2 ;
-  realtype *arg3 = (realtype *) 0 ;
-  N_Vector **arg4 = (N_Vector **) 0 ;
-  N_Vector *arg5 = (N_Vector *) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  void *argp4 = 0 ;
-  int res4 = 0 ;
-  void *argp5 = 0 ;
-  int res5 = 0 ;
-  PyObject *swig_obj[5] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VLinearCombinationVectorArray_Serial", 5, 5, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p_double, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "3"" of type '" "realtype *""'"); 
-  }
-  arg3 = reinterpret_cast< realtype * >(argp3);
-  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "4"" of type '" "N_Vector **""'"); 
-  }
-  arg4 = reinterpret_cast< N_Vector ** >(argp4);
-  res5 = SWIG_ConvertPtr(swig_obj[4], &argp5,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res5)) {
-    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "N_VLinearCombinationVectorArray_Serial" "', argument " "5"" of type '" "N_Vector *""'"); 
-  }
-  arg5 = reinterpret_cast< N_Vector * >(argp5);
-  result = (int)N_VLinearCombinationVectorArray_Serial(arg1,arg2,arg3,arg4,arg5);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWSqrSumLocal_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWSqrSumLocal_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWSqrSumLocal_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWSqrSumLocal_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (realtype)N_VWSqrSumLocal_Serial(arg1,arg2);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VWSqrSumMaskLocal_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  N_Vector arg3 = (N_Vector) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  void *argp3 = 0 ;
-  int res3 = 0 ;
-  PyObject *swig_obj[3] ;
-  realtype result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VWSqrSumMaskLocal_Serial", 3, 3, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VWSqrSumMaskLocal_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VWSqrSumMaskLocal_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res3)) {
-    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "N_VWSqrSumMaskLocal_Serial" "', argument " "3"" of type '" "N_Vector""'"); 
-  }
-  arg3 = reinterpret_cast< N_Vector >(argp3);
-  result = (realtype)N_VWSqrSumMaskLocal_Serial(arg1,arg2,arg3);
-  resultobj = SWIG_From_double(static_cast< double >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VBufSize_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  sunindextype *arg2 = (sunindextype *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VBufSize_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VBufSize_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VBufSize_Serial" "', argument " "2"" of type '" "sunindextype *""'"); 
-  }
-  arg2 = reinterpret_cast< sunindextype * >(argp2);
-  result = (int)N_VBufSize_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VBufPack_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *arg2 = (void *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VBufPack_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VBufPack_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VBufPack_Serial" "', argument " "2"" of type '" "void *""'"); 
-  }
-  result = (int)N_VBufPack_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VBufUnpack_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  void *arg2 = (void *) 0 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VBufUnpack_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VBufUnpack_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, 0);
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VBufUnpack_Serial" "', argument " "2"" of type '" "void *""'"); 
-  }
-  result = (int)N_VBufUnpack_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableFusedOps_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableFusedOps_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableFusedOps_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableFusedOps_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableFusedOps_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableLinearCombination_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableLinearCombination_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableLinearCombination_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableLinearCombination_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableLinearCombination_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableScaleAddMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableScaleAddMulti_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableScaleAddMulti_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableScaleAddMulti_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableScaleAddMulti_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableDotProdMulti_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableDotProdMulti_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableDotProdMulti_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableDotProdMulti_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableDotProdMulti_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableLinearSumVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableLinearSumVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableLinearSumVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableLinearSumVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableLinearSumVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableScaleVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableScaleVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableScaleVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableScaleVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableScaleVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableConstVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableConstVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableConstVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableConstVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableConstVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableWrmsNormVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableWrmsNormVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableWrmsNormVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableWrmsNormVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableWrmsNormVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableWrmsNormMaskVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableWrmsNormMaskVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableWrmsNormMaskVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableWrmsNormMaskVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableWrmsNormMaskVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableScaleAddMultiVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableScaleAddMultiVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableScaleAddMultiVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableScaleAddMultiVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableScaleAddMultiVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VEnableLinearCombinationVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector arg1 = (N_Vector) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  int result;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VEnableLinearCombinationVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VEnableLinearCombinationVectorArray_Serial" "', argument " "1"" of type '" "N_Vector""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VEnableLinearCombinationVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  result = (int)N_VEnableLinearCombinationVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_From_int(static_cast< int >(result));
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VCloneVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  N_Vector *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VCloneVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VCloneVectorArray_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VCloneVectorArray_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (N_Vector *)N_VCloneVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VCloneVectorArrayEmpty_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  int arg1 ;
-  N_Vector arg2 = (N_Vector) 0 ;
-  int val1 ;
-  int ecode1 = 0 ;
-  void *argp2 = 0 ;
-  int res2 = 0 ;
-  PyObject *swig_obj[2] ;
-  N_Vector *result = 0 ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VCloneVectorArrayEmpty_Serial", 2, 2, swig_obj)) SWIG_fail;
-  ecode1 = SWIG_AsVal_int(swig_obj[0], &val1);
-  if (!SWIG_IsOK(ecode1)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "N_VCloneVectorArrayEmpty_Serial" "', argument " "1"" of type '" "int""'");
-  } 
-  arg1 = static_cast< int >(val1);
-  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "N_VCloneVectorArrayEmpty_Serial" "', argument " "2"" of type '" "N_Vector""'"); 
-  }
-  arg2 = reinterpret_cast< N_Vector >(argp2);
-  result = (N_Vector *)N_VCloneVectorArrayEmpty_Serial(arg1,arg2);
-  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  return resultobj;
-fail:
-  return NULL;
-}
-
-
-SWIGINTERN PyObject *_wrap_N_VDestroyVectorArray_Serial(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
-  PyObject *resultobj = 0;
-  N_Vector *arg1 = (N_Vector *) 0 ;
-  int arg2 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int val2 ;
-  int ecode2 = 0 ;
-  PyObject *swig_obj[2] ;
-  
-  if (!SWIG_Python_UnpackTuple(args, "N_VDestroyVectorArray_Serial", 2, 2, swig_obj)) SWIG_fail;
-  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_p__generic_N_Vector, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "N_VDestroyVectorArray_Serial" "', argument " "1"" of type '" "N_Vector *""'"); 
-  }
-  arg1 = reinterpret_cast< N_Vector * >(argp1);
-  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "N_VDestroyVectorArray_Serial" "', argument " "2"" of type '" "int""'");
-  } 
-  arg2 = static_cast< int >(val2);
-  N_VDestroyVectorArray_Serial(arg1,arg2);
-  resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
   return NULL;
@@ -26746,6 +25376,1375 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_gettype_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  SUNNonlinearSolver_Type (*arg2)(SUNNonlinearSolver) = (SUNNonlinearSolver_Type (*)(SUNNonlinearSolver)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_gettype_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_gettype_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__SUNNonlinearSolver_Type);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_gettype_set" "', argument " "2"" of type '" "SUNNonlinearSolver_Type (*)(SUNNonlinearSolver)""'"); 
+    }
+  }
+  if (arg1) (arg1)->gettype = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_gettype_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  SUNNonlinearSolver_Type (*result)(SUNNonlinearSolver) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_gettype_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (SUNNonlinearSolver_Type (*)(SUNNonlinearSolver)) ((arg1)->gettype);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__SUNNonlinearSolver_Type);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_initialize_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver) = (int (*)(SUNNonlinearSolver)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_initialize_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_initialize_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_initialize_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver)""'"); 
+    }
+  }
+  if (arg1) (arg1)->initialize = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_initialize_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_initialize_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver)) ((arg1)->initialize);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setup_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,N_Vector,void *) = (int (*)(SUNNonlinearSolver,N_Vector,void *)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setup_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setup_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setup_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,N_Vector,void *)""'"); 
+    }
+  }
+  if (arg1) (arg1)->setup = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setup_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,N_Vector,void *) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setup_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,N_Vector,void *)) ((arg1)->setup);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_solve_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *) = (int (*)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_solve_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_solve_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_double_int_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_solve_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *)""'"); 
+    }
+  }
+  if (arg1) (arg1)->solve = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_solve_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_solve_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,N_Vector,N_Vector,N_Vector,realtype,int,void *)) ((arg1)->solve);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_double_int_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_free_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver) = (int (*)(SUNNonlinearSolver)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_free_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_free_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_free_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver)""'"); 
+    }
+  }
+  if (arg1) (arg1)->free = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_free_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_free_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver)) ((arg1)->free);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setsysfn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolSysFn) = (int (*)(SUNNonlinearSolver,SUNNonlinSolSysFn)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setsysfn_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setsysfn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setsysfn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolSysFn)""'"); 
+    }
+  }
+  if (arg1) (arg1)->setsysfn = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setsysfn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,SUNNonlinSolSysFn) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setsysfn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolSysFn)) ((arg1)->setsysfn);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsetupfn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolLSetupFn) = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSetupFn)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setlsetupfn_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsetupfn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_int_p_int_p_void__int__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setlsetupfn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolLSetupFn)""'"); 
+    }
+  }
+  if (arg1) (arg1)->setlsetupfn = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsetupfn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,SUNNonlinSolLSetupFn) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsetupfn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSetupFn)) ((arg1)->setlsetupfn);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_int_p_int_p_void__int__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsolvefn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolLSolveFn) = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSolveFn)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setlsolvefn_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsolvefn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p_void__int__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setlsolvefn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolLSolveFn)""'"); 
+    }
+  }
+  if (arg1) (arg1)->setlsolvefn = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setlsolvefn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,SUNNonlinSolLSolveFn) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setlsolvefn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolLSolveFn)) ((arg1)->setlsolvefn);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p_void__int__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setctestfn_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *) = (int (*)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setctestfn_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setctestfn_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setctestfn_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *)""'"); 
+    }
+  }
+  if (arg1) (arg1)->setctestfn = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setctestfn_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setctestfn_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,SUNNonlinSolConvTestFn,void *)) ((arg1)->setctestfn);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setmaxiters_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,int) = (int (*)(SUNNonlinearSolver,int)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_setmaxiters_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setmaxiters_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_int__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_setmaxiters_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,int)""'"); 
+    }
+  }
+  if (arg1) (arg1)->setmaxiters = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_setmaxiters_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,int) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_setmaxiters_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,int)) ((arg1)->setmaxiters);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_int__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumiters_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,long *) = (int (*)(SUNNonlinearSolver,long *)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_getnumiters_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumiters_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_getnumiters_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,long *)""'"); 
+    }
+  }
+  if (arg1) (arg1)->getnumiters = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumiters_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,long *) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumiters_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,long *)) ((arg1)->getnumiters);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getcuriter_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,int *) = (int (*)(SUNNonlinearSolver,int *)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_getcuriter_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getcuriter_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_int__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_getcuriter_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,int *)""'"); 
+    }
+  }
+  if (arg1) (arg1)->getcuriter = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getcuriter_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,int *) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getcuriter_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,int *)) ((arg1)->getcuriter);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_int__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumconvfails_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  int (*arg2)(SUNNonlinearSolver,long *) = (int (*)(SUNNonlinearSolver,long *)) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_Ops_getnumconvfails_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumconvfails_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinearSolver_Ops_getnumconvfails_set" "', argument " "2"" of type '" "int (*)(SUNNonlinearSolver,long *)""'"); 
+    }
+  }
+  if (arg1) (arg1)->getnumconvfails = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_Ops_getnumconvfails_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int (*result)(SUNNonlinearSolver,long *) = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_Ops_getnumconvfails_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  result = (int (*)(SUNNonlinearSolver,long *)) ((arg1)->getnumconvfails);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_SUNNonlinearSolver_Ops(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_SUNNonlinearSolver_Ops", 0, 0, 0)) SWIG_fail;
+  result = (_generic_SUNNonlinearSolver_Ops *)new _generic_SUNNonlinearSolver_Ops();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_SUNNonlinearSolver_Ops(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver_Ops *arg1 = (_generic_SUNNonlinearSolver_Ops *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SUNNonlinearSolver_Ops" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver_Ops *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver_Ops * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *SUNNonlinearSolver_Ops_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *SUNNonlinearSolver_Ops_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_content_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  void *arg2 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_content_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_content_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1],SWIG_as_voidptrptr(&arg2), 0, SWIG_POINTER_DISOWN);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinearSolver_content_set" "', argument " "2"" of type '" "void *""'"); 
+  }
+  if (arg1) (arg1)->content = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_content_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  void *result = 0 ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_content_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  result = (void *) ((arg1)->content);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_void, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_ops_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  SUNNonlinearSolver_Ops arg2 = (SUNNonlinearSolver_Ops) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_ops_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_ops_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinearSolver_ops_set" "', argument " "2"" of type '" "SUNNonlinearSolver_Ops""'"); 
+  }
+  arg2 = reinterpret_cast< SUNNonlinearSolver_Ops >(argp2);
+  if (arg1) (arg1)->ops = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_ops_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  SUNNonlinearSolver_Ops result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_ops_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  result = (SUNNonlinearSolver_Ops) ((arg1)->ops);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver_Ops, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_sunctx_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  SUNContext arg2 = (SUNContext) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinearSolver_sunctx_set", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_sunctx_set" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__SUNContext, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinearSolver_sunctx_set" "', argument " "2"" of type '" "SUNContext""'"); 
+  }
+  arg2 = reinterpret_cast< SUNContext >(argp2);
+  if (arg1) (arg1)->sunctx = arg2;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinearSolver_sunctx_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  SUNContext result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinearSolver_sunctx_get" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  result = (SUNContext) ((arg1)->sunctx);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__SUNContext, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_SUNNonlinearSolver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_SUNNonlinearSolver", 0, 0, 0)) SWIG_fail;
+  result = (_generic_SUNNonlinearSolver *)new _generic_SUNNonlinearSolver();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_SUNNonlinearSolver(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  _generic_SUNNonlinearSolver *arg1 = (_generic_SUNNonlinearSolver *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_SUNNonlinearSolver" "', argument " "1"" of type '" "_generic_SUNNonlinearSolver *""'"); 
+  }
+  arg1 = reinterpret_cast< _generic_SUNNonlinearSolver * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *SUNNonlinearSolver_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p__generic_SUNNonlinearSolver, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *SUNNonlinearSolver_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolNewEmpty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNContext arg1 = (SUNContext) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  SUNNonlinearSolver result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__SUNContext, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolNewEmpty" "', argument " "1"" of type '" "SUNContext""'"); 
+  }
+  arg1 = reinterpret_cast< SUNContext >(argp1);
+  result = (SUNNonlinearSolver)SUNNonlinSolNewEmpty(arg1);
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolFreeEmpty(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolFreeEmpty" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  SUNNonlinSolFreeEmpty(arg1);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolGetType(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  SUNNonlinearSolver_Type result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetType" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  result = (SUNNonlinearSolver_Type)SUNNonlinSolGetType(arg1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolInitialize(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolInitialize" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  result = (int)SUNNonlinSolInitialize(arg1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSetup(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  void *arg3 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int res3 ;
+  PyObject *swig_obj[3] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetup", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetup" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolSetup" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2],SWIG_as_voidptrptr(&arg3), 0, 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SUNNonlinSolSetup" "', argument " "3"" of type '" "void *""'"); 
+  }
+  result = (int)SUNNonlinSolSetup(arg1,arg2,arg3);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSolve(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  N_Vector arg2 = (N_Vector) 0 ;
+  N_Vector arg3 = (N_Vector) 0 ;
+  N_Vector arg4 = (N_Vector) 0 ;
+  realtype arg5 ;
+  int arg6 ;
+  void *arg7 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  double val5 ;
+  int ecode5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  int res7 ;
+  PyObject *swig_obj[7] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSolve", 7, 7, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSolve" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolSolve" "', argument " "2"" of type '" "N_Vector""'"); 
+  }
+  arg2 = reinterpret_cast< N_Vector >(argp2);
+  res3 = SWIG_ConvertPtr(swig_obj[2], &argp3,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SUNNonlinSolSolve" "', argument " "3"" of type '" "N_Vector""'"); 
+  }
+  arg3 = reinterpret_cast< N_Vector >(argp3);
+  res4 = SWIG_ConvertPtr(swig_obj[3], &argp4,SWIGTYPE_p__generic_N_Vector, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "SUNNonlinSolSolve" "', argument " "4"" of type '" "N_Vector""'"); 
+  }
+  arg4 = reinterpret_cast< N_Vector >(argp4);
+  ecode5 = SWIG_AsVal_double(swig_obj[4], &val5);
+  if (!SWIG_IsOK(ecode5)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "SUNNonlinSolSolve" "', argument " "5"" of type '" "realtype""'");
+  } 
+  arg5 = static_cast< realtype >(val5);
+  ecode6 = SWIG_AsVal_int(swig_obj[5], &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "SUNNonlinSolSolve" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = static_cast< int >(val6);
+  res7 = SWIG_ConvertPtr(swig_obj[6],SWIG_as_voidptrptr(&arg7), 0, 0);
+  if (!SWIG_IsOK(res7)) {
+    SWIG_exception_fail(SWIG_ArgError(res7), "in method '" "SUNNonlinSolSolve" "', argument " "7"" of type '" "void *""'"); 
+  }
+  result = (int)SUNNonlinSolSolve(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolFree(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  int result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolFree" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  result = (int)SUNNonlinSolFree(arg1);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSetSysFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  SUNNonlinSolSysFn arg2 = (SUNNonlinSolSysFn) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetSysFn", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetSysFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetSysFn" "', argument " "2"" of type '" "SUNNonlinSolSysFn""'"); 
+    }
+  }
+  result = (int)SUNNonlinSolSetSysFn(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSetLSetupFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  SUNNonlinSolLSetupFn arg2 = (SUNNonlinSolLSetupFn) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetLSetupFn", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetLSetupFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_int_p_int_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetLSetupFn" "', argument " "2"" of type '" "SUNNonlinSolLSetupFn""'"); 
+    }
+  }
+  result = (int)SUNNonlinSolSetLSetupFn(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSetLSolveFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  SUNNonlinSolLSolveFn arg2 = (SUNNonlinSolLSolveFn) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetLSolveFn", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetLSolveFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_N_Vector_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetLSolveFn" "', argument " "2"" of type '" "SUNNonlinSolLSolveFn""'"); 
+    }
+  }
+  result = (int)SUNNonlinSolSetLSolveFn(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSetConvTestFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  SUNNonlinSolConvTestFn arg2 = (SUNNonlinSolConvTestFn) 0 ;
+  void *arg3 = (void *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res3 ;
+  PyObject *swig_obj[3] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetConvTestFn", 3, 3, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetConvTestFn" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  {
+    int res = SWIG_ConvertFunctionPtr(swig_obj[1], (void**)(&arg2), SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "SUNNonlinSolSetConvTestFn" "', argument " "2"" of type '" "SUNNonlinSolConvTestFn""'"); 
+    }
+  }
+  res3 = SWIG_ConvertPtr(swig_obj[2],SWIG_as_voidptrptr(&arg3), 0, 0);
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "SUNNonlinSolSetConvTestFn" "', argument " "3"" of type '" "void *""'"); 
+  }
+  result = (int)SUNNonlinSolSetConvTestFn(arg1,arg2,arg3);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolSetMaxIters(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolSetMaxIters", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolSetMaxIters" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  ecode2 = SWIG_AsVal_int(swig_obj[1], &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "SUNNonlinSolSetMaxIters" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = static_cast< int >(val2);
+  result = (int)SUNNonlinSolSetMaxIters(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolGetNumIters(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  long *arg2 = (long *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolGetNumIters", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetNumIters" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_long, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolGetNumIters" "', argument " "2"" of type '" "long *""'"); 
+  }
+  arg2 = reinterpret_cast< long * >(argp2);
+  result = (int)SUNNonlinSolGetNumIters(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolGetCurIter(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  int *arg2 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolGetCurIter", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetCurIter" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_int, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolGetCurIter" "', argument " "2"" of type '" "int *""'"); 
+  }
+  arg2 = reinterpret_cast< int * >(argp2);
+  result = (int)SUNNonlinSolGetCurIter(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_SUNNonlinSolGetNumConvFails(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SUNNonlinearSolver arg1 = (SUNNonlinearSolver) 0 ;
+  long *arg2 = (long *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  int result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "SUNNonlinSolGetNumConvFails", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p__generic_SUNNonlinearSolver, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SUNNonlinSolGetNumConvFails" "', argument " "1"" of type '" "SUNNonlinearSolver""'"); 
+  }
+  arg1 = reinterpret_cast< SUNNonlinearSolver >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2,SWIGTYPE_p_long, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SUNNonlinSolGetNumConvFails" "', argument " "2"" of type '" "long *""'"); 
+  }
+  arg2 = reinterpret_cast< long * >(argp2);
+  result = (int)SUNNonlinSolGetNumConvFails(arg1,arg2);
+  resultobj = SWIG_From_int(static_cast< int >(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_KINCreate(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   SUNContext arg1 = (SUNContext) 0 ;
@@ -28878,6 +28877,67 @@ static PyMethodDef SwigMethods[] = {
 	 { "N_VSetVecAtIndexVectorArray", _wrap_N_VSetVecAtIndexVectorArray, METH_VARARGS, NULL},
 	 { "N_VPrint", _wrap_N_VPrint, METH_O, NULL},
 	 { "N_VPrintFile", _wrap_N_VPrintFile, METH_VARARGS, NULL},
+	 { "N_VNew_Serial", _wrap_N_VNew_Serial, METH_VARARGS, NULL},
+	 { "N_VNewEmpty_Serial", _wrap_N_VNewEmpty_Serial, METH_VARARGS, NULL},
+	 { "N_VMake_Serial", _wrap_N_VMake_Serial, METH_VARARGS, NULL},
+	 { "N_VGetLength_Serial", _wrap_N_VGetLength_Serial, METH_O, NULL},
+	 { "N_VPrint_Serial", _wrap_N_VPrint_Serial, METH_O, NULL},
+	 { "N_VPrintFile_Serial", _wrap_N_VPrintFile_Serial, METH_VARARGS, NULL},
+	 { "N_VGetVectorID_Serial", _wrap_N_VGetVectorID_Serial, METH_O, NULL},
+	 { "N_VCloneEmpty_Serial", _wrap_N_VCloneEmpty_Serial, METH_O, NULL},
+	 { "N_VClone_Serial", _wrap_N_VClone_Serial, METH_O, NULL},
+	 { "N_VDestroy_Serial", _wrap_N_VDestroy_Serial, METH_O, NULL},
+	 { "N_VSpace_Serial", _wrap_N_VSpace_Serial, METH_VARARGS, NULL},
+	 { "N_VGetArrayPointer_Serial", _wrap_N_VGetArrayPointer_Serial, METH_O, NULL},
+	 { "N_VSetArrayPointer_Serial", _wrap_N_VSetArrayPointer_Serial, METH_VARARGS, NULL},
+	 { "N_VLinearSum_Serial", _wrap_N_VLinearSum_Serial, METH_VARARGS, NULL},
+	 { "N_VConst_Serial", _wrap_N_VConst_Serial, METH_VARARGS, NULL},
+	 { "N_VProd_Serial", _wrap_N_VProd_Serial, METH_VARARGS, NULL},
+	 { "N_VDiv_Serial", _wrap_N_VDiv_Serial, METH_VARARGS, NULL},
+	 { "N_VScale_Serial", _wrap_N_VScale_Serial, METH_VARARGS, NULL},
+	 { "N_VAbs_Serial", _wrap_N_VAbs_Serial, METH_VARARGS, NULL},
+	 { "N_VInv_Serial", _wrap_N_VInv_Serial, METH_VARARGS, NULL},
+	 { "N_VAddConst_Serial", _wrap_N_VAddConst_Serial, METH_VARARGS, NULL},
+	 { "N_VDotProd_Serial", _wrap_N_VDotProd_Serial, METH_VARARGS, NULL},
+	 { "N_VMaxNorm_Serial", _wrap_N_VMaxNorm_Serial, METH_O, NULL},
+	 { "N_VWrmsNorm_Serial", _wrap_N_VWrmsNorm_Serial, METH_VARARGS, NULL},
+	 { "N_VWrmsNormMask_Serial", _wrap_N_VWrmsNormMask_Serial, METH_VARARGS, NULL},
+	 { "N_VMin_Serial", _wrap_N_VMin_Serial, METH_O, NULL},
+	 { "N_VWL2Norm_Serial", _wrap_N_VWL2Norm_Serial, METH_VARARGS, NULL},
+	 { "N_VL1Norm_Serial", _wrap_N_VL1Norm_Serial, METH_O, NULL},
+	 { "N_VCompare_Serial", _wrap_N_VCompare_Serial, METH_VARARGS, NULL},
+	 { "N_VInvTest_Serial", _wrap_N_VInvTest_Serial, METH_VARARGS, NULL},
+	 { "N_VConstrMask_Serial", _wrap_N_VConstrMask_Serial, METH_VARARGS, NULL},
+	 { "N_VMinQuotient_Serial", _wrap_N_VMinQuotient_Serial, METH_VARARGS, NULL},
+	 { "N_VLinearCombination_Serial", _wrap_N_VLinearCombination_Serial, METH_VARARGS, NULL},
+	 { "N_VScaleAddMulti_Serial", _wrap_N_VScaleAddMulti_Serial, METH_VARARGS, NULL},
+	 { "N_VDotProdMulti_Serial", _wrap_N_VDotProdMulti_Serial, METH_VARARGS, NULL},
+	 { "N_VLinearSumVectorArray_Serial", _wrap_N_VLinearSumVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VScaleVectorArray_Serial", _wrap_N_VScaleVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VConstVectorArray_Serial", _wrap_N_VConstVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VWrmsNormVectorArray_Serial", _wrap_N_VWrmsNormVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VWrmsNormMaskVectorArray_Serial", _wrap_N_VWrmsNormMaskVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VScaleAddMultiVectorArray_Serial", _wrap_N_VScaleAddMultiVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VLinearCombinationVectorArray_Serial", _wrap_N_VLinearCombinationVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VWSqrSumLocal_Serial", _wrap_N_VWSqrSumLocal_Serial, METH_VARARGS, NULL},
+	 { "N_VWSqrSumMaskLocal_Serial", _wrap_N_VWSqrSumMaskLocal_Serial, METH_VARARGS, NULL},
+	 { "N_VBufSize_Serial", _wrap_N_VBufSize_Serial, METH_VARARGS, NULL},
+	 { "N_VBufPack_Serial", _wrap_N_VBufPack_Serial, METH_VARARGS, NULL},
+	 { "N_VBufUnpack_Serial", _wrap_N_VBufUnpack_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableFusedOps_Serial", _wrap_N_VEnableFusedOps_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableLinearCombination_Serial", _wrap_N_VEnableLinearCombination_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableScaleAddMulti_Serial", _wrap_N_VEnableScaleAddMulti_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableDotProdMulti_Serial", _wrap_N_VEnableDotProdMulti_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableLinearSumVectorArray_Serial", _wrap_N_VEnableLinearSumVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableScaleVectorArray_Serial", _wrap_N_VEnableScaleVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableConstVectorArray_Serial", _wrap_N_VEnableConstVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableWrmsNormVectorArray_Serial", _wrap_N_VEnableWrmsNormVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableWrmsNormMaskVectorArray_Serial", _wrap_N_VEnableWrmsNormMaskVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableScaleAddMultiVectorArray_Serial", _wrap_N_VEnableScaleAddMultiVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VEnableLinearCombinationVectorArray_Serial", _wrap_N_VEnableLinearCombinationVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VCloneVectorArray_Serial", _wrap_N_VCloneVectorArray_Serial, METH_VARARGS, NULL},
+	 { "N_VCloneVectorArrayEmpty_Serial", _wrap_N_VCloneVectorArrayEmpty_Serial, METH_VARARGS, NULL},
+	 { "N_VDestroyVectorArray_Serial", _wrap_N_VDestroyVectorArray_Serial, METH_VARARGS, NULL},
 	 { "SUNMatrix_Ops_getid_set", _wrap_SUNMatrix_Ops_getid_set, METH_VARARGS, NULL},
 	 { "SUNMatrix_Ops_getid_get", _wrap_SUNMatrix_Ops_getid_get, METH_O, NULL},
 	 { "SUNMatrix_Ops_clone_set", _wrap_SUNMatrix_Ops_clone_set, METH_VARARGS, NULL},
@@ -29038,122 +29098,6 @@ static PyMethodDef SwigMethods[] = {
 	 { "SUNLinSolLastFlag", _wrap_SUNLinSolLastFlag, METH_O, NULL},
 	 { "SUNLinSolSpace", _wrap_SUNLinSolSpace, METH_VARARGS, NULL},
 	 { "SUNLinSolFree", _wrap_SUNLinSolFree, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_gettype_set", _wrap_SUNNonlinearSolver_Ops_gettype_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_gettype_get", _wrap_SUNNonlinearSolver_Ops_gettype_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_initialize_set", _wrap_SUNNonlinearSolver_Ops_initialize_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_initialize_get", _wrap_SUNNonlinearSolver_Ops_initialize_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_setup_set", _wrap_SUNNonlinearSolver_Ops_setup_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_setup_get", _wrap_SUNNonlinearSolver_Ops_setup_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_solve_set", _wrap_SUNNonlinearSolver_Ops_solve_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_solve_get", _wrap_SUNNonlinearSolver_Ops_solve_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_free_set", _wrap_SUNNonlinearSolver_Ops_free_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_free_get", _wrap_SUNNonlinearSolver_Ops_free_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_setsysfn_set", _wrap_SUNNonlinearSolver_Ops_setsysfn_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_setsysfn_get", _wrap_SUNNonlinearSolver_Ops_setsysfn_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_setlsetupfn_set", _wrap_SUNNonlinearSolver_Ops_setlsetupfn_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_setlsetupfn_get", _wrap_SUNNonlinearSolver_Ops_setlsetupfn_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_setlsolvefn_set", _wrap_SUNNonlinearSolver_Ops_setlsolvefn_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_setlsolvefn_get", _wrap_SUNNonlinearSolver_Ops_setlsolvefn_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_setctestfn_set", _wrap_SUNNonlinearSolver_Ops_setctestfn_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_setctestfn_get", _wrap_SUNNonlinearSolver_Ops_setctestfn_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_setmaxiters_set", _wrap_SUNNonlinearSolver_Ops_setmaxiters_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_setmaxiters_get", _wrap_SUNNonlinearSolver_Ops_setmaxiters_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_getnumiters_set", _wrap_SUNNonlinearSolver_Ops_getnumiters_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_getnumiters_get", _wrap_SUNNonlinearSolver_Ops_getnumiters_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_getcuriter_set", _wrap_SUNNonlinearSolver_Ops_getcuriter_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_getcuriter_get", _wrap_SUNNonlinearSolver_Ops_getcuriter_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_getnumconvfails_set", _wrap_SUNNonlinearSolver_Ops_getnumconvfails_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_getnumconvfails_get", _wrap_SUNNonlinearSolver_Ops_getnumconvfails_get, METH_O, NULL},
-	 { "new_SUNNonlinearSolver_Ops", _wrap_new_SUNNonlinearSolver_Ops, METH_NOARGS, NULL},
-	 { "delete_SUNNonlinearSolver_Ops", _wrap_delete_SUNNonlinearSolver_Ops, METH_O, NULL},
-	 { "SUNNonlinearSolver_Ops_swigregister", SUNNonlinearSolver_Ops_swigregister, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_Ops_swiginit", SUNNonlinearSolver_Ops_swiginit, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_content_set", _wrap_SUNNonlinearSolver_content_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_content_get", _wrap_SUNNonlinearSolver_content_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_ops_set", _wrap_SUNNonlinearSolver_ops_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_ops_get", _wrap_SUNNonlinearSolver_ops_get, METH_O, NULL},
-	 { "SUNNonlinearSolver_sunctx_set", _wrap_SUNNonlinearSolver_sunctx_set, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_sunctx_get", _wrap_SUNNonlinearSolver_sunctx_get, METH_O, NULL},
-	 { "new_SUNNonlinearSolver", _wrap_new_SUNNonlinearSolver, METH_NOARGS, NULL},
-	 { "delete_SUNNonlinearSolver", _wrap_delete_SUNNonlinearSolver, METH_O, NULL},
-	 { "SUNNonlinearSolver_swigregister", SUNNonlinearSolver_swigregister, METH_VARARGS, NULL},
-	 { "SUNNonlinearSolver_swiginit", SUNNonlinearSolver_swiginit, METH_VARARGS, NULL},
-	 { "SUNNonlinSolNewEmpty", _wrap_SUNNonlinSolNewEmpty, METH_O, NULL},
-	 { "SUNNonlinSolFreeEmpty", _wrap_SUNNonlinSolFreeEmpty, METH_O, NULL},
-	 { "SUNNonlinSolGetType", _wrap_SUNNonlinSolGetType, METH_O, NULL},
-	 { "SUNNonlinSolInitialize", _wrap_SUNNonlinSolInitialize, METH_O, NULL},
-	 { "SUNNonlinSolSetup", _wrap_SUNNonlinSolSetup, METH_VARARGS, NULL},
-	 { "SUNNonlinSolSolve", _wrap_SUNNonlinSolSolve, METH_VARARGS, NULL},
-	 { "SUNNonlinSolFree", _wrap_SUNNonlinSolFree, METH_O, NULL},
-	 { "SUNNonlinSolSetSysFn", _wrap_SUNNonlinSolSetSysFn, METH_VARARGS, NULL},
-	 { "SUNNonlinSolSetLSetupFn", _wrap_SUNNonlinSolSetLSetupFn, METH_VARARGS, NULL},
-	 { "SUNNonlinSolSetLSolveFn", _wrap_SUNNonlinSolSetLSolveFn, METH_VARARGS, NULL},
-	 { "SUNNonlinSolSetConvTestFn", _wrap_SUNNonlinSolSetConvTestFn, METH_VARARGS, NULL},
-	 { "SUNNonlinSolSetMaxIters", _wrap_SUNNonlinSolSetMaxIters, METH_VARARGS, NULL},
-	 { "SUNNonlinSolGetNumIters", _wrap_SUNNonlinSolGetNumIters, METH_VARARGS, NULL},
-	 { "SUNNonlinSolGetCurIter", _wrap_SUNNonlinSolGetCurIter, METH_VARARGS, NULL},
-	 { "SUNNonlinSolGetNumConvFails", _wrap_SUNNonlinSolGetNumConvFails, METH_VARARGS, NULL},
-	 { "N_VNew_Serial", _wrap_N_VNew_Serial, METH_VARARGS, NULL},
-	 { "N_VNewEmpty_Serial", _wrap_N_VNewEmpty_Serial, METH_VARARGS, NULL},
-	 { "N_VMake_Serial", _wrap_N_VMake_Serial, METH_VARARGS, NULL},
-	 { "N_VGetLength_Serial", _wrap_N_VGetLength_Serial, METH_O, NULL},
-	 { "N_VPrint_Serial", _wrap_N_VPrint_Serial, METH_O, NULL},
-	 { "N_VPrintFile_Serial", _wrap_N_VPrintFile_Serial, METH_VARARGS, NULL},
-	 { "N_VGetVectorID_Serial", _wrap_N_VGetVectorID_Serial, METH_O, NULL},
-	 { "N_VCloneEmpty_Serial", _wrap_N_VCloneEmpty_Serial, METH_O, NULL},
-	 { "N_VClone_Serial", _wrap_N_VClone_Serial, METH_O, NULL},
-	 { "N_VDestroy_Serial", _wrap_N_VDestroy_Serial, METH_O, NULL},
-	 { "N_VSpace_Serial", _wrap_N_VSpace_Serial, METH_VARARGS, NULL},
-	 { "N_VGetArrayPointer_Serial", _wrap_N_VGetArrayPointer_Serial, METH_O, NULL},
-	 { "N_VSetArrayPointer_Serial", _wrap_N_VSetArrayPointer_Serial, METH_VARARGS, NULL},
-	 { "N_VLinearSum_Serial", _wrap_N_VLinearSum_Serial, METH_VARARGS, NULL},
-	 { "N_VConst_Serial", _wrap_N_VConst_Serial, METH_VARARGS, NULL},
-	 { "N_VProd_Serial", _wrap_N_VProd_Serial, METH_VARARGS, NULL},
-	 { "N_VDiv_Serial", _wrap_N_VDiv_Serial, METH_VARARGS, NULL},
-	 { "N_VScale_Serial", _wrap_N_VScale_Serial, METH_VARARGS, NULL},
-	 { "N_VAbs_Serial", _wrap_N_VAbs_Serial, METH_VARARGS, NULL},
-	 { "N_VInv_Serial", _wrap_N_VInv_Serial, METH_VARARGS, NULL},
-	 { "N_VAddConst_Serial", _wrap_N_VAddConst_Serial, METH_VARARGS, NULL},
-	 { "N_VDotProd_Serial", _wrap_N_VDotProd_Serial, METH_VARARGS, NULL},
-	 { "N_VMaxNorm_Serial", _wrap_N_VMaxNorm_Serial, METH_O, NULL},
-	 { "N_VWrmsNorm_Serial", _wrap_N_VWrmsNorm_Serial, METH_VARARGS, NULL},
-	 { "N_VWrmsNormMask_Serial", _wrap_N_VWrmsNormMask_Serial, METH_VARARGS, NULL},
-	 { "N_VMin_Serial", _wrap_N_VMin_Serial, METH_O, NULL},
-	 { "N_VWL2Norm_Serial", _wrap_N_VWL2Norm_Serial, METH_VARARGS, NULL},
-	 { "N_VL1Norm_Serial", _wrap_N_VL1Norm_Serial, METH_O, NULL},
-	 { "N_VCompare_Serial", _wrap_N_VCompare_Serial, METH_VARARGS, NULL},
-	 { "N_VInvTest_Serial", _wrap_N_VInvTest_Serial, METH_VARARGS, NULL},
-	 { "N_VConstrMask_Serial", _wrap_N_VConstrMask_Serial, METH_VARARGS, NULL},
-	 { "N_VMinQuotient_Serial", _wrap_N_VMinQuotient_Serial, METH_VARARGS, NULL},
-	 { "N_VLinearCombination_Serial", _wrap_N_VLinearCombination_Serial, METH_VARARGS, NULL},
-	 { "N_VScaleAddMulti_Serial", _wrap_N_VScaleAddMulti_Serial, METH_VARARGS, NULL},
-	 { "N_VDotProdMulti_Serial", _wrap_N_VDotProdMulti_Serial, METH_VARARGS, NULL},
-	 { "N_VLinearSumVectorArray_Serial", _wrap_N_VLinearSumVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VScaleVectorArray_Serial", _wrap_N_VScaleVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VConstVectorArray_Serial", _wrap_N_VConstVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VWrmsNormVectorArray_Serial", _wrap_N_VWrmsNormVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VWrmsNormMaskVectorArray_Serial", _wrap_N_VWrmsNormMaskVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VScaleAddMultiVectorArray_Serial", _wrap_N_VScaleAddMultiVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VLinearCombinationVectorArray_Serial", _wrap_N_VLinearCombinationVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VWSqrSumLocal_Serial", _wrap_N_VWSqrSumLocal_Serial, METH_VARARGS, NULL},
-	 { "N_VWSqrSumMaskLocal_Serial", _wrap_N_VWSqrSumMaskLocal_Serial, METH_VARARGS, NULL},
-	 { "N_VBufSize_Serial", _wrap_N_VBufSize_Serial, METH_VARARGS, NULL},
-	 { "N_VBufPack_Serial", _wrap_N_VBufPack_Serial, METH_VARARGS, NULL},
-	 { "N_VBufUnpack_Serial", _wrap_N_VBufUnpack_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableFusedOps_Serial", _wrap_N_VEnableFusedOps_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableLinearCombination_Serial", _wrap_N_VEnableLinearCombination_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableScaleAddMulti_Serial", _wrap_N_VEnableScaleAddMulti_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableDotProdMulti_Serial", _wrap_N_VEnableDotProdMulti_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableLinearSumVectorArray_Serial", _wrap_N_VEnableLinearSumVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableScaleVectorArray_Serial", _wrap_N_VEnableScaleVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableConstVectorArray_Serial", _wrap_N_VEnableConstVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableWrmsNormVectorArray_Serial", _wrap_N_VEnableWrmsNormVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableWrmsNormMaskVectorArray_Serial", _wrap_N_VEnableWrmsNormMaskVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableScaleAddMultiVectorArray_Serial", _wrap_N_VEnableScaleAddMultiVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VEnableLinearCombinationVectorArray_Serial", _wrap_N_VEnableLinearCombinationVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VCloneVectorArray_Serial", _wrap_N_VCloneVectorArray_Serial, METH_VARARGS, NULL},
-	 { "N_VCloneVectorArrayEmpty_Serial", _wrap_N_VCloneVectorArrayEmpty_Serial, METH_VARARGS, NULL},
-	 { "N_VDestroyVectorArray_Serial", _wrap_N_VDestroyVectorArray_Serial, METH_VARARGS, NULL},
 	 { "_SUNLinearSolverContent_Dense_N_set", _wrap__SUNLinearSolverContent_Dense_N_set, METH_VARARGS, NULL},
 	 { "_SUNLinearSolverContent_Dense_N_get", _wrap__SUNLinearSolverContent_Dense_N_get, METH_O, NULL},
 	 { "_SUNLinearSolverContent_Dense_pivots_set", _wrap__SUNLinearSolverContent_Dense_pivots_set, METH_VARARGS, NULL},
@@ -29527,6 +29471,61 @@ static PyMethodDef SwigMethods[] = {
 	 { "SUNLinSolFree_SPTFQMR", _wrap_SUNLinSolFree_SPTFQMR, METH_O, NULL},
 	 { "SUNLinSolSetInfoFile_SPTFQMR", _wrap_SUNLinSolSetInfoFile_SPTFQMR, METH_VARARGS, NULL},
 	 { "SUNLinSolSetPrintLevel_SPTFQMR", _wrap_SUNLinSolSetPrintLevel_SPTFQMR, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_gettype_set", _wrap_SUNNonlinearSolver_Ops_gettype_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_gettype_get", _wrap_SUNNonlinearSolver_Ops_gettype_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_initialize_set", _wrap_SUNNonlinearSolver_Ops_initialize_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_initialize_get", _wrap_SUNNonlinearSolver_Ops_initialize_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_setup_set", _wrap_SUNNonlinearSolver_Ops_setup_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_setup_get", _wrap_SUNNonlinearSolver_Ops_setup_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_solve_set", _wrap_SUNNonlinearSolver_Ops_solve_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_solve_get", _wrap_SUNNonlinearSolver_Ops_solve_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_free_set", _wrap_SUNNonlinearSolver_Ops_free_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_free_get", _wrap_SUNNonlinearSolver_Ops_free_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_setsysfn_set", _wrap_SUNNonlinearSolver_Ops_setsysfn_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_setsysfn_get", _wrap_SUNNonlinearSolver_Ops_setsysfn_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_setlsetupfn_set", _wrap_SUNNonlinearSolver_Ops_setlsetupfn_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_setlsetupfn_get", _wrap_SUNNonlinearSolver_Ops_setlsetupfn_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_setlsolvefn_set", _wrap_SUNNonlinearSolver_Ops_setlsolvefn_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_setlsolvefn_get", _wrap_SUNNonlinearSolver_Ops_setlsolvefn_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_setctestfn_set", _wrap_SUNNonlinearSolver_Ops_setctestfn_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_setctestfn_get", _wrap_SUNNonlinearSolver_Ops_setctestfn_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_setmaxiters_set", _wrap_SUNNonlinearSolver_Ops_setmaxiters_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_setmaxiters_get", _wrap_SUNNonlinearSolver_Ops_setmaxiters_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_getnumiters_set", _wrap_SUNNonlinearSolver_Ops_getnumiters_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_getnumiters_get", _wrap_SUNNonlinearSolver_Ops_getnumiters_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_getcuriter_set", _wrap_SUNNonlinearSolver_Ops_getcuriter_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_getcuriter_get", _wrap_SUNNonlinearSolver_Ops_getcuriter_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_getnumconvfails_set", _wrap_SUNNonlinearSolver_Ops_getnumconvfails_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_getnumconvfails_get", _wrap_SUNNonlinearSolver_Ops_getnumconvfails_get, METH_O, NULL},
+	 { "new_SUNNonlinearSolver_Ops", _wrap_new_SUNNonlinearSolver_Ops, METH_NOARGS, NULL},
+	 { "delete_SUNNonlinearSolver_Ops", _wrap_delete_SUNNonlinearSolver_Ops, METH_O, NULL},
+	 { "SUNNonlinearSolver_Ops_swigregister", SUNNonlinearSolver_Ops_swigregister, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_Ops_swiginit", SUNNonlinearSolver_Ops_swiginit, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_content_set", _wrap_SUNNonlinearSolver_content_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_content_get", _wrap_SUNNonlinearSolver_content_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_ops_set", _wrap_SUNNonlinearSolver_ops_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_ops_get", _wrap_SUNNonlinearSolver_ops_get, METH_O, NULL},
+	 { "SUNNonlinearSolver_sunctx_set", _wrap_SUNNonlinearSolver_sunctx_set, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_sunctx_get", _wrap_SUNNonlinearSolver_sunctx_get, METH_O, NULL},
+	 { "new_SUNNonlinearSolver", _wrap_new_SUNNonlinearSolver, METH_NOARGS, NULL},
+	 { "delete_SUNNonlinearSolver", _wrap_delete_SUNNonlinearSolver, METH_O, NULL},
+	 { "SUNNonlinearSolver_swigregister", SUNNonlinearSolver_swigregister, METH_VARARGS, NULL},
+	 { "SUNNonlinearSolver_swiginit", SUNNonlinearSolver_swiginit, METH_VARARGS, NULL},
+	 { "SUNNonlinSolNewEmpty", _wrap_SUNNonlinSolNewEmpty, METH_O, NULL},
+	 { "SUNNonlinSolFreeEmpty", _wrap_SUNNonlinSolFreeEmpty, METH_O, NULL},
+	 { "SUNNonlinSolGetType", _wrap_SUNNonlinSolGetType, METH_O, NULL},
+	 { "SUNNonlinSolInitialize", _wrap_SUNNonlinSolInitialize, METH_O, NULL},
+	 { "SUNNonlinSolSetup", _wrap_SUNNonlinSolSetup, METH_VARARGS, NULL},
+	 { "SUNNonlinSolSolve", _wrap_SUNNonlinSolSolve, METH_VARARGS, NULL},
+	 { "SUNNonlinSolFree", _wrap_SUNNonlinSolFree, METH_O, NULL},
+	 { "SUNNonlinSolSetSysFn", _wrap_SUNNonlinSolSetSysFn, METH_VARARGS, NULL},
+	 { "SUNNonlinSolSetLSetupFn", _wrap_SUNNonlinSolSetLSetupFn, METH_VARARGS, NULL},
+	 { "SUNNonlinSolSetLSolveFn", _wrap_SUNNonlinSolSetLSolveFn, METH_VARARGS, NULL},
+	 { "SUNNonlinSolSetConvTestFn", _wrap_SUNNonlinSolSetConvTestFn, METH_VARARGS, NULL},
+	 { "SUNNonlinSolSetMaxIters", _wrap_SUNNonlinSolSetMaxIters, METH_VARARGS, NULL},
+	 { "SUNNonlinSolGetNumIters", _wrap_SUNNonlinSolGetNumIters, METH_VARARGS, NULL},
+	 { "SUNNonlinSolGetCurIter", _wrap_SUNNonlinSolGetCurIter, METH_VARARGS, NULL},
+	 { "SUNNonlinSolGetNumConvFails", _wrap_SUNNonlinSolGetNumConvFails, METH_VARARGS, NULL},
 	 { "KINCreate", _wrap_KINCreate, METH_O, NULL},
 	 { "KINInit", _wrap_KINInit, METH_VARARGS, NULL},
 	 { "KINSol", _wrap_KINSol, METH_VARARGS, NULL},
@@ -30851,6 +30850,13 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "SUNLS_QRFACT_FAIL",SWIG_From_int(static_cast< int >(807)));
   SWIG_Python_SetConstant(d, "SUNLS_LUFACT_FAIL",SWIG_From_int(static_cast< int >(808)));
   SWIG_Python_SetConstant(d, "SUNLS_MSG_RESIDUAL",SWIG_FromCharPtr("\t\tlin. iteration %ld, lin. residual: %g\n"));
+  SWIG_Python_SetConstant(d, "SUNPCG_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
+  SWIG_Python_SetConstant(d, "SUNSPBCGS_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
+  SWIG_Python_SetConstant(d, "SUNSPFGMR_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
+  SWIG_Python_SetConstant(d, "SUNSPFGMR_MAXRS_DEFAULT",SWIG_From_int(static_cast< int >(0)));
+  SWIG_Python_SetConstant(d, "SUNSPGMR_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
+  SWIG_Python_SetConstant(d, "SUNSPGMR_MAXRS_DEFAULT",SWIG_From_int(static_cast< int >(0)));
+  SWIG_Python_SetConstant(d, "SUNSPTFQMR_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
   SWIG_Python_SetConstant(d, "SUNNONLINEARSOLVER_ROOTFIND",SWIG_From_int(static_cast< int >(SUNNONLINEARSOLVER_ROOTFIND)));
   SWIG_Python_SetConstant(d, "SUNNONLINEARSOLVER_FIXEDPOINT",SWIG_From_int(static_cast< int >(SUNNONLINEARSOLVER_FIXEDPOINT)));
   SWIG_Python_SetConstant(d, "SUN_NLS_SUCCESS",SWIG_From_int(static_cast< int >(0)));
@@ -30862,13 +30868,6 @@ SWIG_init(void) {
   SWIG_Python_SetConstant(d, "SUN_NLS_VECTOROP_ERR",SWIG_From_int(static_cast< int >(-904)));
   SWIG_Python_SetConstant(d, "SUN_NLS_EXT_FAIL",SWIG_From_int(static_cast< int >(-905)));
   SWIG_Python_SetConstant(d, "SUN_NLS_MSG_RESIDUAL",SWIG_FromCharPtr("\tnonlin. iteration %ld, nonlin. residual: %g\n"));
-  SWIG_Python_SetConstant(d, "SUNPCG_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
-  SWIG_Python_SetConstant(d, "SUNSPBCGS_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
-  SWIG_Python_SetConstant(d, "SUNSPFGMR_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
-  SWIG_Python_SetConstant(d, "SUNSPFGMR_MAXRS_DEFAULT",SWIG_From_int(static_cast< int >(0)));
-  SWIG_Python_SetConstant(d, "SUNSPGMR_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
-  SWIG_Python_SetConstant(d, "SUNSPGMR_MAXRS_DEFAULT",SWIG_From_int(static_cast< int >(0)));
-  SWIG_Python_SetConstant(d, "SUNSPTFQMR_MAXL_DEFAULT",SWIG_From_int(static_cast< int >(5)));
   SWIG_Python_SetConstant(d, "KIN_SUCCESS",SWIG_From_int(static_cast< int >(0)));
   SWIG_Python_SetConstant(d, "KIN_INITIAL_GUESS_OK",SWIG_From_int(static_cast< int >(1)));
   SWIG_Python_SetConstant(d, "KIN_STEP_LT_STPTOL",SWIG_From_int(static_cast< int >(2)));

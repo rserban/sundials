@@ -38,12 +38,6 @@
 %rename(SUNNonlinearSolver) _generic_SUNNonlinearSolver;
 %rename(SUNNonlinearSolver_Ops) _generic_SUNNonlinearSolver_Ops;
 
-// Apply typemaps for arrays/poitners
-
-// Typemap for input arrays (e.g. this effects N_VMake functions)
-%apply (int DIM1, double* IN_ARRAY1) {(sunindextype vec_length, realtype *v_data)}
-
-
 // Handle SUNContext mapping
 %ignore SUNContext_Create;
 %ignore SUNContext_Free;
@@ -55,24 +49,16 @@
 #include "sundials/sundials_config.h"
 #include "sundials/sundials_context.h"
 #include "sundials/sundials_types.h"
-#include "sundials/sundials_nvector.h"
-// #include "sundials/sundials_matrix.h"
-#include "sundials/sundials_iterative.h"
-#include "sundials/sundials_linearsolver.h"
 #include "sundials/sundials_nonlinearsolver.h"
 %}
 %include "sundials/sundials_types.h"
 %include "sundials/sundials_context.h"
-%include "sundials/sundials_nvector.h"
-// %include "sundials/sundials_matrix.h"
+%include "../nvector/nvector.i"
 %include "../sunmatrix/sunmatrix.i"
-%include "sundials/sundials_iterative.h"
-%include "sundials/sundials_linearsolver.h"
+%include "../sunlinsol/sunlinsol.i"
 %include "sundials/sundials_nonlinearsolver.h"
 
 // Include implementations of generics
-%include "../nvector/nvector.i"
-%include "../sunlinsol/sunlinsol.i"
 
 // Insert SUNDIALS copyright into generated C files.
 %insert(begin)

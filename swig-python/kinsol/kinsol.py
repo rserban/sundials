@@ -394,6 +394,189 @@ def N_VPrint(v):
 
 def N_VPrintFile(v, outfile):
     return _kinsol.N_VPrintFile(v, outfile)
+
+def N_VNew_Serial(vec_length, sunctx):
+    return _kinsol.N_VNew_Serial(vec_length, sunctx)
+
+def N_VNewEmpty_Serial(vec_length, sunctx):
+    return _kinsol.N_VNewEmpty_Serial(vec_length, sunctx)
+
+def N_VMake_Serial(vec_length, sunctx):
+    return _kinsol.N_VMake_Serial(vec_length, sunctx)
+
+def N_VGetLength_Serial(v):
+    return _kinsol.N_VGetLength_Serial(v)
+
+def N_VPrint_Serial(v):
+    return _kinsol.N_VPrint_Serial(v)
+
+def N_VPrintFile_Serial(v, outfile):
+    return _kinsol.N_VPrintFile_Serial(v, outfile)
+
+def N_VGetVectorID_Serial(v):
+    return _kinsol.N_VGetVectorID_Serial(v)
+
+def N_VCloneEmpty_Serial(w):
+    return _kinsol.N_VCloneEmpty_Serial(w)
+
+def N_VClone_Serial(w):
+    return _kinsol.N_VClone_Serial(w)
+
+def N_VDestroy_Serial(v):
+    return _kinsol.N_VDestroy_Serial(v)
+
+def N_VSpace_Serial(v, lrw, liw):
+    return _kinsol.N_VSpace_Serial(v, lrw, liw)
+
+def N_VGetArrayPointer_Serial(v):
+    return _kinsol.N_VGetArrayPointer_Serial(v)
+
+def N_VSetArrayPointer_Serial(v_data, v):
+    return _kinsol.N_VSetArrayPointer_Serial(v_data, v)
+
+def N_VLinearSum_Serial(a, x, b, y, z):
+    return _kinsol.N_VLinearSum_Serial(a, x, b, y, z)
+
+def N_VConst_Serial(c, z):
+    return _kinsol.N_VConst_Serial(c, z)
+
+def N_VProd_Serial(x, y, z):
+    return _kinsol.N_VProd_Serial(x, y, z)
+
+def N_VDiv_Serial(x, y, z):
+    return _kinsol.N_VDiv_Serial(x, y, z)
+
+def N_VScale_Serial(c, x, z):
+    return _kinsol.N_VScale_Serial(c, x, z)
+
+def N_VAbs_Serial(x, z):
+    return _kinsol.N_VAbs_Serial(x, z)
+
+def N_VInv_Serial(x, z):
+    return _kinsol.N_VInv_Serial(x, z)
+
+def N_VAddConst_Serial(x, b, z):
+    return _kinsol.N_VAddConst_Serial(x, b, z)
+
+def N_VDotProd_Serial(x, y):
+    return _kinsol.N_VDotProd_Serial(x, y)
+
+def N_VMaxNorm_Serial(x):
+    return _kinsol.N_VMaxNorm_Serial(x)
+
+def N_VWrmsNorm_Serial(x, w):
+    return _kinsol.N_VWrmsNorm_Serial(x, w)
+
+def N_VWrmsNormMask_Serial(x, w, id):
+    return _kinsol.N_VWrmsNormMask_Serial(x, w, id)
+
+def N_VMin_Serial(x):
+    return _kinsol.N_VMin_Serial(x)
+
+def N_VWL2Norm_Serial(x, w):
+    return _kinsol.N_VWL2Norm_Serial(x, w)
+
+def N_VL1Norm_Serial(x):
+    return _kinsol.N_VL1Norm_Serial(x)
+
+def N_VCompare_Serial(c, x, z):
+    return _kinsol.N_VCompare_Serial(c, x, z)
+
+def N_VInvTest_Serial(x, z):
+    return _kinsol.N_VInvTest_Serial(x, z)
+
+def N_VConstrMask_Serial(c, x, m):
+    return _kinsol.N_VConstrMask_Serial(c, x, m)
+
+def N_VMinQuotient_Serial(num, denom):
+    return _kinsol.N_VMinQuotient_Serial(num, denom)
+
+def N_VLinearCombination_Serial(nvec, c, V, z):
+    return _kinsol.N_VLinearCombination_Serial(nvec, c, V, z)
+
+def N_VScaleAddMulti_Serial(nvec, a, x, Y, Z):
+    return _kinsol.N_VScaleAddMulti_Serial(nvec, a, x, Y, Z)
+
+def N_VDotProdMulti_Serial(nvec, x, Y, dotprods):
+    return _kinsol.N_VDotProdMulti_Serial(nvec, x, Y, dotprods)
+
+def N_VLinearSumVectorArray_Serial(nvec, a, X, b, Y, Z):
+    return _kinsol.N_VLinearSumVectorArray_Serial(nvec, a, X, b, Y, Z)
+
+def N_VScaleVectorArray_Serial(nvec, c, X, Z):
+    return _kinsol.N_VScaleVectorArray_Serial(nvec, c, X, Z)
+
+def N_VConstVectorArray_Serial(nvecs, c, Z):
+    return _kinsol.N_VConstVectorArray_Serial(nvecs, c, Z)
+
+def N_VWrmsNormVectorArray_Serial(nvecs, X, W, nrm):
+    return _kinsol.N_VWrmsNormVectorArray_Serial(nvecs, X, W, nrm)
+
+def N_VWrmsNormMaskVectorArray_Serial(nvecs, X, W, id, nrm):
+    return _kinsol.N_VWrmsNormMaskVectorArray_Serial(nvecs, X, W, id, nrm)
+
+def N_VScaleAddMultiVectorArray_Serial(nvec, nsum, a, X, Y, Z):
+    return _kinsol.N_VScaleAddMultiVectorArray_Serial(nvec, nsum, a, X, Y, Z)
+
+def N_VLinearCombinationVectorArray_Serial(nvec, nsum, c, X, Z):
+    return _kinsol.N_VLinearCombinationVectorArray_Serial(nvec, nsum, c, X, Z)
+
+def N_VWSqrSumLocal_Serial(x, w):
+    return _kinsol.N_VWSqrSumLocal_Serial(x, w)
+
+def N_VWSqrSumMaskLocal_Serial(x, w, id):
+    return _kinsol.N_VWSqrSumMaskLocal_Serial(x, w, id)
+
+def N_VBufSize_Serial(x, size):
+    return _kinsol.N_VBufSize_Serial(x, size)
+
+def N_VBufPack_Serial(x, buf):
+    return _kinsol.N_VBufPack_Serial(x, buf)
+
+def N_VBufUnpack_Serial(x, buf):
+    return _kinsol.N_VBufUnpack_Serial(x, buf)
+
+def N_VEnableFusedOps_Serial(v, tf):
+    return _kinsol.N_VEnableFusedOps_Serial(v, tf)
+
+def N_VEnableLinearCombination_Serial(v, tf):
+    return _kinsol.N_VEnableLinearCombination_Serial(v, tf)
+
+def N_VEnableScaleAddMulti_Serial(v, tf):
+    return _kinsol.N_VEnableScaleAddMulti_Serial(v, tf)
+
+def N_VEnableDotProdMulti_Serial(v, tf):
+    return _kinsol.N_VEnableDotProdMulti_Serial(v, tf)
+
+def N_VEnableLinearSumVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableLinearSumVectorArray_Serial(v, tf)
+
+def N_VEnableScaleVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableScaleVectorArray_Serial(v, tf)
+
+def N_VEnableConstVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableConstVectorArray_Serial(v, tf)
+
+def N_VEnableWrmsNormVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableWrmsNormVectorArray_Serial(v, tf)
+
+def N_VEnableWrmsNormMaskVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableWrmsNormMaskVectorArray_Serial(v, tf)
+
+def N_VEnableScaleAddMultiVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableScaleAddMultiVectorArray_Serial(v, tf)
+
+def N_VEnableLinearCombinationVectorArray_Serial(v, tf):
+    return _kinsol.N_VEnableLinearCombinationVectorArray_Serial(v, tf)
+
+def N_VCloneVectorArray_Serial(count, w):
+    return _kinsol.N_VCloneVectorArray_Serial(count, w)
+
+def N_VCloneVectorArrayEmpty_Serial(count, w):
+    return _kinsol.N_VCloneVectorArrayEmpty_Serial(count, w)
+
+def N_VDestroyVectorArray_Serial(vs, count):
+    return _kinsol.N_VDestroyVectorArray_Serial(vs, count)
 SUNMATRIX_DENSE = _kinsol.SUNMATRIX_DENSE
 SUNMATRIX_MAGMADENSE = _kinsol.SUNMATRIX_MAGMADENSE
 SUNMATRIX_ONEMKLDENSE = _kinsol.SUNMATRIX_ONEMKLDENSE
@@ -746,283 +929,6 @@ SUNLS_PACKAGE_FAIL_REC = _kinsol.SUNLS_PACKAGE_FAIL_REC
 SUNLS_QRFACT_FAIL = _kinsol.SUNLS_QRFACT_FAIL
 SUNLS_LUFACT_FAIL = _kinsol.SUNLS_LUFACT_FAIL
 SUNLS_MSG_RESIDUAL = _kinsol.SUNLS_MSG_RESIDUAL
-SUNNONLINEARSOLVER_ROOTFIND = _kinsol.SUNNONLINEARSOLVER_ROOTFIND
-SUNNONLINEARSOLVER_FIXEDPOINT = _kinsol.SUNNONLINEARSOLVER_FIXEDPOINT
-class SUNNonlinearSolver_Ops(object):
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    gettype = property(_kinsol.SUNNonlinearSolver_Ops_gettype_get, _kinsol.SUNNonlinearSolver_Ops_gettype_set)
-    initialize = property(_kinsol.SUNNonlinearSolver_Ops_initialize_get, _kinsol.SUNNonlinearSolver_Ops_initialize_set)
-    setup = property(_kinsol.SUNNonlinearSolver_Ops_setup_get, _kinsol.SUNNonlinearSolver_Ops_setup_set)
-    solve = property(_kinsol.SUNNonlinearSolver_Ops_solve_get, _kinsol.SUNNonlinearSolver_Ops_solve_set)
-    free = property(_kinsol.SUNNonlinearSolver_Ops_free_get, _kinsol.SUNNonlinearSolver_Ops_free_set)
-    setsysfn = property(_kinsol.SUNNonlinearSolver_Ops_setsysfn_get, _kinsol.SUNNonlinearSolver_Ops_setsysfn_set)
-    setlsetupfn = property(_kinsol.SUNNonlinearSolver_Ops_setlsetupfn_get, _kinsol.SUNNonlinearSolver_Ops_setlsetupfn_set)
-    setlsolvefn = property(_kinsol.SUNNonlinearSolver_Ops_setlsolvefn_get, _kinsol.SUNNonlinearSolver_Ops_setlsolvefn_set)
-    setctestfn = property(_kinsol.SUNNonlinearSolver_Ops_setctestfn_get, _kinsol.SUNNonlinearSolver_Ops_setctestfn_set)
-    setmaxiters = property(_kinsol.SUNNonlinearSolver_Ops_setmaxiters_get, _kinsol.SUNNonlinearSolver_Ops_setmaxiters_set)
-    getnumiters = property(_kinsol.SUNNonlinearSolver_Ops_getnumiters_get, _kinsol.SUNNonlinearSolver_Ops_getnumiters_set)
-    getcuriter = property(_kinsol.SUNNonlinearSolver_Ops_getcuriter_get, _kinsol.SUNNonlinearSolver_Ops_getcuriter_set)
-    getnumconvfails = property(_kinsol.SUNNonlinearSolver_Ops_getnumconvfails_get, _kinsol.SUNNonlinearSolver_Ops_getnumconvfails_set)
-
-    def __init__(self):
-        _kinsol.SUNNonlinearSolver_Ops_swiginit(self, _kinsol.new_SUNNonlinearSolver_Ops())
-    __swig_destroy__ = _kinsol.delete_SUNNonlinearSolver_Ops
-
-# Register SUNNonlinearSolver_Ops in _kinsol:
-_kinsol.SUNNonlinearSolver_Ops_swigregister(SUNNonlinearSolver_Ops)
-
-class SUNNonlinearSolver(object):
-    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
-    __repr__ = _swig_repr
-    content = property(_kinsol.SUNNonlinearSolver_content_get, _kinsol.SUNNonlinearSolver_content_set)
-    ops = property(_kinsol.SUNNonlinearSolver_ops_get, _kinsol.SUNNonlinearSolver_ops_set)
-    sunctx = property(_kinsol.SUNNonlinearSolver_sunctx_get, _kinsol.SUNNonlinearSolver_sunctx_set)
-
-    def __init__(self):
-        _kinsol.SUNNonlinearSolver_swiginit(self, _kinsol.new_SUNNonlinearSolver())
-    __swig_destroy__ = _kinsol.delete_SUNNonlinearSolver
-
-# Register SUNNonlinearSolver in _kinsol:
-_kinsol.SUNNonlinearSolver_swigregister(SUNNonlinearSolver)
-
-
-def SUNNonlinSolNewEmpty(sunctx):
-    return _kinsol.SUNNonlinSolNewEmpty(sunctx)
-
-def SUNNonlinSolFreeEmpty(NLS):
-    return _kinsol.SUNNonlinSolFreeEmpty(NLS)
-
-def SUNNonlinSolGetType(NLS):
-    return _kinsol.SUNNonlinSolGetType(NLS)
-
-def SUNNonlinSolInitialize(NLS):
-    return _kinsol.SUNNonlinSolInitialize(NLS)
-
-def SUNNonlinSolSetup(NLS, y, mem):
-    return _kinsol.SUNNonlinSolSetup(NLS, y, mem)
-
-def SUNNonlinSolSolve(NLS, y0, y, w, tol, callLSetup, mem):
-    return _kinsol.SUNNonlinSolSolve(NLS, y0, y, w, tol, callLSetup, mem)
-
-def SUNNonlinSolFree(NLS):
-    return _kinsol.SUNNonlinSolFree(NLS)
-
-def SUNNonlinSolSetSysFn(NLS, SysFn):
-    return _kinsol.SUNNonlinSolSetSysFn(NLS, SysFn)
-
-def SUNNonlinSolSetLSetupFn(NLS, SetupFn):
-    return _kinsol.SUNNonlinSolSetLSetupFn(NLS, SetupFn)
-
-def SUNNonlinSolSetLSolveFn(NLS, SolveFn):
-    return _kinsol.SUNNonlinSolSetLSolveFn(NLS, SolveFn)
-
-def SUNNonlinSolSetConvTestFn(NLS, CTestFn, ctest_data):
-    return _kinsol.SUNNonlinSolSetConvTestFn(NLS, CTestFn, ctest_data)
-
-def SUNNonlinSolSetMaxIters(NLS, maxiters):
-    return _kinsol.SUNNonlinSolSetMaxIters(NLS, maxiters)
-
-def SUNNonlinSolGetNumIters(NLS, niters):
-    return _kinsol.SUNNonlinSolGetNumIters(NLS, niters)
-
-def SUNNonlinSolGetCurIter(NLS, iter):
-    return _kinsol.SUNNonlinSolGetCurIter(NLS, iter)
-
-def SUNNonlinSolGetNumConvFails(NLS, nconvfails):
-    return _kinsol.SUNNonlinSolGetNumConvFails(NLS, nconvfails)
-SUN_NLS_SUCCESS = _kinsol.SUN_NLS_SUCCESS
-SUN_NLS_CONTINUE = _kinsol.SUN_NLS_CONTINUE
-SUN_NLS_CONV_RECVR = _kinsol.SUN_NLS_CONV_RECVR
-SUN_NLS_MEM_NULL = _kinsol.SUN_NLS_MEM_NULL
-SUN_NLS_MEM_FAIL = _kinsol.SUN_NLS_MEM_FAIL
-SUN_NLS_ILL_INPUT = _kinsol.SUN_NLS_ILL_INPUT
-SUN_NLS_VECTOROP_ERR = _kinsol.SUN_NLS_VECTOROP_ERR
-SUN_NLS_EXT_FAIL = _kinsol.SUN_NLS_EXT_FAIL
-SUN_NLS_MSG_RESIDUAL = _kinsol.SUN_NLS_MSG_RESIDUAL
-
-def N_VNew_Serial(vec_length, sunctx):
-    return _kinsol.N_VNew_Serial(vec_length, sunctx)
-
-def N_VNewEmpty_Serial(vec_length, sunctx):
-    return _kinsol.N_VNewEmpty_Serial(vec_length, sunctx)
-
-def N_VMake_Serial(vec_length, sunctx):
-    return _kinsol.N_VMake_Serial(vec_length, sunctx)
-
-def N_VGetLength_Serial(v):
-    return _kinsol.N_VGetLength_Serial(v)
-
-def N_VPrint_Serial(v):
-    return _kinsol.N_VPrint_Serial(v)
-
-def N_VPrintFile_Serial(v, outfile):
-    return _kinsol.N_VPrintFile_Serial(v, outfile)
-
-def N_VGetVectorID_Serial(v):
-    return _kinsol.N_VGetVectorID_Serial(v)
-
-def N_VCloneEmpty_Serial(w):
-    return _kinsol.N_VCloneEmpty_Serial(w)
-
-def N_VClone_Serial(w):
-    return _kinsol.N_VClone_Serial(w)
-
-def N_VDestroy_Serial(v):
-    return _kinsol.N_VDestroy_Serial(v)
-
-def N_VSpace_Serial(v, lrw, liw):
-    return _kinsol.N_VSpace_Serial(v, lrw, liw)
-
-def N_VGetArrayPointer_Serial(v):
-    return _kinsol.N_VGetArrayPointer_Serial(v)
-
-def N_VSetArrayPointer_Serial(v_data, v):
-    return _kinsol.N_VSetArrayPointer_Serial(v_data, v)
-
-def N_VLinearSum_Serial(a, x, b, y, z):
-    return _kinsol.N_VLinearSum_Serial(a, x, b, y, z)
-
-def N_VConst_Serial(c, z):
-    return _kinsol.N_VConst_Serial(c, z)
-
-def N_VProd_Serial(x, y, z):
-    return _kinsol.N_VProd_Serial(x, y, z)
-
-def N_VDiv_Serial(x, y, z):
-    return _kinsol.N_VDiv_Serial(x, y, z)
-
-def N_VScale_Serial(c, x, z):
-    return _kinsol.N_VScale_Serial(c, x, z)
-
-def N_VAbs_Serial(x, z):
-    return _kinsol.N_VAbs_Serial(x, z)
-
-def N_VInv_Serial(x, z):
-    return _kinsol.N_VInv_Serial(x, z)
-
-def N_VAddConst_Serial(x, b, z):
-    return _kinsol.N_VAddConst_Serial(x, b, z)
-
-def N_VDotProd_Serial(x, y):
-    return _kinsol.N_VDotProd_Serial(x, y)
-
-def N_VMaxNorm_Serial(x):
-    return _kinsol.N_VMaxNorm_Serial(x)
-
-def N_VWrmsNorm_Serial(x, w):
-    return _kinsol.N_VWrmsNorm_Serial(x, w)
-
-def N_VWrmsNormMask_Serial(x, w, id):
-    return _kinsol.N_VWrmsNormMask_Serial(x, w, id)
-
-def N_VMin_Serial(x):
-    return _kinsol.N_VMin_Serial(x)
-
-def N_VWL2Norm_Serial(x, w):
-    return _kinsol.N_VWL2Norm_Serial(x, w)
-
-def N_VL1Norm_Serial(x):
-    return _kinsol.N_VL1Norm_Serial(x)
-
-def N_VCompare_Serial(c, x, z):
-    return _kinsol.N_VCompare_Serial(c, x, z)
-
-def N_VInvTest_Serial(x, z):
-    return _kinsol.N_VInvTest_Serial(x, z)
-
-def N_VConstrMask_Serial(c, x, m):
-    return _kinsol.N_VConstrMask_Serial(c, x, m)
-
-def N_VMinQuotient_Serial(num, denom):
-    return _kinsol.N_VMinQuotient_Serial(num, denom)
-
-def N_VLinearCombination_Serial(nvec, c, V, z):
-    return _kinsol.N_VLinearCombination_Serial(nvec, c, V, z)
-
-def N_VScaleAddMulti_Serial(nvec, a, x, Y, Z):
-    return _kinsol.N_VScaleAddMulti_Serial(nvec, a, x, Y, Z)
-
-def N_VDotProdMulti_Serial(nvec, x, Y, dotprods):
-    return _kinsol.N_VDotProdMulti_Serial(nvec, x, Y, dotprods)
-
-def N_VLinearSumVectorArray_Serial(nvec, a, X, b, Y, Z):
-    return _kinsol.N_VLinearSumVectorArray_Serial(nvec, a, X, b, Y, Z)
-
-def N_VScaleVectorArray_Serial(nvec, c, X, Z):
-    return _kinsol.N_VScaleVectorArray_Serial(nvec, c, X, Z)
-
-def N_VConstVectorArray_Serial(nvecs, c, Z):
-    return _kinsol.N_VConstVectorArray_Serial(nvecs, c, Z)
-
-def N_VWrmsNormVectorArray_Serial(nvecs, X, W, nrm):
-    return _kinsol.N_VWrmsNormVectorArray_Serial(nvecs, X, W, nrm)
-
-def N_VWrmsNormMaskVectorArray_Serial(nvecs, X, W, id, nrm):
-    return _kinsol.N_VWrmsNormMaskVectorArray_Serial(nvecs, X, W, id, nrm)
-
-def N_VScaleAddMultiVectorArray_Serial(nvec, nsum, a, X, Y, Z):
-    return _kinsol.N_VScaleAddMultiVectorArray_Serial(nvec, nsum, a, X, Y, Z)
-
-def N_VLinearCombinationVectorArray_Serial(nvec, nsum, c, X, Z):
-    return _kinsol.N_VLinearCombinationVectorArray_Serial(nvec, nsum, c, X, Z)
-
-def N_VWSqrSumLocal_Serial(x, w):
-    return _kinsol.N_VWSqrSumLocal_Serial(x, w)
-
-def N_VWSqrSumMaskLocal_Serial(x, w, id):
-    return _kinsol.N_VWSqrSumMaskLocal_Serial(x, w, id)
-
-def N_VBufSize_Serial(x, size):
-    return _kinsol.N_VBufSize_Serial(x, size)
-
-def N_VBufPack_Serial(x, buf):
-    return _kinsol.N_VBufPack_Serial(x, buf)
-
-def N_VBufUnpack_Serial(x, buf):
-    return _kinsol.N_VBufUnpack_Serial(x, buf)
-
-def N_VEnableFusedOps_Serial(v, tf):
-    return _kinsol.N_VEnableFusedOps_Serial(v, tf)
-
-def N_VEnableLinearCombination_Serial(v, tf):
-    return _kinsol.N_VEnableLinearCombination_Serial(v, tf)
-
-def N_VEnableScaleAddMulti_Serial(v, tf):
-    return _kinsol.N_VEnableScaleAddMulti_Serial(v, tf)
-
-def N_VEnableDotProdMulti_Serial(v, tf):
-    return _kinsol.N_VEnableDotProdMulti_Serial(v, tf)
-
-def N_VEnableLinearSumVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableLinearSumVectorArray_Serial(v, tf)
-
-def N_VEnableScaleVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableScaleVectorArray_Serial(v, tf)
-
-def N_VEnableConstVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableConstVectorArray_Serial(v, tf)
-
-def N_VEnableWrmsNormVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableWrmsNormVectorArray_Serial(v, tf)
-
-def N_VEnableWrmsNormMaskVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableWrmsNormMaskVectorArray_Serial(v, tf)
-
-def N_VEnableScaleAddMultiVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableScaleAddMultiVectorArray_Serial(v, tf)
-
-def N_VEnableLinearCombinationVectorArray_Serial(v, tf):
-    return _kinsol.N_VEnableLinearCombinationVectorArray_Serial(v, tf)
-
-def N_VCloneVectorArray_Serial(count, w):
-    return _kinsol.N_VCloneVectorArray_Serial(count, w)
-
-def N_VCloneVectorArrayEmpty_Serial(count, w):
-    return _kinsol.N_VCloneVectorArrayEmpty_Serial(count, w)
-
-def N_VDestroyVectorArray_Serial(vs, count):
-    return _kinsol.N_VDestroyVectorArray_Serial(vs, count)
 class _SUNLinearSolverContent_Dense(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
@@ -1548,6 +1454,100 @@ def SUNLinSolSetInfoFile_SPTFQMR(LS, info_file):
 
 def SUNLinSolSetPrintLevel_SPTFQMR(LS, print_level):
     return _kinsol.SUNLinSolSetPrintLevel_SPTFQMR(LS, print_level)
+SUNNONLINEARSOLVER_ROOTFIND = _kinsol.SUNNONLINEARSOLVER_ROOTFIND
+SUNNONLINEARSOLVER_FIXEDPOINT = _kinsol.SUNNONLINEARSOLVER_FIXEDPOINT
+class SUNNonlinearSolver_Ops(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    gettype = property(_kinsol.SUNNonlinearSolver_Ops_gettype_get, _kinsol.SUNNonlinearSolver_Ops_gettype_set)
+    initialize = property(_kinsol.SUNNonlinearSolver_Ops_initialize_get, _kinsol.SUNNonlinearSolver_Ops_initialize_set)
+    setup = property(_kinsol.SUNNonlinearSolver_Ops_setup_get, _kinsol.SUNNonlinearSolver_Ops_setup_set)
+    solve = property(_kinsol.SUNNonlinearSolver_Ops_solve_get, _kinsol.SUNNonlinearSolver_Ops_solve_set)
+    free = property(_kinsol.SUNNonlinearSolver_Ops_free_get, _kinsol.SUNNonlinearSolver_Ops_free_set)
+    setsysfn = property(_kinsol.SUNNonlinearSolver_Ops_setsysfn_get, _kinsol.SUNNonlinearSolver_Ops_setsysfn_set)
+    setlsetupfn = property(_kinsol.SUNNonlinearSolver_Ops_setlsetupfn_get, _kinsol.SUNNonlinearSolver_Ops_setlsetupfn_set)
+    setlsolvefn = property(_kinsol.SUNNonlinearSolver_Ops_setlsolvefn_get, _kinsol.SUNNonlinearSolver_Ops_setlsolvefn_set)
+    setctestfn = property(_kinsol.SUNNonlinearSolver_Ops_setctestfn_get, _kinsol.SUNNonlinearSolver_Ops_setctestfn_set)
+    setmaxiters = property(_kinsol.SUNNonlinearSolver_Ops_setmaxiters_get, _kinsol.SUNNonlinearSolver_Ops_setmaxiters_set)
+    getnumiters = property(_kinsol.SUNNonlinearSolver_Ops_getnumiters_get, _kinsol.SUNNonlinearSolver_Ops_getnumiters_set)
+    getcuriter = property(_kinsol.SUNNonlinearSolver_Ops_getcuriter_get, _kinsol.SUNNonlinearSolver_Ops_getcuriter_set)
+    getnumconvfails = property(_kinsol.SUNNonlinearSolver_Ops_getnumconvfails_get, _kinsol.SUNNonlinearSolver_Ops_getnumconvfails_set)
+
+    def __init__(self):
+        _kinsol.SUNNonlinearSolver_Ops_swiginit(self, _kinsol.new_SUNNonlinearSolver_Ops())
+    __swig_destroy__ = _kinsol.delete_SUNNonlinearSolver_Ops
+
+# Register SUNNonlinearSolver_Ops in _kinsol:
+_kinsol.SUNNonlinearSolver_Ops_swigregister(SUNNonlinearSolver_Ops)
+
+class SUNNonlinearSolver(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    content = property(_kinsol.SUNNonlinearSolver_content_get, _kinsol.SUNNonlinearSolver_content_set)
+    ops = property(_kinsol.SUNNonlinearSolver_ops_get, _kinsol.SUNNonlinearSolver_ops_set)
+    sunctx = property(_kinsol.SUNNonlinearSolver_sunctx_get, _kinsol.SUNNonlinearSolver_sunctx_set)
+
+    def __init__(self):
+        _kinsol.SUNNonlinearSolver_swiginit(self, _kinsol.new_SUNNonlinearSolver())
+    __swig_destroy__ = _kinsol.delete_SUNNonlinearSolver
+
+# Register SUNNonlinearSolver in _kinsol:
+_kinsol.SUNNonlinearSolver_swigregister(SUNNonlinearSolver)
+
+
+def SUNNonlinSolNewEmpty(sunctx):
+    return _kinsol.SUNNonlinSolNewEmpty(sunctx)
+
+def SUNNonlinSolFreeEmpty(NLS):
+    return _kinsol.SUNNonlinSolFreeEmpty(NLS)
+
+def SUNNonlinSolGetType(NLS):
+    return _kinsol.SUNNonlinSolGetType(NLS)
+
+def SUNNonlinSolInitialize(NLS):
+    return _kinsol.SUNNonlinSolInitialize(NLS)
+
+def SUNNonlinSolSetup(NLS, y, mem):
+    return _kinsol.SUNNonlinSolSetup(NLS, y, mem)
+
+def SUNNonlinSolSolve(NLS, y0, y, w, tol, callLSetup, mem):
+    return _kinsol.SUNNonlinSolSolve(NLS, y0, y, w, tol, callLSetup, mem)
+
+def SUNNonlinSolFree(NLS):
+    return _kinsol.SUNNonlinSolFree(NLS)
+
+def SUNNonlinSolSetSysFn(NLS, SysFn):
+    return _kinsol.SUNNonlinSolSetSysFn(NLS, SysFn)
+
+def SUNNonlinSolSetLSetupFn(NLS, SetupFn):
+    return _kinsol.SUNNonlinSolSetLSetupFn(NLS, SetupFn)
+
+def SUNNonlinSolSetLSolveFn(NLS, SolveFn):
+    return _kinsol.SUNNonlinSolSetLSolveFn(NLS, SolveFn)
+
+def SUNNonlinSolSetConvTestFn(NLS, CTestFn, ctest_data):
+    return _kinsol.SUNNonlinSolSetConvTestFn(NLS, CTestFn, ctest_data)
+
+def SUNNonlinSolSetMaxIters(NLS, maxiters):
+    return _kinsol.SUNNonlinSolSetMaxIters(NLS, maxiters)
+
+def SUNNonlinSolGetNumIters(NLS, niters):
+    return _kinsol.SUNNonlinSolGetNumIters(NLS, niters)
+
+def SUNNonlinSolGetCurIter(NLS, iter):
+    return _kinsol.SUNNonlinSolGetCurIter(NLS, iter)
+
+def SUNNonlinSolGetNumConvFails(NLS, nconvfails):
+    return _kinsol.SUNNonlinSolGetNumConvFails(NLS, nconvfails)
+SUN_NLS_SUCCESS = _kinsol.SUN_NLS_SUCCESS
+SUN_NLS_CONTINUE = _kinsol.SUN_NLS_CONTINUE
+SUN_NLS_CONV_RECVR = _kinsol.SUN_NLS_CONV_RECVR
+SUN_NLS_MEM_NULL = _kinsol.SUN_NLS_MEM_NULL
+SUN_NLS_MEM_FAIL = _kinsol.SUN_NLS_MEM_FAIL
+SUN_NLS_ILL_INPUT = _kinsol.SUN_NLS_ILL_INPUT
+SUN_NLS_VECTOROP_ERR = _kinsol.SUN_NLS_VECTOROP_ERR
+SUN_NLS_EXT_FAIL = _kinsol.SUN_NLS_EXT_FAIL
+SUN_NLS_MSG_RESIDUAL = _kinsol.SUN_NLS_MSG_RESIDUAL
 KIN_SUCCESS = _kinsol.KIN_SUCCESS
 KIN_INITIAL_GUESS_OK = _kinsol.KIN_INITIAL_GUESS_OK
 KIN_STEP_LT_STPTOL = _kinsol.KIN_STEP_LT_STPTOL
@@ -1794,18 +1794,21 @@ import ctypes
 # We provide the ctypes for all the callback functions in KINSol here as
 # a convenience to our users. They could always define it themselves too.
 class cfunctypes():
-  KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object)
-  KINErrHandlerFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object)
+  KINSysFn = [ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object),
+               _kinsol.KINPyRegister_KINPySysFn]
 
-def RegisterFn(py_callback, py_callback_type):
+  KINErrHandlerFn = [ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object),
+                     _kinsol.KINPyRegister_KINPyErrHandlerFn]
+
+
+
+def RegisterFn(py_callback, py_callback_tuple):
+  py_callback_type, kinpy_register_fn = py_callback_tuple
   f_in = py_callback_type(py_callback)
   f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
-
-  if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegister_KINPySysFn(f_in_ptr)
-  elif py_callback_type == cfunctypes.KINErrHandlerFn:
-    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_in_ptr)
-  else:
+  try:
+    return kinpy_register_fn(f_in_ptr)
+  except:
     raise ValueError("Unknown function type encountered")
 
 def RegisterNumbaFn(py_callback, py_callback_type):

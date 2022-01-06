@@ -28,6 +28,8 @@
 
 // include the header file in the swig wrapper
 %{
+#include "sundials/sundials_iterative.h"
+#include "sundials/sundials_linearsolver.h"
 #include "sunlinsol/sunlinsol_dense.h"
 #include "sunlinsol/sunlinsol_pcg.h"
 #include "sunlinsol/sunlinsol_spbcgs.h"
@@ -37,6 +39,8 @@
 %}
 
 // Process and wrap functions in the following files
+%include "sundials/sundials_iterative.h"
+%include "sundials/sundials_linearsolver.h"
 %include "sunlinsol/sunlinsol_dense.h"
 %include "sunlinsol/sunlinsol_pcg.h"
 %include "sunlinsol/sunlinsol_spbcgs.h"

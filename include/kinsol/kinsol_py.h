@@ -29,8 +29,7 @@ extern "C" {
     2. Add member for the new function pointer in the KINPyUserFunctionRegistry in kinsol_py.c.
     3. Add the director and register functions for the wrapper in kinsol_py.c.
     4. Add its ctype to cfunctypes class in kinsol.i.
-    5. Add it to the RegisterFn in kinsol.i.
-    6. Add it to the RegisterNumbaFn in kinsol.i.
+    5. Add it to kinsol_callbacks.i.
 */
 
 /*

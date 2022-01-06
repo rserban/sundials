@@ -21,10 +21,15 @@
 
 %nvector_impl(Serial)
 
+// Typemap for input arrays (e.g. this effects N_VMake functions)
+%apply (int DIM1, double* IN_ARRAY1) {(sunindextype vec_length, realtype *v_data)}
+
 // include the header file in the swig wrapper
 %{
+#include "sundials/sundials_nvector.h"
 #include "nvector/nvector_serial.h"
 %}
 
 // Process and wrap functions in the following files
+%include "sundials/sundials_nvector.h"
 %include "nvector/nvector_serial.h"
