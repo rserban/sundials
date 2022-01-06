@@ -53,16 +53,18 @@ SUNMatrix SUNMatNewEmpty(SUNContext sunctx)
   if (ops == NULL) { free(A); return(NULL); }
 
   /* initialize operations to NULL */
-  ops->getid       = NULL;
-  ops->clone       = NULL;
-  ops->destroy     = NULL;
-  ops->zero        = NULL;
-  ops->copy        = NULL;
-  ops->scaleadd    = NULL;
-  ops->scaleaddi   = NULL;
-  ops->matvecsetup = NULL;
-  ops->matvec      = NULL;
-  ops->space       = NULL;
+  ops->getid           = NULL;
+  ops->clone           = NULL;
+  ops->destroy         = NULL;
+  ops->zero            = NULL;
+  ops->copy            = NULL;
+  ops->scaleadd        = NULL;
+  ops->scaleaddi       = NULL;
+  ops->matvecsetup     = NULL;
+  ops->matvec          = NULL;
+  ops->space           = NULL;
+  ops->arrayview       = NULL;
+  ops->devicearrayview = NULL;
 
   /* attach ops and initialize content to NULL */
   A->ops     = ops;
@@ -102,16 +104,18 @@ int SUNMatCopyOps(SUNMatrix A, SUNMatrix B)
   if (A->ops == NULL || B->ops == NULL) return(-1);
 
   /* Copy ops from A to B */
-  B->ops->getid       = A->ops->getid;
-  B->ops->clone       = A->ops->clone;
-  B->ops->destroy     = A->ops->destroy;
-  B->ops->zero        = A->ops->zero;
-  B->ops->copy        = A->ops->copy;
-  B->ops->scaleadd    = A->ops->scaleadd;
-  B->ops->scaleaddi   = A->ops->scaleaddi;
-  B->ops->matvecsetup = A->ops->matvecsetup;
-  B->ops->matvec      = A->ops->matvec;
-  B->ops->space       = A->ops->space;
+  B->ops->getid           = A->ops->getid;
+  B->ops->clone           = A->ops->clone;
+  B->ops->destroy         = A->ops->destroy;
+  B->ops->zero            = A->ops->zero;
+  B->ops->copy            = A->ops->copy;
+  B->ops->scaleadd        = A->ops->scaleadd;
+  B->ops->scaleaddi       = A->ops->scaleaddi;
+  B->ops->matvecsetup     = A->ops->matvecsetup;
+  B->ops->matvec          = A->ops->matvec;
+  B->ops->space           = A->ops->space;
+  B->ops->arrayview       = A->ops->arrayview;
+  B->ops->devicearrayview = A->ops->devicearrayview;
 
   return(0);
 }
@@ -215,6 +219,36 @@ int SUNMatSpace(SUNMatrix A, long int *lenrw, long int *leniw)
   int ier;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(A));
   ier = A->ops->space(A, lenrw, leniw);
+  SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(A));
+  return(ier);
+}
+
+int SUNMatArrayView(SUNMatrix A, sunindextype* length, realtype** array)
+{
+  int ier;
+  SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(A));
+  if (A->ops->arrayview) {
+    ier = A->ops->arrayview(A, length, array);
+  } else {
+    *array = NULL;
+    *length = 0;
+    ier = 0;
+  }
+  SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(A));
+  return(ier);
+}
+
+int SUNMatDeviceArrayView(SUNMatrix A, sunindextype* length, realtype** array)
+{
+  int ier;
+  SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(A));
+  if (A->ops->devicearrayview) {
+    ier = A->ops->devicearrayview(A, length, array);
+  } else {
+    *array = NULL;
+    *length = 0;
+    ier = 0;
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(A));
   return(ier);
 }

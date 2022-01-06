@@ -91,6 +91,8 @@ struct _generic_SUNMatrix_Ops {
   int          (*matvecsetup)(SUNMatrix);
   int          (*matvec)(SUNMatrix, N_Vector, N_Vector);
   int          (*space)(SUNMatrix, long int*, long int*);
+  int          (*arrayview)(SUNMatrix, sunindextype* length, realtype** array);
+  int          (*devicearrayview)(SUNMatrix, sunindextype* length, realtype** array);
 };
 
 /* A matrix is a structure with an implementation-dependent
@@ -120,6 +122,8 @@ SUNDIALS_EXPORT int SUNMatScaleAddI(realtype c, SUNMatrix A);
 SUNDIALS_EXPORT int SUNMatMatvecSetup(SUNMatrix A);
 SUNDIALS_EXPORT int SUNMatMatvec(SUNMatrix A, N_Vector x, N_Vector y);
 SUNDIALS_EXPORT int SUNMatSpace(SUNMatrix A, long int *lenrw, long int *leniw);
+SUNDIALS_EXPORT int SUNMatArrayView(SUNMatrix A, sunindextype* length, realtype** array);
+SUNDIALS_EXPORT int SUNMatDeviceArrayView(SUNMatrix A, sunindextype* length, realtype** array);
 
 /*
  * -----------------------------------------------------------------

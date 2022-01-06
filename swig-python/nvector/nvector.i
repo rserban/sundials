@@ -14,8 +14,17 @@
 // Swig interface file
 // ---------------------------------------------------------------
 
-
 // Macro for creating an interface to an N_Vector
 %define %nvector_impl(TYPE)
   %ignore _N_VectorContent_## TYPE ##;
 %enddef
+
+%nvector_impl(Serial)
+
+// include the header file in the swig wrapper
+%{
+#include "nvector/nvector_serial.h"
+%}
+
+// Process and wrap functions in the following files
+%include "nvector/nvector_serial.h"

@@ -24,16 +24,28 @@
 extern "C" {
 #endif
 
+/* REMINDER: To make a new callback function usable from Python we must:
+    1. Add the definition for a wrapper function pointer here.
+    2. Add member for the new function pointer in the KINPyUserFunctionRegistry in kinsol_py.c.
+    3. Add the director and register functions for the wrapper in kinsol_py.c.
+    4. Add its ctype to cfunctypes class in kinsol.i.
+    5. Add it to the RegisterFn in kinsol.i.
+    6. Add it to the RegisterNumbaFn in kinsol.i.
+*/
+
+/*
+ * TODO: can we autogenerate the below??
+ */
+
 typedef int (*KINPySysFn)(realtype* uu, sunindextype uu_len, realtype* fval, sunindextype fval_len, void* user_data);
-SUNDIALS_EXPORT KINSysFn KINPyRegisterKINPySysFn(KINPySysFn f);
+SUNDIALS_EXPORT KINSysFn KINPyRegister_KINPySysFn(KINPySysFn f);
 
-// typedef void (*KINErrHandlerFn)(int error_code,
-//                                 const char *module, const char *function,
-//                                 char *msg, void *user_data);
-// SUNDIALS_EXPORT KINErrHandlerFn();
+typedef KINErrHandlerFn KINPyErrHandlerFn;
+SUNDIALS_EXPORT KINErrHandlerFn KINPyRegister_KINPyErrHandlerFn(KINPyErrHandlerFn f);
 
-// typedef void (*KINInfoHandlerFn)(const char *module, const char *function,
-//                                  char *msg, void *user_data);
+typedef KINInfoHandlerFn KINPyInfoHandlerFn;
+SUNDIALS_EXPORT KINInfoHandlerFn KINPyRegister_KINPyInfoHandlerFn(KINPyInfoHandlerFn f);
+
 
 #ifdef __cplusplus  /* wrapper to enable C++ usage */
 }

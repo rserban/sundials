@@ -62,18 +62,15 @@ import_array();
   $result = SWIG_Python_AppendOutput($result, PyLong_FromLong(*$1));
 }
 
-// A typemap for the callback, it expects the argument to be an integer
-// whose value is the address of an appropriate callback function
-%typemap(in) KINPySysFn {
-  $1 = (KINPySysFn)PyLong_AsVoidPtr($input);
-}
-
 // We need this typemap for KINSetUserData otherwise the type-safety check
 // that swig does will fail. One potential problem with this is that the
 // user data (a python) object could go out of scope and be deleted.
 // The user must make sure that the object is not out of scope before
 // KINSOL is done currently.
 %typemap(in) (void *user_data) {
+  $1 = (void *) $input;
+}
+%typemap(in) (void *eh_data) {
   $1 = (void *) $input;
 }
 
@@ -91,6 +88,18 @@ import_array();
   $1 = &argp1;
 }
 
+// A typemap for the callback, it expects the argument to be an integer
+// whose value is the address of an appropriate callback function
+%typemap(in) KINPySysFn {
+  $1 = (KINPySysFn)PyLong_AsVoidPtr($input);
+}
+
+// A typemap for the callback, it expects the argument to be an integer
+// whose value is the address of an appropriate callback function
+%typemap(in) KINPyErrHandlerFn {
+  $1 = (KINPyErrHandlerFn)PyLong_AsVoidPtr($input);
+}
+
 // Process definitions from these files
 %include "kinsol/kinsol.h"
 %include "kinsol/kinsol_py.h"
@@ -106,17 +115,28 @@ import ctypes
 # a convenience to our users. They could always define it themselves too.
 class cfunctypes():
   KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object)
+  KINErrHandlerFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object)
 
 def RegisterFn(py_callback, py_callback_type):
   f_in = py_callback_type(py_callback)
   f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+
   if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegisterKINPySysFn(f_in_ptr)
+    return _kinsol.KINPyRegister_KINPySysFn(f_in_ptr)
+  elif py_callback_type == cfunctypes.KINErrHandlerFn:
+    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_in_ptr)
+  else:
+    raise ValueError("Unknown function type encountered")
 
 def RegisterNumbaFn(py_callback, py_callback_type):
   f = py_callback.ctypes
   f_ptr = ctypes.cast(f, ctypes.c_void_p).value
 
   if py_callback_type == cfunctypes.KINSysFn:
-    return  _kinsol.KINPyRegisterKINPySysFn(f_ptr)
+    return _kinsol.KINPyRegister_KINPySysFn(f_ptr)
+  elif py_callback_type == cfunctypes.KINErrHandlerFn:
+    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_ptr)
+  else:
+    raise ValueError("Unknown function type encountered")
+
 %}

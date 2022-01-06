@@ -97,6 +97,13 @@ SUNDIALS_EXPORT int SUNMatScaleAddI_Dense(realtype c, SUNMatrix A);
 SUNDIALS_EXPORT int SUNMatMatvec_Dense(SUNMatrix A, N_Vector x, N_Vector y);
 SUNDIALS_EXPORT int SUNMatSpace_Dense(SUNMatrix A, long int *lenrw, long int *leniw);
 
+SUNDIALS_STATIC_INLINE int SUNMatArrayView_Dense(SUNMatrix A, sunindextype* length, realtype** array)
+{
+  *array = SUNDenseMatrix_Data(A);
+  *length = SUNDenseMatrix_LData(A);
+  return 0;
+}
+
 
 #ifdef __cplusplus
 }

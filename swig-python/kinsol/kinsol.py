@@ -415,6 +415,8 @@ class SUNMatrix_Ops(object):
     matvecsetup = property(_kinsol.SUNMatrix_Ops_matvecsetup_get, _kinsol.SUNMatrix_Ops_matvecsetup_set)
     matvec = property(_kinsol.SUNMatrix_Ops_matvec_get, _kinsol.SUNMatrix_Ops_matvec_set)
     space = property(_kinsol.SUNMatrix_Ops_space_get, _kinsol.SUNMatrix_Ops_space_set)
+    arrayview = property(_kinsol.SUNMatrix_Ops_arrayview_get, _kinsol.SUNMatrix_Ops_arrayview_set)
+    devicearrayview = property(_kinsol.SUNMatrix_Ops_devicearrayview_get, _kinsol.SUNMatrix_Ops_devicearrayview_set)
 
     def __init__(self):
         _kinsol.SUNMatrix_Ops_swiginit(self, _kinsol.new_SUNMatrix_Ops())
@@ -476,11 +478,87 @@ def SUNMatMatvec(A, x, y):
 
 def SUNMatSpace(A, lenrw, leniw):
     return _kinsol.SUNMatSpace(A, lenrw, leniw)
+
+def SUNMatArrayView(A):
+    return _kinsol.SUNMatArrayView(A)
+
+def SUNMatDeviceArrayView(A):
+    return _kinsol.SUNMatDeviceArrayView(A)
 SUNMAT_SUCCESS = _kinsol.SUNMAT_SUCCESS
 SUNMAT_ILL_INPUT = _kinsol.SUNMAT_ILL_INPUT
 SUNMAT_MEM_FAIL = _kinsol.SUNMAT_MEM_FAIL
 SUNMAT_OPERATION_FAIL = _kinsol.SUNMAT_OPERATION_FAIL
 SUNMAT_MATVEC_SETUP_REQUIRED = _kinsol.SUNMAT_MATVEC_SETUP_REQUIRED
+class _SUNMatrixContent_Dense(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    M = property(_kinsol._SUNMatrixContent_Dense_M_get, _kinsol._SUNMatrixContent_Dense_M_set)
+    N = property(_kinsol._SUNMatrixContent_Dense_N_get, _kinsol._SUNMatrixContent_Dense_N_set)
+    data = property(_kinsol._SUNMatrixContent_Dense_data_get, _kinsol._SUNMatrixContent_Dense_data_set)
+    ldata = property(_kinsol._SUNMatrixContent_Dense_ldata_get, _kinsol._SUNMatrixContent_Dense_ldata_set)
+    cols = property(_kinsol._SUNMatrixContent_Dense_cols_get, _kinsol._SUNMatrixContent_Dense_cols_set)
+
+    def __init__(self):
+        _kinsol._SUNMatrixContent_Dense_swiginit(self, _kinsol.new__SUNMatrixContent_Dense())
+    __swig_destroy__ = _kinsol.delete__SUNMatrixContent_Dense
+
+# Register _SUNMatrixContent_Dense in _kinsol:
+_kinsol._SUNMatrixContent_Dense_swigregister(_SUNMatrixContent_Dense)
+
+
+def SUNDenseMatrix(M, N, sunctx):
+    return _kinsol.SUNDenseMatrix(M, N, sunctx)
+
+def SUNDenseMatrix_Print(A, outfile):
+    return _kinsol.SUNDenseMatrix_Print(A, outfile)
+
+def SUNDenseMatrix_Rows(A):
+    return _kinsol.SUNDenseMatrix_Rows(A)
+
+def SUNDenseMatrix_Columns(A):
+    return _kinsol.SUNDenseMatrix_Columns(A)
+
+def SUNDenseMatrix_LData(A):
+    return _kinsol.SUNDenseMatrix_LData(A)
+
+def SUNDenseMatrix_Data(A):
+    return _kinsol.SUNDenseMatrix_Data(A)
+
+def SUNDenseMatrix_Cols(A):
+    return _kinsol.SUNDenseMatrix_Cols(A)
+
+def SUNDenseMatrix_Column(A, j):
+    return _kinsol.SUNDenseMatrix_Column(A, j)
+
+def SUNMatGetID_Dense(A):
+    return _kinsol.SUNMatGetID_Dense(A)
+
+def SUNMatClone_Dense(A):
+    return _kinsol.SUNMatClone_Dense(A)
+
+def SUNMatDestroy_Dense(A):
+    return _kinsol.SUNMatDestroy_Dense(A)
+
+def SUNMatZero_Dense(A):
+    return _kinsol.SUNMatZero_Dense(A)
+
+def SUNMatCopy_Dense(A, B):
+    return _kinsol.SUNMatCopy_Dense(A, B)
+
+def SUNMatScaleAdd_Dense(c, A, B):
+    return _kinsol.SUNMatScaleAdd_Dense(c, A, B)
+
+def SUNMatScaleAddI_Dense(c, A):
+    return _kinsol.SUNMatScaleAddI_Dense(c, A)
+
+def SUNMatMatvec_Dense(A, x, y):
+    return _kinsol.SUNMatMatvec_Dense(A, x, y)
+
+def SUNMatSpace_Dense(A, lenrw, leniw):
+    return _kinsol.SUNMatSpace_Dense(A, lenrw, leniw)
+
+def SUNMatArrayView_Dense(A):
+    return _kinsol.SUNMatArrayView_Dense(A)
 PREC_NONE = _kinsol.PREC_NONE
 PREC_LEFT = _kinsol.PREC_LEFT
 PREC_RIGHT = _kinsol.PREC_RIGHT
@@ -945,6 +1023,531 @@ def N_VCloneVectorArrayEmpty_Serial(count, w):
 
 def N_VDestroyVectorArray_Serial(vs, count):
     return _kinsol.N_VDestroyVectorArray_Serial(vs, count)
+class _SUNLinearSolverContent_Dense(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    N = property(_kinsol._SUNLinearSolverContent_Dense_N_get, _kinsol._SUNLinearSolverContent_Dense_N_set)
+    pivots = property(_kinsol._SUNLinearSolverContent_Dense_pivots_get, _kinsol._SUNLinearSolverContent_Dense_pivots_set)
+    last_flag = property(_kinsol._SUNLinearSolverContent_Dense_last_flag_get, _kinsol._SUNLinearSolverContent_Dense_last_flag_set)
+
+    def __init__(self):
+        _kinsol._SUNLinearSolverContent_Dense_swiginit(self, _kinsol.new__SUNLinearSolverContent_Dense())
+    __swig_destroy__ = _kinsol.delete__SUNLinearSolverContent_Dense
+
+# Register _SUNLinearSolverContent_Dense in _kinsol:
+_kinsol._SUNLinearSolverContent_Dense_swigregister(_SUNLinearSolverContent_Dense)
+
+
+def SUNLinSol_Dense(y, A, sunctx):
+    return _kinsol.SUNLinSol_Dense(y, A, sunctx)
+
+def SUNLinSolGetType_Dense(S):
+    return _kinsol.SUNLinSolGetType_Dense(S)
+
+def SUNLinSolGetID_Dense(S):
+    return _kinsol.SUNLinSolGetID_Dense(S)
+
+def SUNLinSolInitialize_Dense(S):
+    return _kinsol.SUNLinSolInitialize_Dense(S)
+
+def SUNLinSolSetup_Dense(S, A):
+    return _kinsol.SUNLinSolSetup_Dense(S, A)
+
+def SUNLinSolSolve_Dense(S, A, x, b, tol):
+    return _kinsol.SUNLinSolSolve_Dense(S, A, x, b, tol)
+
+def SUNLinSolLastFlag_Dense(S):
+    return _kinsol.SUNLinSolLastFlag_Dense(S)
+
+def SUNLinSolSpace_Dense(S, lenrwLS, leniwLS):
+    return _kinsol.SUNLinSolSpace_Dense(S, lenrwLS, leniwLS)
+
+def SUNLinSolFree_Dense(S):
+    return _kinsol.SUNLinSolFree_Dense(S)
+SUNPCG_MAXL_DEFAULT = _kinsol.SUNPCG_MAXL_DEFAULT
+class _SUNLinearSolverContent_PCG(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    maxl = property(_kinsol._SUNLinearSolverContent_PCG_maxl_get, _kinsol._SUNLinearSolverContent_PCG_maxl_set)
+    pretype = property(_kinsol._SUNLinearSolverContent_PCG_pretype_get, _kinsol._SUNLinearSolverContent_PCG_pretype_set)
+    zeroguess = property(_kinsol._SUNLinearSolverContent_PCG_zeroguess_get, _kinsol._SUNLinearSolverContent_PCG_zeroguess_set)
+    numiters = property(_kinsol._SUNLinearSolverContent_PCG_numiters_get, _kinsol._SUNLinearSolverContent_PCG_numiters_set)
+    resnorm = property(_kinsol._SUNLinearSolverContent_PCG_resnorm_get, _kinsol._SUNLinearSolverContent_PCG_resnorm_set)
+    last_flag = property(_kinsol._SUNLinearSolverContent_PCG_last_flag_get, _kinsol._SUNLinearSolverContent_PCG_last_flag_set)
+    ATimes = property(_kinsol._SUNLinearSolverContent_PCG_ATimes_get, _kinsol._SUNLinearSolverContent_PCG_ATimes_set)
+    ATData = property(_kinsol._SUNLinearSolverContent_PCG_ATData_get, _kinsol._SUNLinearSolverContent_PCG_ATData_set)
+    Psetup = property(_kinsol._SUNLinearSolverContent_PCG_Psetup_get, _kinsol._SUNLinearSolverContent_PCG_Psetup_set)
+    Psolve = property(_kinsol._SUNLinearSolverContent_PCG_Psolve_get, _kinsol._SUNLinearSolverContent_PCG_Psolve_set)
+    PData = property(_kinsol._SUNLinearSolverContent_PCG_PData_get, _kinsol._SUNLinearSolverContent_PCG_PData_set)
+    s = property(_kinsol._SUNLinearSolverContent_PCG_s_get, _kinsol._SUNLinearSolverContent_PCG_s_set)
+    r = property(_kinsol._SUNLinearSolverContent_PCG_r_get, _kinsol._SUNLinearSolverContent_PCG_r_set)
+    p = property(_kinsol._SUNLinearSolverContent_PCG_p_get, _kinsol._SUNLinearSolverContent_PCG_p_set)
+    z = property(_kinsol._SUNLinearSolverContent_PCG_z_get, _kinsol._SUNLinearSolverContent_PCG_z_set)
+    Ap = property(_kinsol._SUNLinearSolverContent_PCG_Ap_get, _kinsol._SUNLinearSolverContent_PCG_Ap_set)
+    print_level = property(_kinsol._SUNLinearSolverContent_PCG_print_level_get, _kinsol._SUNLinearSolverContent_PCG_print_level_set)
+    info_file = property(_kinsol._SUNLinearSolverContent_PCG_info_file_get, _kinsol._SUNLinearSolverContent_PCG_info_file_set)
+
+    def __init__(self):
+        _kinsol._SUNLinearSolverContent_PCG_swiginit(self, _kinsol.new__SUNLinearSolverContent_PCG())
+    __swig_destroy__ = _kinsol.delete__SUNLinearSolverContent_PCG
+
+# Register _SUNLinearSolverContent_PCG in _kinsol:
+_kinsol._SUNLinearSolverContent_PCG_swigregister(_SUNLinearSolverContent_PCG)
+
+
+def SUNLinSol_PCG(y, pretype, maxl, sunctx):
+    return _kinsol.SUNLinSol_PCG(y, pretype, maxl, sunctx)
+
+def SUNLinSol_PCGSetPrecType(S, pretype):
+    return _kinsol.SUNLinSol_PCGSetPrecType(S, pretype)
+
+def SUNLinSol_PCGSetMaxl(S, maxl):
+    return _kinsol.SUNLinSol_PCGSetMaxl(S, maxl)
+
+def SUNLinSolGetType_PCG(S):
+    return _kinsol.SUNLinSolGetType_PCG(S)
+
+def SUNLinSolGetID_PCG(S):
+    return _kinsol.SUNLinSolGetID_PCG(S)
+
+def SUNLinSolInitialize_PCG(S):
+    return _kinsol.SUNLinSolInitialize_PCG(S)
+
+def SUNLinSolSetATimes_PCG(S, A_data, ATimes):
+    return _kinsol.SUNLinSolSetATimes_PCG(S, A_data, ATimes)
+
+def SUNLinSolSetPreconditioner_PCG(S, P_data, Pset, Psol):
+    return _kinsol.SUNLinSolSetPreconditioner_PCG(S, P_data, Pset, Psol)
+
+def SUNLinSolSetScalingVectors_PCG(S, s, nul):
+    return _kinsol.SUNLinSolSetScalingVectors_PCG(S, s, nul)
+
+def SUNLinSolSetZeroGuess_PCG(S, onoff):
+    return _kinsol.SUNLinSolSetZeroGuess_PCG(S, onoff)
+
+def SUNLinSolSetup_PCG(S, nul):
+    return _kinsol.SUNLinSolSetup_PCG(S, nul)
+
+def SUNLinSolSolve_PCG(S, nul, x, b, tol):
+    return _kinsol.SUNLinSolSolve_PCG(S, nul, x, b, tol)
+
+def SUNLinSolNumIters_PCG(S):
+    return _kinsol.SUNLinSolNumIters_PCG(S)
+
+def SUNLinSolResNorm_PCG(S):
+    return _kinsol.SUNLinSolResNorm_PCG(S)
+
+def SUNLinSolResid_PCG(S):
+    return _kinsol.SUNLinSolResid_PCG(S)
+
+def SUNLinSolLastFlag_PCG(S):
+    return _kinsol.SUNLinSolLastFlag_PCG(S)
+
+def SUNLinSolSpace_PCG(S, lenrwLS, leniwLS):
+    return _kinsol.SUNLinSolSpace_PCG(S, lenrwLS, leniwLS)
+
+def SUNLinSolFree_PCG(S):
+    return _kinsol.SUNLinSolFree_PCG(S)
+
+def SUNLinSolSetInfoFile_PCG(LS, info_file):
+    return _kinsol.SUNLinSolSetInfoFile_PCG(LS, info_file)
+
+def SUNLinSolSetPrintLevel_PCG(LS, print_level):
+    return _kinsol.SUNLinSolSetPrintLevel_PCG(LS, print_level)
+SUNSPBCGS_MAXL_DEFAULT = _kinsol.SUNSPBCGS_MAXL_DEFAULT
+class _SUNLinearSolverContent_SPBCGS(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    maxl = property(_kinsol._SUNLinearSolverContent_SPBCGS_maxl_get, _kinsol._SUNLinearSolverContent_SPBCGS_maxl_set)
+    pretype = property(_kinsol._SUNLinearSolverContent_SPBCGS_pretype_get, _kinsol._SUNLinearSolverContent_SPBCGS_pretype_set)
+    zeroguess = property(_kinsol._SUNLinearSolverContent_SPBCGS_zeroguess_get, _kinsol._SUNLinearSolverContent_SPBCGS_zeroguess_set)
+    numiters = property(_kinsol._SUNLinearSolverContent_SPBCGS_numiters_get, _kinsol._SUNLinearSolverContent_SPBCGS_numiters_set)
+    resnorm = property(_kinsol._SUNLinearSolverContent_SPBCGS_resnorm_get, _kinsol._SUNLinearSolverContent_SPBCGS_resnorm_set)
+    last_flag = property(_kinsol._SUNLinearSolverContent_SPBCGS_last_flag_get, _kinsol._SUNLinearSolverContent_SPBCGS_last_flag_set)
+    ATimes = property(_kinsol._SUNLinearSolverContent_SPBCGS_ATimes_get, _kinsol._SUNLinearSolverContent_SPBCGS_ATimes_set)
+    ATData = property(_kinsol._SUNLinearSolverContent_SPBCGS_ATData_get, _kinsol._SUNLinearSolverContent_SPBCGS_ATData_set)
+    Psetup = property(_kinsol._SUNLinearSolverContent_SPBCGS_Psetup_get, _kinsol._SUNLinearSolverContent_SPBCGS_Psetup_set)
+    Psolve = property(_kinsol._SUNLinearSolverContent_SPBCGS_Psolve_get, _kinsol._SUNLinearSolverContent_SPBCGS_Psolve_set)
+    PData = property(_kinsol._SUNLinearSolverContent_SPBCGS_PData_get, _kinsol._SUNLinearSolverContent_SPBCGS_PData_set)
+    s1 = property(_kinsol._SUNLinearSolverContent_SPBCGS_s1_get, _kinsol._SUNLinearSolverContent_SPBCGS_s1_set)
+    s2 = property(_kinsol._SUNLinearSolverContent_SPBCGS_s2_get, _kinsol._SUNLinearSolverContent_SPBCGS_s2_set)
+    r = property(_kinsol._SUNLinearSolverContent_SPBCGS_r_get, _kinsol._SUNLinearSolverContent_SPBCGS_r_set)
+    r_star = property(_kinsol._SUNLinearSolverContent_SPBCGS_r_star_get, _kinsol._SUNLinearSolverContent_SPBCGS_r_star_set)
+    p = property(_kinsol._SUNLinearSolverContent_SPBCGS_p_get, _kinsol._SUNLinearSolverContent_SPBCGS_p_set)
+    q = property(_kinsol._SUNLinearSolverContent_SPBCGS_q_get, _kinsol._SUNLinearSolverContent_SPBCGS_q_set)
+    u = property(_kinsol._SUNLinearSolverContent_SPBCGS_u_get, _kinsol._SUNLinearSolverContent_SPBCGS_u_set)
+    Ap = property(_kinsol._SUNLinearSolverContent_SPBCGS_Ap_get, _kinsol._SUNLinearSolverContent_SPBCGS_Ap_set)
+    vtemp = property(_kinsol._SUNLinearSolverContent_SPBCGS_vtemp_get, _kinsol._SUNLinearSolverContent_SPBCGS_vtemp_set)
+    print_level = property(_kinsol._SUNLinearSolverContent_SPBCGS_print_level_get, _kinsol._SUNLinearSolverContent_SPBCGS_print_level_set)
+    info_file = property(_kinsol._SUNLinearSolverContent_SPBCGS_info_file_get, _kinsol._SUNLinearSolverContent_SPBCGS_info_file_set)
+
+    def __init__(self):
+        _kinsol._SUNLinearSolverContent_SPBCGS_swiginit(self, _kinsol.new__SUNLinearSolverContent_SPBCGS())
+    __swig_destroy__ = _kinsol.delete__SUNLinearSolverContent_SPBCGS
+
+# Register _SUNLinearSolverContent_SPBCGS in _kinsol:
+_kinsol._SUNLinearSolverContent_SPBCGS_swigregister(_SUNLinearSolverContent_SPBCGS)
+
+
+def SUNLinSol_SPBCGS(y, pretype, maxl, sunctx):
+    return _kinsol.SUNLinSol_SPBCGS(y, pretype, maxl, sunctx)
+
+def SUNLinSol_SPBCGSSetPrecType(S, pretype):
+    return _kinsol.SUNLinSol_SPBCGSSetPrecType(S, pretype)
+
+def SUNLinSol_SPBCGSSetMaxl(S, maxl):
+    return _kinsol.SUNLinSol_SPBCGSSetMaxl(S, maxl)
+
+def SUNLinSolGetType_SPBCGS(S):
+    return _kinsol.SUNLinSolGetType_SPBCGS(S)
+
+def SUNLinSolGetID_SPBCGS(S):
+    return _kinsol.SUNLinSolGetID_SPBCGS(S)
+
+def SUNLinSolInitialize_SPBCGS(S):
+    return _kinsol.SUNLinSolInitialize_SPBCGS(S)
+
+def SUNLinSolSetATimes_SPBCGS(S, A_data, ATimes):
+    return _kinsol.SUNLinSolSetATimes_SPBCGS(S, A_data, ATimes)
+
+def SUNLinSolSetPreconditioner_SPBCGS(S, P_data, Pset, Psol):
+    return _kinsol.SUNLinSolSetPreconditioner_SPBCGS(S, P_data, Pset, Psol)
+
+def SUNLinSolSetScalingVectors_SPBCGS(S, s1, s2):
+    return _kinsol.SUNLinSolSetScalingVectors_SPBCGS(S, s1, s2)
+
+def SUNLinSolSetZeroGuess_SPBCGS(S, onoff):
+    return _kinsol.SUNLinSolSetZeroGuess_SPBCGS(S, onoff)
+
+def SUNLinSolSetup_SPBCGS(S, A):
+    return _kinsol.SUNLinSolSetup_SPBCGS(S, A)
+
+def SUNLinSolSolve_SPBCGS(S, A, x, b, tol):
+    return _kinsol.SUNLinSolSolve_SPBCGS(S, A, x, b, tol)
+
+def SUNLinSolNumIters_SPBCGS(S):
+    return _kinsol.SUNLinSolNumIters_SPBCGS(S)
+
+def SUNLinSolResNorm_SPBCGS(S):
+    return _kinsol.SUNLinSolResNorm_SPBCGS(S)
+
+def SUNLinSolResid_SPBCGS(S):
+    return _kinsol.SUNLinSolResid_SPBCGS(S)
+
+def SUNLinSolLastFlag_SPBCGS(S):
+    return _kinsol.SUNLinSolLastFlag_SPBCGS(S)
+
+def SUNLinSolSpace_SPBCGS(S, lenrwLS, leniwLS):
+    return _kinsol.SUNLinSolSpace_SPBCGS(S, lenrwLS, leniwLS)
+
+def SUNLinSolFree_SPBCGS(S):
+    return _kinsol.SUNLinSolFree_SPBCGS(S)
+
+def SUNLinSolSetInfoFile_SPBCGS(S, info_file):
+    return _kinsol.SUNLinSolSetInfoFile_SPBCGS(S, info_file)
+
+def SUNLinSolSetPrintLevel_SPBCGS(S, print_level):
+    return _kinsol.SUNLinSolSetPrintLevel_SPBCGS(S, print_level)
+SUNSPFGMR_MAXL_DEFAULT = _kinsol.SUNSPFGMR_MAXL_DEFAULT
+SUNSPFGMR_MAXRS_DEFAULT = _kinsol.SUNSPFGMR_MAXRS_DEFAULT
+class _SUNLinearSolverContent_SPFGMR(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    maxl = property(_kinsol._SUNLinearSolverContent_SPFGMR_maxl_get, _kinsol._SUNLinearSolverContent_SPFGMR_maxl_set)
+    pretype = property(_kinsol._SUNLinearSolverContent_SPFGMR_pretype_get, _kinsol._SUNLinearSolverContent_SPFGMR_pretype_set)
+    gstype = property(_kinsol._SUNLinearSolverContent_SPFGMR_gstype_get, _kinsol._SUNLinearSolverContent_SPFGMR_gstype_set)
+    max_restarts = property(_kinsol._SUNLinearSolverContent_SPFGMR_max_restarts_get, _kinsol._SUNLinearSolverContent_SPFGMR_max_restarts_set)
+    zeroguess = property(_kinsol._SUNLinearSolverContent_SPFGMR_zeroguess_get, _kinsol._SUNLinearSolverContent_SPFGMR_zeroguess_set)
+    numiters = property(_kinsol._SUNLinearSolverContent_SPFGMR_numiters_get, _kinsol._SUNLinearSolverContent_SPFGMR_numiters_set)
+    resnorm = property(_kinsol._SUNLinearSolverContent_SPFGMR_resnorm_get, _kinsol._SUNLinearSolverContent_SPFGMR_resnorm_set)
+    last_flag = property(_kinsol._SUNLinearSolverContent_SPFGMR_last_flag_get, _kinsol._SUNLinearSolverContent_SPFGMR_last_flag_set)
+    ATimes = property(_kinsol._SUNLinearSolverContent_SPFGMR_ATimes_get, _kinsol._SUNLinearSolverContent_SPFGMR_ATimes_set)
+    ATData = property(_kinsol._SUNLinearSolverContent_SPFGMR_ATData_get, _kinsol._SUNLinearSolverContent_SPFGMR_ATData_set)
+    Psetup = property(_kinsol._SUNLinearSolverContent_SPFGMR_Psetup_get, _kinsol._SUNLinearSolverContent_SPFGMR_Psetup_set)
+    Psolve = property(_kinsol._SUNLinearSolverContent_SPFGMR_Psolve_get, _kinsol._SUNLinearSolverContent_SPFGMR_Psolve_set)
+    PData = property(_kinsol._SUNLinearSolverContent_SPFGMR_PData_get, _kinsol._SUNLinearSolverContent_SPFGMR_PData_set)
+    s1 = property(_kinsol._SUNLinearSolverContent_SPFGMR_s1_get, _kinsol._SUNLinearSolverContent_SPFGMR_s1_set)
+    s2 = property(_kinsol._SUNLinearSolverContent_SPFGMR_s2_get, _kinsol._SUNLinearSolverContent_SPFGMR_s2_set)
+    V = property(_kinsol._SUNLinearSolverContent_SPFGMR_V_get, _kinsol._SUNLinearSolverContent_SPFGMR_V_set)
+    Z = property(_kinsol._SUNLinearSolverContent_SPFGMR_Z_get, _kinsol._SUNLinearSolverContent_SPFGMR_Z_set)
+    Hes = property(_kinsol._SUNLinearSolverContent_SPFGMR_Hes_get, _kinsol._SUNLinearSolverContent_SPFGMR_Hes_set)
+    givens = property(_kinsol._SUNLinearSolverContent_SPFGMR_givens_get, _kinsol._SUNLinearSolverContent_SPFGMR_givens_set)
+    xcor = property(_kinsol._SUNLinearSolverContent_SPFGMR_xcor_get, _kinsol._SUNLinearSolverContent_SPFGMR_xcor_set)
+    yg = property(_kinsol._SUNLinearSolverContent_SPFGMR_yg_get, _kinsol._SUNLinearSolverContent_SPFGMR_yg_set)
+    vtemp = property(_kinsol._SUNLinearSolverContent_SPFGMR_vtemp_get, _kinsol._SUNLinearSolverContent_SPFGMR_vtemp_set)
+    cv = property(_kinsol._SUNLinearSolverContent_SPFGMR_cv_get, _kinsol._SUNLinearSolverContent_SPFGMR_cv_set)
+    Xv = property(_kinsol._SUNLinearSolverContent_SPFGMR_Xv_get, _kinsol._SUNLinearSolverContent_SPFGMR_Xv_set)
+    print_level = property(_kinsol._SUNLinearSolverContent_SPFGMR_print_level_get, _kinsol._SUNLinearSolverContent_SPFGMR_print_level_set)
+    info_file = property(_kinsol._SUNLinearSolverContent_SPFGMR_info_file_get, _kinsol._SUNLinearSolverContent_SPFGMR_info_file_set)
+
+    def __init__(self):
+        _kinsol._SUNLinearSolverContent_SPFGMR_swiginit(self, _kinsol.new__SUNLinearSolverContent_SPFGMR())
+    __swig_destroy__ = _kinsol.delete__SUNLinearSolverContent_SPFGMR
+
+# Register _SUNLinearSolverContent_SPFGMR in _kinsol:
+_kinsol._SUNLinearSolverContent_SPFGMR_swigregister(_SUNLinearSolverContent_SPFGMR)
+
+
+def SUNLinSol_SPFGMR(y, pretype, maxl, sunctx):
+    return _kinsol.SUNLinSol_SPFGMR(y, pretype, maxl, sunctx)
+
+def SUNLinSol_SPFGMRSetPrecType(S, pretype):
+    return _kinsol.SUNLinSol_SPFGMRSetPrecType(S, pretype)
+
+def SUNLinSol_SPFGMRSetGSType(S, gstype):
+    return _kinsol.SUNLinSol_SPFGMRSetGSType(S, gstype)
+
+def SUNLinSol_SPFGMRSetMaxRestarts(S, maxrs):
+    return _kinsol.SUNLinSol_SPFGMRSetMaxRestarts(S, maxrs)
+
+def SUNLinSolGetType_SPFGMR(S):
+    return _kinsol.SUNLinSolGetType_SPFGMR(S)
+
+def SUNLinSolGetID_SPFGMR(S):
+    return _kinsol.SUNLinSolGetID_SPFGMR(S)
+
+def SUNLinSolInitialize_SPFGMR(S):
+    return _kinsol.SUNLinSolInitialize_SPFGMR(S)
+
+def SUNLinSolSetATimes_SPFGMR(S, A_data, ATimes):
+    return _kinsol.SUNLinSolSetATimes_SPFGMR(S, A_data, ATimes)
+
+def SUNLinSolSetPreconditioner_SPFGMR(S, P_data, Pset, Psol):
+    return _kinsol.SUNLinSolSetPreconditioner_SPFGMR(S, P_data, Pset, Psol)
+
+def SUNLinSolSetScalingVectors_SPFGMR(S, s1, s2):
+    return _kinsol.SUNLinSolSetScalingVectors_SPFGMR(S, s1, s2)
+
+def SUNLinSolSetZeroGuess_SPFGMR(S, onoff):
+    return _kinsol.SUNLinSolSetZeroGuess_SPFGMR(S, onoff)
+
+def SUNLinSolSetup_SPFGMR(S, A):
+    return _kinsol.SUNLinSolSetup_SPFGMR(S, A)
+
+def SUNLinSolSolve_SPFGMR(S, A, x, b, tol):
+    return _kinsol.SUNLinSolSolve_SPFGMR(S, A, x, b, tol)
+
+def SUNLinSolNumIters_SPFGMR(S):
+    return _kinsol.SUNLinSolNumIters_SPFGMR(S)
+
+def SUNLinSolResNorm_SPFGMR(S):
+    return _kinsol.SUNLinSolResNorm_SPFGMR(S)
+
+def SUNLinSolResid_SPFGMR(S):
+    return _kinsol.SUNLinSolResid_SPFGMR(S)
+
+def SUNLinSolLastFlag_SPFGMR(S):
+    return _kinsol.SUNLinSolLastFlag_SPFGMR(S)
+
+def SUNLinSolSpace_SPFGMR(S, lenrwLS, leniwLS):
+    return _kinsol.SUNLinSolSpace_SPFGMR(S, lenrwLS, leniwLS)
+
+def SUNLinSolFree_SPFGMR(S):
+    return _kinsol.SUNLinSolFree_SPFGMR(S)
+
+def SUNLinSolSetInfoFile_SPFGMR(LS, info_file):
+    return _kinsol.SUNLinSolSetInfoFile_SPFGMR(LS, info_file)
+
+def SUNLinSolSetPrintLevel_SPFGMR(LS, print_level):
+    return _kinsol.SUNLinSolSetPrintLevel_SPFGMR(LS, print_level)
+SUNSPGMR_MAXL_DEFAULT = _kinsol.SUNSPGMR_MAXL_DEFAULT
+SUNSPGMR_MAXRS_DEFAULT = _kinsol.SUNSPGMR_MAXRS_DEFAULT
+class _SUNLinearSolverContent_SPGMR(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    maxl = property(_kinsol._SUNLinearSolverContent_SPGMR_maxl_get, _kinsol._SUNLinearSolverContent_SPGMR_maxl_set)
+    pretype = property(_kinsol._SUNLinearSolverContent_SPGMR_pretype_get, _kinsol._SUNLinearSolverContent_SPGMR_pretype_set)
+    gstype = property(_kinsol._SUNLinearSolverContent_SPGMR_gstype_get, _kinsol._SUNLinearSolverContent_SPGMR_gstype_set)
+    max_restarts = property(_kinsol._SUNLinearSolverContent_SPGMR_max_restarts_get, _kinsol._SUNLinearSolverContent_SPGMR_max_restarts_set)
+    zeroguess = property(_kinsol._SUNLinearSolverContent_SPGMR_zeroguess_get, _kinsol._SUNLinearSolverContent_SPGMR_zeroguess_set)
+    numiters = property(_kinsol._SUNLinearSolverContent_SPGMR_numiters_get, _kinsol._SUNLinearSolverContent_SPGMR_numiters_set)
+    resnorm = property(_kinsol._SUNLinearSolverContent_SPGMR_resnorm_get, _kinsol._SUNLinearSolverContent_SPGMR_resnorm_set)
+    last_flag = property(_kinsol._SUNLinearSolverContent_SPGMR_last_flag_get, _kinsol._SUNLinearSolverContent_SPGMR_last_flag_set)
+    ATimes = property(_kinsol._SUNLinearSolverContent_SPGMR_ATimes_get, _kinsol._SUNLinearSolverContent_SPGMR_ATimes_set)
+    ATData = property(_kinsol._SUNLinearSolverContent_SPGMR_ATData_get, _kinsol._SUNLinearSolverContent_SPGMR_ATData_set)
+    Psetup = property(_kinsol._SUNLinearSolverContent_SPGMR_Psetup_get, _kinsol._SUNLinearSolverContent_SPGMR_Psetup_set)
+    Psolve = property(_kinsol._SUNLinearSolverContent_SPGMR_Psolve_get, _kinsol._SUNLinearSolverContent_SPGMR_Psolve_set)
+    PData = property(_kinsol._SUNLinearSolverContent_SPGMR_PData_get, _kinsol._SUNLinearSolverContent_SPGMR_PData_set)
+    s1 = property(_kinsol._SUNLinearSolverContent_SPGMR_s1_get, _kinsol._SUNLinearSolverContent_SPGMR_s1_set)
+    s2 = property(_kinsol._SUNLinearSolverContent_SPGMR_s2_get, _kinsol._SUNLinearSolverContent_SPGMR_s2_set)
+    V = property(_kinsol._SUNLinearSolverContent_SPGMR_V_get, _kinsol._SUNLinearSolverContent_SPGMR_V_set)
+    Hes = property(_kinsol._SUNLinearSolverContent_SPGMR_Hes_get, _kinsol._SUNLinearSolverContent_SPGMR_Hes_set)
+    givens = property(_kinsol._SUNLinearSolverContent_SPGMR_givens_get, _kinsol._SUNLinearSolverContent_SPGMR_givens_set)
+    xcor = property(_kinsol._SUNLinearSolverContent_SPGMR_xcor_get, _kinsol._SUNLinearSolverContent_SPGMR_xcor_set)
+    yg = property(_kinsol._SUNLinearSolverContent_SPGMR_yg_get, _kinsol._SUNLinearSolverContent_SPGMR_yg_set)
+    vtemp = property(_kinsol._SUNLinearSolverContent_SPGMR_vtemp_get, _kinsol._SUNLinearSolverContent_SPGMR_vtemp_set)
+    cv = property(_kinsol._SUNLinearSolverContent_SPGMR_cv_get, _kinsol._SUNLinearSolverContent_SPGMR_cv_set)
+    Xv = property(_kinsol._SUNLinearSolverContent_SPGMR_Xv_get, _kinsol._SUNLinearSolverContent_SPGMR_Xv_set)
+    print_level = property(_kinsol._SUNLinearSolverContent_SPGMR_print_level_get, _kinsol._SUNLinearSolverContent_SPGMR_print_level_set)
+    info_file = property(_kinsol._SUNLinearSolverContent_SPGMR_info_file_get, _kinsol._SUNLinearSolverContent_SPGMR_info_file_set)
+
+    def __init__(self):
+        _kinsol._SUNLinearSolverContent_SPGMR_swiginit(self, _kinsol.new__SUNLinearSolverContent_SPGMR())
+    __swig_destroy__ = _kinsol.delete__SUNLinearSolverContent_SPGMR
+
+# Register _SUNLinearSolverContent_SPGMR in _kinsol:
+_kinsol._SUNLinearSolverContent_SPGMR_swigregister(_SUNLinearSolverContent_SPGMR)
+
+
+def SUNLinSol_SPGMR(y, pretype, maxl, sunctx):
+    return _kinsol.SUNLinSol_SPGMR(y, pretype, maxl, sunctx)
+
+def SUNLinSol_SPGMRSetPrecType(S, pretype):
+    return _kinsol.SUNLinSol_SPGMRSetPrecType(S, pretype)
+
+def SUNLinSol_SPGMRSetGSType(S, gstype):
+    return _kinsol.SUNLinSol_SPGMRSetGSType(S, gstype)
+
+def SUNLinSol_SPGMRSetMaxRestarts(S, maxrs):
+    return _kinsol.SUNLinSol_SPGMRSetMaxRestarts(S, maxrs)
+
+def SUNLinSolGetType_SPGMR(S):
+    return _kinsol.SUNLinSolGetType_SPGMR(S)
+
+def SUNLinSolGetID_SPGMR(S):
+    return _kinsol.SUNLinSolGetID_SPGMR(S)
+
+def SUNLinSolInitialize_SPGMR(S):
+    return _kinsol.SUNLinSolInitialize_SPGMR(S)
+
+def SUNLinSolSetATimes_SPGMR(S, A_data, ATimes):
+    return _kinsol.SUNLinSolSetATimes_SPGMR(S, A_data, ATimes)
+
+def SUNLinSolSetPreconditioner_SPGMR(S, P_data, Pset, Psol):
+    return _kinsol.SUNLinSolSetPreconditioner_SPGMR(S, P_data, Pset, Psol)
+
+def SUNLinSolSetScalingVectors_SPGMR(S, s1, s2):
+    return _kinsol.SUNLinSolSetScalingVectors_SPGMR(S, s1, s2)
+
+def SUNLinSolSetZeroGuess_SPGMR(S, onff):
+    return _kinsol.SUNLinSolSetZeroGuess_SPGMR(S, onff)
+
+def SUNLinSolSetup_SPGMR(S, A):
+    return _kinsol.SUNLinSolSetup_SPGMR(S, A)
+
+def SUNLinSolSolve_SPGMR(S, A, x, b, tol):
+    return _kinsol.SUNLinSolSolve_SPGMR(S, A, x, b, tol)
+
+def SUNLinSolNumIters_SPGMR(S):
+    return _kinsol.SUNLinSolNumIters_SPGMR(S)
+
+def SUNLinSolResNorm_SPGMR(S):
+    return _kinsol.SUNLinSolResNorm_SPGMR(S)
+
+def SUNLinSolResid_SPGMR(S):
+    return _kinsol.SUNLinSolResid_SPGMR(S)
+
+def SUNLinSolLastFlag_SPGMR(S):
+    return _kinsol.SUNLinSolLastFlag_SPGMR(S)
+
+def SUNLinSolSpace_SPGMR(S, lenrwLS, leniwLS):
+    return _kinsol.SUNLinSolSpace_SPGMR(S, lenrwLS, leniwLS)
+
+def SUNLinSolFree_SPGMR(S):
+    return _kinsol.SUNLinSolFree_SPGMR(S)
+
+def SUNLinSolSetInfoFile_SPGMR(LS, info_file):
+    return _kinsol.SUNLinSolSetInfoFile_SPGMR(LS, info_file)
+
+def SUNLinSolSetPrintLevel_SPGMR(LS, print_level):
+    return _kinsol.SUNLinSolSetPrintLevel_SPGMR(LS, print_level)
+SUNSPTFQMR_MAXL_DEFAULT = _kinsol.SUNSPTFQMR_MAXL_DEFAULT
+class _SUNLinearSolverContent_SPTFQMR(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
+    __repr__ = _swig_repr
+    maxl = property(_kinsol._SUNLinearSolverContent_SPTFQMR_maxl_get, _kinsol._SUNLinearSolverContent_SPTFQMR_maxl_set)
+    pretype = property(_kinsol._SUNLinearSolverContent_SPTFQMR_pretype_get, _kinsol._SUNLinearSolverContent_SPTFQMR_pretype_set)
+    zeroguess = property(_kinsol._SUNLinearSolverContent_SPTFQMR_zeroguess_get, _kinsol._SUNLinearSolverContent_SPTFQMR_zeroguess_set)
+    numiters = property(_kinsol._SUNLinearSolverContent_SPTFQMR_numiters_get, _kinsol._SUNLinearSolverContent_SPTFQMR_numiters_set)
+    resnorm = property(_kinsol._SUNLinearSolverContent_SPTFQMR_resnorm_get, _kinsol._SUNLinearSolverContent_SPTFQMR_resnorm_set)
+    last_flag = property(_kinsol._SUNLinearSolverContent_SPTFQMR_last_flag_get, _kinsol._SUNLinearSolverContent_SPTFQMR_last_flag_set)
+    ATimes = property(_kinsol._SUNLinearSolverContent_SPTFQMR_ATimes_get, _kinsol._SUNLinearSolverContent_SPTFQMR_ATimes_set)
+    ATData = property(_kinsol._SUNLinearSolverContent_SPTFQMR_ATData_get, _kinsol._SUNLinearSolverContent_SPTFQMR_ATData_set)
+    Psetup = property(_kinsol._SUNLinearSolverContent_SPTFQMR_Psetup_get, _kinsol._SUNLinearSolverContent_SPTFQMR_Psetup_set)
+    Psolve = property(_kinsol._SUNLinearSolverContent_SPTFQMR_Psolve_get, _kinsol._SUNLinearSolverContent_SPTFQMR_Psolve_set)
+    PData = property(_kinsol._SUNLinearSolverContent_SPTFQMR_PData_get, _kinsol._SUNLinearSolverContent_SPTFQMR_PData_set)
+    s1 = property(_kinsol._SUNLinearSolverContent_SPTFQMR_s1_get, _kinsol._SUNLinearSolverContent_SPTFQMR_s1_set)
+    s2 = property(_kinsol._SUNLinearSolverContent_SPTFQMR_s2_get, _kinsol._SUNLinearSolverContent_SPTFQMR_s2_set)
+    r_star = property(_kinsol._SUNLinearSolverContent_SPTFQMR_r_star_get, _kinsol._SUNLinearSolverContent_SPTFQMR_r_star_set)
+    q = property(_kinsol._SUNLinearSolverContent_SPTFQMR_q_get, _kinsol._SUNLinearSolverContent_SPTFQMR_q_set)
+    d = property(_kinsol._SUNLinearSolverContent_SPTFQMR_d_get, _kinsol._SUNLinearSolverContent_SPTFQMR_d_set)
+    v = property(_kinsol._SUNLinearSolverContent_SPTFQMR_v_get, _kinsol._SUNLinearSolverContent_SPTFQMR_v_set)
+    p = property(_kinsol._SUNLinearSolverContent_SPTFQMR_p_get, _kinsol._SUNLinearSolverContent_SPTFQMR_p_set)
+    r = property(_kinsol._SUNLinearSolverContent_SPTFQMR_r_get, _kinsol._SUNLinearSolverContent_SPTFQMR_r_set)
+    u = property(_kinsol._SUNLinearSolverContent_SPTFQMR_u_get, _kinsol._SUNLinearSolverContent_SPTFQMR_u_set)
+    vtemp1 = property(_kinsol._SUNLinearSolverContent_SPTFQMR_vtemp1_get, _kinsol._SUNLinearSolverContent_SPTFQMR_vtemp1_set)
+    vtemp2 = property(_kinsol._SUNLinearSolverContent_SPTFQMR_vtemp2_get, _kinsol._SUNLinearSolverContent_SPTFQMR_vtemp2_set)
+    vtemp3 = property(_kinsol._SUNLinearSolverContent_SPTFQMR_vtemp3_get, _kinsol._SUNLinearSolverContent_SPTFQMR_vtemp3_set)
+    print_level = property(_kinsol._SUNLinearSolverContent_SPTFQMR_print_level_get, _kinsol._SUNLinearSolverContent_SPTFQMR_print_level_set)
+    info_file = property(_kinsol._SUNLinearSolverContent_SPTFQMR_info_file_get, _kinsol._SUNLinearSolverContent_SPTFQMR_info_file_set)
+
+    def __init__(self):
+        _kinsol._SUNLinearSolverContent_SPTFQMR_swiginit(self, _kinsol.new__SUNLinearSolverContent_SPTFQMR())
+    __swig_destroy__ = _kinsol.delete__SUNLinearSolverContent_SPTFQMR
+
+# Register _SUNLinearSolverContent_SPTFQMR in _kinsol:
+_kinsol._SUNLinearSolverContent_SPTFQMR_swigregister(_SUNLinearSolverContent_SPTFQMR)
+
+
+def SUNLinSol_SPTFQMR(y, pretype, maxl, sunctx):
+    return _kinsol.SUNLinSol_SPTFQMR(y, pretype, maxl, sunctx)
+
+def SUNLinSol_SPTFQMRSetPrecType(S, pretype):
+    return _kinsol.SUNLinSol_SPTFQMRSetPrecType(S, pretype)
+
+def SUNLinSol_SPTFQMRSetMaxl(S, maxl):
+    return _kinsol.SUNLinSol_SPTFQMRSetMaxl(S, maxl)
+
+def SUNLinSolGetType_SPTFQMR(S):
+    return _kinsol.SUNLinSolGetType_SPTFQMR(S)
+
+def SUNLinSolGetID_SPTFQMR(S):
+    return _kinsol.SUNLinSolGetID_SPTFQMR(S)
+
+def SUNLinSolInitialize_SPTFQMR(S):
+    return _kinsol.SUNLinSolInitialize_SPTFQMR(S)
+
+def SUNLinSolSetATimes_SPTFQMR(S, A_data, ATimes):
+    return _kinsol.SUNLinSolSetATimes_SPTFQMR(S, A_data, ATimes)
+
+def SUNLinSolSetPreconditioner_SPTFQMR(S, P_data, Pset, Psol):
+    return _kinsol.SUNLinSolSetPreconditioner_SPTFQMR(S, P_data, Pset, Psol)
+
+def SUNLinSolSetScalingVectors_SPTFQMR(S, s1, s2):
+    return _kinsol.SUNLinSolSetScalingVectors_SPTFQMR(S, s1, s2)
+
+def SUNLinSolSetZeroGuess_SPTFQMR(S, onoff):
+    return _kinsol.SUNLinSolSetZeroGuess_SPTFQMR(S, onoff)
+
+def SUNLinSolSetup_SPTFQMR(S, A):
+    return _kinsol.SUNLinSolSetup_SPTFQMR(S, A)
+
+def SUNLinSolSolve_SPTFQMR(S, A, x, b, tol):
+    return _kinsol.SUNLinSolSolve_SPTFQMR(S, A, x, b, tol)
+
+def SUNLinSolNumIters_SPTFQMR(S):
+    return _kinsol.SUNLinSolNumIters_SPTFQMR(S)
+
+def SUNLinSolResNorm_SPTFQMR(S):
+    return _kinsol.SUNLinSolResNorm_SPTFQMR(S)
+
+def SUNLinSolResid_SPTFQMR(S):
+    return _kinsol.SUNLinSolResid_SPTFQMR(S)
+
+def SUNLinSolLastFlag_SPTFQMR(S):
+    return _kinsol.SUNLinSolLastFlag_SPTFQMR(S)
+
+def SUNLinSolSpace_SPTFQMR(S, lenrwLS, leniwLS):
+    return _kinsol.SUNLinSolSpace_SPTFQMR(S, lenrwLS, leniwLS)
+
+def SUNLinSolFree_SPTFQMR(S):
+    return _kinsol.SUNLinSolFree_SPTFQMR(S)
+
+def SUNLinSolSetInfoFile_SPTFQMR(LS, info_file):
+    return _kinsol.SUNLinSolSetInfoFile_SPTFQMR(LS, info_file)
+
+def SUNLinSolSetPrintLevel_SPTFQMR(LS, print_level):
+    return _kinsol.SUNLinSolSetPrintLevel_SPTFQMR(LS, print_level)
 KIN_SUCCESS = _kinsol.KIN_SUCCESS
 KIN_INITIAL_GUESS_OK = _kinsol.KIN_INITIAL_GUESS_OK
 KIN_STEP_LT_STPTOL = _kinsol.KIN_STEP_LT_STPTOL
@@ -1113,8 +1716,14 @@ def KINSetJacTimesVecSysFn(kinmem, jtimesSysFn):
 def KINSetDebugFile(kinmem, debugfp):
     return _kinsol.KINSetDebugFile(kinmem, debugfp)
 
-def KINPyRegisterKINPySysFn(f):
-    return _kinsol.KINPyRegisterKINPySysFn(f)
+def KINPyRegister_KINPySysFn(f):
+    return _kinsol.KINPyRegister_KINPySysFn(f)
+
+def KINPyRegister_KINPyErrHandlerFn(f):
+    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f)
+
+def KINPyRegister_KINPyInfoHandlerFn(f):
+    return _kinsol.KINPyRegister_KINPyInfoHandlerFn(f)
 KINBBDPRE_SUCCESS = _kinsol.KINBBDPRE_SUCCESS
 KINBBDPRE_PDATA_NULL = _kinsol.KINBBDPRE_PDATA_NULL
 KINBBDPRE_FUNC_UNRECVR = _kinsol.KINBBDPRE_FUNC_UNRECVR
@@ -1186,19 +1795,30 @@ import ctypes
 # a convenience to our users. They could always define it themselves too.
 class cfunctypes():
   KINSysFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object)
+  KINErrHandlerFn = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object)
 
 def RegisterFn(py_callback, py_callback_type):
   f_in = py_callback_type(py_callback)
   f_in_ptr = ctypes.cast(f_in, ctypes.c_void_p).value
+
   if py_callback_type == cfunctypes.KINSysFn:
-    return _kinsol.KINPyRegisterKINPySysFn(f_in_ptr)
+    return _kinsol.KINPyRegister_KINPySysFn(f_in_ptr)
+  elif py_callback_type == cfunctypes.KINErrHandlerFn:
+    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_in_ptr)
+  else:
+    raise ValueError("Unknown function type encountered")
 
 def RegisterNumbaFn(py_callback, py_callback_type):
   f = py_callback.ctypes
   f_ptr = ctypes.cast(f, ctypes.c_void_p).value
 
   if py_callback_type == cfunctypes.KINSysFn:
-    return  _kinsol.KINPyRegisterKINPySysFn(f_ptr)
+    return _kinsol.KINPyRegister_KINPySysFn(f_ptr)
+  elif py_callback_type == cfunctypes.KINErrHandlerFn:
+    return _kinsol.KINPyRegister_KINPyErrHandlerFn(f_ptr)
+  else:
+    raise ValueError("Unknown function type encountered")
+
 
 
 

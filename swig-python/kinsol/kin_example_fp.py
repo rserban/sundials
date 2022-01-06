@@ -28,11 +28,8 @@ import kinsol as kin
 import numpy as np
 import numba as nb
 from numba import cfunc
-import sys
 from timeit import default_timer as timer
-
 import faulthandler
-
 
 class Problem():
 
@@ -131,7 +128,7 @@ def solve(problem, callback_option):
   print("    dy3/dt = 3.e2*(y2)^2")
   print("on the interval from t = 0.0 to t = 0.1, with initial")
   print("conditions: y1 = 1.0, y2 = y3 = 0.")
-  print("Solution method: Newton with dense linear solver.\n")
+  print("Solution method: Anderson accelerated fixed point iteration.\n")
 
   start = timer()
 
@@ -202,18 +199,6 @@ def solve(problem, callback_option):
   # flag = kin.KINSetErrHandlerFn(kmem, kin.RegisterFn(kinErrHandler, kin.cfunctypes.KINErrHandlerFn), problem)
   # if flag < 0: raise RuntimeError(f'KINSetErrHandlerFn returned {flag}')
 
-  # create and attach a linear solver
-  A = kin.SUNDenseMatrix(3, 3, sunctx)
-  kin.SUNMatZero(A)
-  flag, Adata = kin.SUNMatArrayView(A)
-  Adata[:] = 1.0
-  kin.SUNMatScaleAddI(1.0, A)
-  print('A:')
-  print(Adata)
-  LS = kin.SUNLinSol_Dense(sunvec_y, A, sunctx)
-  flag = kin.KINSetLinearSolver(kmem, LS, A)
-  if flag < 0: raise RuntimeError(f'KINSetLinearSolver returned {flag}')
-
   # -------------
   # Initial guess
   # -------------
@@ -230,10 +215,10 @@ def solve(problem, callback_option):
   # call main solver
   flag = kin.KINSol(kmem,          # KINSOL memory block
                     sunvec_y,      # initial guess on input; solution vector
-                    kin.KIN_NONE,  # global strategy choice
+                    kin.KIN_FP,    # global strategy choice
                     sunvec_scale,  # scaling vector for the variable cc
                     sunvec_scale)  # scaling vector for function values fval
-  if flag < 0: raise RuntimeError(f'KINSol returned {flag} ({kin.KINGetReturnFlagName(flag)})')
+  if flag < 0: raise RuntimeError(f'KINSol returned {flag}')
 
   # ------------------------------------
   # Print solution and solver statistics
@@ -260,13 +245,11 @@ def solve(problem, callback_option):
 def PrintFinalStats(kmem):
   flag, nni = kin.KINGetNumNonlinSolvIters(kmem)
   if flag < 0: raise RuntimeError(f'KINGetNumNonlinSolvIters returned {flag}')
-  flag, nli = kin.KINGetNumLinIters(kmem)
-  if flag < 0: raise RuntimeError(f'KINGetNumLinIters returned {flag}')
   flag, nfe = kin.KINGetNumFuncEvals(kmem)
   if flag < 0: raise RuntimeError(f'KINGetNumFuncEvals returned {flag}')
 
   print('\nFinal Statistics...')
-  print('nni      = %6ld      nli = %6ld      nfe     = %6ld' % (nni, nli, nfe))
+  print('nni      = %6ld      nfe     = %6ld' % (nni, nfe))
 
 
 if __name__ == '__main__':

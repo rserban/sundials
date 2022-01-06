@@ -67,6 +67,7 @@ SUNMatrix SUNDenseMatrix(sunindextype M, sunindextype N, SUNContext sunctx)
   A->ops->scaleaddi = SUNMatScaleAddI_Dense;
   A->ops->matvec    = SUNMatMatvec_Dense;
   A->ops->space     = SUNMatSpace_Dense;
+  A->ops->arrayview = SUNMatArrayView_Dense;
 
   /* Create content */
   content = NULL;
