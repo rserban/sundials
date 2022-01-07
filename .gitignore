@@ -15,6 +15,7 @@
 /test/env/env.sh
 
 # directories and files created by testing scripts
+/test/answers*
 /test/build_*
 /test/install_*
 /test/tarballs
@@ -79,3 +80,4 @@ __pycache__
 
 # editor files
 .vscode
+
