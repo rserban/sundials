@@ -45,6 +45,21 @@ SUNDIALS_EXPORT KINErrHandlerFn KINPyRegister_KINPyErrHandlerFn(KINPyErrHandlerF
 typedef KINInfoHandlerFn KINPyInfoHandlerFn;
 SUNDIALS_EXPORT KINInfoHandlerFn KINPyRegister_KINPyInfoHandlerFn(KINPyInfoHandlerFn f);
 
+typedef int (*KINPyLsJacFn)(realtype* u, sunindextype u_len, realtype* fu,
+                            realtype* J, sunindextype J_len, void* user_data,
+                            realtype* tmp1, realtype* tmp2);
+SUNDIALS_EXPORT KINLsJacFn KINPyRegister_KINPyLsJacFn(KINPyLsJacFn f);
+
+// typedef int (*KINLsPrecSetupFn)(N_Vector uu, N_Vector uscale,
+//                                 N_Vector fval, N_Vector fscale,
+//                                 void *user_data);
+
+// typedef int (*KINLsPrecSolveFn)(N_Vector uu, N_Vector uscale,
+//                                 N_Vector fval, N_Vector fscale,
+//                                 N_Vector vv, void *user_data);
+
+// typedef int (*KINLsJacTimesVecFn)(N_Vector v, N_Vector Jv, N_Vector uu,
+//                                   booleantype *new_uu, void *J_data);
 
 #ifdef __cplusplus  /* wrapper to enable C++ usage */
 }

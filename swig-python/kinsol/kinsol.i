@@ -112,13 +112,39 @@ import ctypes
 # We provide the ctypes for all the callback functions in KINSol here as
 # a convenience to our users. They could always define it themselves too.
 class cfunctypes():
-  KINSysFn = [ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.py_object),
+  KINSysFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                               ctypes.POINTER(ctypes.c_double),
+                               ctypes.c_int,
+                               ctypes.POINTER(ctypes.c_double),
+                               ctypes.c_int,
+                               ctypes.py_object),
                _kinsol.KINPyRegister_KINPySysFn]
 
-  KINErrHandlerFn = [ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.py_object),
+  KINErrHandlerFn = [ctypes.CFUNCTYPE(None,
+                                      ctypes.c_int,
+                                      ctypes.c_char_p,
+                                      ctypes.c_char_p,
+                                      ctypes.c_char_p,
+                                      ctypes.py_object),
                      _kinsol.KINPyRegister_KINPyErrHandlerFn]
 
+  KINInfoHandlerFn = [ctypes.CFUNCTYPE(None,
+                                       ctypes.c_char_p,
+                                       ctypes.c_char_p,
+                                       ctypes.c_char_p,
+                                       ctypes.py_object),
+                      _kinsol.KINPyRegister_KINPyInfoHandlerFn]
 
+  KINLsJacFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                                 ctypes.POINTER(ctypes.c_double),
+                                 ctypes.c_int,
+                                 ctypes.POINTER(ctypes.c_double),
+                                 ctypes.POINTER(ctypes.c_double),
+                                 ctypes.c_int,
+                                 ctypes.py_object,
+                                 ctypes.POINTER(ctypes.c_double),
+                                 ctypes.POINTER(ctypes.c_double)),
+                _kinsol.KINPyRegister_KINPyLsJacFn]
 
 def RegisterFn(py_callback, py_callback_tuple):
   py_callback_type, kinpy_register_fn = py_callback_tuple
