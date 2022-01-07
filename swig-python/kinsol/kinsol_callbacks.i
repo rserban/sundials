@@ -2,3 +2,8 @@
 %callback_function(KINPyErrHandlerFn)
 %callback_function(KINPyInfoHandlerFn)
 %callback_function(KINPyLsJacFn)
+%callback_function(KINPyLsPrecSetupFn)
+%callback_function(KINPyLsPrecSolveFn)
+%callback_function(KINPyLsJacTimesVecFn)
+%callback_function(KINPyBBDCommFn)
+%callback_function(KINPyBBDLocalFn)

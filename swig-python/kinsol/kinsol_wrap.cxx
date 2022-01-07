@@ -2721,91 +2721,96 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int swig_types[38]
 #define SWIGTYPE_p_f_int_p__generic_N_Vector_p_void__int swig_types[39]
 #define SWIGTYPE_p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int swig_types[40]
-#define SWIGTYPE_p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int swig_types[41]
-#define SWIGTYPE_p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int swig_types[42]
-#define SWIGTYPE_p_f_int_p_int_p_void__int swig_types[43]
-#define SWIGTYPE_p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int swig_types[44]
-#define SWIGTYPE_p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int swig_types[45]
-#define SWIGTYPE_p_f_int_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[46]
-#define SWIGTYPE_p_f_p__generic_N_Vector__N_Vector_ID swig_types[47]
-#define SWIGTYPE_p_f_p__generic_N_Vector__double swig_types[48]
-#define SWIGTYPE_p_f_p__generic_N_Vector__int swig_types[49]
-#define SWIGTYPE_p_f_p__generic_N_Vector__p_double swig_types[50]
-#define SWIGTYPE_p_f_p__generic_N_Vector__p_void swig_types[51]
-#define SWIGTYPE_p_f_p__generic_N_Vector__void swig_types[52]
-#define SWIGTYPE_p_f_p__generic_N_Vector_double_p__generic_N_Vector__void swig_types[53]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p_FILE__void swig_types[54]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector__double swig_types[55]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector__int swig_types[56]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector__void swig_types[57]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector__double swig_types[58]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector__int swig_types[59]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector__void swig_types[60]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_void__int swig_types[61]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_void__int swig_types[62]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_int_p_void__int swig_types[63]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_SUNMatrix_p_void_p__generic_N_Vector_p__generic_N_Vector__int swig_types[64]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int swig_types[65]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p_int__int swig_types[66]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p_int_p_int__void swig_types[67]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p_int_p_p_double__int swig_types[68]
-#define SWIGTYPE_p_f_p__generic_N_Vector_p_void__int swig_types[69]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__SUNLinearSolver_ID swig_types[70]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__SUNLinearSolver_Type swig_types[71]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__double swig_types[72]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__int swig_types[73]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_int__int swig_types[74]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p__generic_N_Vector_p__generic_N_Vector__int swig_types[75]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p__generic_SUNMatrix__int swig_types[76]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p__generic_SUNMatrix_p__generic_N_Vector_p__generic_N_Vector_double__int swig_types[77]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p_long_p_long__int swig_types[78]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p_void_p_f_p_void__int_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector_double_int__int__int swig_types[79]
-#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p_void_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector__int__int swig_types[80]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix__SUNMatrix_ID swig_types[81]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix__int swig_types[82]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix__void swig_types[83]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix_p__generic_N_Vector_p__generic_N_Vector__int swig_types[84]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix_p__generic_SUNMatrix__int swig_types[85]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix_p_int_p_p_double__int swig_types[86]
-#define SWIGTYPE_p_f_p__generic_SUNMatrix_p_long_p_long__int swig_types[87]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__SUNNonlinearSolver_Type swig_types[88]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int swig_types[89]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_int__int swig_types[90]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int swig_types[91]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_double_int_p_void__int swig_types[92]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p_void__int swig_types[93]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_int_p_int_p_void__int__int swig_types[94]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int__int swig_types[95]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p_void__int__int swig_types[96]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int_p_void__int swig_types[97]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_int__int swig_types[98]
-#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int swig_types[99]
-#define SWIGTYPE_p_f_p_double_int_p_double_int_p_void__int swig_types[100]
-#define SWIGTYPE_p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int swig_types[101]
-#define SWIGTYPE_p_f_p_double_p__generic_N_Vector__void swig_types[102]
-#define SWIGTYPE_p_f_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[103]
-#define SWIGTYPE_p_f_p_void__int swig_types[104]
-#define SWIGTYPE_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector__int swig_types[105]
-#define SWIGTYPE_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector_double_int__int swig_types[106]
-#define SWIGTYPE_p_int swig_types[107]
-#define SWIGTYPE_p_long swig_types[108]
-#define SWIGTYPE_p_long_long swig_types[109]
-#define SWIGTYPE_p_p__generic_N_Vector swig_types[110]
-#define SWIGTYPE_p_p_double swig_types[111]
-#define SWIGTYPE_p_p_f_int_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[112]
-#define SWIGTYPE_p_p_f_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[113]
-#define SWIGTYPE_p_p_p__generic_N_Vector swig_types[114]
-#define SWIGTYPE_p_p_void swig_types[115]
-#define SWIGTYPE_p_short swig_types[116]
-#define SWIGTYPE_p_signed_char swig_types[117]
-#define SWIGTYPE_p_sundials__Context swig_types[118]
-#define SWIGTYPE_p_unsigned_char swig_types[119]
-#define SWIGTYPE_p_unsigned_int swig_types[120]
-#define SWIGTYPE_p_unsigned_long_long swig_types[121]
-#define SWIGTYPE_p_unsigned_short swig_types[122]
-#define SWIGTYPE_p_void swig_types[123]
-static swig_type_info *swig_types[125];
-static swig_module_info swig_module = {swig_types, 124, 0, 0, 0, 0};
+#define SWIGTYPE_p_f_int_p_double_p_double_p_void__int swig_types[41]
+#define SWIGTYPE_p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int swig_types[42]
+#define SWIGTYPE_p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int swig_types[43]
+#define SWIGTYPE_p_f_int_p_double_p_void__int swig_types[44]
+#define SWIGTYPE_p_f_int_p_int_p_void__int swig_types[45]
+#define SWIGTYPE_p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int swig_types[46]
+#define SWIGTYPE_p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int swig_types[47]
+#define SWIGTYPE_p_f_int_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[48]
+#define SWIGTYPE_p_f_p__generic_N_Vector__N_Vector_ID swig_types[49]
+#define SWIGTYPE_p_f_p__generic_N_Vector__double swig_types[50]
+#define SWIGTYPE_p_f_p__generic_N_Vector__int swig_types[51]
+#define SWIGTYPE_p_f_p__generic_N_Vector__p_double swig_types[52]
+#define SWIGTYPE_p_f_p__generic_N_Vector__p_void swig_types[53]
+#define SWIGTYPE_p_f_p__generic_N_Vector__void swig_types[54]
+#define SWIGTYPE_p_f_p__generic_N_Vector_double_p__generic_N_Vector__void swig_types[55]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p_FILE__void swig_types[56]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector__double swig_types[57]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector__int swig_types[58]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector__void swig_types[59]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector__double swig_types[60]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector__int swig_types[61]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector__void swig_types[62]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_void__int swig_types[63]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_void__int swig_types[64]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_int_p_void__int swig_types[65]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_SUNMatrix_p_void_p__generic_N_Vector_p__generic_N_Vector__int swig_types[66]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int swig_types[67]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p_int__int swig_types[68]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p_int_p_int__void swig_types[69]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p_int_p_p_double__int swig_types[70]
+#define SWIGTYPE_p_f_p__generic_N_Vector_p_void__int swig_types[71]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__SUNLinearSolver_ID swig_types[72]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__SUNLinearSolver_Type swig_types[73]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__double swig_types[74]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver__int swig_types[75]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_int__int swig_types[76]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p__generic_N_Vector_p__generic_N_Vector__int swig_types[77]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p__generic_SUNMatrix__int swig_types[78]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p__generic_SUNMatrix_p__generic_N_Vector_p__generic_N_Vector_double__int swig_types[79]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p_long_p_long__int swig_types[80]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p_void_p_f_p_void__int_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector_double_int__int__int swig_types[81]
+#define SWIGTYPE_p_f_p__generic_SUNLinearSolver_p_void_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector__int__int swig_types[82]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix__SUNMatrix_ID swig_types[83]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix__int swig_types[84]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix__void swig_types[85]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix_p__generic_N_Vector_p__generic_N_Vector__int swig_types[86]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix_p__generic_SUNMatrix__int swig_types[87]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix_p_int_p_p_double__int swig_types[88]
+#define SWIGTYPE_p_f_p__generic_SUNMatrix_p_long_p_long__int swig_types[89]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__SUNNonlinearSolver_Type swig_types[90]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver__int swig_types[91]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_int__int swig_types[92]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int swig_types[93]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_double_int_p_void__int swig_types[94]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p_void__int swig_types[95]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_int_p_int_p_void__int__int swig_types[96]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p__generic_N_Vector_p_void__int__int swig_types[97]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_N_Vector_p_void__int__int swig_types[98]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_f_p__generic_SUNNonlinearSolver_p__generic_N_Vector_p__generic_N_Vector_double_p__generic_N_Vector_p_void__int_p_void__int swig_types[99]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_int__int swig_types[100]
+#define SWIGTYPE_p_f_p__generic_SUNNonlinearSolver_p_long__int swig_types[101]
+#define SWIGTYPE_p_f_p_double_int_p_double_int_p_void__int swig_types[102]
+#define SWIGTYPE_p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int swig_types[103]
+#define SWIGTYPE_p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int swig_types[104]
+#define SWIGTYPE_p_f_p_double_int_p_double_p_double_p_double_p_void__int swig_types[105]
+#define SWIGTYPE_p_f_p_double_int_p_double_p_double_p_int_p_void__int swig_types[106]
+#define SWIGTYPE_p_f_p_double_p__generic_N_Vector__void swig_types[107]
+#define SWIGTYPE_p_f_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[108]
+#define SWIGTYPE_p_f_p_void__int swig_types[109]
+#define SWIGTYPE_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector__int swig_types[110]
+#define SWIGTYPE_p_f_p_void_p__generic_N_Vector_p__generic_N_Vector_double_int__int swig_types[111]
+#define SWIGTYPE_p_int swig_types[112]
+#define SWIGTYPE_p_long swig_types[113]
+#define SWIGTYPE_p_long_long swig_types[114]
+#define SWIGTYPE_p_p__generic_N_Vector swig_types[115]
+#define SWIGTYPE_p_p_double swig_types[116]
+#define SWIGTYPE_p_p_f_int_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[117]
+#define SWIGTYPE_p_p_f_p_q_const__char_p_q_const__char_p_char_p_void__void swig_types[118]
+#define SWIGTYPE_p_p_p__generic_N_Vector swig_types[119]
+#define SWIGTYPE_p_p_void swig_types[120]
+#define SWIGTYPE_p_short swig_types[121]
+#define SWIGTYPE_p_signed_char swig_types[122]
+#define SWIGTYPE_p_sundials__Context swig_types[123]
+#define SWIGTYPE_p_unsigned_char swig_types[124]
+#define SWIGTYPE_p_unsigned_int swig_types[125]
+#define SWIGTYPE_p_unsigned_long_long swig_types[126]
+#define SWIGTYPE_p_unsigned_short swig_types[127]
+#define SWIGTYPE_p_void swig_types[128]
+static swig_type_info *swig_types[130];
+static swig_module_info swig_module = {swig_types, 129, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -28320,6 +28325,101 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_KINPyRegister_KINPyLsPrecSetupFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  KINPyLsPrecSetupFn arg1 = (KINPyLsPrecSetupFn) 0 ;
+  PyObject *swig_obj[1] ;
+  KINLsPrecSetupFn result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    arg1 = (KINPyLsPrecSetupFn)PyLong_AsVoidPtr(swig_obj[0]);
+  }
+  result = (KINLsPrecSetupFn)KINPyRegister_KINPyLsPrecSetupFn(arg1);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_KINPyRegister_KINPyLsPrecSolveFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  KINPyLsPrecSolveFn arg1 = (KINPyLsPrecSolveFn) 0 ;
+  PyObject *swig_obj[1] ;
+  KINLsPrecSolveFn result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    arg1 = (KINPyLsPrecSolveFn)PyLong_AsVoidPtr(swig_obj[0]);
+  }
+  result = (KINLsPrecSolveFn)KINPyRegister_KINPyLsPrecSolveFn(arg1);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_KINPyRegister_KINPyLsJacTimesVecFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  KINPyLsJacTimesVecFn arg1 = (KINPyLsJacTimesVecFn) 0 ;
+  PyObject *swig_obj[1] ;
+  KINLsJacTimesVecFn result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    arg1 = (KINPyLsJacTimesVecFn)PyLong_AsVoidPtr(swig_obj[0]);
+  }
+  result = (KINLsJacTimesVecFn)KINPyRegister_KINPyLsJacTimesVecFn(arg1);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_p__generic_N_Vector_p__generic_N_Vector_p__generic_N_Vector_p_int_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_KINPyRegister_KINPyBBDCommFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  KINPyBBDCommFn arg1 = (KINPyBBDCommFn) 0 ;
+  PyObject *swig_obj[1] ;
+  KINBBDCommFn result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    arg1 = (KINPyBBDCommFn)PyLong_AsVoidPtr(swig_obj[0]);
+  }
+  result = (KINBBDCommFn)KINPyRegister_KINPyBBDCommFn(arg1);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_int_p__generic_N_Vector_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_KINPyRegister_KINPyBBDLocalFn(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  KINPyBBDLocalFn arg1 = (KINPyBBDLocalFn) 0 ;
+  PyObject *swig_obj[1] ;
+  KINBBDLocalFn result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    arg1 = (KINPyBBDLocalFn)PyLong_AsVoidPtr(swig_obj[0]);
+  }
+  result = (KINBBDLocalFn)KINPyRegister_KINPyBBDLocalFn(arg1);
+  resultobj = SWIG_NewFunctionPtrObj((void *)(result), SWIGTYPE_p_f_int_p__generic_N_Vector_p__generic_N_Vector_p_void__int);
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_KINBBDPrecInit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   void *arg1 = (void *) 0 ;
@@ -29783,6 +29883,11 @@ static PyMethodDef SwigMethods[] = {
 	 { "KINPyRegister_KINPyErrHandlerFn", _wrap_KINPyRegister_KINPyErrHandlerFn, METH_O, NULL},
 	 { "KINPyRegister_KINPyInfoHandlerFn", _wrap_KINPyRegister_KINPyInfoHandlerFn, METH_O, NULL},
 	 { "KINPyRegister_KINPyLsJacFn", _wrap_KINPyRegister_KINPyLsJacFn, METH_O, NULL},
+	 { "KINPyRegister_KINPyLsPrecSetupFn", _wrap_KINPyRegister_KINPyLsPrecSetupFn, METH_O, NULL},
+	 { "KINPyRegister_KINPyLsPrecSolveFn", _wrap_KINPyRegister_KINPyLsPrecSolveFn, METH_O, NULL},
+	 { "KINPyRegister_KINPyLsJacTimesVecFn", _wrap_KINPyRegister_KINPyLsJacTimesVecFn, METH_O, NULL},
+	 { "KINPyRegister_KINPyBBDCommFn", _wrap_KINPyRegister_KINPyBBDCommFn, METH_O, NULL},
+	 { "KINPyRegister_KINPyBBDLocalFn", _wrap_KINPyRegister_KINPyBBDLocalFn, METH_O, NULL},
 	 { "KINBBDPrecInit", _wrap_KINBBDPrecInit, METH_VARARGS, NULL},
 	 { "KINBBDPrecGetWorkSpace", _wrap_KINBBDPrecGetWorkSpace, METH_O, NULL},
 	 { "KINBBDPrecGetNumGfnEvals", _wrap_KINBBDPrecGetNumGfnEvals, METH_O, NULL},
@@ -29847,8 +29952,10 @@ static swig_type_info _swigt__p_f_int_p__generic_N_Vector_p_double__int = {"_p_f
 static swig_type_info _swigt__p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int = {"_p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int", "int (*)(int,_generic_N_Vector *,_generic_N_Vector **,double *)|int (*)(int,N_Vector,N_Vector *,realtype *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p__generic_N_Vector_p_void__int = {"_p_f_int_p__generic_N_Vector_p_void__int", "int (*)(int,_generic_N_Vector *,void *)|KINBBDCommFn", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int = {"_p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int", "int (*)(int,double *,_generic_N_Vector *,_generic_N_Vector **,_generic_N_Vector **)|int (*)(int,realtype *,N_Vector,N_Vector *,N_Vector *)", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_int_p_double_p_double_p_void__int = {"_p_f_int_p_double_p_double_p_void__int", "KINPyBBDLocalFn|int (*)(int,double *,double *,void *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int = {"_p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int", "int (*)(int,double *,_generic_N_Vector **,_generic_N_Vector *)|int (*)(int,realtype *,N_Vector *,N_Vector)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int = {"_p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int", "int (*)(int,double *,_generic_N_Vector **,_generic_N_Vector **)|int (*)(int,realtype *,N_Vector *,N_Vector *)", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_int_p_double_p_void__int = {"_p_f_int_p_double_p_void__int", "int (*)(int,double *,void *)|KINPyBBDCommFn", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p_int_p_void__int = {"_p_f_int_p_int_p_void__int", "SUNNonlinSolLSetupFn|int (*)(int,int *,void *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int = {"_p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int", "int (*)(int,_generic_N_Vector **,_generic_N_Vector **,_generic_N_Vector *,double *)|int (*)(int,N_Vector *,N_Vector *,N_Vector,realtype *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int = {"_p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int", "int (*)(int,_generic_N_Vector **,_generic_N_Vector **,double *)|int (*)(int,N_Vector *,N_Vector *,realtype *)", 0, 0, (void*)0, 0};
@@ -29908,6 +30015,9 @@ static swig_type_info _swigt__p_f_p__generic_SUNNonlinearSolver_p_int__int = {"_
 static swig_type_info _swigt__p_f_p__generic_SUNNonlinearSolver_p_long__int = {"_p_f_p__generic_SUNNonlinearSolver_p_long__int", "int (*)(_generic_SUNNonlinearSolver *,long *)|int (*)(SUNNonlinearSolver,long *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_double_int_p_double_int_p_void__int = {"_p_f_p_double_int_p_double_int_p_void__int", "KINPySysFn|int (*)(double *,int,double *,int,void *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int = {"_p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int", "int (*)(double *,int,double *,double *,int,void *,double *,double *)|KINPyLsJacFn", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int = {"_p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int", "int (*)(double *,int,double *,double *,double *,double *,void *)|KINPyLsPrecSolveFn", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_p_double_int_p_double_p_double_p_double_p_void__int = {"_p_f_p_double_int_p_double_p_double_p_double_p_void__int", "KINPyLsPrecSetupFn|int (*)(double *,int,double *,double *,double *,void *)", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_f_p_double_int_p_double_p_double_p_int_p_void__int = {"_p_f_p_double_int_p_double_p_double_p_int_p_void__int", "KINPyLsJacTimesVecFn|int (*)(double *,int,double *,double *,int *,void *)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_double_p__generic_N_Vector__void = {"_p_f_p_double_p__generic_N_Vector__void", "void (*)(double *,_generic_N_Vector *)|void (*)(realtype *,N_Vector)", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_q_const__char_p_q_const__char_p_char_p_void__void = {"_p_f_p_q_const__char_p_q_const__char_p_char_p_void__void", "void (*)(char const *,char const *,char *,void *)|KINInfoHandlerFn|KINPyInfoHandlerFn", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_f_p_void__int = {"_p_f_p_void__int", "SUNPSetupFn|int (*)(void *)", 0, 0, (void*)0, 0};
@@ -29973,8 +30083,10 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int,
   &_swigt__p_f_int_p__generic_N_Vector_p_void__int,
   &_swigt__p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int,
+  &_swigt__p_f_int_p_double_p_double_p_void__int,
   &_swigt__p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int,
   &_swigt__p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int,
+  &_swigt__p_f_int_p_double_p_void__int,
   &_swigt__p_f_int_p_int_p_void__int,
   &_swigt__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int,
   &_swigt__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int,
@@ -30034,6 +30146,9 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_f_p__generic_SUNNonlinearSolver_p_long__int,
   &_swigt__p_f_p_double_int_p_double_int_p_void__int,
   &_swigt__p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int,
+  &_swigt__p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int,
+  &_swigt__p_f_p_double_int_p_double_p_double_p_double_p_void__int,
+  &_swigt__p_f_p_double_int_p_double_p_double_p_int_p_void__int,
   &_swigt__p_f_p_double_p__generic_N_Vector__void,
   &_swigt__p_f_p_q_const__char_p_q_const__char_p_char_p_void__void,
   &_swigt__p_f_p_void__int,
@@ -30099,8 +30214,10 @@ static swig_cast_info _swigc__p_f_int_p__generic_N_Vector_p_double__int[] = {  {
 static swig_cast_info _swigc__p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int[] = {  {&_swigt__p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p__generic_N_Vector_p_void__int[] = {  {&_swigt__p_f_int_p__generic_N_Vector_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int[] = {  {&_swigt__p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_int_p_double_p_double_p_void__int[] = {  {&_swigt__p_f_int_p_double_p_double_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int[] = {  {&_swigt__p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int[] = {  {&_swigt__p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_int_p_double_p_void__int[] = {  {&_swigt__p_f_int_p_double_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p_int_p_void__int[] = {  {&_swigt__p_f_int_p_int_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int[] = {  {&_swigt__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int[] = {  {&_swigt__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int, 0, 0, 0},{0, 0, 0, 0}};
@@ -30160,6 +30277,9 @@ static swig_cast_info _swigc__p_f_p__generic_SUNNonlinearSolver_p_int__int[] = {
 static swig_cast_info _swigc__p_f_p__generic_SUNNonlinearSolver_p_long__int[] = {  {&_swigt__p_f_p__generic_SUNNonlinearSolver_p_long__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_double_int_p_double_int_p_void__int[] = {  {&_swigt__p_f_p_double_int_p_double_int_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int[] = {  {&_swigt__p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int[] = {  {&_swigt__p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_p_double_int_p_double_p_double_p_double_p_void__int[] = {  {&_swigt__p_f_p_double_int_p_double_p_double_p_double_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_f_p_double_int_p_double_p_double_p_int_p_void__int[] = {  {&_swigt__p_f_p_double_int_p_double_p_double_p_int_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_double_p__generic_N_Vector__void[] = {  {&_swigt__p_f_p_double_p__generic_N_Vector__void, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_q_const__char_p_q_const__char_p_char_p_void__void[] = {  {&_swigt__p_f_p_q_const__char_p_q_const__char_p_char_p_void__void, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_f_p_void__int[] = {  {&_swigt__p_f_p_void__int, 0, 0, 0},{0, 0, 0, 0}};
@@ -30225,8 +30345,10 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_f_int_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int,
   _swigc__p_f_int_p__generic_N_Vector_p_void__int,
   _swigc__p_f_int_p_double_p__generic_N_Vector_p_p__generic_N_Vector_p_p__generic_N_Vector__int,
+  _swigc__p_f_int_p_double_p_double_p_void__int,
   _swigc__p_f_int_p_double_p_p__generic_N_Vector_p__generic_N_Vector__int,
   _swigc__p_f_int_p_double_p_p__generic_N_Vector_p_p__generic_N_Vector__int,
+  _swigc__p_f_int_p_double_p_void__int,
   _swigc__p_f_int_p_int_p_void__int,
   _swigc__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p__generic_N_Vector_p_double__int,
   _swigc__p_f_int_p_p__generic_N_Vector_p_p__generic_N_Vector_p_double__int,
@@ -30286,6 +30408,9 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_f_p__generic_SUNNonlinearSolver_p_long__int,
   _swigc__p_f_p_double_int_p_double_int_p_void__int,
   _swigc__p_f_p_double_int_p_double_p_double_int_p_void_p_double_p_double__int,
+  _swigc__p_f_p_double_int_p_double_p_double_p_double_p_double_p_void__int,
+  _swigc__p_f_p_double_int_p_double_p_double_p_double_p_void__int,
+  _swigc__p_f_p_double_int_p_double_p_double_p_int_p_void__int,
   _swigc__p_f_p_double_p__generic_N_Vector__void,
   _swigc__p_f_p_q_const__char_p_q_const__char_p_char_p_void__void,
   _swigc__p_f_p_void__int,

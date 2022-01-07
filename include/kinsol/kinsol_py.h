@@ -19,6 +19,7 @@
 #define _KINSOL_PY_H
 
 #include <kinsol/kinsol.h>
+#include <kinsol/kinsol_bbdpre.h>
 
 #ifdef __cplusplus  /* wrapper to enable C++ usage */
 extern "C" {
@@ -50,16 +51,25 @@ typedef int (*KINPyLsJacFn)(realtype* u, sunindextype u_len, realtype* fu,
                             realtype* tmp1, realtype* tmp2);
 SUNDIALS_EXPORT KINLsJacFn KINPyRegister_KINPyLsJacFn(KINPyLsJacFn f);
 
-// typedef int (*KINLsPrecSetupFn)(N_Vector uu, N_Vector uscale,
-//                                 N_Vector fval, N_Vector fscale,
-//                                 void *user_data);
+typedef int (*KINPyLsPrecSetupFn)(realtype* uu, sunindextype uu_len, realtype* uscale,
+                                  realtype* fval, realtype* fscale,
+                                  void *user_data);
+SUNDIALS_EXPORT KINLsPrecSetupFn KINPyRegister_KINPyLsPrecSetupFn(KINPyLsPrecSetupFn f);
+typedef int (*KINPyLsPrecSolveFn)(realtype* uu, sunindextype uu_len, realtype* uscale,
+                                  realtype* fval, realtype* fscale,
+                                  realtype* vv, void *user_data);
+SUNDIALS_EXPORT KINLsPrecSolveFn KINPyRegister_KINPyLsPrecSolveFn(KINPyLsPrecSolveFn f);
 
-// typedef int (*KINLsPrecSolveFn)(N_Vector uu, N_Vector uscale,
-//                                 N_Vector fval, N_Vector fscale,
-//                                 N_Vector vv, void *user_data);
+typedef int (*KINPyLsJacTimesVecFn)(realtype* v, sunindextype v_len, realtype* Jv, realtype* uu,
+                                    booleantype *new_uu, void *J_data);
+SUNDIALS_EXPORT KINLsJacTimesVecFn KINPyRegister_KINPyLsJacTimesVecFn(KINPyLsJacTimesVecFn f);
 
-// typedef int (*KINLsJacTimesVecFn)(N_Vector v, N_Vector Jv, N_Vector uu,
-//                                   booleantype *new_uu, void *J_data);
+typedef int (*KINPyBBDCommFn)(sunindextype Nlocal, realtype* u,
+                              void *user_data);
+SUNDIALS_EXPORT KINBBDCommFn KINPyRegister_KINPyBBDCommFn(KINPyBBDCommFn f);
+typedef int (*KINPyBBDLocalFn)(sunindextype Nlocal, realtype* uu,
+                               realtype* gval, void *user_data);
+SUNDIALS_EXPORT KINBBDLocalFn KINPyRegister_KINPyBBDLocalFn(KINPyBBDLocalFn f);
 
 #ifdef __cplusplus  /* wrapper to enable C++ usage */
 }

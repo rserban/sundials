@@ -1735,6 +1735,21 @@ def KINPyRegister_KINPyInfoHandlerFn(f):
 
 def KINPyRegister_KINPyLsJacFn(f):
     return _kinsol.KINPyRegister_KINPyLsJacFn(f)
+
+def KINPyRegister_KINPyLsPrecSetupFn(f):
+    return _kinsol.KINPyRegister_KINPyLsPrecSetupFn(f)
+
+def KINPyRegister_KINPyLsPrecSolveFn(f):
+    return _kinsol.KINPyRegister_KINPyLsPrecSolveFn(f)
+
+def KINPyRegister_KINPyLsJacTimesVecFn(f):
+    return _kinsol.KINPyRegister_KINPyLsJacTimesVecFn(f)
+
+def KINPyRegister_KINPyBBDCommFn(f):
+    return _kinsol.KINPyRegister_KINPyBBDCommFn(f)
+
+def KINPyRegister_KINPyBBDLocalFn(f):
+    return _kinsol.KINPyRegister_KINPyBBDLocalFn(f)
 KINBBDPRE_SUCCESS = _kinsol.KINBBDPRE_SUCCESS
 KINBBDPRE_PDATA_NULL = _kinsol.KINBBDPRE_PDATA_NULL
 KINBBDPRE_FUNC_UNRECVR = _kinsol.KINBBDPRE_FUNC_UNRECVR
@@ -1838,6 +1853,48 @@ class cfunctypes():
                                  ctypes.POINTER(ctypes.c_double),
                                  ctypes.POINTER(ctypes.c_double)),
                 _kinsol.KINPyRegister_KINPyLsJacFn]
+
+  KINLsPrecSetupFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.c_int,
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.py_object),
+                      _kinsol.KINPyRegister_KINLsPrecSetupFn]
+
+  KINLsPrecSolveFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.c_int,
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.POINTER(ctypes.c_double),
+                                       ctypes.py_object),
+                      _kinsol.KINPyRegister_KINLsPrecSolveFn]
+
+  KINLsJacTimesVecFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                                         ctypes.POINTER(ctypes.c_double),
+                                         ctypes.c_int,
+                                         ctypes.POINTER(ctypes.c_double),
+                                         ctypes.POINTER(ctypes.c_double),
+                                         ctypes.POINTER(ctypes.c_int),
+                                         ctypes.py_object),
+                         _kinsol.KINPyRegister_KINLsJacTimesVecFn]
+
+  KINPyBBDCommFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                                     ctypes.c_int,
+                                     ctypes.POINTER(ctypes.c_double),
+                                     ctypes.py_object),
+                   _kinsol.KINPyRegister_KINPyBBDCommFn]
+
+  KINPyBBDLocalFn = [ctypes.CFUNCTYPE(ctypes.c_int,
+                                      ctypes.c_int,
+                                      ctypes.POINTER(ctypes.c_double),
+                                      ctypes.POINTER(ctypes.c_double),
+                                      ctypes.py_object),
+                    _kinsol.KINPyRegister_KINPyBBDLocalFn]
+
 
 def RegisterFn(py_callback, py_callback_tuple):
   py_callback_type, kinpy_register_fn = py_callback_tuple
