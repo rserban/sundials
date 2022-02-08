@@ -3,7 +3,7 @@
 # Programmer(s): David J. Gardner @ LLNL
 # -----------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2021, Lawrence Livermore National Security
+# Copyright (c) 2002-2022, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -61,7 +61,12 @@ def main():
     else:
         # author of most recent commit
         cmd = "git log --format='%ae' -1"
-        recipient = runCommand(cmd)
+        recipient = runCommand(cmd).rstrip()
+
+        # check if the last commit was a CI merge
+        if (recipient == 'nobody@nowhere'):
+            cmd = "git log HEAD~1 --pretty=format:'%ae' -1"
+            recipient = runCommand(cmd).rstrip()
 
     # send notification if tests fail, log file not found, or fixed
     if (args.teststatus == 'failed'):

@@ -2,7 +2,7 @@
 # Author(s): David J. Gardner @ LLNL
 # -----------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2021, Lawrence Livermore National Security
+# Copyright (c) 2002-2022, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -122,6 +122,9 @@ latex_elements = {
 
 % Link a footnote to its location in the text
 \usepackage{footnotebackref}
+
+% Use bold serif text for table titles
+\protected\def\sphinxstyletheadfamily {\bfseries}
 
 % ===================================================
 % End custom preamble (see latex_elements in conf.py)

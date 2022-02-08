@@ -2,7 +2,7 @@
 # Programmer(s): Slaven Peles, Cody Balos @ LLNL
 # -----------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2021, Lawrence Livermore National Security
+# Copyright (c) 2002-2022, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -37,6 +37,7 @@ EX_FILES = \
 ${EXAMPLES}.tex \
 kin_ex_intro.tex \
 kin_ex_c.tex \
+kin_ex_cxx.tex \
 kin_ex_fortran.tex
 
 include ../Makefile.in

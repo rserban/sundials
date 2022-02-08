@@ -2,7 +2,7 @@
 # Programmer(s): Steven Smith and David J. Gardner @ LLNL
 # ------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
-# Copyright (c) 2002-2021, Lawrence Livermore National Security
+# Copyright (c) 2002-2022, Lawrence Livermore National Security
 # and Southern Methodist University.
 # All rights reserved.
 #
@@ -127,11 +127,10 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
       # check if this test is run with MPI and set the MPI run command
       if((SUNDIALS_ADD_TEST_MPI_NPROCS) AND (MPIEXEC_EXECUTABLE))
-        if(MPIEXEC_EXECUTABLE MATCHES "srun")
-          set(RUN_COMMAND "srun -N1 -n${SUNDIALS_ADD_TEST_MPI_NPROCS} -ppdebug")
-        else()
-          set(RUN_COMMAND "${MPIEXEC_EXECUTABLE} -n ${SUNDIALS_ADD_TEST_MPI_NPROCS}")
-        endif()
+        set(RUN_COMMAND "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SUNDIALS_ADD_TEST_MPI_NPROCS} ${MPIEXEC_PREFLAGS}")
+        # remove trailing white space (empty MPIEXEC_PREFLAGS) as it can cause
+        # erroneous test failures with some MPI implementations
+        string(STRIP "${RUN_COMMAND}" RUN_COMMAND)
         list(APPEND TEST_ARGS "--runcommand=\"${RUN_COMMAND}\"")
       endif()
 
@@ -156,7 +155,10 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
       # check if this test is run with MPI and add the test run command
       if((SUNDIALS_ADD_TEST_MPI_NPROCS) AND (MPIEXEC_EXECUTABLE))
-        add_test(NAME ${NAME} COMMAND ${MPIEXEC_EXECUTABLE} -n ${SUNDIALS_ADD_TEST_MPI_NPROCS} $<TARGET_FILE:${EXECUTABLE}> ${TEST_ARGS})
+        if(MPIEXEC_PREFLAGS)
+          string(REPLACE " " ";" PREFLAGS "${MPIEXEC_PREFLAGS}")
+        endif()
+        add_test(NAME ${NAME} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SUNDIALS_ADD_TEST_MPI_NPROCS} ${PREFLAGS} $<TARGET_FILE:${EXECUTABLE}> ${TEST_ARGS})
       else()
         add_test(NAME ${NAME} COMMAND $<TARGET_FILE:${EXECUTABLE}> ${TEST_ARGS})
       endif()
