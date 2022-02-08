@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Programmer(s): David J. Gardner @ LLNL
+# Programmer(s): David J. Gardner, Cody J. Balos @ LLNL
 # ------------------------------------------------------------------------------
 # SUNDIALS Copyright Start
 # Copyright (c) 2002-2020, Lawrence Livermore National Security
@@ -109,13 +109,13 @@ ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 1000 # changed
-PenaltyBreakComment: 300
+PenaltyBreakComment: 10 # changed (prefer breaking comment)
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
-PenaltyExcessCharacter: 1000000
-PenaltyReturnTypeOnItsOwnLine: 1000 # changed
-PointerAlignment: Right
+PenaltyExcessCharacter: 1000 # changed (loosen to allow possibly a couple extra characters)
+PenaltyReturnTypeOnItsOwnLine: 10000 # changed (penalize more)
+PointerAlignment: Left
 ReflowComments:  true
 SortIncludes:    true
 SortUsingDeclarations: true
