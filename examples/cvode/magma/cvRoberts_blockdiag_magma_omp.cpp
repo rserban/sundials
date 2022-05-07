@@ -109,7 +109,7 @@ int Jac(realtype t, N_Vector y, N_Vector fy, SUNMatrix J, void *user_data,
 __global__
 void j_kernel(int ngroups, realtype* ydata, realtype *Jdata);
 
-// Function to check return pointers and values
+// Functions to check return pointers and values
 
 int check_ptr(void* ptr, const char *funcname);
 int check_retval(int value, const char *funcname);
