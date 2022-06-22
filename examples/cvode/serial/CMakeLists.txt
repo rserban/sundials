@@ -36,6 +36,7 @@ set(CVODE_examples
   "cvRoberts_dns_constraints\;\;develop"
   "cvRoberts_dns_negsol\;\;develop"
   "cvRoberts_dns_uw\;\;develop"
+  "cvRocket_dns\;\;develop"
   )
 
 if(SUNDIALS_BUILD_WITH_MONITORING)
@@ -63,6 +64,7 @@ set(CVODE_examples_SUPERLUMT
 set(CVODE_extras
   plot_cvParticle.py
   plot_cvPendulum.py
+  cvRoberts_dns_stats.csv
   )
 
 # Specify libraries to link against
