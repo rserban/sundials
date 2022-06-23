@@ -27,17 +27,17 @@ extern "C" {
  * ==================================================================
  */
 
-#if defined(SUNDIALS_F77_FUNC)
+#if defined(SUNDIALS_LAPACK_FUNC)
 
-#define dgbtrf_f77      SUNDIALS_F77_FUNC(dgbtrf, DGBTRF)
-#define dgbtrs_f77      SUNDIALS_F77_FUNC(dgbtrs, DGBTRS)
-#define dgetrf_f77      SUNDIALS_F77_FUNC(dgetrf, DGETRF)
-#define dgetrs_f77      SUNDIALS_F77_FUNC(dgetrs, DGETRS)
+#define dgbtrf_f77      SUNDIALS_LAPACK_FUNC(dgbtrf, DGBTRF)
+#define dgbtrs_f77      SUNDIALS_LAPACK_FUNC(dgbtrs, DGBTRS)
+#define dgetrf_f77      SUNDIALS_LAPACK_FUNC(dgetrf, DGETRF)
+#define dgetrs_f77      SUNDIALS_LAPACK_FUNC(dgetrs, DGETRS)
 
-#define sgbtrf_f77      SUNDIALS_F77_FUNC(sgbtrf, SGBTRF)
-#define sgbtrs_f77      SUNDIALS_F77_FUNC(sgbtrs, SGBTRS)
-#define sgetrf_f77      SUNDIALS_F77_FUNC(sgetrf, SGETRF)
-#define sgetrs_f77      SUNDIALS_F77_FUNC(sgetrs, SGETRS)
+#define sgbtrf_f77      SUNDIALS_LAPACK_FUNC(sgbtrf, SGBTRF)
+#define sgbtrs_f77      SUNDIALS_LAPACK_FUNC(sgbtrs, SGBTRS)
+#define sgetrf_f77      SUNDIALS_LAPACK_FUNC(sgetrf, SGETRF)
+#define sgetrs_f77      SUNDIALS_LAPACK_FUNC(sgetrs, SGETRS)
 
 #else
 

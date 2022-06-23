@@ -59,59 +59,126 @@ else()
   set(LAPACK_FOUND FALSE)
 endif()
 
-message(STATUS "LAPACK_LIBRARIES:  ${LAPACK_LIBRARIES}")
+message(STATUS "LAPACK_LIBRARIES: ${LAPACK_LIBRARIES}")
 
 # -----------------------------------------------------------------------------
 # Section 4: Test the TPL
 # -----------------------------------------------------------------------------
 
-# If we have the LAPACK libraries, determine if they work.
-if(LAPACK_LIBRARIES AND (NOT LAPACK_WORKS))
-  # Create the LapackTest directory
-  set(LapackTest_DIR ${PROJECT_BINARY_DIR}/LapackTest)
-  file(MAKE_DIRECTORY ${LapackTest_DIR})
+# Macro to test different name mangling options
+macro(test_lapack_name_mangling)
 
-  # Create a CMakeLists.txt file
-  file(WRITE ${LapackTest_DIR}/CMakeLists.txt
-    "CMAKE_MINIMUM_REQUIRED(VERSION ${CMAKE_VERSION})\n"
-    "PROJECT(ltest C)\n"
-    "SET(CMAKE_VERBOSE_MAKEFILE ON)\n"
-    "SET(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\")\n"
-    "SET(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\")\n"
-    "SET(CMAKE_C_STANDARD \"${CMAKE_C_STANDARD}\")\n"
-    "SET(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}\")\n"
-    "SET(CMAKE_C_FLAGS_RELEASE \"${CMAKE_C_FLAGS_RELEASE}\")\n"
-    "SET(CMAKE_C_FLAGS_DEBUG \"${CMAKE_C_FLAGS_DEBUG}\")\n"
-    "SET(CMAKE_C_FLAGS_RELWITHDEBUGINFO \"${CMAKE_C_FLAGS_RELWITHDEBUGINFO}\")\n"
-    "SET(CMAKE_C_FLAGS_MINSIZE \"${CMAKE_C_FLAGS_MINSIZE}\")\n"
-    "ADD_EXECUTABLE(ltest ltest.c)\n"
-    "TARGET_LINK_LIBRARIES(ltest ${LAPACK_LIBRARIES})\n")
+  # Both the name mangling case and number of underscores must be set
+  if((NOT SUNDIALS_LAPACK_FUNC_CASE AND SUNDIALS_LAPACK_FUNC_UNDERSCORES) OR
+      (SUNDIALS_LAPACK_FUNC_CASE AND NOT SUNDIALS_LAPACK_FUNC_UNDERSCORES))
+    print_error("Both SUNDIALS_LAPACK_FUNC_CASE and SUNDIALS_LAPACK_FUNC_UNDERSCORES must be set.")
+  endif()
 
-  # Create a C source file which calls a Blas function (dcopy) and an Lapack function (dgetrf)
-  file(WRITE ${LapackTest_DIR}/ltest.c
-    "${F77_MANGLE_MACRO1}\n"
-    "#define dcopy_f77 SUNDIALS_F77_FUNC(dcopy, DCOPY)\n"
-    "#define dgetrf_f77 SUNDIALS_F77_FUNC(dgetrf, DGETRF)\n"
-    "extern void dcopy_f77(int *n, const double *x, const int *inc_x, double *y, const int *inc_y);\n"
-    "extern void dgetrf_f77(const int *m, const int *n, double *a, int *lda, int *ipiv, int *info);\n"
+  string(TOUPPER ${SUNDIALS_LAPACK_FUNC_CASE} _case)
+  string(TOUPPER ${SUNDIALS_LAPACK_FUNC_UNDERSCORES} _underscores)
+
+  # Set the C preprocessor macro
+  set(LAPACK_MANGLE_MACRO "#define SUNDIALS_LAPACK_FUNC(name,NAME)")
+
+  if(_case MATCHES "LOWER")
+    set(LAPACK_MANGLE_MACRO "${LAPACK_MANGLE_MACRO} name")
+  elseif(_case MATCHES "UPPER")
+    set(LAPACK_MANGLE_MACRO "${LAPACK_MANGLE_MACRO} NAME")
+  else()
+    print_error("Invalid SUNDIALS_LAPACK_FUNC_CASE option.")
+  endif()
+
+  if(SUNDIALS_LAPACK_FUNC_SUFFIX)
+    set(LAPACK_MANGLE_MACRO "${LAPACK_MANGLE_MACRO} ## ${SUNDIALS_LAPACK_FUNC_SUFFIX}")
+  endif()
+
+  if(_underscores MATCHES "ONE")
+    set(LAPACK_MANGLE_MACRO "${LAPACK_MANGLE_MACRO} ## _")
+  elseif(_underscores MATCHES "TWO")
+    set(LAPACK_MANGLE_MACRO "${LAPACK_MANGLE_MACRO} ## __")
+  elseif(NOT (_underscores MATCHES "NONE"))
+    print_error("Invalid SUNDIALS_LAPACK_FUNC_UNDERSCORES option.")
+  endif()
+
+  # Test timers with a simple program
+  set(LAPACK_TEST_DIR ${PROJECT_BINARY_DIR}/LapackTest)
+  file(MAKE_DIRECTORY ${LAPACK_TEST_DIR})
+
+  # Create a CMakeLists.txt file which will generate the test executable
+  file(WRITE ${LAPACK_TEST_DIR}/CMakeLists.txt
+    "cmake_minimum_required(VERSION ${CMAKE_VERSION})\n"
+    "project(ltest C)\n"
+    "set(CMAKE_VERBOSE_MAKEFILE ON)\n"
+    "set(CMAKE_BUILD_TYPE \"${CMAKE_BUILD_TYPE}\")\n"
+    "set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\")\n"
+    "set(CMAKE_C_STANDARD ${CMAKE_C_STANDARD})\n"
+    "set(CMAKE_C_EXTENSIONS ${CMAKE_C_EXTENSIONS})\n"
+    "set(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}\")\n"
+    "set(CMAKE_C_FLAGS_RELEASE \"${CMAKE_C_FLAGS_RELEASE}\")\n"
+    "set(CMAKE_C_FLAGS_DEBUG \"${CMAKE_C_FLAGS_DEBUG}\")\n"
+    "set(CMAKE_C_FLAGS_RELWITHDEBUGINFO \"${CMAKE_C_FLAGS_RELWITHDEBUGINFO}\")\n"
+    "set(CMAKE_C_FLAGS_MINSIZE \"${CMAKE_C_FLAGS_MINSIZE}\")\n"
+    "add_executable(ltest ltest.c)\n"
+    "target_link_libraries(ltest \"${LAPACK_LIBRARIES}\")\n")
+
+  # Create a simple C source for testing
+  file(WRITE ${LAPACK_TEST_DIR}/ltest.c
+    "${LAPACK_MANGLE_MACRO}\n"
+    "#define dcopy_mangled SUNDIALS_LAPACK_FUNC(dcopy, DCOPY)\n"
+    "#define dgetrf_mangled SUNDIALS_LAPACK_FUNC(dgetrf, DGETRF)\n"
+    "extern void dcopy_mangled(int *n, const double *x, const int *inc_x, double *y, const int *inc_y);\n"
+    "extern void dgetrf_magnled(const int *m, const int *n, double *a, int *lda, int *ipiv, int *info);\n"
     "int main(){\n"
     "int n=1;\n"
     "double x, y;\n"
-    "dcopy_f77(&n, &x, &n, &y, &n);\n"
-    "dgetrf_f77(&n, &n, &x, &n, &n, &n);\n"
-    "return(0);\n"
+    "dcopy_mangled(&n, &x, &n, &y, &n);\n"
+    "dgetrf_mangled(&n, &n, &x, &n, &n, &n);\n"
+    "return 0;\n"
     "}\n")
-
-  # Attempt to build and link the "ltest" executable
-  try_compile(COMPILE_OK ${LapackTest_DIR} ${LapackTest_DIR}
-    ltest OUTPUT_VARIABLE COMPILE_OUTPUT)
 
   # To ensure we do not use stuff from the previous attempts,
   # we must remove the CMakeFiles directory.
-  file(REMOVE_RECURSE ${LapackTest_DIR}/CMakeFiles)
+  file(REMOVE_RECURSE ${LAPACK_TEST_DIR}/CMakeFiles)
+
+  # Use TRY_COMPILE to make the target
+  try_compile(COMPILE_OK ${LAPACK_TEST_DIR} ${LAPACK_TEST_DIR} ltest
+    OUTPUT_VARIABLE COMPILE_OUTPUT)
+
+endmacro()
+
+
+if(NOT LAPACK_WORKS)
+
+  # Test the current settings first
+  test_lapack_name_mangling()
+
+  # Test the possible options
+  if(NOT COMPILE_OK)
+
+    foreach(case "LOWER" "UPPER")
+      foreach(underscores "NONE" "ONE" "TWO")
+
+        # Overwrite the cache variable values
+        set(SUNDIALS_LAPACK_FUNC_CASE "${case}" CACHE STRING
+          "Case of LAPACK function names" FORCE)
+
+        set(SUNDIALS_LAPACK_FUNC_UNDERSCORES "${underscores}" CACHE STRING
+          "Number of underscores appended to LAPACK function names (none/one/two)"
+          FORCE)
+
+        test_lapack_name_mangling()
+        if(COMPILE_OK)
+          break()
+        endif()
+
+      endforeach()
+    endforeach()
+
+  endif()
 
   # Process test result
   if(COMPILE_OK)
+
     message(STATUS "Checking if LAPACK works with SUNDIALS... OK")
     set(LAPACK_WORKS TRUE CACHE BOOL "LAPACK works with SUNDIALS as configured" FORCE)
 
@@ -124,14 +191,17 @@ if(LAPACK_LIBRARIES AND (NOT LAPACK_WORKS))
       list(GET LAPACK_LIBRARIES 0 TMP_LAPACK_LIBRARIES)
       get_filename_component(LAPACK_LIBRARY_DIR ${TMP_LAPACK_LIBRARIES} PATH)
     endif()
-  else(COMPILE_OK)
-    set(LAPACK_WORKS FALSE CACHE BOOL "LAPACK does not work with SUNDIALS as configured" FORCE)
+
+  else()
+
     message(STATUS "Checking if LAPACK works with SUNDIALS... FAILED")
-    message(STATUS "Check output: ")
-    message("${COMPILE_OUTPUT}")
+    set(LAPACK_WORKS FALSE CACHE BOOL "LAPACK does not work with SUNDIALS as configured" FORCE)
     print_error("SUNDIALS interface to LAPACK is not functional.")
+
   endif()
 
-elseif(LAPACK_LIBRARIES AND LAPACK_WORKS)
+else()
+
   message(STATUS "Skipped LAPACK tests, assuming LAPACK works with SUNDIALS. Set LAPACK_WORKS=FALSE to (re)run compatibility test.")
+
 endif()
