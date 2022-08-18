@@ -12,6 +12,7 @@
  * SUNDIALS Copyright End
  * -----------------------------------------------------------------*/
 
+#include "sundials/sundials_types.h"
 #include <sundials/sundials_config.h>
 
 #if SUNDIALS_MPI_ENABLED
@@ -43,7 +44,6 @@
 #if SUNDIALS_MPI_ENABLED
 static int sunCollectTimers(SUNProfiler p);
 #endif
-static void sunPrintTimers(int idx, SUNHashMapKeyValue kv, FILE* fp, void* pvoid);
 static int sunCompareTimes(const void* l, const void* r);
 
 /*
@@ -142,7 +142,6 @@ static void sunResetTiming(sunTimerStruct* entry)
   entry->count   = 0;
 }
 
-
 /*
   SUNProfiler.
 
@@ -156,6 +155,7 @@ struct _SUNProfiler
   SUNHashMap      map;
   sunTimerStruct* overhead;
   double          sundials_time;
+  SUNOutputFormat output_format;
 };
 
 int SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
@@ -213,6 +213,9 @@ int SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
 
   /* Initialize the overall timer to 0. */
   profiler->sundials_time = 0.0;
+
+  /* Default to table output format */
+  profiler->output_format = SUN_OUTPUTFORMAT_TABLE;
 
   SUNDIALS_MARK_BEGIN(profiler, SUNDIALS_ROOT_TIMER);
   sunStopTiming(profiler->overhead);
@@ -334,6 +337,42 @@ int SUNProfiler_Reset(SUNProfiler p)
   return 0;
 }
 
+int SUNProfiler_SetOutputFormat(SUNProfiler p, SUNOutputFormat fmt)
+{
+  if (!p) return -1;
+
+  if ((fmt != SUN_OUTPUTFORMAT_TABLE) && (fmt != SUN_OUTPUTFORMAT_CSV))
+    return -1;
+
+  p->output_format = fmt;
+
+  return 0;
+}
+
+/* Print out the: timer name, percentage of exec time (based on the max),
+   max across ranks, average across ranks, and the timer counter. */
+static void sunProfilerPrint(int idx, const char* name, sunTimerStruct* timer,
+                             FILE* fp, SUNOutputFormat fmt, double total_time)
+{
+  const long   count   = timer->count;
+  const double maximum = timer->maximum;
+  const double average = timer->average;
+  const double percent = strcmp(name, (const char*) SUNDIALS_ROOT_TIMER) ?
+    maximum / total_time * 100 : 100;
+
+  if (fmt == SUN_OUTPUTFORMAT_CSV)
+  {
+    if (idx) fprintf(fp,",");
+    fprintf(fp, "%s percent,%.2f,%s maximum,%.6f,%s average,%.6f,%s count,%ld",
+            name, percent, name, maximum, name, average, name, count);
+  }
+  else
+  {
+    fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t %.6fs \t %ld\n",
+            name, percent, maximum, average, count);
+  }
+}
+
 int SUNProfiler_Print(SUNProfiler p, FILE* fp)
 {
   int i = 0;
@@ -366,15 +405,25 @@ int SUNProfiler_Print(SUNProfiler p, FILE* fp)
     /* Sort the timers in descending order */
     if (SUNHashMap_Sort(p->map, &sorted, sunCompareTimes))
       return(-1);
-    fprintf(fp, "\n================================================================================================================\n");
-    fprintf(fp, "SUNDIALS GIT VERSION: %s\n", SUNDIALS_GIT_VERSION);
-    fprintf(fp, "SUNDIALS PROFILER: %s\n", p->title);
-    fprintf(fp, "%-40s\t %% time (inclusive) \t max/rank \t average/rank \t count \n", "Results:");
-    fprintf(fp, "================================================================================================================\n");
+
+    if (p->output_format ==  SUN_OUTPUTFORMAT_TABLE)
+    {
+      fprintf(fp, "\n================================================================================================================\n");
+      fprintf(fp, "SUNDIALS GIT VERSION: %s\n", SUNDIALS_GIT_VERSION);
+      fprintf(fp, "SUNDIALS PROFILER: %s\n", p->title);
+      fprintf(fp, "%-40s\t %% time (inclusive) \t max/rank \t average/rank \t count \n", "Results:");
+      fprintf(fp, "================================================================================================================\n");
+    }
 
     /* Print all the other timers out */
     for (i = 0; i < p->map->size; i++)
-      if (sorted[i]) sunPrintTimers(i, sorted[i], fp, (void*) p);
+    {
+      if (sorted[i])
+        sunProfilerPrint(i, (const char*)sorted[i]->key,
+                         (sunTimerStruct*)sorted[i]->value,
+                         fp, p->output_format, p->sundials_time);
+    }
+
     free(sorted);
   }
 
@@ -383,15 +432,24 @@ int SUNProfiler_Print(SUNProfiler p, FILE* fp)
   if (rank == 0)
   {
     /* Print out the total time and the profiler overhead */
-    fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t -- \t\t -- \n", "Est. profiler overhead",
-            p->overhead->elapsed/p->sundials_time,
-            p->overhead->elapsed);
+    if (p->output_format == SUN_OUTPUTFORMAT_CSV)
+    {
+      fprintf(fp, ",estimated profiler overhead percent,%.2f,profiler overhead max,%.6f",
+              p->overhead->elapsed / p->sundials_time,
+              p->overhead->elapsed);
+    }
+    else
+    {
+      fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t -- \t\t -- \n", "Est. profiler overhead",
+              p->overhead->elapsed / p->sundials_time,
+              p->overhead->elapsed);
+    }
 
     /* End of output */
     fprintf(fp, "\n");
   }
 
-  return(0);
+  return 0;
 }
 
 #if SUNDIALS_MPI_ENABLED
@@ -471,22 +529,9 @@ int sunCollectTimers(SUNProfiler p)
 }
 #endif
 
-/* Print out the: timer name, percentage of exec time (based on the max),
-   max across ranks, average across ranks, and the timer counter. */
-void sunPrintTimers(int idx, SUNHashMapKeyValue kv, FILE* fp, void* pvoid)
-{
-  SUNProfiler p = (SUNProfiler) pvoid;
-  sunTimerStruct* ts = (sunTimerStruct*) kv->value;
-  double maximum = ts->maximum;
-  double average = ts->average;
-  double percent = strcmp((const char*) kv->key, (const char*) SUNDIALS_ROOT_TIMER) ? maximum / p->sundials_time * 100 : 100;
-  fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t %.6fs \t %ld\n",
-          kv->key, percent, maximum, average, ts->count);
-}
-
 /* Comparator for qsort that compares key-value pairs
    based on the maximum time in the sunTimerStruct. */
-int sunCompareTimes(const void* l, const void* r)
+static int sunCompareTimes(const void* l, const void* r)
 {
   double left_max;
   double right_max;
