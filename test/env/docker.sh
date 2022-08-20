@@ -87,8 +87,8 @@ TPL_ROOT=/opt/views/int${SUNDIALS_INDEX_SIZE}-${SUNDIALS_PRECISION}
 source /opt/python-venv/sundocs/bin/activate
 
 # load cmake and MPI
-/opt/spack/bin/spack load cmake
-/opt/spack/bin/spack load openmpi
+/opt/spack/bin/spack load --sh cmake
+/opt/spack/bin/spack load --sh openmpi
 
 # ------------------------------------------------------------------------------
 # Compilers and flags
