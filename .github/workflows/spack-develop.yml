@@ -1,7 +1,7 @@
-#
 name: spack@develop build and test with GCC+TPLs (no GPUs)
 
 on:
+  push: # testing
   pull_request:
   schedule:
   - cron: '00 22 * * *'
@@ -10,7 +10,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/llnl/sundials-ci-int${{ matrix.indexsize }}-${{ matrix.precision }}:spack-develop
+      image: ghcr.io/llnl/sundials-ci:spack-develop
       options: --user root
     strategy:
       matrix:
