@@ -2,7 +2,7 @@
 name: double precision build and test with GCC+TPLs (no GPUs)
 
 on:
-  push:
+  #push: # disable for now
   pull_request:
 
 jobs:
