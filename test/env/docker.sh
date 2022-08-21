@@ -86,8 +86,11 @@ TPL_ROOT=/opt/views/int${SUNDIALS_INDEX_SIZE}-${SUNDIALS_PRECISION}
 # setup the python environment
 source /opt/python-venv/sundocs/bin/activate
 
+# load spack view
+spack env view enable ${TPL_ROOT}
+
 # load cmake and MPI
-export PATH=${TPL_ROOT}/cmake/bin:${TPL_ROOT}/openmpi/bin:${PATH}
+#export PATH=${TPL_ROOT}/cmake/bin:${TPL_ROOT}/openmpi/bin:${PATH}
 
 # ------------------------------------------------------------------------------
 # Compilers and flags
