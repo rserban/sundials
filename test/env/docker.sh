@@ -87,7 +87,7 @@ TPL_ROOT=/opt/views/int${SUNDIALS_INDEX_SIZE}-${SUNDIALS_PRECISION}
 source /opt/python-venv/sundocs/bin/activate
 
 # load spack view
-/opt/spack/bin/spack env activate -V -d /opt/spack-environment
+/opt/spack/bin/spack env activate --sh -V -d /opt/spack-environment
 /opt/spack/bin/spack env view enable ${TPL_ROOT}
 ls ${TPL_ROOT} | tee -a setup_env.log
 ls ${TPL_ROOT}/*/* | tee -a setup_env.log
