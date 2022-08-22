@@ -82,11 +82,13 @@ umask 002
 
 # path to TPL installs
 TPL_ROOT=/opt/views/int${SUNDIALS_INDEX_SIZE}-${SUNDIALS_PRECISION}
-ls ${TPL_ROOT} | tee -a setup_env.log
-ls ${TPL_ROOT}/*/* | tee -a setup_env.log
 
 # setup the python environment
 source /opt/python-venv/sundocs/bin/activate
+
+ls ${TPL_ROOT} | tee -a setup_env.log
+ls ${TPL_ROOT}/*/* | tee -a setup_env.log
+echo "PATH=${PATH}"
 
 # ------------------------------------------------------------------------------
 # Compilers and flags
