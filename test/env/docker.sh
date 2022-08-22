@@ -88,9 +88,8 @@ source /opt/python-venv/sundocs/bin/activate
 
 # load spack view
 spack env view enable ${TPL_ROOT}
-
-# load cmake and MPI
-#export PATH=${TPL_ROOT}/cmake/bin:${TPL_ROOT}/openmpi/bin:${PATH}
+ls ${TPL_ROOT}
+ls ${TPL_ROOT}/*/*
 
 # ------------------------------------------------------------------------------
 # Compilers and flags
