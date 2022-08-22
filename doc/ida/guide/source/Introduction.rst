@@ -78,6 +78,8 @@ Changes in v6.3.0
 Added the function :c:func:`IDAGetUserData` to retrieve the user data pointer
 provided to :c:func:`IDASetUserData`.
 
+Fix mismatched definition and declaration bug in SuperLU_DIST matrix constructor.
+
 Fixed the unituitive behavior of the :cmakeop:`USE_GENERIC_MATH` CMake option which
 caused the double precision math functions to be used regardless of the value of
 :cmakeop:`SUNDIALS_PRECISION`. Now, SUNDIALS will use precision appropriate math

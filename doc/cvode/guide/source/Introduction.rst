@@ -121,6 +121,8 @@ Added a new example, ``examples/cvode/serial/cvRocket_dns.c,`` which
 demonstrates using CVODE with a discontinuous right-hand-side function
 and rootfinding.
 
+Fix mismatched definition and declaration bug in SuperLU_DIST matrix constructor.
+
 Fixed the unituitive behavior of the :cmakeop:`USE_GENERIC_MATH` CMake option which
 caused the double precision math functions to be used regardless of the value of
 :cmakeop:`SUNDIALS_PRECISION`. Now, SUNDIALS will use precision appropriate math

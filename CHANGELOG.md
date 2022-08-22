@@ -24,6 +24,8 @@ Added a variety of embedded DIRK methods from [Kennedy & Carpenter,
 NASA TM-2016-219173, 2016] and [Kennedy & Carpenter, Appl. Numer. Math., 146, 2019] to
 ARKODE.
 
+Fix mismatched definition and declaration bug in SuperLU_DIST matrix constructor.
+
 Fixed the unituitive behavior of the `USE_GENERIC_MATH` CMake option which
 caused the double precision math functions to be used regardless of the value of
 `SUNDIALS_PRECISION`. Now, SUNDIALS will use precision appropriate math
