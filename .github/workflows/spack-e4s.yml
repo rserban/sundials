@@ -1,20 +1,20 @@
-#
-name: double precision build and test with GCC+TPLs (no GPUs)
+name: spack@e4s build and test with GCC+TPLs (no GPUs)
 
 on:
-  #push: # disable for now
+  push: # testing
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/llnl/sundials-ci-int${{ matrix.indexsize }}-${{ matrix.precision }}:latest
+      image: ghcr.io/llnl/sundials-ci-spack-e4s:spack-e4s
       options: --user root
     strategy:
       matrix:
         indexsize: [32, 64]
-        precision: ['double']
+        precision: ['single', 'double', 'extended']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -26,9 +26,9 @@ jobs:
           indexsize: ${{ matrix.indexsize }}
           precision: ${{ matrix.precision }}
       - name: Archive files from failed build
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: build_files
+          name: build_files_${{ matrix.indexsize }}_${{ matrix.precision }}
           path: |
-            ${{ github.workspace }}/test/build_*
+            ${{ github.workspace }}/test/build_${{ matrix.indexsize }}_${{ matrix.precision }}_*
