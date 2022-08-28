@@ -1,4 +1,4 @@
-name: spack@e4s build and test with GCC+TPLs (no GPUs)
+name: spack@latest build and test with GCC+TPLs (no GPUs)
 
 on:
   push: # testing
@@ -9,7 +9,7 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/llnl/sundials-ci-spack-e4s:spack-e4s
+      image: ghcr.io/llnl/sundials-ci-spack-latest:spack-latest
       options: --user root
     strategy:
       matrix:
