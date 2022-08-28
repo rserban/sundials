@@ -14,18 +14,19 @@
 GitHub
 ======
 
-There are two types of CI testing that we run on GitHub via `GitHub actions <https://github.com/LLNL/sundials/actions>`_:
+There are two types of CI testing that we run on GitHub via
+`GitHub actions <https://github.com/LLNL/sundials/actions>`_:
 
 1. Comprehensive (excluding GPUs)
 2. Minimal/Short
 
-The comprehensive testing is run only on one platform (Ubuntu) and utilizes Docker + Spack + the
-latest E4S release to build SUNDIALS in many different configurations with and without third-party
-libraries enabled.
+The comprehensive testing is run only on one platform (Ubuntu) and utilizes
+Docker + Spack to build SUNDIALS in many different configurations with and
+without third-party libraries enabled.
 
-The minimal/short testing runs on more platforms: Windows (MinGW and MSVC), and MacOS but it runs in
-only one configuration (using 64-bit indices and double precision) and without third-party
-libraries.
+The minimal/short testing runs on more platforms: Linux (Ubuntu), Windows (MinGW
+and MSVC), and MacOS but it runs in only one configuration (using 64-bit indices
+and double precision) and without third-party libraries.
 
 
 Building the Docker containers for CI
@@ -85,14 +86,16 @@ to build the Docker container(s) used for the comprehensive CI testing.
 Automated building of new containers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We currently have six different containers, one for each combination of {int32, int64} and {single,
-double, extended} precision. These containers are pinned to an E4S release. When E4S does a release,
-we can rebuild these containers to use the packages from it. We add E4S as a mirror in the Spack
-environment so that its buildcache can be leveraged.
+We currently have two containers, one using the latest Spack release
+(``sundials-ci-spack-latest``) and one using the Spack develop branch
+(``sundials-ci-spack-develop``). Both containers include configurations of
+third-party libraries using {int32, int64} index sizes and {single, double,
+extended} precision.
 
-We also maintain two containers for the {int32, double} pair that are built automatically (in a
-GitHub action) every week against the latest Spack develop commit. This allows us to test against
-the latest versions of dependencies reguarly and detect interface breakages.
+The container utilizing the Spack develop branch is built automatically (in a
+GitHub action) every week against the latest develop commit. This allows us to
+test against the latest versions of dependencies reguarly and detect interface
+breakages.
 
 
 GitLab
