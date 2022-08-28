@@ -28,9 +28,9 @@ jobs:
           indexsize: ${{ matrix.indexsize }}
           precision: ${{ matrix.precision }}
       - name: Archive files from failed build
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: build_files
+          name: build_files_${{ matrix.indexsize }}_${{ matrix.precision }}
           path: |
-            ${{ github.workspace }}/test/build_*
+            ${{ github.workspace }}/test/build_${{ matrix.indexsize }}_${{ matrix.precision }}_*
