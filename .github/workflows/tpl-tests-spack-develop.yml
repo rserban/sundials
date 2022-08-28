@@ -1,15 +1,16 @@
-name: spack@latest build and test with GCC+TPLs (no GPUs)
+name: TPL tests (no GPU) - spack@develop
 
 on:
   push: # testing
-  pull_request:
   workflow_dispatch:
+  # schedule:
+  # - cron: '00 22 * * *'
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/llnl/sundials-ci-spack-latest:spack-latest
+      image: ghcr.io/llnl/sundials-ci-spack-develop:spack-develop
       options: --user root
     strategy:
       matrix:
