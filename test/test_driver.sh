@@ -86,6 +86,19 @@ help ()
         --tpls
             Enable external third-party libraries in a custom test.
 
+        --loglevel LEVEL
+            Logging level to use in a custom test. LEVEL must be one of:
+
+            0 -- logging disabled
+            1 -- add error logging
+            2 -- add warning logging
+            3 -- add informational logging
+            4 -- add debugging logging
+            5 -- add verbose debugging logging
+
+        --profiling
+            Enable profiling in a custom test.
+
         --suntesttype TYPE
             SUNDIALS test type for a custom test. TYPE must be one of:
 
@@ -145,6 +158,8 @@ tarball="NONE"
 realtype="double"
 indexsize="64"
 libtype="both"
+loglevel="1"
+profiling="OFF"
 tpls="OFF"
 suntesttype="DEV"
 phase=""
@@ -269,6 +284,19 @@ while [[ $# -gt 0 ]]; do
             esac
             shift 2;;
 
+        --loglevel)
+            loglevel=$2
+            if ((number < 0 || number > 5)); then
+                echo "ERROR: Invaid log level $loglevel"
+                help
+                exit 1;;
+            fi
+            shift 2;;
+
+        --profiling)
+            profiling="ON"
+            shift;;
+
         --tpls)
             tpls="ON"
             shift;;
@@ -368,6 +396,8 @@ args_realtypes=()
 args_indexsizes=()
 args_libtypes=()
 args_tpls=()
+args_loglevel=()
+args_profiling=()
 args_suntests=()
 args_phase=()
 
@@ -378,13 +408,31 @@ case "$testtype" in
         tarball=NONE
 
         # C90 compile test and sanitizer tests
-        for is in 32 64; do
-            args_realtypes+=("double")
-            args_indexsizes+=("${is}")
-            args_libtypes+=("static")
-            args_tpls+=("OFF")
-            args_suntests+=("DEV")
-            args_phase+=("BUILD")
+        for ll in 0 1 2 3 4 5; do
+            for pf in ON OFF; do
+                for is in 32 64; do
+                    args_realtypes+=("double")
+                    args_indexsizes+=("${is}")
+                    args_libtypes+=("static")
+                    args_tpls+=("OFF")
+                    args_loglevel+=("${ll}")
+                    args_profiling+=("${pf}")
+                    args_suntests+=("DEV")
+                    args_phase+=("BUILD")
+                done
+            done
+        done
+
+        # C90 compile test and sanitizer tests
+        # for is in 32 64; do
+        #     args_realtypes+=("double")
+        #     args_indexsizes+=("${is}")
+        #     args_libtypes+=("static")
+        #     args_tpls+=("OFF")
+        #     args_loglevel+=("1")
+        #     args_profiling+=("OFF")
+        #     args_suntests+=("DEV")
+        #     args_phase+=("BUILD")
         done
 
         # Basic development tests
@@ -393,6 +441,8 @@ case "$testtype" in
             args_indexsizes+=("${is}")
             args_libtypes+=("static")
             args_tpls+=("ON")
+            args_loglevel+=("1")
+            args_profiling+=("ON")
             args_suntests+=("DEV")
             args_phase+=("TEST")
         done
@@ -403,13 +453,19 @@ case "$testtype" in
         tarball=sundials
 
         # C90 compile test and sanitizer tests
-        for is in 32 64; do
-            args_realtypes+=("double")
-            args_indexsizes+=("${is}")
-            args_libtypes+=("static")
-            args_tpls+=("OFF")
-            args_suntests+=("DEV")
-            args_phase+=("BUILD")
+        for ll in 0 1 2 3 4 5; do
+            for pf in ON OFF; do
+                for is in 32 64; do
+                    args_realtypes+=("double")
+                    args_indexsizes+=("${is}")
+                    args_libtypes+=("static")
+                    args_tpls+=("OFF")
+                    args_loglevel+=("${ll}")
+                    args_profiling+=("${pf}")
+                    args_suntests+=("DEV")
+                    args_phase+=("BUILD")
+                done
+            done
         done
 
         # More development tests
@@ -435,13 +491,19 @@ case "$testtype" in
         tarball=sundials
 
         # C90 compile test and sanitizer tests
-        for is in 32 64; do
-            args_realtypes+=("double")
-            args_indexsizes+=("${is}")
-            args_libtypes+=("static")
-            args_tpls+=("OFF")
-            args_suntests+=("DEV")
-            args_phase+=("BUILD")
+        for ll in 0 1 2 3 4 5; do
+            for pf in ON OFF; do
+                for is in 32 64; do
+                    args_realtypes+=("double")
+                    args_indexsizes+=("${is}")
+                    args_libtypes+=("static")
+                    args_tpls+=("OFF")
+                    args_loglevel+=("${ll}")
+                    args_profiling+=("${pf}")
+                    args_suntests+=("DEV")
+                    args_phase+=("BUILD")
+                done
+            done
         done
 
         # Even more development tests
@@ -470,6 +532,8 @@ case "$testtype" in
         args_indexsizes+=("${indexsize}")
         args_libtypes+=("${libtype}")
         args_tpls+=("${tpls}")
+        args_loglevel+=("${loglevel}")
+        args_profiling+=("${profiling}")
         args_suntests+=("${suntesttype}")
         args_phase+=("${phase}")
         if [ "${realtype}" != "double" ] && [ "${suntesttype}" == "DEV" ]; then
@@ -502,6 +566,8 @@ if [ "$tarball" != NONE ]; then
                 "${args_indexsizes[0]}"
                 "${args_libtypes[0]}"
                 "${args_tpls[0]}"
+                "${args_loglevel[0]}"
+                "${args_profiling[0]}"
                 "${args_suntests[0]}")
 
     # Setup environment
@@ -586,6 +652,8 @@ for ((j=0;j<ntestdirs;j++)); do
                     "${args_indexsizes[i]}"
                     "${args_libtypes[i]}"
                     "${args_tpls[i]}"
+                    "${args_loglevel[i]}"
+                    "${args_profiling[i]}"
                     "${args_suntests[i]}")
 
         # Print test header for Jenkins section collapsing

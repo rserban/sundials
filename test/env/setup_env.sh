@@ -40,13 +40,15 @@
 echo "./setup_env.sh $*" | tee -a setup_env.log
 
 # Check number of inputs
-if [ "$#" -lt 5 ]; then
+if [ "$#" -lt 7 ]; then
     echo "ERROR: missing required inputs"
-    echo "  1) real type    : [single|double|extended]"
-    echo "  2) index size   : [32|64]"
-    echo "  3) library type : [static|shared|both]"
-    echo "  4) TPL status   : [ON|OFF]"
-    echo "  5) test type    : [STD|DEV]"
+    echo "  1) real type     : [single|double|extended]"
+    echo "  2) index size    : [32|64]"
+    echo "  3) library type  : [static|shared|both]"
+    echo "  4) TPL status    : [ON|OFF]"
+    echo "  5) test type     : [STD|DEV]"
+    echo "  6) logging level : [0,1,2,3,4,5]"
+    echo "  7) profiling     : [ON|OFF]"
     return 1
 fi
 
@@ -57,6 +59,8 @@ export SUNDIALS_INDEX_SIZE="$2"
 export SUNDIALS_LIBRARY_TYPE="$3"
 export SUNDIALS_TPLS="$4"
 export SUNDIALS_TEST_TYPE="$5"
+export SUNDIALS_LOGGING_LEVEL="$6"
+export SUNDIALS_PROFILING="$7"
 
 # Remove parsed inputs, the remainder are passed to the environment script
 shift 5
@@ -191,12 +195,6 @@ fi
 # ensure TPLs are off when necessary
 
 if [[ "${SUNDIALS_TPLS}" == "OFF" ]]; then
-
-    # turn off profiling so we have a case that tests it
-    export SUNDIALS_PROFILING=OFF
-
-    # turn off logging so we have a case that tests it
-    export SUNDIALS_LOGGING_LEVEL=0
 
     # threading
     export SUNDIALS_PTHREAD=OFF
