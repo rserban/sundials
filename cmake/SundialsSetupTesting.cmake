@@ -25,10 +25,8 @@ if(SUNDIALS_TEST_DEVTESTS)
   # Python is needed to use the test runner
   find_package(PythonInterp REQUIRED)
   if(${PYTHON_VERSION_MAJOR} LESS 3)
-    if(${PYTHON_VERSION_MINOR} LESS 7)
-      print_warning("Python version must be 2.7.x or greater to run development tests"
-        "Examples will build but 'make test' may fail.")
-    endif()
+    print_warning("Python 3.x or greater is required to run development tests"
+      "Examples will build but 'make test' may fail.")
   endif()
 
   # look for the testRunner script in the test directory
