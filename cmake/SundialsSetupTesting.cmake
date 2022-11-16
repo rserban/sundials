@@ -17,57 +17,49 @@
 # Enable testing with 'make test'
 include(CTest)
 
-# Check if development tests are enabled
-if(SUNDIALS_TEST_DEVTESTS)
+# Check if test runner is needed
+if(SUNDIALS_TEST_DIFF OR SUNDIALS_TEST_PROFILE)
+  set(SUNDIALS_TEST_USE_RUNNER TRUE)
+else()
+  set(SUNDIALS_TEST_USE_RUNNER FALSE)
+endif()
 
-  message("SUNDIALS Development testing")
+if(SUNDIALS_TEST_USE_RUNNER)
 
   # Python is needed to use the test runner
   find_package(PythonInterp REQUIRED)
   if(${PYTHON_VERSION_MAJOR} LESS 3)
-    print_warning("Python 3.x or greater is required to run development tests"
-      "Examples will build but 'make test' may fail.")
+    print_error("Python 3.x is required to diff or profile tests. Set SUNDIALS_TEST_DIFF and SUNDIALS_TEST_PROFILE to OFF")
   endif()
 
-  # look for the testRunner script in the test directory
+  # Look for the testRunner script in the test directory
   find_program(TESTRUNNER testRunner PATHS test NO_DEFAULT_PATH)
   if(NOT TESTRUNNER)
-    print_error("Could not locate testRunner. Set SUNDIALS_TEST_DEVTESTS=OFF to continue.")
+    print_error("Could not locate testRunner. Set SUNDIALS_TEST_DIFF and SUNDIALS_TEST_PROFILE to OFF")
   endif()
   message(STATUS "Found testRunner: ${TESTRUNNER}")
   set(TESTRUNNER ${TESTRUNNER} CACHE INTERNAL "")
 
-  # Create the default test output directory
-  set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/Testing/output)
+endif()
 
-  if(NOT EXISTS ${TEST_OUTPUT_DIR})
-    file(MAKE_DIRECTORY ${TEST_OUTPUT_DIR})
-  endif()
+if(SUNDIALS_TEST_DIFF)
 
-  # If a non-default output directory was provided make sure it exists
-  if(SUNDIALS_TEST_OUTPUT_DIR)
-    message(STATUS "Using non-default test output directory: ${SUNDIALS_TEST_OUTPUT_DIR}")
-    if(NOT EXISTS ${SUNDIALS_TEST_OUTPUT_DIR})
-      file(MAKE_DIRECTORY ${SUNDIALS_TEST_OUTPUT_DIR})
-    endif()
+  # Create the default test output directory if necessary
+  if(NOT EXISTS ${SUNDIALS_TEST_OUTPUT_DIR})
+    file(MAKE_DIRECTORY ${SUNDIALS_TEST_OUTPUT_DIR})
   endif()
+  message(STATUS "Test output directory: ${SUNDIALS_TEST_OUTPUT_DIR}")
 
   # If a non-default answer directory was provided make sure it exists
   if(SUNDIALS_TEST_ANSWER_DIR)
-    message(STATUS "Using non-default test answer directory: ${SUNDIALS_TEST_ANSWER_DIR}")
+    message(STATUS "Test answer directory: ${SUNDIALS_TEST_ANSWER_DIR}")
     if(NOT EXISTS ${SUNDIALS_TEST_ANSWER_DIR})
       print_error("SUNDIALS_TEST_ANSWER_DIR does not exist!")
     endif()
   endif()
 
-  # Check if using non-default comparison precisions when testing
-  if(SUNDIALS_TEST_FLOAT_PRECISION GREATER_EQUAL "0")
-    message(STATUS "Using non-default float precision: ${SUNDIALS_TEST_FLOAT_PRECISION}")
-  endif()
-
-  if(SUNDIALS_TEST_INTEGER_PRECISION GREATER_EQUAL "0")
-    message(STATUS "Using non-default integer precision: ${SUNDIALS_TEST_INTEGER_PRECISION}")
-  endif()
+  message(STATUS "Test float comparison precision: ${SUNDIALS_TEST_FLOAT_PRECISION}")
+  message(STATUS "Test integer comparison precision: ${SUNDIALS_TEST_INTEGER_PRECISION}")
 
 endif()
 

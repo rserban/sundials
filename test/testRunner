@@ -28,18 +28,21 @@ import re
 import subprocess
 import sys
 
+
 def main():
 
-    parser = argparse.ArgumentParser(description='Sundials test runner for use in ctest.')
+    parser = argparse.ArgumentParser(description='Run a CI test.')
 
     # Required inputs
     parser.add_argument('--testname', dest='testName', type=str, required=True,
                         help='name of the test')
 
-    parser.add_argument('--executablename', dest='executableName', type=str, required=True,
+    parser.add_argument('--executablename', dest='executableName', type=str,
+                        required=True,
                         help='executable, including path')
 
-    parser.add_argument('--outputdir', dest='outputDir', type=str, required=True,
+    parser.add_argument('--outputdir', dest='outputDir', type=str,
+                        required=True,
                         help='path to output directory')
 
     # Optional inputs
@@ -47,25 +50,30 @@ def main():
                         help='path to answers directory')
 
     parser.add_argument('--answerfile', dest='answerFile', type=str,
-                        help='answer file, filename only specify path using --answerdir')
+                        help='answer filename')
 
     parser.add_argument('--runcommand', dest='runCommand', type=str,
                         help='command used to run test executable, eg. mpirun')
 
     parser.add_argument('--runargs', dest='runArgs', type=str,
-                        help='command line arguments passed to test executable')
+                        help='command line arguments for test executable')
 
-    parser.add_argument('--floatprecision', dest='floatPrecision', type=int, default=4,
-                        help='precision for floating point failure comparison (number of digits')
+    parser.add_argument('--floatprecision', dest='floatPrecision', type=int,
+                        default=4,
+                        help='''number of matching digits in floating point
+                        comparisons''')
 
-    parser.add_argument('--integerpercentage', dest='integerPercentage', type=int, default=10,
-                        help='integer percentage difference for failure comparison')
+    parser.add_argument('--integerpercentage', dest='integerPercentage',
+                        type=int, default=10,
+                        help='percentage difference for integer comparisons')
 
     parser.add_argument('--nodiff', dest='CheckDiff', action='store_false',
-                        help='do not diff the output file against answer file, only check the test return value')
+                        help='''do not compare the output and answer files,
+                        only check the test return value''')
 
     parser.add_argument('--profile', action='store_true',
-                        help='Gather profiling data (requires Caliper to be enabled)')
+                        help='''Gather profiling data (requires Caliper to be
+                        enabled)''')
 
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='run verbosely')
@@ -73,14 +81,14 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        print("testName=%s"%(args.testName))
-        print("executableName=%s"%(args.executableName))
-        print("answerDir=%s"%(args.answerDir))
-        print("answerFile=%s"%(args.answerFile))
-        print("outputDir=%s"%(args.outputDir))
-        print("runCommand=%s"%(args.runCommand))
-        print("runArgs=%s"%(args.runArgs))
-        print("profile=%s"%(args.profile))
+        print("testName       = ", args.testName)
+        print("executableName = ", args.executableName)
+        print("answerDir      = ", args.answerDir)
+        print("answerFile     = ", args.answerFile)
+        print("outputDir      = ", args.outputDir)
+        print("runCommand     = ", args.runCommand)
+        print("runArgs        = ", args.runArgs)
+        print("profile        = ", args.profile)
 
     # Check for output directory
     if not os.path.exists(args.outputDir):
@@ -116,10 +124,11 @@ def main():
 
     if args.profile:
         dateTime = datetime.datetime.now().strftime("%m%d%Y_%H%M%S")
-        profilePath = os.path.join(args.outputDir, args.testName+".%s.caliper" % dateTime)
+        profilePath = os.path.join(args.outputDir,
+                                   args.testName+".%s.caliper" % dateTime)
         os.environ['SUNDIALS_VERSION'] = subprocess.check_output(
-                ['git', 'describe', '--abbrev=12', '--dirty', '--always', '--tags']
-            ).decode('UTF-8').strip()
+                ['git', 'describe', '--abbrev=12', '--dirty', '--always',
+                 '--tags']).decode('UTF-8').strip()
         os.environ['CALI_SERVICES_ENABLE'] = 'env'
         os.environ['CALI_ENV_EXTRA'] = 'SUNDIALS_VERSION'
         os.environ['CALI_CONFIG'] = 'runtime-report,hatchet-region-profile,output=%s' % profilePath
@@ -136,7 +145,7 @@ def main():
             print("  Command = " + ' '.join(testCommand))
             print("  Output File = " + outputFile)
             if args.profile:
-                print("  ENV{CALI_CONFIG} = " + os.environ['CALI_CONFIG'] + "\n")
+                print("  CALI_CONFIG = " + os.environ['CALI_CONFIG'] + "\n")
 
         # run the test
         process = subprocess.Popen(testCommand, stdout=outFile, stderr=outFile)
@@ -155,9 +164,9 @@ def main():
                 answerDir = os.path.join(os.path.dirname(sys.argv[0]),
                                          "answers")
             if args.answerFile:
-                answerFile = os.path.join(args.answerDir, args.answerFile)
+                answerFile = os.path.join(answerDir, args.answerFile)
             else:
-                answerFile = os.path.join(args.answerDir, args.testName)
+                answerFile = os.path.join(answerDir, args.testName)
 
             if args.verbose:
                 print("Comparing test output and answer files...")
@@ -185,6 +194,7 @@ def main():
     else:
         print("Test failed.")
         sys.exit(1)
+
 
 def compare(outputFile, answerFile, args):
     # Note: This functions strips all lines of leading and trailing whitespace
@@ -218,6 +228,7 @@ def compare(outputFile, answerFile, args):
         return False
     return True
 
+
 def compareLines(outLine, answerLine, integerPercentage, floatPrecision):
     outTokens = tokenizeLine(outLine)
     answerTokens = tokenizeLine(answerLine)
@@ -235,7 +246,7 @@ def compareLines(outLine, answerLine, integerPercentage, floatPrecision):
         if outIsInt:
             answerIsInt, answerInt = isInt(answerValue)
             if not answerIsInt:
-                print("ERROR: The output is a int but answer is not."
+                print("ERROR: The output is a int but answer is not.")
                 return False
             elif not intCompare(answerInt, outInt, integerPercentage):
                 return False
@@ -244,7 +255,7 @@ def compareLines(outLine, answerLine, integerPercentage, floatPrecision):
             if outIsFloat:
                 answerIsFloat, answerFloat = isFloat(answerValue)
                 if not answerIsFloat:
-                    print("ERROR: The output is a float but answer is not."
+                    print("ERROR: The output is a float but answer is not.")
                     return False
                 elif not floatCompare(answerFloat, outFloat, floatPrecision):
                     return False
@@ -255,12 +266,14 @@ def compareLines(outLine, answerLine, integerPercentage, floatPrecision):
                 return False
     return True
 
+
 def isInt(value):
     # Check if string can be converted to int
     try:
         return True, int(value)
     except ValueError:
         return False, 0
+
 
 def intCompare(answer, value, percentage):
     # Check if integer error greater than the allowed percentage
@@ -276,12 +289,14 @@ def intCompare(answer, value, percentage):
     print("  Allowance = " + str(percentage) + "%")
     return False
 
+
 def isFloat(value):
     # Check if string can be converted to float
     try:
         return True, float(value)
     except ValueError:
         return False, 0
+
 
 def floatCompare(answer, value, precision):
     # Check if floating point numbers match to a given number of digits
@@ -296,11 +311,14 @@ def floatCompare(answer, value, precision):
     print("  Allowance = " + str(precision) + " decimals")
     return False
 
+
 def tokenizeLine(line):
     return tokenizeLine.pattern.split(line)
 
+
 # Precompile a pattern since it will be used many times
 tokenizeLine.pattern = re.compile(r';|,|\s+|=+|:|\|\(|\)')
+
 
 def stripLines(lines):
     strippedLines = []
@@ -309,6 +327,7 @@ def stripLines(lines):
         if strippedLine != "":
             strippedLines.append(strippedLine)
     return strippedLines
+
 
 if __name__ == "__main__":
     main()
