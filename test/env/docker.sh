@@ -160,7 +160,7 @@ export SUNDIALS_MONITORING=ON
 export SUNDIALS_PROFILING=ON
 
 # Sundials logging
-export SUNDIALS_LOGGING_LEVEL=4
+export SUNDIALS_LOGGING_LEVEL=3
 export SUNDIALS_LOGGING_ENABLE_MPI=ON
 
 # Answer files
@@ -283,6 +283,13 @@ if [ "$SUNDIALS_PRECISION" == "double" ]; then
     export SUPERLU_DIST_INCLUDE_DIR="${SUPERLU_DIST_ROOT}/include"
     export SUPERLU_DIST_LIBRARY_DIR="${SUPERLU_DIST_ROOT}/lib"
     export SUPERLU_DIST_OPENMP=OFF
+
+    # if BLAS wasnt found, then dont build SuperLU_DIST
+    if [ -z "$BLAS_LIBRARIES" ]; then
+        export SUNDIALS_SUPERLU_DIST=OFF
+    else
+        export SUNDIALS_SUPERLU_DIST=ON
+    fi
 else
     export SUNDIALS_SUPERLU_DIST=OFF
     unset SUPERLU_DIST_INCLUDE_DIR
