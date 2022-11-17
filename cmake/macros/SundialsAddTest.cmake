@@ -77,21 +77,22 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
   set(_add_test TRUE)
 
+  # development only tests
+  if(NOT SUNDIALS_TEST_DEVTESTS AND SUNDIALS_ADD_TEST_EXAMPLE_TYPE)
+    message(STATUS "Test ${NAME} excluded from standard tests")
+    set(_add_test FALSE)
+  endif()
+
   # always excluded
   if("${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL "exclude")
+    message(STATUS "Test ${NAME} excluded")
     set(_add_test FALSE)
   endif()
 
   # precision-specific exclusions
   string(TOLOWER "exclude-${SUNDIALS_PRECISION}" _exclude_precision)
   if("${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL _exclude_precision)
-    message(STATUS "Skipped test ${NAME} because it had type ${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}")
-    set(_add_test FALSE)
-  endif()
-
-  # development only tests
-  if(("${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL "develop")
-      AND SUNDIALS_TEST_DEVTESTS)
+    message(STATUS "Test ${NAME} excluded with ${_exclude_precision} precision")
     set(_add_test FALSE)
   endif()
 
@@ -101,30 +102,7 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
   if(_add_test)
 
-    # set run command if necessary and remove trailing white space from the
-    # command (i.e., empty MPIEXEC_PREFLAGS) as it can cause erroneous test
-    # failures with some MPI implementations
-    if((SUNDIALS_ADD_TEST_MPI_NPROCS) AND (MPIEXEC_EXECUTABLE))
-      set(_run_command "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SUNDIALS_ADD_TEST_MPI_NPROCS} ${MPIEXEC_PREFLAGS}")
-      string(STRIP "${_run_command}" _run_command)
-    endif()
-
-    # set the test input args
-    if(SUNDIALS_ADD_TEST_TEST_ARGS)
-      string(REPLACE ";" " " _user_args "${SUNDIALS_ADD_TEST_TEST_ARGS}")
-      set(_run_args "${_user_args}")
-      unset(_user_args)
-    endif()
-
-    if(SUNDIALS_ADD_TEST_EXTRA_ARGS)
-      string(REPLACE ";" " " _extra_args "${SUNDIALS_ADD_TEST_EXTRA_ARGS}")
-      set(_run_args "${_run_args} ${_extra_args}")
-      unset(_extra_args)
-    endif()
-
-    if(_run_args)
-      string(STRIP "${_run_args}" _run_args)
-    endif()
+    message(STATUS "Test ${NAME} added")
 
     if(SUNDIALS_TEST_USE_RUNNER)
 
@@ -134,15 +112,35 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
         "--testname=${NAME}"
         "--executablename=$<TARGET_FILE:${EXECUTABLE}>"
         "--outputdir=${SUNDIALS_TEST_OUTPUT_DIR}"
-        )
+      )
 
-      # check if this test is run with MPI and set the MPI run command
-      if(_run_command)
+      # set run command if necessary and remove trailing white space from the
+      # command (i.e., empty MPIEXEC_PREFLAGS) as it can cause erroneous test
+      # failures with some MPI implementations
+      if((SUNDIALS_ADD_TEST_MPI_NPROCS) AND (MPIEXEC_EXECUTABLE))
+        set(_run_command "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SUNDIALS_ADD_TEST_MPI_NPROCS} ${MPIEXEC_PREFLAGS}")
+        string(STRIP "${_run_command}" _run_command)
         list(APPEND TEST_ARGS "--runcommand=\"${_run_command}\"")
+        unset(_run_command)
+      endif()
+
+      # set the test input args
+      if(SUNDIALS_ADD_TEST_TEST_ARGS)
+        string(REPLACE ";" " " _user_args "${SUNDIALS_ADD_TEST_TEST_ARGS}")
+        set(_run_args "${_user_args}")
+        unset(_user_args)
+      endif()
+
+      if(SUNDIALS_ADD_TEST_EXTRA_ARGS)
+        string(REPLACE ";" " " _extra_args "${SUNDIALS_ADD_TEST_EXTRA_ARGS}")
+        set(_run_args "${_run_args} ${_extra_args}")
+        unset(_extra_args)
       endif()
 
       if(_run_args)
+        string(STRIP "${_run_args}" _run_args)
         list(APPEND TEST_ARGS "--runargs=\"${_run_args}\"")
+        unset(_run_args)
       endif()
 
       if(SUNDIALS_TEST_PROFILE)
@@ -188,11 +186,32 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
     else()
 
-      if(_run_command)
-        add_test(NAME ${NAME} COMMAND ${_run_command} $<TARGET_FILE:${EXECUTABLE}> ${_run_args})
+      # convert string to list
+      if(SUNDIALS_ADD_TEST_TEST_ARGS)
+        string(REPLACE " " ";" _user_args "${SUNDIALS_ADD_TEST_TEST_ARGS}")
+        set(_run_args "${_user_args}")
+        unset(_user_args)
+      endif()
+
+      if(SUNDIALS_ADD_TEST_EXTRA_ARGS)
+        string(REPLACE " " ";" _extra_args "${SUNDIALS_ADD_TEST_EXTRA_ARGS}")
+        set(_run_args "${_run_args} ${_extra_args}")
+        unset(_extra_args)
+      endif()
+
+      if(_run_args)
+        string(STRIP "${_run_args}" _run_args)
+      endif()
+
+      if(SUNDIALS_ADD_TEST_MPI_NPROCS AND MPIEXEC_EXECUTABLE)
+        if(MPIEXEC_PREFLAGS)
+          string(REPLACE " " ";" PREFLAGS "${MPIEXEC_PREFLAGS}")
+        endif()
+        add_test(NAME ${NAME} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SUNDIALS_ADD_TEST_MPI_NPROCS} ${PREFLAGS} $<TARGET_FILE:${EXECUTABLE}> ${_run_args})
       else()
         add_test(NAME ${NAME} COMMAND $<TARGET_FILE:${EXECUTABLE}> ${_run_args})
       endif()
+      unset(_run_args)
 
     endif()
 
@@ -200,7 +219,5 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
   unset(_add_test)
   unset(_use_runner)
-  unset(_run_command)
-  unset(_run_args)
 
 endmacro()
