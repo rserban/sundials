@@ -196,7 +196,7 @@ def main():
         sys.exit(1)
 
 
-def compare(outputFile, answerFile, args):
+def compare(outputFile, answerFile, integerPercentage, floatPrecision):
     # Note: This functions strips all lines of leading and trailing whitespace
     # and blank lines. Then it compares the output against the answer file. It
     # allows fuzziness in floating points and integers.
@@ -218,7 +218,8 @@ def compare(outputFile, answerFile, args):
     diffCount = 0
     for i, outLine in enumerate(outLines):
         answerLine = answerLines[i]
-        if not compareLines(outLine, answerLine, args):
+        if not compareLines(outLine, answerLine, integerPercentage,
+                            floatPrecision):
             diffCount += 1
             print("ERROR: Lines Differ:")
             print("  Output = " + outLine)
