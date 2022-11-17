@@ -283,13 +283,16 @@ sundials_option(SUNDIALS_TEST_ANSWER_DIR PATH
 sundials_option(SUNDIALS_TEST_PROFILE BOOL
   "Use Caliper to profile SUNDIALS tests" OFF ADVANCED)
 
-sundials_option(SUNDIALS_TEST_DIFF BOOL
-  "Compare test output to saved outputs" ON ADVANCED)
-
-# Include development examples in regression tests
 sundials_option(SUNDIALS_TEST_DEVTESTS BOOL
   "Include development tests in make test" OFF ADVANCED)
 
-# Include unit tests in regression tests
 sundials_option(SUNDIALS_TEST_UNITTESTS BOOL
   "Include unit tests in make test" OFF ADVANCED)
+
+if(SUNDIALS_TEST_DEVTESTS)
+  sundials_option(SUNDIALS_TEST_DIFF BOOL
+    "Compare test output to saved outputs" ON ADVANCED)
+else()
+  sundials_option(SUNDIALS_TEST_DIFF BOOL
+    "Compare test output to saved outputs" OFF ADVANCED)
+endif()

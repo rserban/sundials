@@ -184,7 +184,7 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
       endif()
 
-      add_test(NAME ${NAME} COMMAND ${PYTHON_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS})
+      add_test(NAME ${NAME} COMMAND ${Python3_EXECUTABLE} ${TESTRUNNER} ${TEST_ARGS})
 
     else()
 

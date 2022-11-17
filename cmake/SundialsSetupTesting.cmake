@@ -27,9 +27,9 @@ endif()
 if(SUNDIALS_TEST_USE_RUNNER)
 
   # Python is needed to use the test runner
-  find_package(PythonInterp REQUIRED)
-  if(${PYTHON_VERSION_MAJOR} LESS 3)
-    print_error("Python 3.x is required to diff or profile tests. Set SUNDIALS_TEST_DIFF and SUNDIALS_TEST_PROFILE to OFF")
+  find_package(Python3 COMPONENTS Interpreter)
+  if(NOT Python3_FOUND)
+    print_error("Python3 is required to diff or profile tests. Set SUNDIALS_TEST_DIFF and SUNDIALS_TEST_PROFILE to OFF")
   endif()
 
   # Look for the testRunner script in the test directory
