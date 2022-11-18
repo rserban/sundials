@@ -147,20 +147,20 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
         list(APPEND TEST_ARGS "--profile")
       endif()
 
-      # set answer directory
-      if(SUNDIALS_TEST_ANSWER_DIR)
-        list(APPEND TEST_ARGS "--answerdir=${SUNDIALS_TEST_ANSWER_DIR}")
-      elseif(SUNDIALS_ADD_TEST_ANSWER_DIR)
-        list(APPEND TEST_ARGS "--answerdir=${SUNDIALS_ADD_TEST_ANSWER_DIR}")
-      endif()
-
-      # set the test answer file name
-      if(SUNDIALS_ADD_TEST_ANSWER_FILE)
-        list(APPEND TEST_ARGS "--answerfile=${SUNDIALS_ADD_TEST_ANSWER_FILE}")
-      endif()
-
       # set comparison precisions or do not diff the output and answer files
       if(SUNDIALS_TEST_DIFF AND NOT SUNDIALS_ADD_TEST_NODIFF)
+
+        # set answer directory
+        if(SUNDIALS_TEST_ANSWER_DIR)
+          list(APPEND TEST_ARGS "--answerdir=${SUNDIALS_TEST_ANSWER_DIR}")
+        elseif(SUNDIALS_ADD_TEST_ANSWER_DIR)
+          list(APPEND TEST_ARGS "--answerdir=${SUNDIALS_ADD_TEST_ANSWER_DIR}")
+        endif()
+
+        # set the test answer file name
+        if(SUNDIALS_ADD_TEST_ANSWER_FILE)
+          list(APPEND TEST_ARGS "--answerfile=${SUNDIALS_ADD_TEST_ANSWER_FILE}")
+        endif()
 
         if(SUNDIALS_ADD_TEST_FLOAT_PRECISION AND
             (NOT SUNDIALS_ADD_TEST_FLOAT_PRECISION MATCHES "DEFAULT|default"))
@@ -186,7 +186,7 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
     else()
 
-      # convert string to list
+      # create semicolon separated list of input arguments
       if(SUNDIALS_ADD_TEST_TEST_ARGS)
         string(REPLACE " " ";" _user_args "${SUNDIALS_ADD_TEST_TEST_ARGS}")
         set(_run_args "${_user_args}")
@@ -218,6 +218,5 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
   endif()
 
   unset(_add_test)
-  unset(_use_runner)
 
 endmacro()
