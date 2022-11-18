@@ -280,6 +280,9 @@ sundials_option(SUNDIALS_TEST_OUTPUT_DIR PATH
 sundials_option(SUNDIALS_TEST_ANSWER_DIR PATH
   "Location of testing answer files" "" ADVANCED)
 
+sundials_option(SUNDIALS_TEST_DIFF BOOL
+  "Compare test output to saved outputs" OFF ADVANCED)
+
 sundials_option(SUNDIALS_TEST_PROFILE BOOL
   "Use Caliper to profile SUNDIALS tests" OFF ADVANCED)
 
@@ -288,11 +291,3 @@ sundials_option(SUNDIALS_TEST_DEVTESTS BOOL
 
 sundials_option(SUNDIALS_TEST_UNITTESTS BOOL
   "Include unit tests in make test" OFF ADVANCED)
-
-if(SUNDIALS_TEST_DEVTESTS)
-  sundials_option(SUNDIALS_TEST_DIFF BOOL
-    "Compare test output to saved outputs" ON ADVANCED)
-else()
-  sundials_option(SUNDIALS_TEST_DIFF BOOL
-    "Compare test output to saved outputs" OFF ADVANCED)
-endif()

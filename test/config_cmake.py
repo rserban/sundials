@@ -559,6 +559,11 @@ def main():
             'SUNDIALS_TEST_UNITTESTS', 'OFF', 'BOOL',
             'SUNDIALS unit tests')
 
+    # compare output and answer files
+    add_arg(group, '--test-diff', 'SUNDIALS_TEST_DIFF',
+            'SUNDIALS_TEST_DIFF', 'OFF', 'BOOL',
+            'Compare test output and answer files')
+
     # test output directory
     add_arg(group, '--test-output-dir', 'SUNDIALS_TEST_OUTPUT_DIR',
             'SUNDIALS_TEST_OUTPUT_DIR', None, 'PATH',
@@ -579,6 +584,11 @@ def main():
             'SUNDIALS_TEST_INTEGER_PRECISION',
             'SUNDIALS_TEST_INTEGER_PRECISION', None, 'STRING',
             'SUNDIALS test integer comparison precision')
+
+    # profile tests
+    add_arg(group, '--test-profile', 'SUNDIALS_TEST_PROFILE',
+            'SUNDIALS_TEST_PROFILE', 'OFF', 'BOOL',
+            'Profile tests (requires Caliper)')
 
     add_arg(group, '--make-verbose', 'CMAKE_VERBOSE_MAKEFILE',
             'CMAKE_VERBOSE_MAKEFILE', 'OFF', 'BOOL', 'verbose make output')

@@ -95,10 +95,12 @@ case "$SUNDIALS_TEST_TYPE" in
     DEV)
         export SUNDIALS_TEST_DEVTESTS=ON
         export SUNDIALS_TEST_UNITTESTS=ON
+        export SUNDIALS_TEST_DIFF=ON
         ;;
     STD|NONE)
         export SUNDIALS_TEST_DEVTESTS=OFF
         export SUNDIALS_TEST_UNITTESTS=OFF
+        export SUNDIALS_TEST_DIFF=OFF
         ;;
     *)
         echo "ERROR: Unknown test type option: $SUNDIALS_TEST_TYPE"
