@@ -79,20 +79,17 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
 
   # development only tests
   if(NOT SUNDIALS_TEST_DEVTESTS AND SUNDIALS_ADD_TEST_EXAMPLE_TYPE)
-    message(STATUS "Test ${NAME} excluded from standard tests")
     set(_add_test FALSE)
   endif()
 
   # always excluded
   if("${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL "exclude")
-    message(STATUS "Test ${NAME} excluded")
     set(_add_test FALSE)
   endif()
 
   # precision-specific exclusions
   string(TOLOWER "exclude-${SUNDIALS_PRECISION}" _exclude_precision)
   if("${SUNDIALS_ADD_TEST_EXAMPLE_TYPE}" STREQUAL _exclude_precision)
-    message(STATUS "Test ${NAME} excluded with ${_exclude_precision} precision")
     set(_add_test FALSE)
   endif()
 
@@ -101,8 +98,6 @@ macro(SUNDIALS_ADD_TEST NAME EXECUTABLE)
   # --------
 
   if(_add_test)
-
-    message(STATUS "Test ${NAME} added")
 
     if(SUNDIALS_TEST_USE_RUNNER)
 
