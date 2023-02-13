@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 /* SUNDIALS public headers */
 #include <nvector/nvector_sycl.h>

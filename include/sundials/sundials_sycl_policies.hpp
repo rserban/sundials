@@ -20,7 +20,7 @@
 
 #include <cstdio>
 #include <stdexcept>
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 
 namespace sundials
 {

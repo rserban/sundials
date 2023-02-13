@@ -16,7 +16,7 @@
  * -----------------------------------------------------------------*/
 
 #include <cstdlib>
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 #include <sundials/sundials_memory.h>
 
 int MyMemoryHelper_Alloc(SUNMemoryHelper helper, SUNMemory* memptr,
