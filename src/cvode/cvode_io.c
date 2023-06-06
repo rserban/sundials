@@ -724,7 +724,7 @@ int CVodeClearStopTime(void *cvode_mem)
   CVodeMem cv_mem;
 
   if (cvode_mem==NULL) {
-    cvProcessError(NULL, CV_MEM_NULL, "CVODE", "CVodeClearStopTime", MSGCV_NO_MEM);
+    cvProcessError(NULL, CV_MEM_NULL, __LINE__, __func__, __FILE__, MSGCV_NO_MEM);
     return (CV_MEM_NULL);
   }
   cv_mem = (CVodeMem) cvode_mem;
