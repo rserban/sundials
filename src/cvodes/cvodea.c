@@ -2360,8 +2360,6 @@ static void CVAbckpbDelete(CVodeBMem* cvB_memPtr)
   {
     SUNAssignSUNCTX((*cvB_memPtr)->cv_y->sunctx);
 
-  if (*cvB_memPtr != NULL)
-  {
     /* Save head of the list */
     tmp = *cvB_memPtr;
 

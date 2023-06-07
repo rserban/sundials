@@ -18,6 +18,7 @@
  */
 
 #include <math.h>
+#include <sundials/sundials_core.h>
 
 /* define constatnts */
 #define ZERO RCONST(0.0)

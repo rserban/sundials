@@ -19,6 +19,7 @@
  */
 
 #include <math.h>
+#include <sundials/sundials_core.h>
 
 /* define constatnts */
 #define NEG_TWO  RCONST(-2.0)
