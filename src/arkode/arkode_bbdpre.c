@@ -459,6 +459,7 @@ static int ARKBBDPrecSetup(realtype t, N_Vector y, N_Vector fy, booleantype jok,
                       MSG_BBD_SUNMAT_FAIL);
       return (SUNLS_UNRECOV_FAILURE);
     }
+    if (retval > 0) { return (1); }
 
     /* Otherwise call ARKBBDDQJac for new J value */
   }
@@ -473,6 +474,7 @@ static int ARKBBDPrecSetup(realtype t, N_Vector y, N_Vector fy, booleantype jok,
                       MSG_BBD_SUNMAT_FAIL);
       return (SUNLS_UNRECOV_FAILURE);
     }
+    if (retval > 0) { return (1); }
 
     retval = ARKBBDDQJac(pdata, t, y, pdata->tmp1, pdata->tmp2, pdata->tmp3);
     if (retval < 0)

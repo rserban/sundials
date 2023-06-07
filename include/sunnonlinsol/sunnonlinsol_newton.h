@@ -23,6 +23,8 @@
 #define _SUNNONLINSOL_NEWTON_H
 
 #include "sundials/sundials_nonlinearsolver.h"
+#include "sundials/sundials_nvector.h"
+#include "sundials/sundials_types.h"
 
 #ifdef __cplusplus /* wrapper to enable C++ usage */
 extern "C" {

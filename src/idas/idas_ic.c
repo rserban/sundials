@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sundials/sundials_math.h>
 
 #include "idas_impl.h"
 

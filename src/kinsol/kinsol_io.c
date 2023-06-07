@@ -19,6 +19,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sundials/sundials_math.h>
+#include <sundials/sundials_types.h>
 
 #include "kinsol_impl.h"
 #include "kinsol_ls_impl.h"

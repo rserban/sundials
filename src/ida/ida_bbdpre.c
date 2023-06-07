@@ -27,6 +27,7 @@
 #include <nvector/nvector_serial.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sundials/sundials_math.h>
 
 #include "ida_bbdpre_impl.h"
 #include "ida_impl.h"

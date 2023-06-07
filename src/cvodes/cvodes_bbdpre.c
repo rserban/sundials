@@ -507,6 +507,7 @@ static int cvBBDPrecSetup(realtype t, N_Vector y, N_Vector fy, booleantype jok,
                      MSGBBD_SUNMAT_FAIL);
       return (SUNLS_UNRECOV_FAILURE);
     }
+    if (retval > 0) { return (1); }
 
     /* Otherwise call CVBBDDQJac for new J value */
   }
@@ -521,6 +522,7 @@ static int cvBBDPrecSetup(realtype t, N_Vector y, N_Vector fy, booleantype jok,
                      MSGBBD_SUNMAT_FAIL);
       return (SUNLS_UNRECOV_FAILURE);
     }
+    if (retval > 0) { return (1); }
 
     retval = cvBBDDQJac(pdata, t, y, pdata->tmp1, pdata->tmp2, pdata->tmp3);
     if (retval < 0)

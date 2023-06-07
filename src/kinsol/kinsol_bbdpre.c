@@ -26,6 +26,7 @@
 #include <nvector/nvector_serial.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sundials/sundials_math.h>
 
 #include "kinsol_bbdpre_impl.h"
 #include "kinsol_impl.h"

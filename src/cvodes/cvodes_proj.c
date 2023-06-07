@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "cvodes_impl.h"
+#include "sundials/sundials_math.h"
 
 /* Private constants */
 #define ZERO RCONST(0.0) /* real 0.0 */

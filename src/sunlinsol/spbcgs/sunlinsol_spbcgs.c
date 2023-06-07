@@ -382,6 +382,8 @@ int SUNLinSolSolve_SPBCGS(SUNLinearSolver S, SUNMatrix A, N_Vector x,
         SUNLS_PSOLVE_FAIL_UNREC : SUNLS_PSOLVE_FAIL_REC;
       return(LASTFLAG(S));
     }
+  } else {
+    N_VScale(ONE, r_star, r);
   }
   else {
     SUNCheckCallLastErrNoRet(N_VScale(ONE, r_star, r));

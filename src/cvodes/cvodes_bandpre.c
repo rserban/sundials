@@ -26,6 +26,10 @@
 #include "cvodes_impl.h"
 #include "cvodes_ls_impl.h"
 
+#include "cvodes_bandpre_impl.h"
+#include "cvodes_impl.h"
+#include "cvodes_ls_impl.h"
+
 #define MIN_INC_MULT RCONST(1000.0)
 #define ZERO         RCONST(0.0)
 #define ONE          RCONST(1.0)
@@ -399,6 +403,7 @@ static int cvBandPrecSetup(realtype t, N_Vector y, N_Vector fy, booleantype jok,
                      __FILE__, MSGBP_SUNMAT_FAIL);
       return (SUNLS_UNRECOV_FAILURE);
     }
+    if (retval > 0) { return (1); }
 
     retval = cvBandPrecDQJac(pdata, t, y, fy, pdata->tmp1, pdata->tmp2);
     if (retval < 0)

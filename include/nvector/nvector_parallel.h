@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <sundials/sundials_core.h>
 #include <sundials/sundials_mpi_types.h>
+#include <sundials/sundials_nvector.h>
 
 #ifdef __cplusplus /* wrapper to enable C++ usage */
 extern "C" {

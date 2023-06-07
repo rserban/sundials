@@ -470,6 +470,13 @@ int SUNLinSolSolve_SPTFQMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
         SUNLS_PSOLVE_FAIL_UNREC : SUNLS_PSOLVE_FAIL_REC;
       return(LASTFLAG(S));
     }
+  } else {
+    N_VScale(ONE, v, vtemp1);
+  }
+  if (scale_b) {
+    N_VProd(sb, vtemp1, v);
+  } else {
+    N_VScale(ONE, vtemp1, v);
   }
   else {
     SUNCheckCallLastErrNoRet(N_VScale(ONE, v, vtemp1));

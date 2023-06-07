@@ -719,6 +719,7 @@ int erkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f, int mo
       SUNCheckCallLastErrNoRet(
         N_VScale(ONE, step_mem->F[step_mem->stages - 1], step_mem->F[0]));
     }
+    else { N_VScale(ONE, step_mem->F[step_mem->stages - 1], step_mem->F[0]); }
 
     /* copy RHS vector into output */
     SUNCheckCallLastErrNoRet(N_VScale(ONE, step_mem->F[0], f));
