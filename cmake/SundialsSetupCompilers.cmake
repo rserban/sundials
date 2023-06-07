@@ -20,6 +20,8 @@
 
 include(SundialsIndexSize)
 
+
+
 # ===============================================================
 # Platform specifc settings
 # ===============================================================
@@ -440,3 +442,18 @@ foreach(lang ${_SUNDIALS_ENABLED_LANGS})
     set(_EXAMPLES_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE INTERNAL "${lang} compiler for installed examples")
   endif()
 endforeach()
+
+
+# ===============================================================
+# clang-tidy settings
+# ===============================================================
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.26.0")
+  set(SUNDIALS_ENABLE_CLANG_TIDY ON CACHE BOOL "enable clang-tidy to run with the build")
+  if(SUNDIALS_ENABLE_CLANG_TIDY)
+    set(CMAKE_C_CLANG_TIDY clang-tidy -checks=readability-*)
+    set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=readability-*)
+    set(CMAKE_C_CLANG_TIDY_EXPORT_FIXES_DIR ${PROJECT_BINARY_DIR}/tidy)
+    set(CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR ${PROJECT_BINARY_DIR}/tidy)
+  endif()
+endif()
