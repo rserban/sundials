@@ -53,11 +53,13 @@ SUNLinearSolver SUNLinSol_SPBCGS(N_Vector y, int pretype, int maxl, SUNContext s
   SUNLinearSolverContent_SPBCGS content;
 
   /* check for legal pretype and maxl values; if illegal use defaults */
-  if ((pretype != SUN_PREC_NONE)  && (pretype != SUN_PREC_LEFT) &&
-      (pretype != SUN_PREC_RIGHT) && (pretype != SUN_PREC_BOTH))
+  if ((pretype != SUN_PREC_NONE) && (pretype != SUN_PREC_LEFT) &&
+      (pretype != SUN_PREC_RIGHT) && (pretype != SUN_PREC_BOTH)) {
     pretype = SUN_PREC_NONE;
-  if (maxl <= 0)
+  }
+  if (maxl <= 0) {
     maxl = SUNSPBCGS_MAXL_DEFAULT;
+  }
 
   /* check that the supplied N_Vector supports all requisite operations */
   SUNAssert((y->ops->nvclone) && (y->ops->nvdestroy) && (y->ops->nvlinearsum) &&
@@ -165,8 +167,9 @@ SUNErrCode SUNLinSol_SPBCGSSetPrecType(SUNLinearSolver S, int pretype)
 SUNErrCode SUNLinSol_SPBCGSSetMaxl(SUNLinearSolver S, int maxl)
 {
   /* Check for legal pretype */
-  if (maxl <= 0)
+  if (maxl <= 0) {
     maxl = SUNSPBCGS_MAXL_DEFAULT;
+  }
 
   /* Set pretype */
   SPBCGS_CONTENT(S)->maxl = maxl;
@@ -196,15 +199,16 @@ SUNErrCode SUNLinSolInitialize_SPBCGS(SUNLinearSolver S)
 {
   SUNAssignSUNCTX(S->sunctx);
 
-  if (SPBCGS_CONTENT(S)->maxl <= 0)
+  if (SPBCGS_CONTENT(S)->maxl <= 0) {
     SPBCGS_CONTENT(S)->maxl = SUNSPBCGS_MAXL_DEFAULT;
+  }
 
   SUNAssert(SPBCGS_CONTENT(S)->ATimes, SUN_ERR_ARG_CORRUPT);
 
-  if ( (PRETYPE(S) != SUN_PREC_LEFT) &&
-       (PRETYPE(S) != SUN_PREC_RIGHT) &&
-       (PRETYPE(S) != SUN_PREC_BOTH) )
+  if ((PRETYPE(S) != SUN_PREC_LEFT) && (PRETYPE(S) != SUN_PREC_RIGHT) &&
+      (PRETYPE(S) != SUN_PREC_BOTH)) {
     PRETYPE(S) = SUN_PREC_NONE;
+  }
 
   SUNAssert((PRETYPE(S) == SUN_PREC_NONE) || SPBCGS_CONTENT(S)->Psolve, SUN_ERR_ARG_CORRUPT);
 
@@ -556,7 +560,9 @@ int SUNLinSolSolve_SPBCGS(SUNLinearSolver S, SUNMatrix A, N_Vector x,
     /* Calculate omega = <u,q>/<u,u> */
 
     omega_denom = SUNCheckCallLastErrNoRet(N_VDotProd(u, u));
-    if (omega_denom == ZERO) omega_denom = ONE;
+    if (omega_denom == ZERO) {
+      omega_denom = ONE;
+    }
     omega = SUNCheckCallLastErrNoRet(N_VDotProd(u, q));
     omega /= omega_denom;
 
@@ -646,10 +652,11 @@ int SUNLinSolSolve_SPBCGS(SUNLinearSolver S, SUNMatrix A, N_Vector x,
     }
 
     *zeroguess = SUNFALSE;
-    if (converged == SUNTRUE)
+    if (converged == SUNTRUE) {
       LASTFLAG(S) = SUNLS_SUCCESS;
-    else
+    } else {
       LASTFLAG(S) = SUNLS_RES_REDUCED;
+    }
     return(LASTFLAG(S));
 
   }

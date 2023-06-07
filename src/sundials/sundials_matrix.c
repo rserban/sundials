@@ -76,10 +76,14 @@ SUNMatrix SUNMatNewEmpty(SUNContext sunctx)
 
 void SUNMatFreeEmpty(SUNMatrix A)
 {
-  if (A == NULL)  return;
+  if (A == NULL) {
+    return;
+  }
 
   /* free non-NULL ops structure */
-  if (A->ops)  free(A->ops);
+  if (A->ops) {
+    free(A->ops);
+  }
   A->ops = NULL;
 
   /* free overall SUNMatrix object and return */
@@ -138,11 +142,15 @@ SUNMatrix SUNMatClone(SUNMatrix A)
 
 void SUNMatDestroy(SUNMatrix A)
 {
-  if (A == NULL) return;
+  if (A == NULL) {
+    return;
+  }
 
   /* if the destroy operation exists use it */
-  if (A->ops)
-    if (A->ops->destroy) { A->ops->destroy(A); return; }
+  if (A->ops) {
+    if (A->ops->destroy) { A->ops->destroy(A); return;
+    }
+  }
 
   /* if we reach this point, either ops == NULL or destroy == NULL,
      try to cleanup by freeing the content, ops, and matrix */
@@ -193,8 +201,9 @@ SUNErrCode SUNMatMatvecSetup(SUNMatrix A)
 {
   SUNErrCode ier = 0;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(A));
-  if (A->ops->matvecsetup)
+  if (A->ops->matvecsetup) {
     ier = A->ops->matvecsetup(A);
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(A));
   return(ier);
 }

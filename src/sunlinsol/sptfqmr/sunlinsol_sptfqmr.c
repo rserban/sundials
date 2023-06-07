@@ -51,11 +51,13 @@ SUNLinearSolver SUNLinSol_SPTFQMR(N_Vector y, int pretype, int maxl, SUNContext 
   SUNLinearSolverContent_SPTFQMR content;
 
   /* check for legal pretype and maxl values; if illegal use defaults */
-  if ((pretype != SUN_PREC_NONE)  && (pretype != SUN_PREC_LEFT) &&
-      (pretype != SUN_PREC_RIGHT) && (pretype != SUN_PREC_BOTH))
+  if ((pretype != SUN_PREC_NONE) && (pretype != SUN_PREC_LEFT) &&
+      (pretype != SUN_PREC_RIGHT) && (pretype != SUN_PREC_BOTH)) {
     pretype = SUN_PREC_NONE;
-  if (maxl <= 0)
+  }
+  if (maxl <= 0) {
     maxl = SUNSPTFQMR_MAXL_DEFAULT;
+  }
 
   /* check that the supplied N_Vector supports all requisite operations */
   SUNAssert((y->ops->nvclone) && (y->ops->nvdestroy) &&
@@ -164,8 +166,9 @@ SUNErrCode SUNLinSol_SPTFQMRSetPrecType(SUNLinearSolver S, int pretype)
 SUNErrCode SUNLinSol_SPTFQMRSetMaxl(SUNLinearSolver S, int maxl)
 {
   /* Check for legal pretype */
-  if (maxl <= 0)
+  if (maxl <= 0) {
     maxl = SUNSPTFQMR_MAXL_DEFAULT;
+  }
 
   /* Set pretype */
   SPTFQMR_CONTENT(S)->maxl = maxl;
@@ -200,15 +203,17 @@ SUNErrCode SUNLinSolInitialize_SPTFQMR(SUNLinearSolver S)
   content = SPTFQMR_CONTENT(S);
 
   /* ensure valid options */
-  if (content->maxl <= 0)
+  if (content->maxl <= 0) {
     content->maxl = SUNSPTFQMR_MAXL_DEFAULT;
+  }
 
   SUNAssert(content->ATimes, SUN_ERR_ARG_CORRUPT);
 
-  if ( (content->pretype != SUN_PREC_LEFT) &&
-       (content->pretype != SUN_PREC_RIGHT) &&
-       (content->pretype != SUN_PREC_BOTH) )
+  if ((content->pretype != SUN_PREC_LEFT) &&
+      (content->pretype != SUN_PREC_RIGHT) &&
+      (content->pretype != SUN_PREC_BOTH)) {
     content->pretype = SUN_PREC_NONE;
+  }
 
   SUNAssert((content->pretype == SUN_PREC_NONE) || (content->Psolve != NULL),
             SUN_ERR_ARG_CORRUPT);
@@ -712,7 +717,9 @@ int SUNLinSolSolve_SPTFQMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
     }  /* END inner loop */
 
     /* If converged, then exit outer loop as well */
-    if (converged == SUNTRUE) break;
+    if (converged == SUNTRUE) {
+      break;
+    }
 
     /* rho[1] = r_star^T*r_[1] */
     rho[1] = SUNCheckCallLastErrNoRet(N_VDotProd(r_star, r[1]));
@@ -805,10 +812,11 @@ int SUNLinSolSolve_SPTFQMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
     }
 
     *zeroguess = SUNFALSE;
-    if (converged == SUNTRUE)
+    if (converged == SUNTRUE) {
       LASTFLAG(S) = SUNLS_SUCCESS;
-    else
+    } else {
       LASTFLAG(S) = SUNLS_RES_REDUCED;
+    }
     return(LASTFLAG(S));
   } else {
     *zeroguess  = SUNFALSE;
@@ -858,7 +866,9 @@ SUNErrCode SUNLinSolSpace_SPTFQMR(SUNLinearSolver S, long int* lenrwLS,
 
 SUNErrCode SUNLinSolFree_SPTFQMR(SUNLinearSolver S)
 {
-  if (S == NULL) return(SUNLS_SUCCESS);
+  if (S == NULL) {
+    return (SUNLS_SUCCESS);
+  }
 
   if (S->content) {
     /* delete items from within the content structure */

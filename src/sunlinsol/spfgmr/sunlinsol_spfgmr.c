@@ -58,7 +58,9 @@ SUNLinearSolver SUNLinSol_SPFGMR(N_Vector y, int pretype, int maxl, SUNContext s
               (pretype == SUN_PREC_BOTH) ) ? SUN_PREC_RIGHT : SUN_PREC_NONE;
 
   /* if maxl input is illegal, set to default */
-  if (maxl <= 0)  maxl = SUNSPFGMR_MAXL_DEFAULT;
+  if (maxl <= 0) {
+    maxl = SUNSPFGMR_MAXL_DEFAULT;
+  }
 
   /* check that the supplied N_Vector supports all requisite operations */
   SUNAssert((y->ops->nvclone) && (y->ops->nvdestroy) &&
@@ -178,8 +180,9 @@ SUNErrCode SUNLinSol_SPFGMRSetGSType(SUNLinearSolver S, int gstype)
 SUNErrCode SUNLinSol_SPFGMRSetMaxRestarts(SUNLinearSolver S, int maxrs)
 {
   /* Illegal maxrs implies use of default value */
-  if (maxrs < 0)
+  if (maxrs < 0) {
     maxrs = SUNSPFGMR_MAXRS_DEFAULT;
+  }
 
   /* Set max_restarts */
   SPFGMR_CONTENT(S)->max_restarts = maxrs;
@@ -215,15 +218,17 @@ SUNErrCode SUNLinSolInitialize_SPFGMR(SUNLinearSolver S)
   content = SPFGMR_CONTENT(S);
 
   /* ensure valid options */
-  if (content->max_restarts < 0)
+  if (content->max_restarts < 0) {
     content->max_restarts = SUNSPFGMR_MAXRS_DEFAULT;
+  }
 
   SUNAssert(content->ATimes, SUN_ERR_ARG_CORRUPT);
 
-  if ( (content->pretype != SUN_PREC_LEFT) &&
-       (content->pretype != SUN_PREC_RIGHT) &&
-       (content->pretype != SUN_PREC_BOTH) )
+  if ((content->pretype != SUN_PREC_LEFT) &&
+      (content->pretype != SUN_PREC_RIGHT) &&
+      (content->pretype != SUN_PREC_BOTH)) {
     content->pretype = SUN_PREC_NONE;
+  }
 
   SUNAssert((content->pretype == SUN_PREC_NONE) || (content->Psolve != NULL),
             SUN_ERR_ARG_CORRUPT);
@@ -477,9 +482,11 @@ int SUNLinSolSolve_SPFGMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
 
     /* Initialize the Hessenberg matrix Hes and Givens rotation
        product.  Normalize the initial vector V[0].             */
-    for (i=0; i<=l_max; i++)
-      for (j=0; j<l_max; j++)
+    for (i = 0; i <= l_max; i++) {
+      for (j = 0; j < l_max; j++) {
         Hes[i][j] = ZERO;
+      }
+    }
     rotation_product = ONE;
     SUNCheckCallLastErrNoRet(N_VScale(ONE/r_norm, V[0], V[0]));
 
@@ -568,7 +575,9 @@ int SUNLinSolSolve_SPFGMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
 
     /*   Construct g, then solve for y. */
     yg[0] = r_norm;
-    for (i=1; i<=krydim; i++)  yg[i]=ZERO;
+    for (i = 1; i <= krydim; i++) {
+      yg[i] = ZERO;
+    }
     if (SUNQRsol(krydim, Hes, givens, yg) != 0) {
       *zeroguess  = SUNFALSE;
       LASTFLAG(S) = SUNLS_QRSOL_FAIL;
@@ -598,7 +607,9 @@ int SUNLinSolSolve_SPFGMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
     }
 
     /* Not yet converged; if allowed, prepare for restart. */
-    if (ntries == max_restarts) break;
+    if (ntries == max_restarts) {
+      break;
+    }
 
     /* Construct last column of Q in yg. */
     s_product = ONE;
@@ -610,8 +621,9 @@ int SUNLinSolSolve_SPFGMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
 
     /* Scale r_norm and yg. */
     r_norm *= s_product;
-    for (i=0; i<=krydim; i++)
+    for (i = 0; i <= krydim; i++) {
       yg[i] *= r_norm;
+    }
     r_norm = SUNRabs(r_norm);
 
     /* Multiply yg by V_(krydim+1) to get last residual vector; restart. */
@@ -688,7 +700,9 @@ SUNErrCode SUNLinSolFree_SPFGMR(SUNLinearSolver S)
 {
   int k;
 
-  if (S == NULL) return SUN_SUCCESS;
+  if (S == NULL) {
+    return SUN_SUCCESS;
+  }
 
   if (S->content) {
     /* delete items from within the content structure */
@@ -711,11 +725,12 @@ SUNErrCode SUNLinSolFree_SPFGMR(SUNLinearSolver S)
       SPFGMR_CONTENT(S)->Z = NULL;
     }
     if (SPFGMR_CONTENT(S)->Hes) {
-      for (k=0; k<=SPFGMR_CONTENT(S)->maxl; k++)
+      for (k = 0; k <= SPFGMR_CONTENT(S)->maxl; k++) {
         if (SPFGMR_CONTENT(S)->Hes[k]) {
           free(SPFGMR_CONTENT(S)->Hes[k]);
           SPFGMR_CONTENT(S)->Hes[k] = NULL;
         }
+      }
       free(SPFGMR_CONTENT(S)->Hes);
       SPFGMR_CONTENT(S)->Hes = NULL;
     }

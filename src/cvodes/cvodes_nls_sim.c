@@ -300,8 +300,9 @@ static int cvNlsLSetupSensSim(booleantype jbad, booleantype* jcur,
   cv_mem = (CVodeMem) cvode_mem;
 
   /* if the nonlinear solver marked the Jacobian as bad update convfail */
-  if (jbad)
+  if (jbad) {
     cv_mem->convfail = CV_FAIL_BAD_J;
+  }
 
   /* setup the linear solver */
   retval = cv_mem->cv_lsetup(cv_mem, cv_mem->convfail, cv_mem->cv_y,
@@ -320,8 +321,12 @@ static int cvNlsLSetupSensSim(booleantype jbad, booleantype* jcur,
   cv_mem->cv_crateS     = ONE;
   cv_mem->cv_nstlp      = cv_mem->cv_nst;
 
-  if (retval < 0) return(CV_LSETUP_FAIL);
-  if (retval > 0) return(SUN_NLS_CONV_RECVR);
+  if (retval < 0) {
+    return (CV_LSETUP_FAIL);
+  }
+  if (retval > 0) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   return(CV_SUCCESS);
 }
@@ -347,8 +352,12 @@ static int cvNlsLSolveSensSim(N_Vector deltaSim, void* cvode_mem)
   retval = cv_mem->cv_lsolve(cv_mem, delta, cv_mem->cv_ewt, cv_mem->cv_y,
                              cv_mem->cv_ftemp);
 
-  if (retval < 0) return(CV_LSOLVE_FAIL);
-  if (retval > 0) return(SUN_NLS_CONV_RECVR);
+  if (retval < 0) {
+    return (CV_LSOLVE_FAIL);
+  }
+  if (retval > 0) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   /* extract sensitivity deltas from the vector wrapper */
   deltaS = NV_VECS_SW(deltaSim)+1;
@@ -358,8 +367,12 @@ static int cvNlsLSolveSensSim(N_Vector deltaSim, void* cvode_mem)
     retval = cv_mem->cv_lsolve(cv_mem, deltaS[is], cv_mem->cv_ewtS[is],
                                cv_mem->cv_y, cv_mem->cv_ftemp);
 
-    if (retval < 0) return(CV_LSOLVE_FAIL);
-    if (retval > 0) return(SUN_NLS_CONV_RECVR);
+    if (retval < 0) {
+      return (CV_LSOLVE_FAIL);
+    }
+    if (retval > 0) {
+      return (SUN_NLS_CONV_RECVR);
+    }
   }
 
   return(CV_SUCCESS);
@@ -406,7 +419,9 @@ static int cvNlsConvTestSensSim(SUNNonlinearSolver NLS,
   /* get the current nonlinear solver iteration count */
   retval = SUNNonlinSolGetCurIter(NLS, &m);
   SUNCheckCallNoRet(retval);
-  if (retval != CV_SUCCESS) return(CV_MEM_NULL);
+  if (retval != CV_SUCCESS) {
+    return (CV_MEM_NULL);
+  }
 
   /* Test for convergence. If m > 0, an estimate of the convergence
      rate constant is stored in crate, and used in the test.
@@ -437,7 +452,9 @@ static int cvNlsConvTestSensSim(SUNNonlinearSolver NLS,
   }
 
   /* check if the iteration seems to be diverging */
-  if ((m >= 1) && (Del > RDIV*cv_mem->cv_delp)) return(SUN_NLS_CONV_RECVR);
+  if ((m >= 1) && (Del > RDIV * cv_mem->cv_delp)) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   /* Save norm of correction and loop again */
   cv_mem->cv_delp = Del;
@@ -475,8 +492,12 @@ static int cvNlsResidualSensSim(N_Vector ycorSim, N_Vector resSim, void* cvode_m
   retval = cv_mem->nls_f(cv_mem->cv_tn, cv_mem->cv_y, cv_mem->cv_ftemp,
                          cv_mem->cv_user_data);
   cv_mem->cv_nfe++;
-  if (retval < 0) return(CV_RHSFUNC_FAIL);
-  if (retval > 0) return(RHSFUNC_RECVR);
+  if (retval < 0) {
+    return (CV_RHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (RHSFUNC_RECVR);
+  }
 
   /* compute the resiudal */
   SUNCheckCallLastErrNoRet(N_VLinearSum(cv_mem->cv_rl1, cv_mem->cv_zn[1], ONE, ycor, res));
@@ -490,7 +511,9 @@ static int cvNlsResidualSensSim(N_Vector ycorSim, N_Vector resSim, void* cvode_m
   retval = N_VLinearSumVectorArray(cv_mem->cv_Ns,
                                    ONE, cv_mem->cv_znS[0],
                                    ONE, ycorS, cv_mem->cv_yS);
-  if (retval != CV_SUCCESS) return(CV_VECTOROP_ERR);
+  if (retval != CV_SUCCESS) {
+    return (CV_VECTOROP_ERR);
+  }
 
   /* evaluate the sensitivity rhs function */
   retval = cvSensRhsWrapper(cv_mem, cv_mem->cv_tn,
@@ -498,8 +521,12 @@ static int cvNlsResidualSensSim(N_Vector ycorSim, N_Vector resSim, void* cvode_m
                             cv_mem->cv_yS, cv_mem->cv_ftempS,
                             cv_mem->cv_vtemp1, cv_mem->cv_vtemp2);
 
-  if (retval < 0) return(CV_SRHSFUNC_FAIL);
-  if (retval > 0) return(SRHSFUNC_RECVR);
+  if (retval < 0) {
+    return (CV_SRHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (SRHSFUNC_RECVR);
+  }
 
   /* compute the sensitivity resiudal */
   cvals[0] = cv_mem->cv_rl1;    XXvecs[0] = cv_mem->cv_znS[1];
@@ -508,7 +535,9 @@ static int cvNlsResidualSensSim(N_Vector ycorSim, N_Vector resSim, void* cvode_m
 
   retval = N_VLinearCombinationVectorArray(cv_mem->cv_Ns,
                                            3, cvals, XXvecs, resS);
-  if (retval != CV_SUCCESS) return(CV_VECTOROP_ERR);
+  if (retval != CV_SUCCESS) {
+    return (CV_VECTOROP_ERR);
+  }
 
   return(CV_SUCCESS);
 }
@@ -540,8 +569,12 @@ static int cvNlsFPFunctionSensSim(N_Vector ycorSim, N_Vector resSim, void* cvode
   retval = cv_mem->nls_f(cv_mem->cv_tn, cv_mem->cv_y, res,
                          cv_mem->cv_user_data);
   cv_mem->cv_nfe++;
-  if (retval < 0) return(CV_RHSFUNC_FAIL);
-  if (retval > 0) return(RHSFUNC_RECVR);
+  if (retval < 0) {
+    return (CV_RHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (RHSFUNC_RECVR);
+  }
 
   /* evaluate fixed point function */
   SUNCheckCallLastErrNoRet(N_VLinearSum(cv_mem->cv_h, res, -ONE, cv_mem->cv_zn[1], res));
@@ -562,8 +595,12 @@ static int cvNlsFPFunctionSensSim(N_Vector ycorSim, N_Vector resSim, void* cvode
                             cv_mem->cv_yS, resS,
                             cv_mem->cv_vtemp1, cv_mem->cv_vtemp2);
 
-  if (retval < 0) return(CV_SRHSFUNC_FAIL);
-  if (retval > 0) return(SRHSFUNC_RECVR);
+  if (retval < 0) {
+    return (CV_SRHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (SRHSFUNC_RECVR);
+  }
 
   /* evaluate sensitivity fixed point function */
   for (is=0; is<cv_mem->cv_Ns; is++) {

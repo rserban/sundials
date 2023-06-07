@@ -155,10 +155,14 @@ N_Vector N_VNewEmpty(SUNContext sunctx)
 /* Free a generic N_Vector (assumes content is already empty) */
 void N_VFreeEmpty(N_Vector v)
 {
-  if (v == NULL) return;
+  if (v == NULL) {
+    return;
+  }
 
   /* free non-NULL ops structure */
-  if (v->ops) free(v->ops);
+  if (v->ops) {
+    free(v->ops);
+  }
   v->ops = NULL;
 
   /* free overall N_Vector object and return */
@@ -298,7 +302,9 @@ N_Vector N_VCloneEmpty(N_Vector w)
 
 void N_VDestroy(N_Vector v)
 {
-  if (v == NULL) return;
+  if (v == NULL) {
+    return;
+  }
 
   /* if the destroy operation exists use it */
   if (v->ops->nvdestroy) {
@@ -327,10 +333,11 @@ sunrealtype *N_VGetArrayPointer(N_Vector v)
 
 sunrealtype *N_VGetDeviceArrayPointer(N_Vector v)
 {
-  if (v->ops->nvgetdevicearraypointer)
+  if (v->ops->nvgetdevicearraypointer) {
     return((sunrealtype *) v->ops->nvgetdevicearraypointer(v));
-  else
-    return(NULL);
+  } else {
+    return (NULL);
+  }
 }
 
 void N_VSetArrayPointer(sunrealtype *v_data, N_Vector v)
@@ -341,10 +348,11 @@ void N_VSetArrayPointer(sunrealtype *v_data, N_Vector v)
 
 void *N_VGetCommunicator(N_Vector v)
 {
-  if (v->ops->nvgetcommunicator)
+  if (v->ops->nvgetcommunicator) {
     return(v->ops->nvgetcommunicator(v));
-  else
-    return(NULL);
+  } else {
+    return (NULL);
+  }
 }
 
 sunindextype N_VGetLength(N_Vector v)
@@ -754,7 +762,9 @@ SUNErrCode N_VScaleAddMultiVectorArray(int nvec, int nsum, sunrealtype* a, N_Vec
       }
 
       ier = X[0]->ops->nvscaleaddmulti(nsum, a, X[i], YY, ZZ);
-      if (ier != 0) break;
+      if (ier != 0) {
+        break;
+      }
     }
 
     /* free array of vectors */
@@ -798,7 +808,9 @@ SUNErrCode N_VLinearCombinationVectorArray(int nvec, int nsum, sunrealtype* c,
       }
 
       ier = Z[0]->ops->nvlinearcombination(nsum, c, Y, Z[i]);
-      if (ier != 0) break;
+      if (ier != 0) {
+        break;
+      }
     }
 
     /* free array of vectors */
@@ -913,8 +925,9 @@ SUNErrCode N_VDotProdMultiLocal(int nvec, N_Vector x, N_Vector* Y, sunrealtype* 
   int i;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(x));
 
-  if (x->ops->nvdotprodmultilocal)
+  if (x->ops->nvdotprodmultilocal) {
     return x->ops->nvdotprodmultilocal(nvec, x, Y, dotprods);
+  }
 
   if (x->ops->nvdotprodlocal) {
     for (i = 0; i < nvec; i++) {
@@ -930,8 +943,9 @@ SUNErrCode N_VDotProdMultiLocal(int nvec, N_Vector x, N_Vector* Y, sunrealtype* 
 SUNErrCode N_VDotProdMultiAllReduce(int nvec, N_Vector x, sunrealtype* sum)
 {
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(x));
-  if (x->ops->nvdotprodmultiallreduce)
+  if (x->ops->nvdotprodmultiallreduce) {
     return x->ops->nvdotprodmultiallreduce(nvec, x, sum);
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(x));
   return SUN_ERR_NOT_IMPLEMENTED;
 }
@@ -944,10 +958,11 @@ SUNErrCode N_VBufSize(N_Vector x, sunindextype *size)
 {
   SUNErrCode ier;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(x));
-  if (x->ops->nvbufsize == NULL)
+  if (x->ops->nvbufsize == NULL) {
     ier = SUN_ERR_NOT_IMPLEMENTED;
-  else
+  } else {
     ier = x->ops->nvbufsize(x, size);
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(x));
   return(ier);
 }
@@ -956,10 +971,11 @@ SUNErrCode N_VBufPack(N_Vector x, void *buf)
 {
   SUNErrCode ier;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(x));
-  if (x->ops->nvbufpack == NULL)
+  if (x->ops->nvbufpack == NULL) {
     ier = SUN_ERR_NOT_IMPLEMENTED;
-  else
+  } else {
     ier = x->ops->nvbufpack(x, buf);
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(x));
   return(ier);
 }
@@ -968,10 +984,11 @@ SUNErrCode N_VBufUnpack(N_Vector x, void *buf)
 {
   SUNErrCode ier;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(x));
-  if (x->ops->nvbufunpack == NULL)
+  if (x->ops->nvbufunpack == NULL) {
     ier = SUN_ERR_NOT_IMPLEMENTED;
-  else
+  } else {
     ier = x->ops->nvbufunpack(x, buf);
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(x));
   return(ier);
 }
@@ -1038,7 +1055,9 @@ void N_VDestroyVectorArray(N_Vector* vs, int count)
 {
   int j;
 
-  if (vs == NULL) return;
+  if (vs == NULL) {
+    return;
+  }
 
   for (j = 0; j < count; j++) {
     N_VDestroy(vs[j]);

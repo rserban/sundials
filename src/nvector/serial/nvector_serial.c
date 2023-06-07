@@ -345,7 +345,9 @@ N_Vector N_VClone_Serial(N_Vector w)
 
 void N_VDestroy_Serial(N_Vector v)
 {
-  if (v == NULL) return;
+  if (v == NULL) {
+    return;
+  }
 
   /* free content */
   if (v->content != NULL) {
@@ -380,7 +382,9 @@ realtype *N_VGetArrayPointer_Serial(N_Vector v)
 
 void N_VSetArrayPointer_Serial(realtype *v_data, N_Vector v)
 {
-  if (NV_LENGTH_S(v) > 0) NV_DATA_S(v) = v_data;
+  if (NV_LENGTH_S(v) > 0) {
+    NV_DATA_S(v) = v_data;
+  }
 
   return;
 }
@@ -466,8 +470,9 @@ void N_VLinearSum_Serial(realtype a, N_Vector x, realtype b, N_Vector y, N_Vecto
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = (a*xd[i])+(b*yd[i]);
+  for (i = 0; i < N; i++) {
+    zd[i] = (a * xd[i]) + (b * yd[i]);
+  }
 
   return;
 }
@@ -482,7 +487,9 @@ void N_VConst_Serial(realtype c, N_Vector z)
   N  = NV_LENGTH_S(z);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++) zd[i] = c;
+  for (i = 0; i < N; i++) {
+    zd[i] = c;
+  }
 
   return;
 }
@@ -499,8 +506,9 @@ void N_VProd_Serial(N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = xd[i]*yd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = xd[i] * yd[i];
+  }
 
   return;
 }
@@ -517,8 +525,9 @@ void N_VDiv_Serial(N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = xd[i]/yd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = xd[i] / yd[i];
+  }
 
   return;
 }
@@ -543,8 +552,9 @@ void N_VScale_Serial(realtype c, N_Vector x, N_Vector z)
     N  = NV_LENGTH_S(x);
     xd = NV_DATA_S(x);
     zd = NV_DATA_S(z);
-    for (i = 0; i < N; i++)
-      zd[i] = c*xd[i];
+    for (i = 0; i < N; i++) {
+      zd[i] = c * xd[i];
+    }
   }
 
   return;
@@ -561,8 +571,9 @@ void N_VAbs_Serial(N_Vector x, N_Vector z)
   xd = NV_DATA_S(x);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
+  for (i = 0; i < N; i++) {
     zd[i] = SUNRabs(xd[i]);
+  }
 
   return;
 }
@@ -578,8 +589,9 @@ void N_VInv_Serial(N_Vector x, N_Vector z)
   xd = NV_DATA_S(x);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = ONE/xd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = ONE / xd[i];
+  }
 
   return;
 }
@@ -595,8 +607,9 @@ void N_VAddConst_Serial(N_Vector x, realtype b, N_Vector z)
   xd = NV_DATA_S(x);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = xd[i]+b;
+  for (i = 0; i < N; i++) {
+    zd[i] = xd[i] + b;
+  }
 
   return;
 }
@@ -613,8 +626,9 @@ realtype N_VDotProd_Serial(N_Vector x, N_Vector y)
   xd = NV_DATA_S(x);
   yd = NV_DATA_S(y);
 
-  for (i = 0; i < N; i++)
-    sum += xd[i]*yd[i];
+  for (i = 0; i < N; i++) {
+    sum += xd[i] * yd[i];
+  }
 
   return(sum);
 }
@@ -631,7 +645,9 @@ realtype N_VMaxNorm_Serial(N_Vector x)
   xd = NV_DATA_S(x);
 
   for (i = 0; i < N; i++) {
-    if (SUNRabs(xd[i]) > max) max = SUNRabs(xd[i]);
+    if (SUNRabs(xd[i]) > max) {
+      max = SUNRabs(xd[i]);
+    }
   }
 
   return(max);
@@ -709,7 +725,9 @@ realtype N_VMin_Serial(N_Vector x)
   min = xd[0];
 
   for (i = 1; i < N; i++) {
-    if (xd[i] < min) min = xd[i];
+    if (xd[i] < min) {
+      min = xd[i];
+    }
   }
 
   return(min);
@@ -746,8 +764,9 @@ realtype N_VL1Norm_Serial(N_Vector x)
   N  = NV_LENGTH_S(x);
   xd = NV_DATA_S(x);
 
-  for (i = 0; i<N; i++)
+  for (i = 0; i < N; i++) {
     sum += SUNRabs(xd[i]);
+  }
 
   return(sum);
 }
@@ -784,10 +803,11 @@ booleantype N_VInvTest_Serial(N_Vector x, N_Vector z)
 
   no_zero_found = SUNTRUE;
   for (i = 0; i < N; i++) {
-    if (xd[i] == ZERO)
+    if (xd[i] == ZERO) {
       no_zero_found = SUNFALSE;
-    else
-      zd[i] = ONE/xd[i];
+    } else {
+      zd[i] = ONE / xd[i];
+    }
   }
 
   return no_zero_found;
@@ -813,8 +833,9 @@ booleantype N_VConstrMask_Serial(N_Vector c, N_Vector x, N_Vector m)
     md[i] = ZERO;
 
     /* Continue if no constraints were set for the variable */
-    if (cd[i] == ZERO)
+    if (cd[i] == ZERO) {
       continue;
+    }
 
     /* Check if a set constraint has been violated */
     test = (SUNRabs(cd[i]) > ONEPT5 && xd[i]*cd[i] <= ZERO) ||
@@ -844,11 +865,13 @@ realtype N_VMinQuotient_Serial(N_Vector num, N_Vector denom)
   min = BIG_REAL;
 
   for (i = 0; i < N; i++) {
-    if (dd[i] == ZERO) continue;
-    else {
-      if (!notEvenOnce) min = SUNMIN(min, nd[i]/dd[i]);
-      else {
-	min = nd[i]/dd[i];
+    if (dd[i] == ZERO) {
+      continue;
+    } else {
+      if (!notEvenOnce) {
+        min = SUNMIN(min, nd[i] / dd[i]);
+      } else {
+        min = nd[i]/dd[i];
         notEvenOnce = SUNFALSE;
       }
     }
@@ -1282,8 +1305,9 @@ SUNErrCode N_VWrmsNormMaskVectorArray_Serial(int nvec, N_Vector* X, N_Vector* W,
     wd = NV_DATA_S(W[i]);
     nrm[i] = ZERO;
     for (j=0; j<N; j++) {
-      if (idd[j] > ZERO)
+      if (idd[j] > ZERO) {
         nrm[i] += SUNSQR(xd[j] * wd[j]);
+      }
     }
     nrm[i] = SUNRsqrt(nrm[i]/N);
   }
@@ -1548,8 +1572,9 @@ SUNErrCode N_VBufPack_Serial(N_Vector x, void *buf)
   xd = NV_DATA_S(x);
   bd = (realtype*) buf;
 
-  for (i = 0; i < N; i++)
+  for (i = 0; i < N; i++) {
     bd[i] = xd[i];
+  }
 
   return SUN_SUCCESS;
 }
@@ -1568,8 +1593,9 @@ SUNErrCode N_VBufUnpack_Serial(N_Vector x, void *buf)
   xd = NV_DATA_S(x);
   bd = (realtype*) buf;
 
-  for (i = 0; i < N; i++)
+  for (i = 0; i < N; i++) {
     xd[i] = bd[i];
+  }
 
   return SUN_SUCCESS;
 }
@@ -1592,8 +1618,9 @@ static void VCopy_Serial(N_Vector x, N_Vector z)
   xd = NV_DATA_S(x);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
+  for (i = 0; i < N; i++) {
     zd[i] = xd[i];
+  }
 
   return;
 }
@@ -1610,8 +1637,9 @@ static void VSum_Serial(N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = xd[i]+yd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = xd[i] + yd[i];
+  }
 
   return;
 }
@@ -1628,8 +1656,9 @@ static void VDiff_Serial(N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = xd[i]-yd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = xd[i] - yd[i];
+  }
 
   return;
 }
@@ -1645,8 +1674,9 @@ static void VNeg_Serial(N_Vector x, N_Vector z)
   xd = NV_DATA_S(x);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
+  for (i = 0; i < N; i++) {
     zd[i] = -xd[i];
+  }
 
   return;
 }
@@ -1663,8 +1693,9 @@ static void VScaleSum_Serial(realtype c, N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = c*(xd[i]+yd[i]);
+  for (i = 0; i < N; i++) {
+    zd[i] = c * (xd[i] + yd[i]);
+  }
 
   return;
 }
@@ -1681,8 +1712,9 @@ static void VScaleDiff_Serial(realtype c, N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = c*(xd[i]-yd[i]);
+  for (i = 0; i < N; i++) {
+    zd[i] = c * (xd[i] - yd[i]);
+  }
 
   return;
 }
@@ -1699,8 +1731,9 @@ static void VLin1_Serial(realtype a, N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = (a*xd[i])+yd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = (a * xd[i]) + yd[i];
+  }
 
   return;
 }
@@ -1717,8 +1750,9 @@ static void VLin2_Serial(realtype a, N_Vector x, N_Vector y, N_Vector z)
   yd = NV_DATA_S(y);
   zd = NV_DATA_S(z);
 
-  for (i = 0; i < N; i++)
-    zd[i] = (a*xd[i])-yd[i];
+  for (i = 0; i < N; i++) {
+    zd[i] = (a * xd[i]) - yd[i];
+  }
 
   return;
 }
@@ -1735,19 +1769,22 @@ static void Vaxpy_Serial(realtype a, N_Vector x, N_Vector y)
   yd = NV_DATA_S(y);
 
   if (a == ONE) {
-    for (i = 0; i < N; i++)
+    for (i = 0; i < N; i++) {
       yd[i] += xd[i];
+    }
     return;
   }
 
   if (a == -ONE) {
-    for (i = 0; i < N; i++)
+    for (i = 0; i < N; i++) {
       yd[i] -= xd[i];
+    }
     return;
   }
 
-  for (i = 0; i < N; i++)
-    yd[i] += a*xd[i];
+  for (i = 0; i < N; i++) {
+    yd[i] += a * xd[i];
+  }
 
   return;
 }
@@ -1762,8 +1799,9 @@ static void VScaleBy_Serial(realtype a, N_Vector x)
   N  = NV_LENGTH_S(x);
   xd = NV_DATA_S(x);
 
-  for (i = 0; i < N; i++)
+  for (i = 0; i < N; i++) {
     xd[i] *= a;
+  }
 
   return;
 }
@@ -1789,8 +1827,9 @@ static void VSumVectorArray_Serial(int nvec, N_Vector* X, N_Vector* Y, N_Vector*
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
     zd = NV_DATA_S(Z[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       zd[j] = xd[j] + yd[j];
+    }
   }
 }
 
@@ -1808,8 +1847,9 @@ static void VDiffVectorArray_Serial(int nvec, N_Vector* X, N_Vector* Y, N_Vector
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
     zd = NV_DATA_S(Z[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       zd[j] = xd[j] - yd[j];
+    }
   }
 }
 
@@ -1827,8 +1867,9 @@ static void VScaleSumVectorArray_Serial(int nvec, realtype c, N_Vector* X, N_Vec
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
     zd = NV_DATA_S(Z[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       zd[j] = c * (xd[j] + yd[j]);
+    }
   }
 }
 
@@ -1846,8 +1887,9 @@ static void VScaleDiffVectorArray_Serial(int nvec, realtype c, N_Vector* X, N_Ve
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
     zd = NV_DATA_S(Z[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       zd[j] = c * (xd[j] - yd[j]);
+    }
   }
 }
 
@@ -1865,8 +1907,9 @@ static void VLin1VectorArray_Serial(int nvec, realtype a, N_Vector* X, N_Vector*
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
     zd = NV_DATA_S(Z[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       zd[j] = (a * xd[j]) + yd[j];
+    }
   }
 }
 
@@ -1884,8 +1927,9 @@ static void VLin2VectorArray_Serial(int nvec, realtype a, N_Vector* X, N_Vector*
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
     zd = NV_DATA_S(Z[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       zd[j] = (a * xd[j]) - yd[j];
+    }
   }
 }
 
@@ -1902,8 +1946,9 @@ static void VaxpyVectorArray_Serial(int nvec, realtype a, N_Vector* X, N_Vector*
     for (i=0; i<nvec; i++) {
       xd = NV_DATA_S(X[i]);
       yd = NV_DATA_S(Y[i]);
-      for (j=0; j<N; j++)
+      for (j = 0; j < N; j++) {
         yd[j] += xd[j];
+      }
     }
     return;
   }
@@ -1912,8 +1957,9 @@ static void VaxpyVectorArray_Serial(int nvec, realtype a, N_Vector* X, N_Vector*
     for (i=0; i<nvec; i++) {
       xd = NV_DATA_S(X[i]);
       yd = NV_DATA_S(Y[i]);
-      for (j=0; j<N; j++)
+      for (j = 0; j < N; j++) {
         yd[j] -= xd[j];
+      }
     }
     return;
   }
@@ -1921,8 +1967,9 @@ static void VaxpyVectorArray_Serial(int nvec, realtype a, N_Vector* X, N_Vector*
   for (i=0; i<nvec; i++) {
     xd = NV_DATA_S(X[i]);
     yd = NV_DATA_S(Y[i]);
-    for (j=0; j<N; j++)
+    for (j = 0; j < N; j++) {
       yd[j] += a * xd[j];
+    }
   }
 }
 

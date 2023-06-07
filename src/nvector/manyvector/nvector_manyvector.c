@@ -280,8 +280,9 @@ N_Vector N_VNew_ManyVector(sunindextype num_subvectors,
 
   /* Check that input N_Vectors are non-NULL */
   MVASSERT(vec_array, SUN_ERR_ARG_CORRUPT);
-  for (i=0; i<num_subvectors; i++)
+  for (i = 0; i < num_subvectors; i++) {
     MVASSERT(vec_array[i], SUN_ERR_ARG_CORRUPT);
+  }
 
   /* Create vector */
   v = NULL;
@@ -368,8 +369,9 @@ N_Vector N_VNew_ManyVector(sunindextype num_subvectors,
   content->subvec_array = (N_Vector *) malloc(num_subvectors * sizeof(N_Vector));
   MVASSERT(content->subvec_array, SUN_ERR_MALLOC_FAIL);
 
-  for (i=0; i<num_subvectors; i++)
+  for (i = 0; i < num_subvectors; i++) {
     content->subvec_array[i] = vec_array[i];
+  }
 
   /* Determine overall ManyVector length: sum contributions from all subvectors */
   local_length = 0;
@@ -401,8 +403,9 @@ realtype *MVAPPEND(N_VGetSubvectorArrayPointer)(N_Vector v, sunindextype vec_num
 {
   SUNAssignSUNCTX(v->sunctx);
   MVASSERT(vec_num >= 0 || vec_num <= MANYVECTOR_NUM_SUBVECS(v), SUN_ERR_ARG_OUTOFRANGE);
-  if ( MANYVECTOR_SUBVEC(v,vec_num)->ops->nvgetarraypointer == NULL )
-    return(NULL);
+  if (MANYVECTOR_SUBVEC(v, vec_num)->ops->nvgetarraypointer == NULL) {
+    return (NULL);
+  }
   return(N_VGetArrayPointer(MANYVECTOR_SUBVEC(v,vec_num)));
 }
 
@@ -416,8 +419,9 @@ SUNErrCode MVAPPEND(N_VSetSubvectorArrayPointer)(realtype *v_data, N_Vector v, s
   SUNAssignSUNCTX(v->sunctx);
   MVASSERT(vec_num >= 0 || vec_num <= MANYVECTOR_NUM_SUBVECS(v), SUN_ERR_ARG_OUTOFRANGE);
   /* TODO(CJB): Is it valid to call the function in this case, or do we want to assert? */
-  if ( MANYVECTOR_SUBVEC(v,vec_num)->ops->nvsetarraypointer == NULL )
-    return(-1);
+  if (MANYVECTOR_SUBVEC(v, vec_num)->ops->nvsetarraypointer == NULL) {
+    return (-1);
+  }
   N_VSetArrayPointer(v_data, MANYVECTOR_SUBVEC(v,vec_num));
   return SUN_SUCCESS;
 }
@@ -486,7 +490,9 @@ void MVAPPEND(N_VDestroy)(N_Vector v)
 {
   sunindextype i;
 
-  if (v == NULL) return;
+  if (v == NULL) {
+    return;
+  }
 
   /* free content */
   if (v->content != NULL) {
@@ -1321,23 +1327,26 @@ SUNErrCode MVAPPEND(N_VDotProdMultiLocal)(int nvec, N_Vector x, N_Vector* Y,
   MVASSERT(contrib, SUN_ERR_MALLOC_FAIL);
 
   /* initialize output */
-  for (j = 0; j < nvec; j++)
+  for (j = 0; j < nvec; j++) {
     dotprods[j] = ZERO;
+  }
 
   /* loop over subvectors */
   for (i = 0; i < MANYVECTOR_NUM_SUBVECS(x); i++) {
 
     /* extract subvectors from vector array */
-    for (j = 0; j < nvec; j++)
+    for (j = 0; j < nvec; j++) {
       Ysub[j] = MANYVECTOR_SUBVEC(Y[j], i);
+    }
 
     /* compute dot products */
     SUNCheckCall(
       N_VDotProdMultiLocal(nvec, MANYVECTOR_SUBVEC(x,i), Ysub, contrib));
 
     /* accumulate contributions */
-    for (j = 0; j < nvec; j++)
+    for (j = 0; j < nvec; j++) {
       dotprods[j] += contrib[j];
+    }
   }
 
   free(Ysub);
@@ -1389,7 +1398,9 @@ SUNErrCode MVAPPEND(N_VLinearCombination)(int nvec, realtype* c, N_Vector* X, N_
   for (i=0; i<MANYVECTOR_NUM_SUBVECS(z); i++) {
 
     /* for each subvector, create the array of subvectors of X */
-    for (j=0; j<nvec; j++)  Xsub[j] = MANYVECTOR_SUBVEC(X[j],i);
+    for (j = 0; j < nvec; j++) {
+      Xsub[j] = MANYVECTOR_SUBVEC(X[j], i);
+    }
 
     /* now call N_VLinearCombination for this array of subvectors */
     SUNCheckCall(
@@ -1602,8 +1613,9 @@ SUNErrCode MVAPPEND(N_VConstVectorArray)(int nvec, realtype c, N_Vector* Z)
   for (i=0; i<MANYVECTOR_NUM_SUBVECS(Z[0]); i++) {
 
     /* for each subvector, create the array of subvectors of X, Y and Z */
-    for (j=0; j<nvec; j++)
-      Zsub[j] = MANYVECTOR_SUBVEC(Z[j],i);
+    for (j = 0; j < nvec; j++) {
+      Zsub[j] = MANYVECTOR_SUBVEC(Z[j], i);
+    }
 
     /* now call N_VConstVectorArray for this array of subvectors */
     SUNCheckCall(N_VConstVectorArray(nvec, c, Zsub));
@@ -1647,8 +1659,9 @@ SUNErrCode MVAPPEND(N_VWrmsNormVectorArray)(int nvec, N_Vector* X, N_Vector* W, 
 #endif
 
   /* finish off WRMS norms and return */
-  for (i=0; i<nvec; i++)
-    nrm[i] = SUNRsqrt(nrm[i]/(MANYVECTOR_GLOBLENGTH(X[i])));
+  for (i = 0; i < nvec; i++) {
+    nrm[i] = SUNRsqrt(nrm[i] / (MANYVECTOR_GLOBLENGTH(X[i])));
+  }
 
   return(retval);
 }
@@ -1687,8 +1700,9 @@ SUNErrCode MVAPPEND(N_VWrmsNormMaskVectorArray)(int nvec, N_Vector* X, N_Vector*
 #endif
 
   /* finish off WRMS norms and return */
-  for (i=0; i<nvec; i++)
-    nrm[i] = SUNRsqrt(nrm[i]/(MANYVECTOR_GLOBLENGTH(X[i])));
+  for (i = 0; i < nvec; i++) {
+    nrm[i] = SUNRsqrt(nrm[i] / (MANYVECTOR_GLOBLENGTH(X[i])));
+  }
 
   return(retval);
 }
@@ -1824,10 +1838,11 @@ SUNErrCode MVAPPEND(N_VEnableFusedOps)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableLinearCombination)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvlinearcombination = MVAPPEND(N_VLinearCombination);
-  else
+  } else {
     v->ops->nvlinearcombination = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1836,10 +1851,11 @@ SUNErrCode MVAPPEND(N_VEnableLinearCombination)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableScaleAddMulti)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvscaleaddmulti = MVAPPEND(N_VScaleAddMulti);
-  else
+  } else {
     v->ops->nvscaleaddmulti = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1848,10 +1864,11 @@ SUNErrCode MVAPPEND(N_VEnableScaleAddMulti)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableDotProdMulti)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvdotprodmulti = MVAPPEND(N_VDotProdMulti);
-  else
+  } else {
     v->ops->nvdotprodmulti = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1860,10 +1877,11 @@ SUNErrCode MVAPPEND(N_VEnableDotProdMulti)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableLinearSumVectorArray)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvlinearsumvectorarray = MVAPPEND(N_VLinearSumVectorArray);
-  else
+  } else {
     v->ops->nvlinearsumvectorarray = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1872,10 +1890,11 @@ SUNErrCode MVAPPEND(N_VEnableLinearSumVectorArray)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableScaleVectorArray)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvscalevectorarray = MVAPPEND(N_VScaleVectorArray);
-  else
+  } else {
     v->ops->nvscalevectorarray = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1884,10 +1903,11 @@ SUNErrCode MVAPPEND(N_VEnableScaleVectorArray)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableConstVectorArray)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvconstvectorarray = MVAPPEND(N_VConstVectorArray);
-  else
+  } else {
     v->ops->nvconstvectorarray = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1896,10 +1916,11 @@ SUNErrCode MVAPPEND(N_VEnableConstVectorArray)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableWrmsNormVectorArray)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvwrmsnormvectorarray = MVAPPEND(N_VWrmsNormVectorArray);
-  else
+  } else {
     v->ops->nvwrmsnormvectorarray = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1908,10 +1929,11 @@ SUNErrCode MVAPPEND(N_VEnableWrmsNormVectorArray)(N_Vector v, booleantype tf)
 SUNErrCode MVAPPEND(N_VEnableWrmsNormMaskVectorArray)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvwrmsnormmaskvectorarray = MVAPPEND(N_VWrmsNormMaskVectorArray);
-  else
+  } else {
     v->ops->nvwrmsnormmaskvectorarray = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1920,10 +1942,11 @@ SUNErrCode MVAPPEND(N_VEnableWrmsNormMaskVectorArray)(N_Vector v, booleantype tf
 SUNErrCode MVAPPEND(N_VEnableDotProdMultiLocal)(N_Vector v, booleantype tf)
 {
   /* enable/disable operation */
-  if (tf)
+  if (tf) {
     v->ops->nvdotprodmultilocal = MVAPPEND(N_VDotProdMultiLocal);
-  else
+  } else {
     v->ops->nvdotprodmultilocal = NULL;
+  }
 
   /* return success */
   return SUN_SUCCESS;
@@ -1974,8 +1997,9 @@ static N_Vector ManyVectorClone(N_Vector w, booleantype cloneempty)
   MVASSERT(content->subvec_array, SUN_ERR_MALLOC_FAIL);
 
   /* Initialize the subvector array to NULL */
-  for (i=0; i<content->num_subvectors; i++)
+  for (i = 0; i < content->num_subvectors; i++) {
     content->subvec_array[i] = NULL;
+  }
 
   /* Duplicate the input communicator (if applicable) */
 #ifdef MANYVECTOR_BUILD_WITH_MPI

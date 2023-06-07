@@ -41,7 +41,9 @@ int MRIStepSetNonlinearSolver(void *arkode_mem, SUNNonlinearSolver NLS)
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "MRIStepSetNonlinearSolver",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(ark_mem->sunctx);
 
@@ -139,12 +141,15 @@ int MRIStepSetNlsRhsFn(void *arkode_mem, ARKRhsFn nls_fsi)
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "MRIStepSetNlsRhsFn",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS) return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
-  if (nls_fsi)
+  if (nls_fsi) {
     step_mem->nls_fsi = nls_fsi;
-  else
+  } else {
     step_mem->nls_fsi = step_mem->fsi;
+  }
 
   return(ARK_SUCCESS);
 }
@@ -168,7 +173,9 @@ int MRIStepGetNonlinearSystemData(void *arkode_mem, realtype *tcur,
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "MRIStepGetNonlinearSystemData",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   *tcur      = ark_mem->tcur;
   *zpred     = step_mem->zpred;
@@ -344,7 +351,9 @@ int mriStep_Nls(ARKodeMem ark_mem, int nflag)
   }
 
   /* check for recoverable failure, return ARKODE::CONV_FAIL */
-  if (nls_status == SUN_NLS_CONV_RECVR) return(CONV_FAIL);
+  if (nls_status == SUN_NLS_CONV_RECVR) {
+    return (CONV_FAIL);
+  }
 
   return(nls_status);
 }
@@ -369,10 +378,14 @@ int mriStep_NlsLSetup(booleantype jbad, booleantype* jcur, void* arkode_mem)
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_NlsLSetup",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   /* update convfail based on jbad flag */
-  if (jbad)  step_mem->convfail = ARK_FAIL_BAD_J;
+  if (jbad) {
+    step_mem->convfail = ARK_FAIL_BAD_J;
+  }
 
   /* Use ARKODE's tempv1, tempv2 and tempv3 as
      temporary vectors for the linear solver setup routine */
@@ -392,8 +405,12 @@ int mriStep_NlsLSetup(booleantype jbad, booleantype* jcur, void* arkode_mem)
   step_mem->gammap = step_mem->gamma;
   step_mem->nstlp  = ark_mem->nst;
 
-  if (retval < 0) return(ARK_LSETUP_FAIL);
-  if (retval > 0) return(CONV_FAIL);
+  if (retval < 0) {
+    return (ARK_LSETUP_FAIL);
+  }
+  if (retval > 0) {
+    return (CONV_FAIL);
+  }
 
   return(ARK_SUCCESS);
 }
@@ -414,15 +431,18 @@ int mriStep_NlsLSolve(N_Vector b, void* arkode_mem)
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_NlsLSolve",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(ark_mem->sunctx);
 
   /* retrieve nonlinear solver iteration from module */
   retval = SUNNonlinSolGetCurIter(step_mem->NLS, &nonlin_iter);
   SUNCheckCallNoRet(retval);
-  if (retval != SUN_NLS_SUCCESS)
-    return(ARK_NLS_OP_ERR);
+  if (retval != SUN_NLS_SUCCESS) {
+    return (ARK_NLS_OP_ERR);
+  }
 
   /* call linear solver interface, and handle return value */
   retval = step_mem->lsolve(ark_mem, b, ark_mem->tcur,
@@ -430,8 +450,12 @@ int mriStep_NlsLSolve(N_Vector b, void* arkode_mem)
                             step_mem->Fsi[step_mem->stage_map[step_mem->istage]],
                             step_mem->eRNrm, nonlin_iter);
 
-  if (retval < 0) return(ARK_LSOLVE_FAIL);
-  if (retval > 0) return(CONV_FAIL);
+  if (retval < 0) {
+    return (ARK_LSOLVE_FAIL);
+  }
+  if (retval > 0) {
+    return (CONV_FAIL);
+  }
 
   return(ARK_SUCCESS);
 }
@@ -468,7 +492,9 @@ int mriStep_NlsResidual(N_Vector zcor, N_Vector r, void* arkode_mem)
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_NlsResidual",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(ark_mem->sunctx);
 
@@ -480,8 +506,12 @@ int mriStep_NlsResidual(N_Vector zcor, N_Vector r, void* arkode_mem)
                              step_mem->Fsi[step_mem->stage_map[step_mem->istage]],
                              ark_mem->user_data);
   step_mem->nfsi++;
-  if (retval < 0) return(ARK_RHSFUNC_FAIL);
-  if (retval > 0) return(RHSFUNC_RECVR);
+  if (retval < 0) {
+    return (ARK_RHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (RHSFUNC_RECVR);
+  }
 
   /* compute residual: zcor - gamma*Fsi - sdata */
   c[0] = ONE;
@@ -492,7 +522,9 @@ int mriStep_NlsResidual(N_Vector zcor, N_Vector r, void* arkode_mem)
   X[2] = step_mem->Fsi[step_mem->stage_map[step_mem->istage]];
   retval = N_VLinearCombination(3, c, X, r);
   SUNCheckCallNoRet(retval);
-  if (retval != 0)  return(ARK_VECTOROP_ERR);
+  if (retval != 0) {
+    return (ARK_VECTOROP_ERR);
+  }
   return(ARK_SUCCESS);
 }
 
@@ -528,7 +560,9 @@ int mriStep_NlsFPFunction(N_Vector zcor, N_Vector g, void* arkode_mem)
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_NlsFPFunction",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(ark_mem->sunctx);
 
@@ -540,8 +574,12 @@ int mriStep_NlsFPFunction(N_Vector zcor, N_Vector g, void* arkode_mem)
                              step_mem->Fsi[step_mem->stage_map[step_mem->istage]],
                              ark_mem->user_data);
   step_mem->nfsi++;
-  if (retval < 0) return(ARK_RHSFUNC_FAIL);
-  if (retval > 0) return(RHSFUNC_RECVR);
+  if (retval < 0) {
+    return (ARK_RHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (RHSFUNC_RECVR);
+  }
 
   /* combine parts:  g = gamma*Fsi(z) + sdata */
   N_VLinearSum(step_mem->gamma,
@@ -583,13 +621,16 @@ int mriStep_NlsConvTest(SUNNonlinearSolver NLS, N_Vector y, N_Vector del,
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_NlsConvTest",
                                  &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
+  if (retval != ARK_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(ark_mem->sunctx);
 
   /* if the problem is linearly implicit, just return success */
-  if (step_mem->linear)
-    return(SUN_NLS_SUCCESS);
+  if (step_mem->linear) {
+    return (SUN_NLS_SUCCESS);
+  }
 
   /* compute the norm of the correction */
   delnrm = SUNCheckCallLastErrNoRet(N_VWrmsNorm(del, ewt));
@@ -597,21 +638,28 @@ int mriStep_NlsConvTest(SUNNonlinearSolver NLS, N_Vector y, N_Vector del,
   /* get the current nonlinear solver iteration count */
   retval = SUNNonlinSolGetCurIter(NLS, &m);
   SUNCheckCallNoRet(retval);
-  if (retval != SUN_SUCCESS)  return(ARK_MEM_NULL);
+  if (retval != SUN_SUCCESS) {
+    return (ARK_MEM_NULL);
+  }
 
   /* update the stored estimate of the convergence rate (assumes linear convergence) */
-  if (m > 0)
-    step_mem->crate = SUNMAX(step_mem->crdown*step_mem->crate, delnrm/step_mem->delp);
+  if (m > 0) {
+    step_mem->crate =
+        SUNMAX(step_mem->crdown * step_mem->crate, delnrm / step_mem->delp);
+  }
 
   /* compute our scaled error norm for testing convergence */
   dcon = SUNMIN(step_mem->crate, ONE) * delnrm / tol;
 
   /* check for convergence; if so return with success */
-  if (dcon <= ONE)  return(SUN_NLS_SUCCESS);
+  if (dcon <= ONE) {
+    return (SUN_NLS_SUCCESS);
+  }
 
   /* check for divergence */
-  if ((m >= 1) && (delnrm > step_mem->rdiv*step_mem->delp))
-    return(SUN_NLS_CONV_RECVR);
+  if ((m >= 1) && (delnrm > step_mem->rdiv * step_mem->delp)) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   /* save norm of correction for next iteration */
   step_mem->delp = delnrm;

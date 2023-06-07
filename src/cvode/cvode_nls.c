@@ -84,8 +84,9 @@ int CVodeSetNonlinearSolver(void *cvode_mem, SUNNonlinearSolver NLS)
   }
 
   /* free any existing nonlinear solver */
-  if ((cv_mem->NLS != NULL) && (cv_mem->ownNLS))
+  if ((cv_mem->NLS != NULL) && (cv_mem->ownNLS)) {
     retval = SUNNonlinSolFree(cv_mem->NLS);
+  }
 
   /* set SUNNonlinearSolver pointer */
   cv_mem->NLS = NLS;
@@ -165,10 +166,11 @@ int CVodeSetNlsRhsFn(void *cvode_mem, CVRhsFn f)
 
   cv_mem = (CVodeMem) cvode_mem;
 
-  if (f)
+  if (f) {
     cv_mem->nls_f = f;
-  else
+  } else {
     cv_mem->nls_f = cv_mem->cv_f;
+  }
 
   return(CV_SUCCESS);
 }
@@ -221,10 +223,11 @@ int cvNlsInit(CVodeMem cv_mem)
   int retval;
 
   /* set the linear solver setup wrapper function */
-  if (cv_mem->cv_lsetup)
+  if (cv_mem->cv_lsetup) {
     retval = SUNNonlinSolSetLSetupFn(cv_mem->NLS, cvNlsLSetup);
-  else
+  } else {
     retval = SUNNonlinSolSetLSetupFn(cv_mem->NLS, NULL);
+  }
   SUNCheckCallNoRet(retval);
 
   if (retval != CV_SUCCESS) {
@@ -234,10 +237,11 @@ int cvNlsInit(CVodeMem cv_mem)
   }
 
   /* set the linear solver solve wrapper function */
-  if (cv_mem->cv_lsolve)
+  if (cv_mem->cv_lsolve) {
     retval = SUNNonlinSolSetLSolveFn(cv_mem->NLS, cvNlsLSolve);
-  else
+  } else {
     retval = SUNNonlinSolSetLSolveFn(cv_mem->NLS, NULL);
+  }
   SUNCheckCallNoRet(retval);
 
   if (retval != CV_SUCCESS) {
@@ -271,8 +275,9 @@ static int cvNlsLSetup(booleantype jbad, booleantype* jcur, void* cvode_mem)
   cv_mem = (CVodeMem) cvode_mem;
 
   /* if the nonlinear solver marked the Jacobian as bad update convfail */
-  if (jbad)
+  if (jbad) {
     cv_mem->convfail = CV_FAIL_BAD_J;
+  }
 
   /* setup the linear solver */
   retval = cv_mem->cv_lsetup(cv_mem, cv_mem->convfail, cv_mem->cv_y, cv_mem->cv_ftemp,
@@ -288,8 +293,12 @@ static int cvNlsLSetup(booleantype jbad, booleantype* jcur, void* cvode_mem)
   cv_mem->cv_crate  = ONE;
   cv_mem->cv_nstlp  = cv_mem->cv_nst;
 
-  if (retval < 0) return(CV_LSETUP_FAIL);
-  if (retval > 0) return(SUN_NLS_CONV_RECVR);
+  if (retval < 0) {
+    return (CV_LSETUP_FAIL);
+  }
+  if (retval > 0) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   return(CV_SUCCESS);
 }
@@ -308,8 +317,12 @@ static int cvNlsLSolve(N_Vector delta, void* cvode_mem)
 
   retval = cv_mem->cv_lsolve(cv_mem, delta, cv_mem->cv_ewt, cv_mem->cv_y, cv_mem->cv_ftemp);
 
-  if (retval < 0) return(CV_LSOLVE_FAIL);
-  if (retval > 0) return(SUN_NLS_CONV_RECVR);
+  if (retval < 0) {
+    return (CV_LSOLVE_FAIL);
+  }
+  if (retval > 0) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   return(CV_SUCCESS);
 }
@@ -337,7 +350,9 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
   /* get the current nonlinear solver iteration count */
   retval = SUNNonlinSolGetCurIter(NLS, &m);
   SUNCheckCallNoRet(retval);
-  if (retval != CV_SUCCESS) return(CV_MEM_NULL);
+  if (retval != CV_SUCCESS) {
+    return (CV_MEM_NULL);
+  }
 
   /* Test for convergence. If m > 0, an estimate of the convergence
      rate constant is stored in crate, and used in the test.        */
@@ -357,7 +372,9 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
   }
 
   /* check if the iteration seems to be diverging */
-  if ((m >= 1) && (del > RDIV*cv_mem->cv_delp)) return(SUN_NLS_CONV_RECVR);
+  if ((m >= 1) && (del > RDIV * cv_mem->cv_delp)) {
+    return (SUN_NLS_CONV_RECVR);
+  }
 
   /* Save norm of correction and loop again */
   cv_mem->cv_delp = del;
@@ -387,8 +404,12 @@ static int cvNlsResidual(N_Vector ycor, N_Vector res, void* cvode_mem)
   retval = cv_mem->nls_f(cv_mem->cv_tn, cv_mem->cv_y, cv_mem->cv_ftemp,
                          cv_mem->cv_user_data);
   cv_mem->cv_nfe++;
-  if (retval < 0) return(CV_RHSFUNC_FAIL);
-  if (retval > 0) return(RHSFUNC_RECVR);
+  if (retval < 0) {
+    return (CV_RHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (RHSFUNC_RECVR);
+  }
 
 #ifdef SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS
   if (cv_mem->cv_usefused)
@@ -427,8 +448,12 @@ static int cvNlsFPFunction(N_Vector ycor, N_Vector res, void* cvode_mem)
   retval = cv_mem->nls_f(cv_mem->cv_tn, cv_mem->cv_y, res,
                          cv_mem->cv_user_data);
   cv_mem->cv_nfe++;
-  if (retval < 0) return(CV_RHSFUNC_FAIL);
-  if (retval > 0) return(RHSFUNC_RECVR);
+  if (retval < 0) {
+    return (CV_RHSFUNC_FAIL);
+  }
+  if (retval > 0) {
+    return (RHSFUNC_RECVR);
+  }
 
   SUNCheckCallLastErrNoRet(N_VLinearSum(cv_mem->cv_h, res, -ONE, cv_mem->cv_zn[1], res));
   SUNCheckCallLastErrNoRet(N_VScale(cv_mem->cv_rl1, res, res));

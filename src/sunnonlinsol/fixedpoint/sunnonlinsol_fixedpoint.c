@@ -255,7 +255,9 @@ int SUNNonlinSolSolve_FixedPoint(SUNNonlinearSolver NLS, N_Vector y0,
 #endif
 
     /* return if successful */
-    if (retval == 0) return SUN_NLS_SUCCESS;
+    if (retval == 0) {
+      return SUN_NLS_SUCCESS;
+    }
 
     /* check if the iterations should continue; otherwise increment the
        convergence failure count and return error flag */
@@ -276,7 +278,9 @@ int SUNNonlinSolSolve_FixedPoint(SUNNonlinearSolver NLS, N_Vector y0,
 SUNErrCode SUNNonlinSolFree_FixedPoint(SUNNonlinearSolver NLS)
 {
   /* return if NLS is already free */
-  if (NLS == NULL) return SUN_SUCCESS;
+  if (NLS == NULL) {
+    return SUN_SUCCESS;
+  }
 
   /* free items from content structure, then the structure itself */
   if (NLS->content) {
@@ -429,7 +433,9 @@ static SUNErrCode AndersonAccelerate(SUNNonlinearSolver NLS, N_Vector gval,
   beta    = FP_CONTENT(NLS)->beta;
 
   /* reset ipt_map, i_pt */
-  for (i = 0; i < maa; i++)  ipt_map[i]=0;
+  for (i = 0; i < maa; i++) {
+    ipt_map[i] = 0;
+  }
   i_pt = iter-1 - ((iter-1)/maa)*maa;
 
   /* update dg[i_pt], df[i_pt], fv, gold and fold*/
@@ -499,9 +505,11 @@ static SUNErrCode AndersonAccelerate(SUNNonlinearSolver NLS, N_Vector gval,
     }
 
     /* ahift R to the left by one */
-    for (i = 1; i < maa; i++)
-      for (j = 0; j < maa-1; j++)
-        R[(i-1)*maa + j] = R[i*maa + j];
+    for (i = 1; i < maa; i++) {
+      for (j = 0; j < maa - 1; j++) {
+        R[(i - 1) * maa + j] = R[i * maa + j];
+      }
+    }
 
     /* add the new df vector */
     SUNCheckCallLastErr(N_VScale(ONE, df[i_pt], vtemp));
@@ -515,15 +523,19 @@ static SUNErrCode AndersonAccelerate(SUNNonlinearSolver NLS, N_Vector gval,
 
     /* update the iteration map */
     j = 0;
-    for (i = i_pt+1; i < maa; i++)
+    for (i = i_pt + 1; i < maa; i++) {
       ipt_map[j++] = i;
-    for (i = 0; i < i_pt+1; i++)
+    }
+    for (i = 0; i < i_pt + 1; i++) {
       ipt_map[j++] = i;
+    }
   }
 
   /* solve least squares problem and update solution */
   lAA = iter;
-  if (maa < iter)  lAA = maa;
+  if (maa < iter) {
+    lAA = maa;
+  }
   SUNCheckCall(N_VDotProdMulti(lAA, fv, Q, gamma));
 
   /* set arrays for fused vector operation */
@@ -531,8 +543,9 @@ static SUNErrCode AndersonAccelerate(SUNNonlinearSolver NLS, N_Vector gval,
   Xvecs[0] = gval;
   nvec = 1;
   for (i = lAA-1; i > -1; i--) {
-    for (j = i+1; j < lAA; j++)
-      gamma[i] -= R[j*maa+i]*gamma[j];
+    for (j = i + 1; j < lAA; j++) {
+      gamma[i] -= R[j * maa + i] * gamma[j];
+    }
     if (gamma[i] == ZERO) {
       gamma[i] = ZERO;
     } else {

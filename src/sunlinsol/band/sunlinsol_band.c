@@ -150,8 +150,9 @@ int SUNLinSolSetup_Band(SUNLinearSolver S, SUNMatrix A)
                                     SM_LBAND_B(A), SM_SUBAND_B(A), pivots);
 
   /* store error flag (if nonzero, that row encountered zero-valued pivod) */
-  if (LASTFLAG(S) > 0)
-    return(SUNLS_LUFACT_FAIL);
+  if (LASTFLAG(S) > 0) {
+    return (SUNLS_LUFACT_FAIL);
+  }
   return(SUNLS_SUCCESS);
 }
 
@@ -203,7 +204,9 @@ SUNErrCode SUNLinSolSpace_Band(SUNLinearSolver S, long int* lenrwLS,
 SUNErrCode SUNLinSolFree_Band(SUNLinearSolver S)
 {
   /* return if S is already free */
-  if (S == NULL) return SUN_SUCCESS;
+  if (S == NULL) {
+    return SUN_SUCCESS;
+  }
 
   /* delete items from contents, then delete generic structure */
   if (S->content) {

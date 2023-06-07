@@ -119,7 +119,9 @@ int KINSetLinearSolver(void *kinmem, SUNLinearSolver LS, SUNMatrix A)
   }
 
   /* free any existing system solver attached to KIN */
-  if (kin_mem->kin_lfree) kin_mem->kin_lfree(kin_mem);
+  if (kin_mem->kin_lfree) {
+    kin_mem->kin_lfree(kin_mem);
+  }
 
   /* Determine if this is an iterative linear solver */
   kin_mem->kin_inexact_ls = iterative;
@@ -222,7 +224,9 @@ int KINSetJacFn(void *kinmem, KINLsJacFn jac)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "KINSetJacFn",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   /* return with failure if jac cannot be used */
   if ((jac != NULL) && (kinls_mem->J == NULL)) {
@@ -262,7 +266,9 @@ int KINSetPreconditioner(void *kinmem,
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "KINSetPreconditioner",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   /* store function pointers for user-supplied routines in KINLS interface */
   kinls_mem->pset   = psetup;
@@ -301,7 +307,9 @@ int KINSetJacTimesVecFn(void *kinmem, KINLsJacTimesVecFn jtv)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "KINSetJacTimesVecFn",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   /* issue error if LS object does not support user-supplied ATimes */
   if (kinls_mem->LS->ops->setatimes == NULL) {
@@ -338,7 +346,9 @@ int KINSetJacTimesVecSysFn(void *kinmem, KINSysFn jtimesSysFn)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kin_mem, "KINSetJacTimesVecSysFn",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS) return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   /* check if using internal finite difference approximation */
   if (!(kinls_mem->jtimesDQ)) {
@@ -348,10 +358,11 @@ int KINSetJacTimesVecSysFn(void *kinmem, KINSysFn jtimesSysFn)
   }
 
   /* store function pointers for system function (NULL implies use kin_func) */
-  if (jtimesSysFn != NULL)
+  if (jtimesSysFn != NULL) {
     kinls_mem->jt_func = jtimesSysFn;
-  else
+  } else {
     kinls_mem->jt_func = kin_mem->kin_func;
+  }
 
   return(KINLS_SUCCESS);
 }
@@ -368,7 +379,9 @@ int KINGetJac(void* kinmem, SUNMatrix* J)
 
   /* access KINLsMem structure; set output and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetJac", &kin_mem, &kinls_mem);
-  if (retval != KINLS_SUCCESS) return retval;
+  if (retval != KINLS_SUCCESS) {
+    return retval;
+  }
   *J = kinls_mem->J;
   return KINLS_SUCCESS;
 }
@@ -381,7 +394,9 @@ int KINGetJacNumIters(void* kinmem, long int* nni_J)
 
   /* access KINLsMem structure; set output and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetJacNumIters", &kin_mem, &kinls_mem);
-  if (retval != KINLS_SUCCESS) return retval;
+  if (retval != KINLS_SUCCESS) {
+    return retval;
+  }
   *nni_J = kin_mem->kin_nnilset;
   return KINLS_SUCCESS;
 }
@@ -400,7 +415,9 @@ int KINGetLinWorkSpace(void *kinmem, long int *lenrwLS, long int *leniwLS)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "KINGetLinWorkSpace",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(kin_mem->kin_sunctx);
 
@@ -440,7 +457,9 @@ int KINGetNumJacEvals(void *kinmem, long int *njevals)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumJacEvals",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *njevals = kinls_mem->nje;
   return(KINLS_SUCCESS);
 }
@@ -458,7 +477,9 @@ int KINGetNumPrecEvals(void *kinmem, long int *npevals)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumPrecEvals",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *npevals = kinls_mem->npe;
   return(KINLS_SUCCESS);
 }
@@ -476,7 +497,9 @@ int KINGetNumPrecSolves(void *kinmem, long int *npsolves)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumPrecSolves",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *npsolves = kinls_mem->nps;
   return(KINLS_SUCCESS);
 }
@@ -494,7 +517,9 @@ int KINGetNumLinIters(void *kinmem, long int *nliters)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumLinIters",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *nliters = kinls_mem->nli;
   return(KINLS_SUCCESS);
 }
@@ -512,7 +537,9 @@ int KINGetNumLinConvFails(void *kinmem, long int *nlcfails)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumLinConvFails",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *nlcfails = kinls_mem->ncfl;
   return(KINLS_SUCCESS);
 }
@@ -530,7 +557,9 @@ int KINGetNumJtimesEvals(void *kinmem, long int *njvevals)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumJtimesEvals",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *njvevals = kinls_mem->njtimes;
   return(KINLS_SUCCESS);
 }
@@ -548,7 +577,9 @@ int KINGetNumLinFuncEvals(void *kinmem, long int *nfevals)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetNumLinFuncEvals",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *nfevals = kinls_mem->nfeDQ;
   return(KINLS_SUCCESS);
 }
@@ -566,7 +597,9 @@ int KINGetLastLinFlag(void *kinmem, long int *flag)
   /* access KINLsMem structure; set output value and return */
   retval = kinLs_AccessLMem(kinmem, "KINGetLastLinFlag",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
   *flag = kinls_mem->last_flag;
   return(KINLS_SUCCESS);
 }
@@ -637,7 +670,9 @@ int kinLsATimes(void *kinmem, N_Vector v, N_Vector z)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "kinLsATimes",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   /* call Jacobian-times-vector product routine
      (either user-supplied or internal DQ) */
@@ -668,7 +703,9 @@ int kinLsPSetup(void *kinmem)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "kinLsPSetup",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   /* Call user pset routine to update preconditioner */
   retval = kinls_mem->pset(kin_mem->kin_uu, kin_mem->kin_uscale,
@@ -699,7 +736,9 @@ int kinLsPSolve(void *kinmem, N_Vector r, N_Vector z, realtype tol, int lr)
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "kinLsPSolve",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(kin_mem->kin_sunctx);
 
@@ -828,7 +867,9 @@ int kinLsDenseDQJac(N_Vector u, N_Vector fu, SUNMatrix Jac,
 
     retval = kin_mem->kin_func(u, ftemp, kin_mem->kin_user_data);
     kinls_mem->nfeDQ++;
-    if (retval != 0) break;
+    if (retval != 0) {
+      break;
+    }
 
     /* reset u_j */
     u_data[j] = ujsaved;
@@ -909,7 +950,9 @@ int kinLsBandDQJac(N_Vector u, N_Vector fu, SUNMatrix Jac,
 
     /* Evaluate f with incremented u */
     retval = kin_mem->kin_func(utemp, futemp, kin_mem->kin_user_data);
-    if (retval != 0) return(retval);
+    if (retval != 0) {
+      return (retval);
+    }
 
     /* Restore utemp components, then form and load difference quotients */
     for (j=group-1; j < N; j+=width) {
@@ -920,8 +963,10 @@ int kinLsBandDQJac(N_Vector u, N_Vector fu, SUNMatrix Jac,
       inc_inv = ONE/inc;
       i1 = SUNMAX(0, j-mupper);
       i2 = SUNMIN(j+mlower, N-1);
-      for (i=i1; i <= i2; i++)
-        SM_COLUMN_ELEMENT_B(col_j,i,j) = inc_inv * (futemp_data[i] - fu_data[i]);
+      for (i = i1; i <= i2; i++) {
+        SM_COLUMN_ELEMENT_B(col_j, i, j) =
+            inc_inv * (futemp_data[i] - fu_data[i]);
+      }
     }
   }
 
@@ -961,7 +1006,9 @@ int kinLsDQJtimes(N_Vector v, N_Vector Jv, N_Vector u,
   /* access KINLsMem structure */
   retval = kinLs_AccessLMem(kinmem, "kinLsDQJtimes",
                             &kin_mem, &kinls_mem);
-  if (retval != KIN_SUCCESS)  return(retval);
+  if (retval != KIN_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(kin_mem->kin_sunctx);
 
@@ -997,7 +1044,9 @@ int kinLsDQJtimes(N_Vector v, N_Vector Jv, N_Vector u,
   retval = kinls_mem->jt_func(kin_mem->kin_vtemp1, kin_mem->kin_vtemp2,
                               kin_mem->kin_user_data);
   kinls_mem->nfeDQ++;
-  if (retval != 0) return(retval);
+  if (retval != 0) {
+    return (retval);
+  }
 
   /* finish the computation of the difference quotient */
   SUNCheckCallLastErrNoRet(N_VLinearSum(sigma_inv, kin_mem->kin_vtemp2, -sigma_inv, kin_mem->kin_fval, Jv));
@@ -1097,9 +1146,11 @@ int kinLsInitialize(KINMem kin_mem)
 
   /* if J is NULL and: NOT preconditioning or do NOT need to setup the
      preconditioner, then set the lsetup function to NULL */
-  if (kinls_mem->J == NULL)
-    if ((kinls_mem->psolve == NULL) || (kinls_mem->pset == NULL))
+  if (kinls_mem->J == NULL) {
+    if ((kinls_mem->psolve == NULL) || (kinls_mem->pset == NULL)) {
       kin_mem->kin_lsetup = NULL;
+    }
+  }
 
   /* Set scaling vectors assuming RIGHT preconditioning */
   /* NOTE: retval is non-zero only if LS == NULL        */
@@ -1233,7 +1284,9 @@ int kinLsSolve(KINMem kin_mem, N_Vector xx, N_Vector bb,
   /* Set zero initial guess flag */
   retval = SUNLinSolSetZeroGuess(kinls_mem->LS, SUNTRUE);
   SUNCheckCallNoRet(retval);
-  if (retval != SUN_SUCCESS) return(-1);
+  if (retval != SUN_SUCCESS) {
+    return (-1);
+  }
 
   /* set flag required for user-supplied J*v routine */
   kinls_mem->new_uu = SUNTRUE;
@@ -1252,13 +1305,15 @@ int kinLsSolve(KINMem kin_mem, N_Vector xx, N_Vector bb,
     nli_inc = SUNCheckCallLastErrNoRet(SUNLinSolNumIters(kinls_mem->LS));
   }
 
-  if (kinls_mem->iterative && kin_mem->kin_printfl > 2)
-    KINPrintInfo(kin_mem, PRNT_NLI, "KINLS", "kinLsSolve",
-                 INFO_NLI, nli_inc);
+  if (kinls_mem->iterative && kin_mem->kin_printfl > 2) {
+    KINPrintInfo(kin_mem, PRNT_NLI, "KINLS", "kinLsSolve", INFO_NLI, nli_inc);
+  }
 
   /* Increment counters nli and ncfl */
   kinls_mem->nli += nli_inc;
-  if (ls_status != SUNLS_SUCCESS) kinls_mem->ncfl++;
+  if (ls_status != SUNLS_SUCCESS) {
+    kinls_mem->ncfl++;
+  }
 
   /* Interpret solver return value */
   kinls_mem->last_flag = retval;
@@ -1329,9 +1384,10 @@ int kinLsSolve(KINMem kin_mem, N_Vector xx, N_Vector bb,
     }
   }
 
-  if (kin_mem->kin_inexact_ls && kin_mem->kin_printfl > 2)
-    KINPrintInfo(kin_mem, PRNT_EPS, "KINLS", "kinLsSolve",
-                 INFO_EPS, res_norm, kin_mem->kin_eps);
+  if (kin_mem->kin_inexact_ls && kin_mem->kin_printfl > 2) {
+    KINPrintInfo(kin_mem, PRNT_EPS, "KINLS", "kinLsSolve", INFO_EPS, res_norm,
+                 kin_mem->kin_eps);
+  }
 
   return(0);
 }
@@ -1346,15 +1402,21 @@ int kinLsFree(KINMem kin_mem)
   KINLsMem kinls_mem;
 
   /* Return immediately if kin_mem or kin_mem->kin_lmem are NULL */
-  if (kin_mem == NULL) return (KINLS_SUCCESS);
-  if (kin_mem->kin_lmem == NULL) return(KINLS_SUCCESS);
+  if (kin_mem == NULL) {
+    return (KINLS_SUCCESS);
+  }
+  if (kin_mem->kin_lmem == NULL) {
+    return (KINLS_SUCCESS);
+  }
   kinls_mem = (KINLsMem) kin_mem->kin_lmem;
 
   /* Nullify SUNMatrix pointer */
   kinls_mem->J = NULL;
 
   /* Free preconditioner memory (if applicable) */
-  if (kinls_mem->pfree) kinls_mem->pfree(kin_mem);
+  if (kinls_mem->pfree) {
+    kinls_mem->pfree(kin_mem);
+  }
 
   /* free KINLs interface structure */
   free(kin_mem->kin_lmem);

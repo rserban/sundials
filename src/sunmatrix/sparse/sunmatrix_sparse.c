@@ -157,9 +157,11 @@ SUNMatrix SUNSparseFromDenseMatrix(SUNMatrix Ad, realtype droptol,
 
   /* determine total number of nonzeros */
   nnz = 0;
-  for (j=0; j<N; j++)
-    for (i=0; i<M; i++)
-      nnz += (SUNRabs(SM_ELEMENT_D(Ad,i,j)) > droptol);
+  for (j = 0; j < N; j++) {
+    for (i = 0; i < M; i++) {
+      nnz += (SUNRabs(SM_ELEMENT_D(Ad, i, j)) > droptol);
+    }
+  }
 
   /* allocate sparse matrix */
   As = NULL;
@@ -220,9 +222,12 @@ SUNMatrix SUNSparseFromBandMatrix(SUNMatrix Ab, realtype droptol, int sparsetype
 
   /* determine total number of nonzeros */
   nnz = 0;
-  for (j=0; j<N; j++)
-    for (i=SUNMAX(0,j-SM_UBAND_B(Ab)); i<=SUNMIN(M-1,j+SM_LBAND_B(Ab)); i++)
-      nnz += (SUNRabs(SM_ELEMENT_B(Ab,i,j)) > droptol);
+  for (j = 0; j < N; j++) {
+    for (i = SUNMAX(0, j - SM_UBAND_B(Ab));
+         i <= SUNMIN(M - 1, j + SM_LBAND_B(Ab)); i++) {
+      nnz += (SUNRabs(SM_ELEMENT_B(Ab, i, j)) > droptol);
+    }
+  }
 
   /* allocate sparse matrix */
   As =
@@ -474,7 +479,9 @@ SUNMatrix SUNMatClone_Sparse(SUNMatrix A)
 
 void SUNMatDestroy_Sparse(SUNMatrix A)
 {
-  if (A == NULL) return;
+  if (A == NULL) {
+    return;
+  }
 
   /* free content */
   if (A->content != NULL) {
@@ -518,8 +525,9 @@ SUNErrCode SUNMatZero_Sparse(SUNMatrix A)
     (SM_DATA_S(A))[i] = ZERO;
     (SM_INDEXVALS_S(A))[i] = 0;
   }
-  for (i=0; i<SM_NP_S(A); i++)
+  for (i = 0; i < SM_NP_S(A); i++) {
     (SM_INDEXPTRS_S(A))[i] = 0;
+  }
   (SM_INDEXPTRS_S(A))[SM_NP_S(A)] = 0;
   return SUN_SUCCESS;
 }
@@ -604,15 +612,17 @@ SUNErrCode SUNMatScaleAddI_Sparse(realtype c, SUNMatrix A)
       }
     }
     /* if no diagonal found, increment necessary storage counter */
-    if (!found)  newvals += 1;
+    if (!found) {
+      newvals += 1;
+    }
   }
 
   /* If extra nonzeros required, check whether matrix has sufficient storage space
      for new nonzero entries  (so I can be inserted into existing storage) */
   newmat = SUNFALSE;   /* no reallocation needed */
-  if (newvals > (SM_NNZ_S(A) - Ap[N]))
+  if (newvals > (SM_NNZ_S(A) - Ap[N])) {
     newmat = SUNTRUE;
-
+  }
 
   /* perform operation based on existing/necessary structure */
 
@@ -620,14 +630,15 @@ SUNErrCode SUNMatScaleAddI_Sparse(realtype c, SUNMatrix A)
   if (newvals == 0) {
 
     /* iterate through columns, adding 1.0 to diagonal */
-    for (j=0; j < SUNMIN(M,N); j++)
-      for (i=Ap[j]; i<Ap[j+1]; i++)
+    for (j = 0; j < SUNMIN(M, N); j++) {
+      for (i = Ap[j]; i < Ap[j + 1]; i++) {
         if (Ai[i] == j) {
           Ax[i] = ONE + c*Ax[i];
         } else {
           Ax[i] = c*Ax[i];
         }
-
+      }
+    }
 
   /*   case 2: A has sufficient storage, but does not already contain a diagonal */
   } else if (!newmat) {
@@ -753,18 +764,21 @@ SUNErrCode SUNMatScaleAddI_Sparse(realtype c, SUNMatrix A)
     /* update A's structure with C's values; nullify C's pointers */
     SM_NNZ_S(A) = SM_NNZ_S(C);
 
-    if (SM_DATA_S(A))
+    if (SM_DATA_S(A)) {
       free(SM_DATA_S(A));
+    }
     SM_DATA_S(A) = SM_DATA_S(C);
     SM_DATA_S(C) = NULL;
 
-    if (SM_INDEXVALS_S(A))
+    if (SM_INDEXVALS_S(A)) {
       free(SM_INDEXVALS_S(A));
+    }
     SM_INDEXVALS_S(A) = SM_INDEXVALS_S(C);
     SM_INDEXVALS_S(C) = NULL;
 
-    if (SM_INDEXPTRS_S(A))
+    if (SM_INDEXPTRS_S(A)) {
       free(SM_INDEXPTRS_S(A));
+    }
     SM_INDEXPTRS_S(A) = SM_INDEXPTRS_S(C);
     SM_INDEXPTRS_S(C) = NULL;
 
@@ -828,27 +842,35 @@ SUNErrCode SUNMatScaleAdd_Sparse(realtype c, SUNMatrix A, SUNMatrix B)
   for (j=0; j<N; j++) {
 
     /* clear work array */
-    for (i=0; i<M; i++)  w[i] = 0;
+    for (i = 0; i < M; i++) {
+      w[i] = 0;
+    }
 
     /* scan column of A, incrementing w by one */
-    for (i=Ap[j]; i<Ap[j+1]; i++)
+    for (i = Ap[j]; i < Ap[j + 1]; i++) {
       w[Ai[i]] += 1;
+    }
 
     /* scan column of B, decrementing w by one */
-    for (i=Bp[j]; i<Bp[j+1]; i++)
+    for (i = Bp[j]; i < Bp[j + 1]; i++) {
       w[Bi[i]] -= 1;
+    }
 
     /* if any entry of w is negative, A doesn't contain B's sparsity,
        so increment necessary storage counter */
-    for (i=0; i<M; i++)
-      if (w[i] < 0)  newvals += 1;
+    for (i = 0; i < M; i++) {
+      if (w[i] < 0) {
+        newvals += 1;
+      }
+    }
   }
 
   /* If extra nonzeros required, check whether A has sufficient storage space
      for new nonzero entries (so B can be inserted into existing storage) */
   newmat = SUNFALSE;   /* no reallocation needed */
-  if (newvals > (SM_NNZ_S(A) - Ap[N]))
+  if (newvals > (SM_NNZ_S(A) - Ap[N])) {
     newmat = SUNTRUE;
+  }
 
   /* perform operation based on existing/necessary structure */
 
@@ -859,17 +881,19 @@ SUNErrCode SUNMatScaleAdd_Sparse(realtype c, SUNMatrix A, SUNMatrix B)
     for (j=0; j<N; j++) {
 
       /* clear work array */
-      for (i=0; i<M; i++)
+      for (i = 0; i < M; i++) {
         x[i] = ZERO;
+      }
 
       /* scan column of B, updating work array */
-      for (i = Bp[j]; i < Bp[j+1]; i++)
+      for (i = Bp[j]; i < Bp[j + 1]; i++) {
         x[Bi[i]] = Bx[i];
+      }
 
       /* scan column of A, updating array entries appropriately */
-      for (i = Ap[j]; i < Ap[j+1]; i++)
-        Ax[i] = c*Ax[i] + x[Ai[i]];
-
+      for (i = Ap[j]; i < Ap[j + 1]; i++) {
+        Ax[i] = c * Ax[i] + x[Ai[i]];
+      }
     }
 
 
@@ -1046,12 +1070,15 @@ SUNErrCode SUNMatSpace_Sparse(SUNMatrix A, long int *lenrw, long int *leniw)
 static booleantype compatibleMatrices(SUNMatrix A, SUNMatrix B)
 {
   /* both matrices must have the same shape and sparsity type */
-  if (SUNSparseMatrix_Rows(A) != SUNSparseMatrix_Rows(B))
+  if (SUNSparseMatrix_Rows(A) != SUNSparseMatrix_Rows(B)) {
     return SUNFALSE;
-  if (SUNSparseMatrix_Columns(A) != SUNSparseMatrix_Columns(B))
+  }
+  if (SUNSparseMatrix_Columns(A) != SUNSparseMatrix_Columns(B)) {
     return SUNFALSE;
-  if (SM_SPARSETYPE_S(A) != SM_SPARSETYPE_S(B))
+  }
+  if (SM_SPARSETYPE_S(A) != SM_SPARSETYPE_S(B)) {
     return SUNFALSE;
+  }
 
   return SUNTRUE;
 }
@@ -1065,14 +1092,16 @@ static booleantype compatibleMatrices(SUNMatrix A, SUNMatrix B)
 static booleantype compatibleMatrixAndVectors(SUNMatrix A, N_Vector x, N_Vector y)
 {
   /* vectors must implement N_VGetArrayPointer */
-  if ( (x->ops->nvgetarraypointer == NULL) ||
-       (y->ops->nvgetarraypointer == NULL) )
+  if ((x->ops->nvgetarraypointer == NULL) ||
+      (y->ops->nvgetarraypointer == NULL)) {
     return SUNFALSE;
+  }
 
   /* Verify that the dimensions of A, x, and y agree */
-  if ( (SUNSparseMatrix_Columns(A) != N_VGetLength(x)) ||
-       (SUNSparseMatrix_Rows(A) != N_VGetLength(y)) )
+  if ((SUNSparseMatrix_Columns(A) != N_VGetLength(x)) ||
+      (SUNSparseMatrix_Rows(A) != N_VGetLength(y))) {
     return SUNFALSE;
+  }
 
   return SUNTRUE;
 }
@@ -1106,16 +1135,17 @@ SUNErrCode Matvec_SparseCSC(SUNMatrix A, N_Vector x, N_Vector y)
   yd = SUNCheckCallLastErr(N_VGetArrayPointer(y));
 
   /* initialize result */
-  for (i=0; i<SM_ROWS_S(A); i++)
+  for (i = 0; i < SM_ROWS_S(A); i++) {
     yd[i] = 0.0;
+  }
 
   /* iterate through matrix columns */
   for (j=0; j<SM_COLUMNS_S(A); j++) {
 
     /* iterate down column of A, performing product */
-    for (i=Ap[j]; i<Ap[j+1]; i++)
-      yd[Ai[i]] += Ax[i]*xd[j];
-
+    for (i = Ap[j]; i < Ap[j + 1]; i++) {
+      yd[Ai[i]] += Ax[i] * xd[j];
+    }
   }
 
   return SUN_SUCCESS;
@@ -1149,16 +1179,17 @@ SUNErrCode Matvec_SparseCSR(SUNMatrix A, N_Vector x, N_Vector y)
   yd = SUNCheckCallLastErr(N_VGetArrayPointer(y));
 
   /* initialize result */
-  for (i=0; i<SM_ROWS_S(A); i++)
+  for (i = 0; i < SM_ROWS_S(A); i++) {
     yd[i] = 0.0;
+  }
 
   /* iterate through matrix rows */
   for (i=0; i<SM_ROWS_S(A); i++) {
 
     /* iterate along row of A, performing product */
-    for (j=Ap[i]; j<Ap[i+1]; j++)
-      yd[i] += Ax[j]*xd[Aj[j]];
-
+    for (j = Ap[i]; j < Ap[i + 1]; j++) {
+      yd[i] += Ax[j] * xd[Aj[j]];
+    }
   }
 
   return(0);

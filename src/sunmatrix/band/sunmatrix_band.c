@@ -110,7 +110,9 @@ SUNMatrix SUNBandMatrixStorage(sunindextype N, sunindextype mu,
 
   content->cols = (realtype **) malloc(N * sizeof(realtype *));
   SUNAssert(content->cols, SUN_ERR_MALLOC_FAIL);
-  for (j=0; j<N; j++) content->cols[j] = content->data + j * colSize;
+  for (j = 0; j < N; j++) {
+    content->cols[j] = content->data + j * colSize;
+  }
 
   return(A);
 }
@@ -131,8 +133,9 @@ void SUNBandMatrix_Print(SUNMatrix A, FILE* outfile)
   for (i=0; i<SM_ROWS_B(A); i++) {
     start = SUNMAX(0, i-SM_LBAND_B(A));
     finish = SUNMIN(SM_COLUMNS_B(A)-1, i+SM_UBAND_B(A));
-    for (j=0; j<start; j++)
-      fprintf(outfile,"%12s  ","");
+    for (j = 0; j < start; j++) {
+      fprintf(outfile, "%12s  ", "");
+    }
     for (j=start; j<=finish; j++) {
 #if defined(SUNDIALS_EXTENDED_PRECISION)
       fprintf(outfile,"%12Lg  ", SM_ELEMENT_B(A,i,j));
@@ -246,7 +249,9 @@ SUNMatrix SUNMatClone_Band(SUNMatrix A)
 
 void SUNMatDestroy_Band(SUNMatrix A)
 {
-  if (A == NULL) return;
+  if (A == NULL) {
+    return;
+  }
 
   /* free content */
   if (A->content != NULL) {
@@ -282,8 +287,9 @@ SUNErrCode SUNMatZero_Band(SUNMatrix A)
 
   /* Perform operation */
   Adata = SM_DATA_B(A);
-  for (i=0; i<SM_LDATA_B(A); i++)
+  for (i = 0; i < SM_LDATA_B(A); i++) {
     Adata[i] = ZERO;
+  }
 
   return SUN_SUCCESS;
 }
@@ -312,8 +318,9 @@ SUNErrCode SUNMatCopy_Band(SUNMatrix A, SUNMatrix B)
     SM_CONTENT_B(B)->ldata = SM_COLUMNS_B(B) * colSize;
     SM_CONTENT_B(B)->data = (realtype *)
       realloc(SM_CONTENT_B(B)->data, SM_COLUMNS_B(B) * colSize*sizeof(realtype));
-    for (j=0; j<SM_COLUMNS_B(B); j++)
+    for (j = 0; j < SM_COLUMNS_B(B); j++) {
       SM_CONTENT_B(B)->cols[j] = SM_CONTENT_B(B)->data + j * colSize;
+    }
   }
 
   /* Perform operation */
@@ -321,8 +328,9 @@ SUNErrCode SUNMatCopy_Band(SUNMatrix A, SUNMatrix B)
   for (j=0; j<SM_COLUMNS_B(B); j++) {
     B_colj = SM_COLUMN_B(B,j);
     A_colj = SM_COLUMN_B(A,j);
-    for (i=-SM_UBAND_B(A); i<=SM_LBAND_B(A); i++)
+    for (i = -SM_UBAND_B(A); i <= SM_LBAND_B(A); i++) {
       B_colj[i] = A_colj[i];
+    }
   }
   return SUN_SUCCESS;
 }
@@ -338,8 +346,9 @@ SUNErrCode SUNMatScaleAddI_Band(realtype c, SUNMatrix A)
   /* Perform operation */
   for (j=0; j<SM_COLUMNS_B(A); j++) {
     A_colj = SM_COLUMN_B(A,j);
-    for (i=-SM_UBAND_B(A); i<=SM_LBAND_B(A); i++)
+    for (i = -SM_UBAND_B(A); i <= SM_LBAND_B(A); i++) {
       A_colj[i] *= c;
+    }
     SM_ELEMENT_B(A,j,j) += ONE;
   }
   return SUN_SUCCESS;
@@ -365,8 +374,9 @@ SUNErrCode SUNMatScaleAdd_Band(realtype c, SUNMatrix A, SUNMatrix B)
   for (j=0; j<SM_COLUMNS_B(A); j++) {
     A_colj = SM_COLUMN_B(A,j);
     B_colj = SM_COLUMN_B(B,j);
-    for (i=-SM_UBAND_B(B); i<=SM_LBAND_B(B); i++)
-      A_colj[i] = c*A_colj[i] + B_colj[i];
+    for (i = -SM_UBAND_B(B); i <= SM_LBAND_B(B); i++) {
+      A_colj[i] = c * A_colj[i] + B_colj[i];
+    }
   }
   return SUN_SUCCESS;
 }
@@ -384,14 +394,16 @@ SUNErrCode SUNMatMatvec_Band(SUNMatrix A, N_Vector x, N_Vector y)
   yd = SUNCheckCallLastErr(N_VGetArrayPointer(y));
 
   /* Perform operation */
-  for (i=0; i<SM_ROWS_B(A); i++)
+  for (i = 0; i < SM_ROWS_B(A); i++) {
     yd[i] = ZERO;
+  }
   for(j=0; j<SM_COLUMNS_B(A); j++) {
     col_j = SM_COLUMN_B(A,j);
     is = SUNMAX(0, j-SM_UBAND_B(A));
     ie = SUNMIN(SM_ROWS_B(A)-1, j+SM_LBAND_B(A));
-    for (i=is; i<=ie; i++)
-      yd[i] += col_j[i-j]*xd[j];
+    for (i = is; i <= ie; i++) {
+      yd[i] += col_j[i - j] * xd[j];
+    }
   }
   return SUN_SUCCESS;
 }
@@ -416,10 +428,12 @@ static booleantype compatibleMatrices(SUNMatrix A, SUNMatrix B)
 {
   /* both matrices must have the same number of columns
      (note that we do not check for identical bandwidth) */
-  if (SM_ROWS_B(A) != SM_ROWS_B(B))
+  if (SM_ROWS_B(A) != SM_ROWS_B(B)) {
     return SUNFALSE;
-  if (SM_COLUMNS_B(A) != SM_COLUMNS_B(B))
+  }
+  if (SM_COLUMNS_B(A) != SM_COLUMNS_B(B)) {
     return SUNFALSE;
+  }
   return SUNTRUE;
 }
 
@@ -458,16 +472,18 @@ SUNErrCode SMScaleAddNew_Band(realtype c, SUNMatrix A, SUNMatrix B)
   for (j=0; j<SM_COLUMNS_B(A); j++) {
     A_colj = SM_COLUMN_B(A,j);
     C_colj = SM_COLUMN_B(C,j);
-    for (i=-SM_UBAND_B(A); i<=SM_LBAND_B(A); i++)
-      C_colj[i] = c*A_colj[i];
+    for (i = -SM_UBAND_B(A); i <= SM_LBAND_B(A); i++) {
+      C_colj[i] = c * A_colj[i];
+    }
   }
 
   /* add B into new matrix */
   for (j=0; j<SM_COLUMNS_B(B); j++) {
     B_colj = SM_COLUMN_B(B,j);
     C_colj = SM_COLUMN_B(C,j);
-    for (i=-SM_UBAND_B(B); i<=SM_LBAND_B(B); i++)
+    for (i = -SM_UBAND_B(B); i <= SM_LBAND_B(B); i++) {
       C_colj[i] += B_colj[i];
+    }
   }
 
   /* replace A contents with C contents, nullify C content pointer, destroy C */

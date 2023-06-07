@@ -77,7 +77,9 @@ SUNErrCode SUNModifiedGS(N_Vector* v, realtype** h, int k, int p,
      by a very small vector length. */
 
   temp = FACTOR * vk_norm;
-  if ((temp + (*new_vk_norm)) != temp) return (0);
+  if ((temp + (*new_vk_norm)) != temp) {
+    return (0);
+  }
 
   new_norm_2 = ZERO;
 
@@ -85,7 +87,9 @@ SUNErrCode SUNModifiedGS(N_Vector* v, realtype** h, int k, int p,
   {
     new_product = SUNCheckCallLastErr(N_VDotProd(v[i], v[k]));
     temp = FACTOR * h[i][k_minus_1];
-    if ((temp + new_product) == temp) continue;
+    if ((temp + new_product) == temp) {
+      continue;
+    }
     h[i][k_minus_1] += new_product;
     SUNCheckCallLastErr(N_VLinearSum(ONE, v[k], -new_product, v[i], v[k]));
     new_norm_2 += SUNSQR(new_product);
@@ -233,7 +237,9 @@ int SUNQRfact(int n, realtype** h, realtype* q, int job)
       }
       q[q_ptr]     = c;
       q[q_ptr + 1] = s;
-      if ((h[k][k] = c * temp1 - s * temp2) == ZERO) code = k + 1;
+      if ((h[k][k] = c * temp1 - s * temp2) == ZERO) {
+        code = k + 1;
+      }
     }
     break;
 
@@ -283,7 +289,9 @@ int SUNQRfact(int n, realtype** h, realtype* q, int job)
     q_ptr        = 2 * n_minus_1;
     q[q_ptr]     = c;
     q[q_ptr + 1] = s;
-    if ((h[n_minus_1][n_minus_1] = c * temp1 - s * temp2) == ZERO) code = n;
+    if ((h[n_minus_1][n_minus_1] = c * temp1 - s * temp2) == ZERO) {
+      code = n;
+    }
   }
 
   return (code);
@@ -331,7 +339,9 @@ int SUNQRsol(int n, realtype** h, realtype* q, realtype* b)
       break;
     }
     b[k] /= h[k][k];
-    for (i = 0; i < k; i++) b[i] -= b[k] * h[i][k];
+    for (i = 0; i < k; i++) {
+      b[i] -= b[k] * h[i][k];
+    }
   }
 
   return (code);

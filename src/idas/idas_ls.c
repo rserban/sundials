@@ -182,7 +182,9 @@ int IDASetLinearSolver(void *ida_mem, SUNLinearSolver LS, SUNMatrix A)
   }
 
   /* free any existing system solver attached to IDA */
-  if (IDA_mem->ida_lfree)  IDA_mem->ida_lfree(IDA_mem);
+  if (IDA_mem->ida_lfree) {
+    IDA_mem->ida_lfree(IDA_mem);
+  }
 
   /* Set four main system linear solver function fields in IDA_mem */
   IDA_mem->ida_linit  = idaLsInitialize;
@@ -296,10 +298,11 @@ int IDASetLinearSolver(void *ida_mem, SUNLinearSolver LS, SUNMatrix A)
   }
 
   /* For matrix-based LS, enable solution scaling */
-  if (matrixbased)
+  if (matrixbased) {
     idals_mem->scalesol = SUNTRUE;
-  else
+  } else {
     idals_mem->scalesol = SUNFALSE;
+  }
 
   /* Attach linear solver memory to integrator memory */
   IDA_mem->ida_lmem = idals_mem;
@@ -323,7 +326,9 @@ int IDASetJacFn(void *ida_mem, IDALsJacFn jac)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDALsSetJacFn",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* return with failure if jac cannot be used */
   if ((jac != NULL) && (idals_mem->J == NULL)) {
@@ -357,7 +362,9 @@ int IDASetEpsLin(void *ida_mem, realtype eplifac)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetEpsLin",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Check for legal eplifac */
   if (eplifac < ZERO) {
@@ -382,7 +389,9 @@ int IDASetLSNormFactor(void *ida_mem, realtype nrmfac)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetLSNormFactor",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS) return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(IDA_mem->ida_sunctx);
 
@@ -413,10 +422,14 @@ int IDASetLinearSolutionScaling(void *ida_mem, booleantype onoff)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetLinearSolutionScaling",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS) return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* check for valid solver type */
-  if (!(idals_mem->matrixbased)) return(IDALS_ILL_INPUT);
+  if (!(idals_mem->matrixbased)) {
+    return (IDALS_ILL_INPUT);
+  }
 
   /* set solution scaling flag */
   idals_mem->scalesol = onoff;
@@ -435,7 +448,9 @@ int IDASetIncrementFactor(void *ida_mem, realtype dqincfac)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetIncrementFactor",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Check for legal dqincfac */
   if (dqincfac <= ZERO) {
@@ -463,7 +478,9 @@ int IDASetPreconditioner(void *ida_mem,
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetPreconditioner",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* store function pointers for user-supplied routines in IDALs interface */
   idals_mem->pset   = psetup;
@@ -503,7 +520,9 @@ int IDASetJacTimes(void *ida_mem, IDALsJacTimesSetupFn jtsetup,
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetJacTimes",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* issue error if LS object does not allow user-supplied ATimes */
   if (idals_mem->LS->ops->setatimes == NULL) {
@@ -543,7 +562,9 @@ int IDASetJacTimesResFn(void *ida_mem, IDAResFn jtimesResFn)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDASetJacTimesResFn",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS) return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* check if using internal finite difference approximation */
   if (!(idals_mem->jtimesDQ)) {
@@ -553,10 +574,11 @@ int IDASetJacTimesResFn(void *ida_mem, IDAResFn jtimesResFn)
   }
 
   /* store function pointers for Res function (NULL implies use DAE Res) */
-  if (jtimesResFn != NULL)
+  if (jtimesResFn != NULL) {
     idals_mem->jt_res = jtimesResFn;
-  else
+  } else {
     idals_mem->jt_res = IDA_mem->ida_res;
+  }
 
   return(IDALS_SUCCESS);
 }
@@ -573,7 +595,9 @@ int IDAGetJac(void* ida_mem, SUNMatrix* J)
 
   /* access IDALsMem structure; set output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetJac", &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS) return retval;
+  if (retval != IDALS_SUCCESS) {
+    return retval;
+  }
   *J = idals_mem->J;
   return IDALS_SUCCESS;
 }
@@ -586,7 +610,9 @@ int IDAGetJacCj(void* ida_mem, sunrealtype* cj_J)
 
   /* access IDALsMem structure; set output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetJacCj", &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS) return retval;
+  if (retval != IDALS_SUCCESS) {
+    return retval;
+  }
   *cj_J = IDA_mem->ida_cjold;
   return IDALS_SUCCESS;
 }
@@ -599,7 +625,9 @@ int IDAGetJacTime(void* ida_mem, sunrealtype* t_J)
 
   /* access IDALsMem structure; set output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetJacTime", &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS) return retval;
+  if (retval != IDALS_SUCCESS) {
+    return retval;
+  }
   *t_J = idals_mem->tnlj;
   return IDALS_SUCCESS;
 }
@@ -613,7 +641,9 @@ int IDAGetJacNumSteps(void* ida_mem, long int* nst_J)
   /* access IDALsMem structure; set output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetJacNumSteps", &IDA_mem,
                             &idals_mem);
-  if (retval != IDALS_SUCCESS) return retval;
+  if (retval != IDALS_SUCCESS) {
+    return retval;
+  }
   *nst_J = idals_mem->nstlj;
   return IDALS_SUCCESS;
 }
@@ -632,7 +662,9 @@ int IDAGetLinWorkSpace(void *ida_mem, long int *lenrwLS,
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetLinWorkSpace",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(IDA_mem->ida_sunctx);
 
@@ -671,7 +703,9 @@ int IDAGetNumJacEvals(void *ida_mem, long int *njevals)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumJacEvals",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *njevals = idals_mem->nje;
   return(IDALS_SUCCESS);
 }
@@ -687,7 +721,9 @@ int IDAGetNumPrecEvals(void *ida_mem, long int *npevals)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumPrecEvals",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *npevals = idals_mem->npe;
   return(IDALS_SUCCESS);
 }
@@ -703,7 +739,9 @@ int IDAGetNumPrecSolves(void *ida_mem, long int *npsolves)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumPrecSolves",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *npsolves = idals_mem->nps;
   return(IDALS_SUCCESS);
 }
@@ -719,7 +757,9 @@ int IDAGetNumLinIters(void *ida_mem, long int *nliters)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumLinIters",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *nliters = idals_mem->nli;
   return(IDALS_SUCCESS);
 }
@@ -735,7 +775,9 @@ int IDAGetNumLinConvFails(void *ida_mem, long int *nlcfails)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumLinConvFails",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *nlcfails = idals_mem->ncfl;
   return(IDALS_SUCCESS);
 }
@@ -752,7 +794,9 @@ int IDAGetNumJTSetupEvals(void *ida_mem, long int *njtsetups)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumJTSetupEvals",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *njtsetups = idals_mem->njtsetup;
   return(IDALS_SUCCESS);
 }
@@ -769,7 +813,9 @@ int IDAGetNumJtimesEvals(void *ida_mem, long int *njvevals)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumJtimesEvals",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *njvevals = idals_mem->njtimes;
   return(IDALS_SUCCESS);
 }
@@ -787,7 +833,9 @@ int IDAGetNumLinResEvals(void *ida_mem, long int *nrevalsLS)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetNumLinResEvals",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *nrevalsLS = idals_mem->nreDQ;
   return(IDALS_SUCCESS);
 }
@@ -803,7 +851,9 @@ int IDAGetLastLinFlag(void *ida_mem, long int *flag)
   /* access IDALsMem structure; store output and return */
   retval = idaLs_AccessLMem(ida_mem, "IDAGetLastLinFlag",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
   *flag = idals_mem->last_flag;
   return(IDALS_SUCCESS);
 }
@@ -877,7 +927,9 @@ int idaLsATimes(void *ida_mem, N_Vector v, N_Vector z)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "idaLsATimes",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call Jacobian-times-vector product routine
      (either user-supplied or internal DQ) */
@@ -910,7 +962,9 @@ int idaLsPSetup(void *ida_mem)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "idaLsPSetup",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Call user pset routine to update preconditioner and possibly
      reset jcur (pass !jbad as update suggestion) */
@@ -943,7 +997,9 @@ int idaLsPSolve(void *ida_mem, N_Vector r, N_Vector z, realtype tol, int lr)
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "idaLsPSolve",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call the user-supplied psolve routine, and accumulate count */
   retval = idals_mem->psolve(IDA_mem->ida_tn, idals_mem->ycur,
@@ -1071,14 +1127,23 @@ int idaLsDenseDQJac(realtype tt, realtype c_j, N_Vector yy,
     inc = SUNMAX( srur * SUNMAX( SUNRabs(yj), SUNRabs(IDA_mem->ida_hh*ypj) ),
                   ONE/ewt_data[j] );
 
-    if (IDA_mem->ida_hh*ypj < ZERO) inc = -inc;
+    if (IDA_mem->ida_hh * ypj < ZERO) {
+      inc = -inc;
+    }
     inc = (yj + inc) - yj;
 
     /* Adjust sign(inc) again if y_j has an inequality constraint. */
     if (IDA_mem->ida_constraintsSet) {
       conj = cns_data[j];
-      if (SUNRabs(conj) == ONE)      {if((yj+inc)*conj <  ZERO) inc = -inc;}
-      else if (SUNRabs(conj) == TWO) {if((yj+inc)*conj <= ZERO) inc = -inc;}
+      if (SUNRabs(conj) == ONE)      {
+        if ((yj + inc) * conj < ZERO) {
+          inc = -inc;
+        }
+      } else if (SUNRabs(conj) == TWO) {
+        if ((yj + inc) * conj <= ZERO) {
+          inc = -inc;
+        }
+      }
     }
 
     /* Increment y_j and yp_j, call res, and break on error return. */
@@ -1087,7 +1152,9 @@ int idaLsDenseDQJac(realtype tt, realtype c_j, N_Vector yy,
 
     retval = IDA_mem->ida_res(tt, yy, yp, rtemp, IDA_mem->ida_user_data);
     idals_mem->nreDQ++;
-    if (retval != 0) break;
+    if (retval != 0) {
+      break;
+    }
 
     /* Construct difference quotient in jthCol */
     inc_inv = ONE/inc;
@@ -1183,14 +1250,23 @@ int idaLsBandDQJac(realtype tt, realtype c_j, N_Vector yy,
         adjustment to give it the same sign as hh*ypj. */
         inc = SUNMAX( srur * SUNMAX( SUNRabs(yj), SUNRabs(IDA_mem->ida_hh*ypj) ),
                       ONE/ewtj );
-        if (IDA_mem->ida_hh*ypj < ZERO)  inc = -inc;
+        if (IDA_mem->ida_hh * ypj < ZERO) {
+          inc = -inc;
+        }
         inc = (yj + inc) - yj;
 
         /* Adjust sign(inc) again if yj has an inequality constraint. */
         if (IDA_mem->ida_constraintsSet) {
           conj = cns_data[j];
-          if (SUNRabs(conj) == ONE)      {if((yj+inc)*conj <  ZERO) inc = -inc;}
-          else if (SUNRabs(conj) == TWO) {if((yj+inc)*conj <= ZERO) inc = -inc;}
+          if (SUNRabs(conj) == ONE)      {
+            if ((yj + inc) * conj < ZERO) {
+              inc = -inc;
+            }
+          } else if (SUNRabs(conj) == TWO) {
+            if ((yj + inc) * conj <= ZERO) {
+              inc = -inc;
+            }
+          }
         }
 
         /* Increment yj and ypj. */
@@ -1201,7 +1277,9 @@ int idaLsBandDQJac(realtype tt, realtype c_j, N_Vector yy,
     /* Call res routine with incremented arguments. */
     retval = IDA_mem->ida_res(tt, ytemp, yptemp, rtemp, IDA_mem->ida_user_data);
     idals_mem->nreDQ++;
-    if (retval != 0) break;
+    if (retval != 0) {
+      break;
+    }
 
     /* Loop over the indices j in this group again. */
     for (j=group-1; j<N; j+=width) {
@@ -1215,20 +1293,31 @@ int idaLsBandDQJac(realtype tt, realtype c_j, N_Vector yy,
       /* Set increment inc exactly as above. */
       inc = SUNMAX( srur * SUNMAX( SUNRabs(yj), SUNRabs(IDA_mem->ida_hh*ypj) ),
                     ONE/ewtj );
-      if (IDA_mem->ida_hh*ypj < ZERO)  inc = -inc;
+      if (IDA_mem->ida_hh * ypj < ZERO) {
+        inc = -inc;
+      }
       inc = (yj + inc) - yj;
       if (IDA_mem->ida_constraintsSet) {
         conj = cns_data[j];
-        if (SUNRabs(conj) == ONE)      {if((yj+inc)*conj <  ZERO) inc = -inc;}
-        else if (SUNRabs(conj) == TWO) {if((yj+inc)*conj <= ZERO) inc = -inc;}
+        if (SUNRabs(conj) == ONE)      {
+          if ((yj + inc) * conj < ZERO) {
+            inc = -inc;
+          }
+        } else if (SUNRabs(conj) == TWO) {
+          if ((yj + inc) * conj <= ZERO) {
+            inc = -inc;
+          }
+        }
       }
 
       /* Load the difference quotient Jacobian elements for column j */
       inc_inv = ONE/inc;
       i1 = SUNMAX(0, j-mupper);
       i2 = SUNMIN(j+mlower,N-1);
-      for (i=i1; i<=i2; i++)
-        SM_COLUMN_ELEMENT_B(col_j,i,j) = inc_inv * (rtemp_data[i]-r_data[i]);
+      for (i = i1; i <= i2; i++) {
+        SM_COLUMN_ELEMENT_B(col_j, i, j) =
+            inc_inv * (rtemp_data[i] - r_data[i]);
+      }
     }
   }
 
@@ -1263,7 +1352,9 @@ int idaLsDQJtimes(realtype tt, N_Vector yy, N_Vector yp, N_Vector rr,
   /* access IDALsMem structure */
   retval = idaLs_AccessLMem(ida_mem, "idaLsDQJtimes",
                             &IDA_mem, &idals_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   SUNAssignSUNCTX(IDA_mem->ida_sunctx);
 
@@ -1288,13 +1379,19 @@ int idaLsDQJtimes(realtype tt, N_Vector yy, N_Vector yp, N_Vector rr,
     /* Call res for Jv = F(t, y_tmp, yp_tmp), and return if it failed. */
     retval = idals_mem->jt_res(tt, y_tmp, yp_tmp, Jv, IDA_mem->ida_user_data);
     idals_mem->nreDQ++;
-    if (retval == 0) break;
-    if (retval < 0)  return(-1);
+    if (retval == 0) {
+      break;
+    }
+    if (retval < 0) {
+      return (-1);
+    }
 
     sig *= PT25;
   }
 
-  if (retval > 0) return(+1);
+  if (retval > 0) {
+    return (+1);
+  }
 
   /* Set Jv to [Jv - rr]/sig and return. */
   siginv = ONE/sig;
@@ -1378,8 +1475,9 @@ int idaLsInitialize(IDAMem IDA_mem)
 
   /* if J is NULL and psetup is not present, then idaLsSetup does
      not need to be called, so set the lsetup function to NULL */
-  if ( (idals_mem->J == NULL) && (idals_mem->pset == NULL) )
+  if ((idals_mem->J == NULL) && (idals_mem->pset == NULL)) {
     IDA_mem->ida_lsetup = NULL;
+  }
 
   /* When using a matrix-embedded linear solver disable lsetup call */
   if (SUNLinSolGetType(idals_mem->LS) == SUNLINEARSOLVER_MATRIX_EMBEDDED) {
@@ -1554,7 +1652,9 @@ int idaLsSolve(IDAMem IDA_mem, N_Vector b, N_Vector weight,
   /* Set zero initial guess flag */
   retval = SUNLinSolSetZeroGuess(idals_mem->LS, SUNTRUE);
   SUNCheckCallNoRet(retval);
-  if (retval != SUN_SUCCESS) return(-1);
+  if (retval != SUN_SUCCESS) {
+    return (-1);
+  }
 
   /* If a user-provided jtsetup routine is supplied, call that here */
   if (idals_mem->jtsetup) {
@@ -1601,7 +1701,9 @@ int idaLsSolve(IDAMem IDA_mem, N_Vector b, N_Vector weight,
     SUNCheckCallLastErrNoRet(N_VScale(TWO/(ONE + IDA_mem->ida_cjratio), b, b));
 
   /* Increment ncfl counter */
-  if (ls_status != SUNLS_SUCCESS) idals_mem->ncfl++;
+  if (ls_status != SUNLS_SUCCESS) {
+    idals_mem->ncfl++;
+  }
 
   /* Interpret solver return value  */
   idals_mem->last_flag = retval;
@@ -1678,21 +1780,29 @@ int idaLsPerf(IDAMem IDA_mem, int perftask)
    */
   nstd = IDA_mem->ida_nst - idals_mem->nst0;
   nnid = IDA_mem->ida_nni - idals_mem->nni0;
-  if (nstd == 0 || nnid == 0) return(0);
+  if (nstd == 0 || nnid == 0) {
+    return (0);
+  }
 
   rcfn = ((realtype) (IDA_mem->ida_ncfn - idals_mem->ncfn0)) / ((realtype) nstd);
   rcfl = ((realtype) (idals_mem->ncfl - idals_mem->ncfl0)) / ((realtype) nnid);
   lcfn = (rcfn > PT9);
   lcfl = (rcfl > PT9);
-  if (!(lcfn || lcfl)) return(0);
+  if (!(lcfn || lcfl)) {
+    return (0);
+  }
   idals_mem->nwarn++;
-  if (idals_mem->nwarn > 10) return(1);
-  if (lcfn)
+  if (idals_mem->nwarn > 10) {
+    return (1);
+  }
+  if (lcfn) {
     IDAProcessError(IDA_mem, IDA_WARNING, __LINE__, __func__, __FILE__,
                     MSG_LS_CFN_WARN, IDA_mem->ida_tn, rcfn);
-  if (lcfl)
+  }
+  if (lcfl) {
     IDAProcessError(IDA_mem, IDA_WARNING, __LINE__, __func__, __FILE__,
                     MSG_LS_CFL_WARN, IDA_mem->ida_tn, rcfl);
+  }
   return(0);
 }
 
@@ -1708,8 +1818,12 @@ int idaLsFree(IDAMem IDA_mem)
   IDALsMem idals_mem;
 
   /* Return immediately if IDA_mem or IDA_mem->ida_lmem are NULL */
-  if (IDA_mem == NULL)  return (IDALS_SUCCESS);
-  if (IDA_mem->ida_lmem == NULL)  return(IDALS_SUCCESS);
+  if (IDA_mem == NULL) {
+    return (IDALS_SUCCESS);
+  }
+  if (IDA_mem->ida_lmem == NULL) {
+    return (IDALS_SUCCESS);
+  }
   idals_mem = (IDALsMem) IDA_mem->ida_lmem;
 
   /* Free N_Vector memory */
@@ -1735,7 +1849,9 @@ int idaLsFree(IDAMem IDA_mem)
   idals_mem->J = NULL;
 
   /* Free preconditioner memory (if applicable) */
-  if (idals_mem->pfree)  idals_mem->pfree(IDA_mem);
+  if (idals_mem->pfree) {
+    idals_mem->pfree(IDA_mem);
+  }
 
   /* free IDALs interface structure */
   free(IDA_mem->ida_lmem);
@@ -1831,7 +1947,9 @@ int IDASetLinearSolverB(void *ida_mem, int which,
   /* Find the IDABMem entry in the linked list corresponding to 'which'. */
   IDAB_mem = IDAADJ_mem->IDAB_mem;
   while (IDAB_mem != NULL) {
-    if( which == IDAB_mem->ida_index ) break;
+    if (which == IDAB_mem->ida_index) {
+      break;
+    }
     IDAB_mem = IDAB_mem->ida_next;
   }
 
@@ -1857,7 +1975,9 @@ int IDASetLinearSolverB(void *ida_mem, int which,
   idalsB_mem->P_dataB   = NULL;
 
   /* free any existing system solver attached to IDAB */
-  if (IDAB_mem->ida_lfree)  IDAB_mem->ida_lfree(IDAB_mem);
+  if (IDAB_mem->ida_lfree) {
+    IDAB_mem->ida_lfree(IDAB_mem);
+  }
 
   /* Attach lmemB data and lfreeB function. */
   IDAB_mem->ida_lmem  = idalsB_mem;
@@ -1891,7 +2011,9 @@ int IDASetJacFnB(void *ida_mem, int which, IDALsJacFnB jacB)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetJacFnB", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* set jacB function pointer */
   idalsB_mem->jacB = jacB;
@@ -1920,7 +2042,9 @@ int IDASetJacFnBS(void *ida_mem, int which, IDALsJacFnBS jacBS)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetJacFnBS", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* set jacBS function pointer */
   idalsB_mem->jacBS = jacBS;
@@ -1949,7 +2073,9 @@ int IDASetEpsLinB(void *ida_mem, int which, realtype eplifacB)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetEpsLinB", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call corresponding routine for IDAB_mem structure */
   ida_memB = (void *) IDAB_mem->IDA_mem;
@@ -1969,7 +2095,9 @@ int IDASetLSNormFactorB(void *ida_mem, int which, realtype nrmfacB)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetLSNormFactorB", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS) return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call corresponding routine for IDAB_mem structure */
   ida_memB = (void *) IDAB_mem->IDA_mem;
@@ -1989,7 +2117,9 @@ int IDASetLinearSolutionScalingB(void *ida_mem, int which, booleantype onoffB)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetLinearSolutionScalingB",
                              &IDA_mem, &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS) return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call corresponding routine for IDAB_mem structure */
   ida_memB = (void *) IDAB_mem->IDA_mem;
@@ -2009,7 +2139,9 @@ int IDASetIncrementFactorB(void *ida_mem, int which, realtype dqincfacB)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetIncrementFactorB",
                              &IDA_mem, &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call corresponding routine for IDAB_mem structure */
   ida_memB = (void *) IDAB_mem->IDA_mem;
@@ -2033,7 +2165,9 @@ int IDASetPreconditionerB(void *ida_mem, int which,
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetPreconditionerB",
                              &IDA_mem, &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Set preconditioners for the backward problem. */
   idalsB_mem->psetB   = psetupB;
@@ -2063,7 +2197,9 @@ int IDASetPreconditionerBS(void *ida_mem, int which,
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetPreconditionerBS",
                              &IDA_mem, &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Set preconditioners for the backward problem. */
   idalsB_mem->psetBS   = psetupBS;
@@ -2093,7 +2229,9 @@ int IDASetJacTimesB(void *ida_mem, int which,
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetJacTimesB", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Set jacobian routines for the backward problem. */
   idalsB_mem->jtsetupB = jtsetupB;
@@ -2123,7 +2261,9 @@ int IDASetJacTimesBS(void *ida_mem, int which,
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetJacTimesBS", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS)  return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* Set jacobian routines for the backward problem. */
   idalsB_mem->jtsetupBS = jtsetupBS;
@@ -2149,7 +2289,9 @@ int IDASetJacTimesResFnB(void *ida_mem, int which, IDAResFn jtimesResFn)
   /* access relevant memory structures */
   retval = idaLs_AccessLMemB(ida_mem, which, "IDASetJacTimesResFnB", &IDA_mem,
                              &IDAADJ_mem, &IDAB_mem, &idalsB_mem);
-  if (retval != IDALS_SUCCESS) return(retval);
+  if (retval != IDALS_SUCCESS) {
+    return (retval);
+  }
 
   /* call corresponding routine for IDAB_mem structure */
   ida_memB = (void *) IDAB_mem->IDA_mem;
@@ -2222,13 +2364,14 @@ static int idaLsJacBSWrapper(realtype tt, realtype c_jB, N_Vector yyB,
 
   /* Get forward solution from interpolation. */
   if(IDAADJ_mem->ia_noInterp == SUNFALSE) {
-    if (IDAADJ_mem->ia_interpSensi)
+    if (IDAADJ_mem->ia_interpSensi) {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp, IDAADJ_mem->ia_yySTmp,
                                    IDAADJ_mem->ia_ypSTmp);
-    else
+    } else {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp, NULL, NULL);
+    }
 
     if (retval != IDA_SUCCESS) {
       IDAProcessError(IDAB_mem->IDA_mem, -1, __LINE__, __func__, __FILE__, MSG_LS_BAD_T);
@@ -2301,14 +2444,15 @@ static int idaLsPrecSetupBS(realtype tt, N_Vector yyB, N_Vector ypB,
 
   /* Get forward solution from interpolation. */
   if(IDAADJ_mem->ia_noInterp == SUNFALSE) {
-    if (IDAADJ_mem->ia_interpSensi)
+    if (IDAADJ_mem->ia_interpSensi) {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp,
                                    IDAADJ_mem->ia_yySTmp,
                                    IDAADJ_mem->ia_ypSTmp);
-    else
+    } else {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp, NULL, NULL);
+    }
     if (retval != IDA_SUCCESS) {
       IDAProcessError(IDAB_mem->IDA_mem, -1, __LINE__, __func__, __FILE__, MSG_LS_BAD_T);
       return(-1);
@@ -2386,14 +2530,15 @@ static int idaLsPrecSolveBS(realtype tt, N_Vector yyB, N_Vector ypB,
 
   /* Get forward solution from interpolation. */
   if(IDAADJ_mem->ia_noInterp == SUNFALSE) {
-    if (IDAADJ_mem->ia_interpSensi)
+    if (IDAADJ_mem->ia_interpSensi) {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp,
                                    IDAADJ_mem->ia_yySTmp,
                                    IDAADJ_mem->ia_ypSTmp);
-    else
+    } else {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp, NULL, NULL);
+    }
     if (retval != IDA_SUCCESS) {
       IDAProcessError(IDAB_mem->IDA_mem, -1, __LINE__, __func__, __FILE__, MSG_LS_BAD_T);
       return(-1);
@@ -2466,14 +2611,15 @@ static int idaLsJacTimesSetupBS(realtype tt, N_Vector yyB, N_Vector ypB,
 
   /* Get forward solution from interpolation. */
   if(IDAADJ_mem->ia_noInterp == SUNFALSE) {
-    if (IDAADJ_mem->ia_interpSensi)
+    if (IDAADJ_mem->ia_interpSensi) {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp,
                                    IDAADJ_mem->ia_yySTmp,
                                    IDAADJ_mem->ia_ypSTmp);
-    else
+    } else {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp, NULL, NULL);
+    }
     if (retval != IDA_SUCCESS) {
       IDAProcessError(IDAB_mem->IDA_mem, -1, __LINE__, __func__, __FILE__, MSG_LS_BAD_T);
       return(-1);
@@ -2553,14 +2699,15 @@ static int idaLsJacTimesVecBS(realtype tt, N_Vector yyB, N_Vector ypB,
 
   /* Get forward solution from interpolation. */
   if(IDAADJ_mem->ia_noInterp == SUNFALSE) {
-    if (IDAADJ_mem->ia_interpSensi)
+    if (IDAADJ_mem->ia_interpSensi) {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp,
                                    IDAADJ_mem->ia_yySTmp,
                                    IDAADJ_mem->ia_ypSTmp);
-    else
+    } else {
       retval = IDAADJ_mem->ia_getY(IDA_mem, tt, IDAADJ_mem->ia_yyTmp,
                                    IDAADJ_mem->ia_ypTmp, NULL, NULL);
+    }
     if (retval != IDA_SUCCESS) {
       IDAProcessError(IDAB_mem->IDA_mem, -1, __LINE__, __func__, __FILE__, MSG_LS_BAD_T);
       return(-1);
@@ -2583,8 +2730,12 @@ int idaLsFreeB(IDABMem IDAB_mem)
   IDALsMemB idalsB_mem;
 
   /* Return immediately if IDAB_mem or IDAB_mem->ida_lmem are NULL */
-  if (IDAB_mem == NULL)            return(IDALS_SUCCESS);
-  if (IDAB_mem->ida_lmem == NULL)  return(IDALS_SUCCESS);
+  if (IDAB_mem == NULL) {
+    return (IDALS_SUCCESS);
+  }
+  if (IDAB_mem->ida_lmem == NULL) {
+    return (IDALS_SUCCESS);
+  }
   idalsB_mem = (IDALsMemB) IDAB_mem->ida_lmem;
 
   /* free IDALsMemB interface structure */
@@ -2626,7 +2777,9 @@ int idaLs_AccessLMemB(void *ida_mem, int which, const char *fname,
   /* Find the IDABMem entry in the linked list corresponding to which */
   *IDAB_mem = (*IDAADJ_mem)->IDAB_mem;
   while ((*IDAB_mem) != NULL) {
-    if ( which == (*IDAB_mem)->ida_index ) break;
+    if (which == (*IDAB_mem)->ida_index) {
+      break;
+    }
     *IDAB_mem = (*IDAB_mem)->ida_next;
   }
 

@@ -272,8 +272,9 @@ int CVBBDPrecInit(void *cvode_mem, sunindextype Nlocal,
   pdata->nge = 0;
 
   /* make sure P_data is free from any previous allocations */
-  if (cvls_mem->pfree)
+  if (cvls_mem->pfree) {
     cvls_mem->pfree(cv_mem);
+  }
 
   /* Point to the new P_data field in the LS memory */
   cvls_mem->P_data = pdata;
@@ -579,10 +580,14 @@ static int CVBBDPrecFree(CVodeMem cv_mem)
   CVLsMem cvls_mem;
   CVBBDPrecData pdata;
 
-  if (cv_mem->cv_lmem == NULL) return(0);
+  if (cv_mem->cv_lmem == NULL) {
+    return (0);
+  }
   cvls_mem = (CVLsMem) cv_mem->cv_lmem;
 
-  if (cvls_mem->P_data == NULL) return(0);
+  if (cvls_mem->P_data == NULL) {
+    return (0);
+  }
   pdata = (CVBBDPrecData) cvls_mem->P_data;
 
   SUNCheckCallNoRet(SUNLinSolFree(pdata->LS));
@@ -638,13 +643,17 @@ static int CVBBDDQJac(CVBBDPrecData pdata, realtype t, N_Vector y,
   /* Call cfn and gloc to get base value of g(t,y) */
   if (pdata->cfn != NULL) {
     retval = pdata->cfn(pdata->n_local, t, y, cv_mem->cv_user_data);
-    if (retval != 0) return(retval);
+    if (retval != 0) {
+      return (retval);
+    }
   }
 
   retval = pdata->gloc(pdata->n_local, t, ytemp, gy,
                        cv_mem->cv_user_data);
   pdata->nge++;
-  if (retval != 0) return(retval);
+  if (retval != 0) {
+    return (retval);
+  }
 
   /* Obtain pointers to the data for various vectors */
   y_data     =  SUNCheckCallLastErrNoRet(N_VGetArrayPointer(y));
@@ -677,8 +686,15 @@ static int CVBBDDQJac(CVBBDPrecData pdata, realtype t, N_Vector y,
       /* Adjust sign(inc) again if yj has an inequality constraint. */
       if (cv_mem->cv_constraintsSet) {
         conj = cns_data[j];
-        if (SUNRabs(conj) == ONE)      {if ((yj+inc)*conj < ZERO)  inc = -inc;}
-        else if (SUNRabs(conj) == TWO) {if ((yj+inc)*conj <= ZERO) inc = -inc;}
+        if (SUNRabs(conj) == ONE)      {
+          if ((yj + inc) * conj < ZERO) {
+            inc = -inc;
+          }
+        } else if (SUNRabs(conj) == TWO) {
+          if ((yj + inc) * conj <= ZERO) {
+            inc = -inc;
+          }
+        }
       }
 
       ytemp_data[j] += inc;
@@ -688,7 +704,9 @@ static int CVBBDDQJac(CVBBDPrecData pdata, realtype t, N_Vector y,
     retval = pdata->gloc(pdata->n_local, t, ytemp, gtemp,
                          cv_mem->cv_user_data);
     pdata->nge++;
-    if (retval != 0) return(retval);
+    if (retval != 0) {
+      return (retval);
+    }
 
     /* Restore ytemp, then form and load difference quotients */
     for (j=group-1; j < pdata->n_local; j+=width) {
@@ -700,16 +718,24 @@ static int CVBBDDQJac(CVBBDPrecData pdata, realtype t, N_Vector y,
       /* Adjust sign(inc) as before. */
       if (cv_mem->cv_constraintsSet) {
         conj = cns_data[j];
-        if (SUNRabs(conj) == ONE)      {if ((yj+inc)*conj < ZERO)  inc = -inc;}
-        else if (SUNRabs(conj) == TWO) {if ((yj+inc)*conj <= ZERO) inc = -inc;}
+        if (SUNRabs(conj) == ONE)      {
+          if ((yj + inc) * conj < ZERO) {
+            inc = -inc;
+          }
+        } else if (SUNRabs(conj) == TWO) {
+          if ((yj + inc) * conj <= ZERO) {
+            inc = -inc;
+          }
+        }
       }
 
       inc_inv = ONE/inc;
       i1 = SUNMAX(0, j-pdata->mukeep);
       i2 = SUNMIN(j + pdata->mlkeep, pdata->n_local-1);
-      for (i=i1; i <= i2; i++)
-        SM_COLUMN_ELEMENT_B(col_j,i,j) =
-          inc_inv * (gtemp_data[i] - gy_data[i]);
+      for (i = i1; i <= i2; i++) {
+        SM_COLUMN_ELEMENT_B(col_j, i, j) =
+            inc_inv * (gtemp_data[i] - gy_data[i]);
+      }
     }
   }
 

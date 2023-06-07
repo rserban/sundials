@@ -137,8 +137,9 @@ int SUNLinSolSetup_Dense(SUNLinearSolver S, SUNMatrix A)
                                      SUNDenseMatrix_Columns(A), pivots);
 
   /* store error flag (if nonzero, this row encountered zero-valued pivod) */
-  if (LASTFLAG(S) > 0)
-    return(SUNLS_LUFACT_FAIL);
+  if (LASTFLAG(S) > 0) {
+    return (SUNLS_LUFACT_FAIL);
+  }
   return(SUNLS_SUCCESS);
 }
 
@@ -189,7 +190,9 @@ SUNErrCode SUNLinSolSpace_Dense(SUNLinearSolver S, long int* lenrwLS,
 SUNErrCode SUNLinSolFree_Dense(SUNLinearSolver S)
 {
   /* return if S is already free */
-  if (S == NULL) return SUN_SUCCESS;
+  if (S == NULL) {
+    return SUN_SUCCESS;
+  }
 
   /* delete items from contents, then delete generic structure */
   if (S->content) {

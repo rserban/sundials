@@ -87,8 +87,9 @@ SUNMatrix SUNDenseMatrix(sunindextype M, sunindextype N, SUNContext sunctx)
 
   content->cols = (realtype**)malloc(N * sizeof(realtype*));
   SUNAssert(content->cols, SUN_ERR_MALLOC_FAIL);
-  for (j = 0; j < N; j++)
+  for (j = 0; j < N; j++) {
     content->cols[j] = content->data + j * M;
+  }
 
   return (A);
 }
@@ -187,8 +188,9 @@ SUNMatrix SUNMatClone_Dense(SUNMatrix A)
 
 void SUNMatDestroy_Dense(SUNMatrix A)
 {
-  if (A == NULL)
+  if (A == NULL) {
     return;
+  }
 
   /* free content */
   if (A->content != NULL) {
@@ -228,8 +230,9 @@ SUNErrCode SUNMatZero_Dense(SUNMatrix A)
 
   /* Perform operation A_ij = 0 */
   Adata = SM_DATA_D(A);
-  for (i = 0; i < SM_LDATA_D(A); i++)
+  for (i = 0; i < SM_LDATA_D(A); i++) {
     Adata[i] = ZERO;
+  }
 
   return SUN_SUCCESS;
 }
@@ -244,9 +247,11 @@ SUNErrCode SUNMatCopy_Dense(SUNMatrix A, SUNMatrix B)
   SUNCheck(compatibleMatrices(A, B), SUN_ERR_ARG_DIMSMISMATCH);
 
   /* Perform operation B_ij = A_ij */
-  for (j = 0; j < SM_COLUMNS_D(A); j++)
-    for (i = 0; i < SM_ROWS_D(A); i++)
+  for (j = 0; j < SM_COLUMNS_D(A); j++) {
+    for (i = 0; i < SM_ROWS_D(A); i++) {
       SM_ELEMENT_D(B, i, j) = SM_ELEMENT_D(A, i, j);
+    }
+  }
 
   return SUN_SUCCESS;
 }
@@ -262,8 +267,9 @@ SUNErrCode SUNMatScaleAddI_Dense(realtype c, SUNMatrix A)
   for (j = 0; j < SM_COLUMNS_D(A); j++) {
     for (i = 0; i < SM_ROWS_D(A); i++) {
       SM_ELEMENT_D(A, i, j) *= c;
-      if (i == j)
+      if (i == j) {
         SM_ELEMENT_D(A, i, j) += ONE;
+      }
     }
   }
 
@@ -279,9 +285,11 @@ SUNErrCode SUNMatScaleAdd_Dense(realtype c, SUNMatrix A, SUNMatrix B)
   SUNCheck(compatibleMatrices(A, B), SUN_ERR_ARG_DIMSMISMATCH);
 
   /* Perform operation A = c*A + B */
-  for (j = 0; j < SM_COLUMNS_D(A); j++)
-    for (i = 0; i < SM_ROWS_D(A); i++)
+  for (j = 0; j < SM_COLUMNS_D(A); j++) {
+    for (i = 0; i < SM_ROWS_D(A); i++) {
       SM_ELEMENT_D(A, i, j) = c * SM_ELEMENT_D(A, i, j) + SM_ELEMENT_D(B, i, j);
+    }
+  }
 
   return SUN_SUCCESS;
 }
@@ -299,12 +307,14 @@ SUNErrCode SUNMatMatvec_Dense(SUNMatrix A, N_Vector x, N_Vector y)
   yd = SUNCheckCallLastErr(N_VGetArrayPointer(y));
 
   /* Perform operation y = Ax */
-  for (i = 0; i < SM_ROWS_D(A); i++)
+  for (i = 0; i < SM_ROWS_D(A); i++) {
     yd[i] = ZERO;
+  }
   for (j = 0; j < SM_COLUMNS_D(A); j++) {
     col_j = SM_COLUMN_D(A, j);
-    for (i = 0; i < SM_ROWS_D(A); i++)
+    for (i = 0; i < SM_ROWS_D(A); i++) {
       yd[i] += col_j[i] * xd[j];
+    }
   }
   return SUN_SUCCESS;
 }

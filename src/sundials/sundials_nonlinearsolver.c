@@ -78,10 +78,14 @@ SUNNonlinearSolver SUNNonlinSolNewEmpty(SUNContext sunctx)
 
 void SUNNonlinSolFreeEmpty(SUNNonlinearSolver NLS)
 {
-  if (NLS == NULL)  return;
+  if (NLS == NULL) {
+    return;
+  }
 
   /* free non-NULL ops structure */
-  if (NLS->ops)  free(NLS->ops);
+  if (NLS->ops) {
+    free(NLS->ops);
+  }
   NLS->ops = NULL;
 
   /* free overall N_Vector object and return */
@@ -102,10 +106,11 @@ SUNErrCode SUNNonlinSolInitialize(SUNNonlinearSolver NLS)
 {
   SUNErrCode ier;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(NLS));
-  if (NLS->ops->initialize)
+  if (NLS->ops->initialize) {
     ier = NLS->ops->initialize(NLS);
-  else
+  } else {
     ier = SUN_NLS_SUCCESS;
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(NLS));
   return(ier);
 }
@@ -114,10 +119,11 @@ SUNErrCode SUNNonlinSolSetup(SUNNonlinearSolver NLS, N_Vector y, void* mem)
 {
   SUNErrCode ier;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(NLS));
-  if (NLS->ops->setup)
+  if (NLS->ops->setup) {
     ier = NLS->ops->setup(NLS, y, mem);
-  else
+  } else {
     ier = SUN_NLS_SUCCESS;
+  }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(NLS));
   return(ier);
 }
@@ -135,11 +141,16 @@ int SUNNonlinSolSolve(SUNNonlinearSolver NLS, N_Vector y0, N_Vector y,
 
 SUNErrCode SUNNonlinSolFree(SUNNonlinearSolver NLS)
 {
-  if (NLS == NULL) return(SUN_SUCCESS);
+  if (NLS == NULL) {
+    return (SUN_SUCCESS);
+  }
 
   /* if the free operation exists use it */
-  if (NLS->ops)
-    if (NLS->ops->free) return(NLS->ops->free(NLS));
+  if (NLS->ops) {
+    if (NLS->ops->free) {
+      return (NLS->ops->free(NLS));
+    }
+  }
 
   /* if we reach this point, either ops == NULL or free == NULL,
      try to cleanup by freeing the content, ops, and solver */
@@ -163,19 +174,21 @@ SUNErrCode SUNNonlinSolSetSysFn(SUNNonlinearSolver NLS, SUNNonlinSolSysFn SysFn)
 /* set the linear solver setup function (optional) */
 SUNErrCode SUNNonlinSolSetLSetupFn(SUNNonlinearSolver NLS, SUNNonlinSolLSetupFn LSetupFn)
 {
-  if (NLS->ops->setlsetupfn)
+  if (NLS->ops->setlsetupfn) {
     return((int) NLS->ops->setlsetupfn(NLS, LSetupFn));
-  else
-    return(SUN_SUCCESS);
+  } else {
+    return (SUN_SUCCESS);
+  }
 }
 
 /* set the linear solver solve function (optional) */
 SUNErrCode SUNNonlinSolSetLSolveFn(SUNNonlinearSolver NLS, SUNNonlinSolLSolveFn LSolveFn)
 {
-  if (NLS->ops->setlsolvefn)
+  if (NLS->ops->setlsolvefn) {
     return((int) NLS->ops->setlsolvefn(NLS, LSolveFn));
-  else
-    return(SUN_SUCCESS);
+  } else {
+    return (SUN_SUCCESS);
+  }
 }
 
 /* set the convergence test function (optional) */
@@ -183,18 +196,20 @@ SUNErrCode SUNNonlinSolSetConvTestFn(SUNNonlinearSolver NLS,
                               SUNNonlinSolConvTestFn CTestFn,
                               void* ctest_data)
 {
-  if (NLS->ops->setctestfn)
+  if (NLS->ops->setctestfn) {
     return((int) NLS->ops->setctestfn(NLS, CTestFn, ctest_data));
-  else
-    return(SUN_SUCCESS);
+  } else {
+    return (SUN_SUCCESS);
+  }
 }
 
 SUNErrCode SUNNonlinSolSetMaxIters(SUNNonlinearSolver NLS, int maxiters)
 {
-  if (NLS->ops->setmaxiters)
+  if (NLS->ops->setmaxiters) {
     return((int) NLS->ops->setmaxiters(NLS, maxiters));
-  else
-    return(SUN_SUCCESS);
+  } else {
+    return (SUN_SUCCESS);
+  }
 }
 
 /* -----------------------------------------------------------------------------

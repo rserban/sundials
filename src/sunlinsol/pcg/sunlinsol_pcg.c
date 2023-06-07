@@ -52,11 +52,13 @@ SUNLinearSolver SUNLinSol_PCG(N_Vector y, int pretype, int maxl, SUNContext sunc
   SUNLinearSolverContent_PCG content;
 
   /* check for legal pretype and maxl values; if illegal use defaults */
-  if ((pretype != SUN_PREC_NONE)  && (pretype != SUN_PREC_LEFT) &&
-      (pretype != SUN_PREC_RIGHT) && (pretype != SUN_PREC_BOTH))
+  if ((pretype != SUN_PREC_NONE) && (pretype != SUN_PREC_LEFT) &&
+      (pretype != SUN_PREC_RIGHT) && (pretype != SUN_PREC_BOTH)) {
     pretype = SUN_PREC_NONE;
-  if (maxl <= 0)
+  }
+  if (maxl <= 0) {
     maxl = SUNPCG_MAXL_DEFAULT;
+  }
 
   /* Create linear solver */
   S = NULL;
@@ -148,8 +150,9 @@ SUNErrCode SUNLinSol_PCGSetPrecType(SUNLinearSolver S, int pretype)
 SUNErrCode SUNLinSol_PCGSetMaxl(SUNLinearSolver S, int maxl)
 {
   /* Check for legal number of iters */
-  if (maxl <= 0)
+  if (maxl <= 0) {
     maxl = SUNPCG_MAXL_DEFAULT;
+  }
 
   /* Set max iters */
   PCG_CONTENT(S)->maxl = maxl;
@@ -178,15 +181,16 @@ SUNLinearSolver_ID SUNLinSolGetID_PCG(SUNLinearSolver S)
 SUNErrCode SUNLinSolInitialize_PCG(SUNLinearSolver S)
 {
   SUNAssignSUNCTX(S->sunctx);
-  if (PCG_CONTENT(S)->maxl <= 0)
+  if (PCG_CONTENT(S)->maxl <= 0) {
     PCG_CONTENT(S)->maxl = SUNPCG_MAXL_DEFAULT;
+  }
 
   SUNAssert(PCG_CONTENT(S)->ATimes, SUN_ERR_ARG_CORRUPT);
 
-  if ( (PRETYPE(S) != SUN_PREC_LEFT) &&
-       (PRETYPE(S) != SUN_PREC_RIGHT) &&
-       (PRETYPE(S) != SUN_PREC_BOTH) )
+  if ((PRETYPE(S) != SUN_PREC_LEFT) && (PRETYPE(S) != SUN_PREC_RIGHT) &&
+      (PRETYPE(S) != SUN_PREC_BOTH)) {
     PRETYPE(S) = SUN_PREC_NONE;
+  }
 
   SUNAssert((PCG_CONTENT(S)->pretype == SUN_PREC_NONE) ||
               (PCG_CONTENT(S)->Psolve != NULL),
@@ -440,7 +444,9 @@ int SUNLinSolSolve_PCG(SUNLinearSolver S, SUNMatrix nul, N_Vector x,
     }
 
     /* Exit early on last iteration */
-    if (l == l_max - 1) break;
+    if (l == l_max - 1) {
+      break;
+    }
 
     /* Apply preconditioner:  z = P^{-1}*r */
     if (UsePrec) {
@@ -519,7 +525,9 @@ SUNErrCode SUNLinSolSpace_PCG(SUNLinearSolver S, long int* lenrwLS,
 
 SUNErrCode SUNLinSolFree_PCG(SUNLinearSolver S)
 {
-  if (S == NULL) return SUN_SUCCESS;
+  if (S == NULL) {
+    return SUN_SUCCESS;
+  }
 
   if (S->content) {
     /* delete items from within the content structure */

@@ -206,14 +206,18 @@ int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS, N_Vector y0,
 
     /* compute the nonlinear residual, store in delta */
     retval = NEWTON_CONTENT(NLS)->Sys(ycor, delta, mem);
-    if (retval != SUN_NLS_SUCCESS) break;
+    if (retval != SUN_NLS_SUCCESS) {
+      break;
+    }
 
     /* if indicated, setup the linear system */
     if (callLSetup) {
       retval = NEWTON_CONTENT(NLS)->LSetup(jbad,
                                            &(NEWTON_CONTENT(NLS)->jcur),
                                            mem);
-      if (retval != SUN_NLS_SUCCESS) break;
+      if (retval != SUN_NLS_SUCCESS) {
+        break;
+      }
     }
 
     /* initialize current iteration counter for this solve attempt */
@@ -244,7 +248,9 @@ int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS, N_Vector y0,
 
       /* solve the linear system to get Newton update delta */
       retval = NEWTON_CONTENT(NLS)->LSolve(delta, mem);
-      if (retval != SUN_NLS_SUCCESS) break;
+      if (retval != SUN_NLS_SUCCESS) {
+        break;
+      }
 
       /* update the Newton iterate */
       SUNCheckCallLastErrNoRet(N_VLinearSum(ONE, ycor, ONE, delta, ycor));
@@ -275,7 +281,9 @@ int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS, N_Vector y0,
       }
 
       /* check if the iteration should continue; otherwise exit Newton loop */
-      if (retval != SUN_NLS_CONTINUE) break;
+      if (retval != SUN_NLS_CONTINUE) {
+        break;
+      }
 
       /* not yet converged. Increment curiter and test for max allowed. */
       NEWTON_CONTENT(NLS)->curiter++;
@@ -286,7 +294,9 @@ int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS, N_Vector y0,
 
       /* compute the nonlinear residual, store in delta */
       retval = NEWTON_CONTENT(NLS)->Sys(ycor, delta, mem);
-      if (retval != SUN_NLS_SUCCESS) break;
+      if (retval != SUN_NLS_SUCCESS) {
+        break;
+      }
 
     } /* end of Newton iteration loop */
 
