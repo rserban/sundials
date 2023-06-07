@@ -26,10 +26,6 @@
 #include "arkode_impl.h"
 #include "arkode_ls_impl.h"
 
-#include "arkode_bandpre_impl.h"
-#include "arkode_impl.h"
-#include "arkode_ls_impl.h"
-
 #define MIN_INC_MULT RCONST(1000.0)
 #define ZERO         RCONST(0.0)
 #define ONE          RCONST(1.0)
