@@ -15,8 +15,9 @@
  * ----------------------------------------------------------------*/
 
 #include <string.h>
-#include <sundials/sundials_core.h>
 #include <sundials/impl/sundials_errors_impl.h>
+#include <sundials/sundials_core.h>
+
 #include "sundials_debug.h"
 
 #if defined(SUNDIALS_BUILD_WITH_PROFILING)
@@ -34,7 +35,7 @@ SUNMemory SUNMemoryNewEmpty()
 
   mem->bytes = 0;
 
-  return(mem);
+  return (mem);
 }
 
 SUNMemoryHelper SUNMemoryHelper_NewEmpty(SUNContext sunctx)
@@ -116,14 +117,15 @@ SUNErrCode SUNMemoryHelper_GetAllocStats(SUNMemoryHelper helper,
 {
   SUNErrCode ier = SUN_SUCCESS;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(helper));
-  if (helper->ops->getallocstats) {
+  if (helper->ops->getallocstats)
+  {
     return helper->ops->getallocstats(helper, mem_type, num_allocations,
                                       num_deallocations, bytes_allocated,
                                       bytes_high_watermark);
   }
   else { ier = SUN_ERR_NOT_IMPLEMENTED; }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(helper));
-  return(ier);
+  return (ier);
 }
 
 SUNErrCode SUNMemoryHelper_Alloc(SUNMemoryHelper helper, SUNMemory* memptr,
@@ -132,11 +134,11 @@ SUNErrCode SUNMemoryHelper_Alloc(SUNMemoryHelper helper, SUNMemory* memptr,
 {
   SUNErrCode ier = SUN_SUCCESS;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(helper));
-  if (helper->ops->alloc) {
+  if (helper->ops->alloc)
+  {
     ier = helper->ops->alloc(helper, memptr, mem_size, mem_type, queue);
-  } else {
-    ier = SUN_ERR_NOT_IMPLEMENTED;
   }
+  else { ier = SUN_ERR_NOT_IMPLEMENTED; }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(helper));
   return ier;
 }
@@ -147,11 +149,8 @@ SUNErrCode SUNMemoryHelper_Dealloc(SUNMemoryHelper helper, SUNMemory mem,
   SUNErrCode ier = SUN_SUCCESS;
   SUNDIALS_MARK_FUNCTION_BEGIN(getSUNProfiler(helper));
   if (helper->ops->dealloc == NULL) { ier = -1; }
-  if (!mem) {
-    ier = SUN_SUCCESS;
-  } else {
-    ier = helper->ops->dealloc(helper, mem, queue);
-  }
+  if (!mem) { ier = SUN_SUCCESS; }
+  else { ier = helper->ops->dealloc(helper, mem, queue); }
   SUNDIALS_MARK_FUNCTION_END(getSUNProfiler(helper));
   return ier;
 }
@@ -184,9 +183,7 @@ SUNErrCode SUNMemoryHelper_CopyAsync(SUNMemoryHelper helper, SUNMemory dst,
 
 SUNErrCode SUNMemoryHelper_Destroy(SUNMemoryHelper helper)
 {
-  if (!helper) {
-    return SUN_SUCCESS;
-  }
+  if (!helper) { return SUN_SUCCESS; }
 
   if (helper->ops->destroy)
   {
@@ -215,16 +212,14 @@ SUNMemoryHelper SUNMemoryHelper_Clone(SUNMemoryHelper helper)
   if (!helper->ops->clone)
   {
     if (helper->content)
-    { 
+    {
       SUNCheck(!helper->content, SUN_ERR_NOT_IMPLEMENTED);
-      return (NULL); 
+      return (NULL);
     }
     else
     {
       SUNMemoryHelper hclone = SUNMemoryHelper_NewEmpty(helper->sunctx);
-      if (hclone) {
-        SUNMemoryHelper_CopyOps(helper, hclone);
-      }
+      if (hclone) { SUNMemoryHelper_CopyOps(helper, hclone); }
       return (hclone);
     }
   }

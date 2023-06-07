@@ -31,18 +31,19 @@
 #include <sundials/sundials_matrix.h>
 #include <sundials/sundials_nvector.h>
 
-#ifdef __cplusplus  /* wrapper to enable C++ usage */
+#ifdef __cplusplus /* wrapper to enable C++ usage */
 extern "C" {
 #endif
 
 /* Default SPTFQMR solver parameters */
-#define SUNSPTFQMR_MAXL_DEFAULT    5
+#define SUNSPTFQMR_MAXL_DEFAULT 5
 
 /* ------------------------------------------
  * SPTFQMR Implementation of SUNLinearSolver
  * ------------------------------------------ */
 
-struct _SUNLinearSolverContent_SPTFQMR {
+struct _SUNLinearSolverContent_SPTFQMR
+{
   int maxl;
   int pretype;
   booleantype zeroguess;
@@ -63,7 +64,7 @@ struct _SUNLinearSolverContent_SPTFQMR {
   N_Vector d;
   N_Vector v;
   N_Vector p;
-  N_Vector *r;
+  N_Vector* r;
   N_Vector u;
   N_Vector vtemp1;
   N_Vector vtemp2;
@@ -73,9 +74,9 @@ struct _SUNLinearSolverContent_SPTFQMR {
   FILE* info_file;
 };
 
-typedef struct _SUNLinearSolverContent_SPTFQMR *SUNLinearSolverContent_SPTFQMR;
+typedef struct _SUNLinearSolverContent_SPTFQMR* SUNLinearSolverContent_SPTFQMR;
 
- /* -------------------------------------
+/* -------------------------------------
  * Exported Functions SUNLINSOL_SPTFQMR
  * -------------------------------------- */
 

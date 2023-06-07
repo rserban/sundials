@@ -108,15 +108,18 @@ SUNMemory SUNMemoryHelper_Wrap(void* ptr, SUNMemoryType mem_type);
  * Required SUNMemoryHelper operations.
  */
 
-SUNDIALS_EXPORT SUNErrCode
-SUNMemoryHelper_Alloc(SUNMemoryHelper, SUNMemory* memptr, size_t mem_size,
-                      SUNMemoryType mem_type, void* queue);
+SUNDIALS_EXPORT SUNErrCode SUNMemoryHelper_Alloc(SUNMemoryHelper,
+                                                 SUNMemory* memptr,
+                                                 size_t mem_size,
+                                                 SUNMemoryType mem_type,
+                                                 void* queue);
 
 SUNDIALS_EXPORT
 SUNErrCode SUNMemoryHelper_Dealloc(SUNMemoryHelper, SUNMemory mem, void* queue);
 
-SUNDIALS_EXPORT SUNErrCode SUNMemoryHelper_Copy(
-  SUNMemoryHelper, SUNMemory dst, SUNMemory src, size_t mem_size, void* queue);
+SUNDIALS_EXPORT SUNErrCode SUNMemoryHelper_Copy(SUNMemoryHelper, SUNMemory dst,
+                                                SUNMemory src, size_t mem_size,
+                                                void* queue);
 
 /*
  * Optional SUNMemoryHelper operations.

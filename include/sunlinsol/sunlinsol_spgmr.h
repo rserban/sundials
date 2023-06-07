@@ -126,8 +126,8 @@ SUNDIALS_EXPORT
 int SUNLinSolSetup_SPGMR(SUNLinearSolver S, SUNMatrix A);
 
 SUNDIALS_EXPORT
-int SUNLinSolSolve_SPGMR(SUNLinearSolver S, SUNMatrix A, N_Vector x,
-                         N_Vector b, realtype tol);
+int SUNLinSolSolve_SPGMR(SUNLinearSolver S, SUNMatrix A, N_Vector x, N_Vector b,
+                         realtype tol);
 
 SUNDIALS_EXPORT
 int SUNLinSolNumIters_SPGMR(SUNLinearSolver S);
@@ -142,7 +142,8 @@ SUNDIALS_EXPORT
 sunindextype SUNLinSolLastFlag_SPGMR(SUNLinearSolver S);
 
 SUNDIALS_EXPORT
-SUNErrCode SUNLinSolSpace_SPGMR(SUNLinearSolver S, long int* lenrwLS, long int* leniwLS);
+SUNErrCode SUNLinSolSpace_SPGMR(SUNLinearSolver S, long int* lenrwLS,
+                                long int* leniwLS);
 
 SUNDIALS_EXPORT
 SUNErrCode SUNLinSolFree_SPGMR(SUNLinearSolver S);

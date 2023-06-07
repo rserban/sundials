@@ -238,19 +238,16 @@ SUNDIALS_EXPORT
 realtype N_VWSqrSumLocal_ParHyp(N_Vector x, N_Vector w);
 
 SUNDIALS_EXPORT
-realtype N_VWSqrSumMaskLocal_ParHyp(N_Vector x, N_Vector w,
-                                    N_Vector id);
+realtype N_VWSqrSumMaskLocal_ParHyp(N_Vector x, N_Vector w, N_Vector id);
 
 SUNDIALS_EXPORT
 booleantype N_VInvTestLocal_ParHyp(N_Vector x, N_Vector z);
 
 SUNDIALS_EXPORT
-booleantype N_VConstrMaskLocal_ParHyp(N_Vector c, N_Vector x,
-                                      N_Vector m);
+booleantype N_VConstrMaskLocal_ParHyp(N_Vector c, N_Vector x, N_Vector m);
 
 SUNDIALS_EXPORT
-realtype N_VMinQuotientLocal_ParHyp(N_Vector num,
-                                    N_Vector denom);
+realtype N_VMinQuotientLocal_ParHyp(N_Vector num, N_Vector denom);
 
 /* OPTIONAL single buffer reduction operations */
 

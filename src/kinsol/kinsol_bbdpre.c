@@ -23,32 +23,29 @@
  * blocking occurs at the process level.
  * -----------------------------------------------------------------*/
 
+#include <nvector/nvector_serial.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <nvector/nvector_serial.h>
+#include "kinsol_bbdpre_impl.h"
 #include "kinsol_impl.h"
 #include "kinsol_ls_impl.h"
-#include "kinsol_bbdpre_impl.h"
 
 #define ZERO RCONST(0.0)
 #define ONE  RCONST(1.0)
 
 /* Prototypes of functions KINBBDPrecSetup and KINBBDPrecSolve */
-static int KINBBDPrecSetup(N_Vector uu, N_Vector uscale,
-                           N_Vector fval, N_Vector fscale,
-                           void *pdata);
+static int KINBBDPrecSetup(N_Vector uu, N_Vector uscale, N_Vector fval,
+                           N_Vector fscale, void* pdata);
 
-static int KINBBDPrecSolve(N_Vector uu, N_Vector uscale,
-                           N_Vector fval, N_Vector fscale,
-                           N_Vector vv, void *pdata);
+static int KINBBDPrecSolve(N_Vector uu, N_Vector uscale, N_Vector fval,
+                           N_Vector fscale, N_Vector vv, void* pdata);
 
 /* Prototype for KINBBDPrecFree */
 static int KINBBDPrecFree(KINMem kin_mem);
 
 /* Prototype for difference quotient jacobian calculation routine */
-static int KBBDDQJac(KBBDPrecData pdata,
-                     N_Vector uu, N_Vector uscale,
+static int KBBDDQJac(KBBDPrecData pdata, N_Vector uu, N_Vector uscale,
                      N_Vector gu, N_Vector gtemp, N_Vector utemp);
 
 /*------------------------------------------------------------------
@@ -58,11 +55,9 @@ static int KBBDDQJac(KBBDPrecData pdata,
 /*------------------------------------------------------------------
   KINBBDPrecInit
   ------------------------------------------------------------------*/
-int KINBBDPrecInit(void *kinmem, sunindextype Nlocal,
-                   sunindextype mudq, sunindextype mldq,
-                   sunindextype mukeep, sunindextype mlkeep,
-                   realtype dq_rel_uu,
-                   KINBBDLocalFn gloc, KINBBDCommFn gcomm)
+int KINBBDPrecInit(void* kinmem, sunindextype Nlocal, sunindextype mudq,
+                   sunindextype mldq, sunindextype mukeep, sunindextype mlkeep,
+                   realtype dq_rel_uu, KINBBDLocalFn gloc, KINBBDCommFn gcomm)
 {
   KINMem kin_mem;
   KINLsMem kinls_mem;
@@ -71,134 +66,168 @@ int KINBBDPrecInit(void *kinmem, sunindextype Nlocal,
   long int lrw, liw;
   int flag;
 
-  if (kinmem == NULL) {
-    KINProcessError(NULL, KINLS_MEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_MEM_NULL);
-    return(KINLS_MEM_NULL);
+  if (kinmem == NULL)
+  {
+    KINProcessError(NULL, KINLS_MEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_NULL);
+    return (KINLS_MEM_NULL);
   }
-  kin_mem = (KINMem) kinmem;
+  kin_mem = (KINMem)kinmem;
 
   SUNAssignSUNCTX(kin_mem->kin_sunctx);
 
   /* Test if the LS linear solver interface has been created */
-  if (kin_mem->kin_lmem == NULL) {
-    KINProcessError(kin_mem, KINLS_LMEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_LMEM_NULL);
-    return(KINLS_LMEM_NULL);
+  if (kin_mem->kin_lmem == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_LMEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_LMEM_NULL);
+    return (KINLS_LMEM_NULL);
   }
-  kinls_mem = (KINLsMem) kin_mem->kin_lmem;
+  kinls_mem = (KINLsMem)kin_mem->kin_lmem;
 
   /* Test compatibility of NVECTOR package with the BBD preconditioner */
-  /* Note: Do NOT need to check for N_VScale since has already been checked for in KINSOL */
-  if (kin_mem->kin_vtemp1->ops->nvgetarraypointer == NULL) {
-    KINProcessError(kin_mem, KINLS_ILL_INPUT, __LINE__, __func__, __FILE__, MSGBBD_BAD_NVECTOR);
-    return(KINLS_ILL_INPUT);
+  /* Note: Do NOT need to check for N_VScale since has already been checked for
+   * in KINSOL */
+  if (kin_mem->kin_vtemp1->ops->nvgetarraypointer == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_ILL_INPUT, __LINE__, __func__, __FILE__,
+                    MSGBBD_BAD_NVECTOR);
+    return (KINLS_ILL_INPUT);
   }
 
   /* Allocate data memory */
   pdata = NULL;
-  pdata = (KBBDPrecData) malloc(sizeof *pdata);
-  if (pdata == NULL) {
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+  pdata = (KBBDPrecData)malloc(sizeof *pdata);
+  if (pdata == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   /* Set pointers to gloc and gcomm; load half-bandwidths */
   pdata->kin_mem = kinmem;
-  pdata->gloc = gloc;
-  pdata->gcomm = gcomm;
-  pdata->mudq = SUNMIN(Nlocal-1, SUNMAX(0, mudq));
-  pdata->mldq = SUNMIN(Nlocal-1, SUNMAX(0, mldq));
-  muk = SUNMIN(Nlocal-1, SUNMAX(0, mukeep));
-  mlk = SUNMIN(Nlocal-1, SUNMAX(0, mlkeep));
-  pdata->mukeep = muk;
-  pdata->mlkeep = mlk;
+  pdata->gloc    = gloc;
+  pdata->gcomm   = gcomm;
+  pdata->mudq    = SUNMIN(Nlocal - 1, SUNMAX(0, mudq));
+  pdata->mldq    = SUNMIN(Nlocal - 1, SUNMAX(0, mldq));
+  muk            = SUNMIN(Nlocal - 1, SUNMAX(0, mukeep));
+  mlk            = SUNMIN(Nlocal - 1, SUNMAX(0, mlkeep));
+  pdata->mukeep  = muk;
+  pdata->mlkeep  = mlk;
 
   /* Set extended upper half-bandwidth for PP (required for pivoting) */
-  storage_mu = SUNMIN(Nlocal-1, muk+mlk);
+  storage_mu = SUNMIN(Nlocal - 1, muk + mlk);
 
   /* Allocate memory for preconditioner matrix */
   pdata->PP = NULL;
-  pdata->PP = SUNBandMatrixStorage(Nlocal, muk, mlk, storage_mu, kin_mem->kin_sunctx);
-  if (pdata->PP == NULL) {
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+  pdata->PP = SUNBandMatrixStorage(Nlocal, muk, mlk, storage_mu,
+                                   kin_mem->kin_sunctx);
+  if (pdata->PP == NULL)
+  {
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   /* Allocate memory for temporary N_Vectors */
   pdata->zlocal = NULL;
-  pdata->zlocal = SUNCheckCallLastErrNoRet(N_VNew_Serial(Nlocal, kin_mem->kin_sunctx));
-  if (pdata->zlocal == NULL) {
+  pdata->zlocal =
+    SUNCheckCallLastErrNoRet(N_VNew_Serial(Nlocal, kin_mem->kin_sunctx));
+  if (pdata->zlocal == NULL)
+  {
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   pdata->rlocal = NULL;
-  pdata->rlocal = SUNCheckCallLastErrNoRet(N_VNewEmpty_Serial(Nlocal, kin_mem->kin_sunctx)); /* empty vector */
-  if (pdata->rlocal == NULL) {
+  pdata->rlocal = SUNCheckCallLastErrNoRet(
+    N_VNewEmpty_Serial(Nlocal, kin_mem->kin_sunctx)); /* empty vector */
+  if (pdata->rlocal == NULL)
+  {
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   pdata->tempv1 = NULL;
   pdata->tempv1 = SUNCheckCallLastErrNoRet(N_VClone(kin_mem->kin_vtemp1));
-  if (pdata->tempv1 == NULL) {
+  if (pdata->tempv1 == NULL)
+  {
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->rlocal));
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   pdata->tempv2 = NULL;
   pdata->tempv2 = SUNCheckCallLastErrNoRet(N_VClone(kin_mem->kin_vtemp1));
-  if (pdata->tempv2 == NULL) {
+  if (pdata->tempv2 == NULL)
+  {
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->rlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv1));
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   pdata->tempv3 = NULL;
   pdata->tempv3 = SUNCheckCallLastErrNoRet(N_VClone(kin_mem->kin_vtemp1));
-  if (pdata->tempv3 == NULL) {
+  if (pdata->tempv3 == NULL)
+  {
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->rlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv1));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv2));
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   /* Allocate memory for banded linear solver */
   pdata->LS = NULL;
   pdata->LS = SUNLinSol_Band(pdata->zlocal, pdata->PP, kin_mem->kin_sunctx);
-  if (pdata->LS == NULL) {
+  if (pdata->LS == NULL)
+  {
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->rlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv1));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv2));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv3));
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__, MSGBBD_MEM_FAIL);
-    return(KINLS_MEM_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_MEM_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_FAIL);
+    return (KINLS_MEM_FAIL);
   }
 
   /* initialize band linear solver object */
   flag = SUNLinSolInitialize(pdata->LS);
   SUNCheckCallNoRet(flag);
-  if (flag != SUNLS_SUCCESS) {
+  if (flag != SUNLS_SUCCESS)
+  {
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->rlocal));
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv1));
@@ -206,9 +235,11 @@ int KINBBDPrecInit(void *kinmem, sunindextype Nlocal,
     SUNCheckCallLastErrNoRet(N_VDestroy(pdata->tempv3));
     SUNCheckCallLastErrNoRet(SUNMatDestroy(pdata->PP));
     SUNCheckCallNoRet(SUNLinSolFree(pdata->LS));
-    free(pdata); pdata = NULL;
-    KINProcessError(kin_mem, KINLS_SUNLS_FAIL, __LINE__, __func__, __FILE__, MSGBBD_SUNLS_FAIL);
-    return(KINLS_SUNLS_FAIL);
+    free(pdata);
+    pdata = NULL;
+    KINProcessError(kin_mem, KINLS_SUNLS_FAIL, __LINE__, __func__, __FILE__,
+                    MSGBBD_SUNLS_FAIL);
+    return (KINLS_SUNLS_FAIL);
   }
 
   /* Set rel_uu based on input value dq_rel_uu (0 implies default) */
@@ -220,28 +251,33 @@ int KINBBDPrecInit(void *kinmem, sunindextype Nlocal,
   /* Set work space sizes and initialize nge */
   pdata->rpwsize = 0;
   pdata->ipwsize = 0;
-  if (kin_mem->kin_vtemp1->ops->nvspace) {
+  if (kin_mem->kin_vtemp1->ops->nvspace)
+  {
     SUNCheckCallLastErrNoRet(N_VSpace(kin_mem->kin_vtemp1, &lrw1, &liw1));
-    pdata->rpwsize += 3*lrw1;
-    pdata->ipwsize += 3*liw1;
+    pdata->rpwsize += 3 * lrw1;
+    pdata->ipwsize += 3 * liw1;
   }
-  if (pdata->zlocal->ops->nvspace) {
+  if (pdata->zlocal->ops->nvspace)
+  {
     SUNCheckCallLastErrNoRet(N_VSpace(pdata->zlocal, &lrw1, &liw1));
     pdata->rpwsize += lrw1;
     pdata->ipwsize += liw1;
   }
-  if (pdata->rlocal->ops->nvspace) {
+  if (pdata->rlocal->ops->nvspace)
+  {
     SUNCheckCallLastErrNoRet(N_VSpace(pdata->rlocal, &lrw1, &liw1));
     pdata->rpwsize += lrw1;
     pdata->ipwsize += liw1;
   }
-  if (pdata->PP->ops->space) {
+  if (pdata->PP->ops->space)
+  {
     flag = SUNMatSpace(pdata->PP, &lrw, &liw);
     SUNCheckCallNoRet(flag);
     pdata->rpwsize += lrw;
     pdata->ipwsize += liw;
   }
-  if (pdata->LS->ops->space) {
+  if (pdata->LS->ops->space)
+  {
     flag = SUNLinSolSpace(pdata->LS, &lrw, &liw);
     SUNCheckCallNoRet(flag);
     pdata->rpwsize += lrw;
@@ -250,9 +286,7 @@ int KINBBDPrecInit(void *kinmem, sunindextype Nlocal,
   pdata->nge = 0;
 
   /* make sure pdata is free from any previous allocations */
-  if (kinls_mem->pfree != NULL) {
-    kinls_mem->pfree(kin_mem);
-  }
+  if (kinls_mem->pfree != NULL) { kinls_mem->pfree(kin_mem); }
 
   /* Point to the new pdata field in the LS memory */
   kinls_mem->pdata = pdata;
@@ -261,81 +295,87 @@ int KINBBDPrecInit(void *kinmem, sunindextype Nlocal,
   kinls_mem->pfree = KINBBDPrecFree;
 
   /* Attach preconditioner solve and setup functions */
-  flag = KINSetPreconditioner(kinmem, KINBBDPrecSetup,
-                              KINBBDPrecSolve);
+  flag = KINSetPreconditioner(kinmem, KINBBDPrecSetup, KINBBDPrecSolve);
 
-  return(flag);
+  return (flag);
 }
-
 
 /*------------------------------------------------------------------
   KINBBDPrecGetWorkSpace
   ------------------------------------------------------------------*/
-int KINBBDPrecGetWorkSpace(void *kinmem,
-                           long int *lenrwBBDP,
-                           long int *leniwBBDP)
+int KINBBDPrecGetWorkSpace(void* kinmem, long int* lenrwBBDP, long int* leniwBBDP)
 {
   KINMem kin_mem;
   KINLsMem kinls_mem;
   KBBDPrecData pdata;
 
-  if (kinmem == NULL) {
-    KINProcessError(NULL, KINLS_MEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_MEM_NULL);
-    return(KINLS_MEM_NULL);
+  if (kinmem == NULL)
+  {
+    KINProcessError(NULL, KINLS_MEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_NULL);
+    return (KINLS_MEM_NULL);
   }
-  kin_mem = (KINMem) kinmem;
+  kin_mem = (KINMem)kinmem;
 
-  if (kin_mem->kin_lmem == NULL) {
-    KINProcessError(kin_mem, KINLS_LMEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_LMEM_NULL);
-    return(KINLS_LMEM_NULL);
+  if (kin_mem->kin_lmem == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_LMEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_LMEM_NULL);
+    return (KINLS_LMEM_NULL);
   }
-  kinls_mem = (KINLsMem) kin_mem->kin_lmem;
+  kinls_mem = (KINLsMem)kin_mem->kin_lmem;
 
-  if (kinls_mem->pdata == NULL) {
-    KINProcessError(kin_mem, KINLS_PMEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_PMEM_NULL);
-    return(KINLS_PMEM_NULL);
+  if (kinls_mem->pdata == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_PMEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_PMEM_NULL);
+    return (KINLS_PMEM_NULL);
   }
-  pdata = (KBBDPrecData) kinls_mem->pdata;
+  pdata = (KBBDPrecData)kinls_mem->pdata;
 
   *lenrwBBDP = pdata->rpwsize;
   *leniwBBDP = pdata->ipwsize;
 
-  return(KINLS_SUCCESS);
+  return (KINLS_SUCCESS);
 }
 
 /*------------------------------------------------------------------
  KINBBDPrecGetNumGfnEvals
  -------------------------------------------------------------------*/
-int KINBBDPrecGetNumGfnEvals(void *kinmem,
-                             long int *ngevalsBBDP)
+int KINBBDPrecGetNumGfnEvals(void* kinmem, long int* ngevalsBBDP)
 {
   KINMem kin_mem;
   KINLsMem kinls_mem;
   KBBDPrecData pdata;
 
-  if (kinmem == NULL) {
-    KINProcessError(NULL, KINLS_MEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_MEM_NULL);
-    return(KINLS_MEM_NULL);
+  if (kinmem == NULL)
+  {
+    KINProcessError(NULL, KINLS_MEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_MEM_NULL);
+    return (KINLS_MEM_NULL);
   }
-  kin_mem = (KINMem) kinmem;
+  kin_mem = (KINMem)kinmem;
 
-  if (kin_mem->kin_lmem == NULL) {
-    KINProcessError(kin_mem, KINLS_LMEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_LMEM_NULL);
-    return(KINLS_LMEM_NULL);
+  if (kin_mem->kin_lmem == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_LMEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_LMEM_NULL);
+    return (KINLS_LMEM_NULL);
   }
-  kinls_mem = (KINLsMem) kin_mem->kin_lmem;
+  kinls_mem = (KINLsMem)kin_mem->kin_lmem;
 
-  if (kinls_mem->pdata == NULL) {
-    KINProcessError(kin_mem, KINLS_PMEM_NULL, __LINE__, __func__, __FILE__, MSGBBD_PMEM_NULL);
-    return(KINLS_PMEM_NULL);
+  if (kinls_mem->pdata == NULL)
+  {
+    KINProcessError(kin_mem, KINLS_PMEM_NULL, __LINE__, __func__, __FILE__,
+                    MSGBBD_PMEM_NULL);
+    return (KINLS_PMEM_NULL);
   }
-  pdata = (KBBDPrecData) kinls_mem->pdata;
+  pdata = (KBBDPrecData)kinls_mem->pdata;
 
   *ngevalsBBDP = pdata->nge;
 
-  return(KINLS_SUCCESS);
+  return (KINLS_SUCCESS);
 }
-
 
 /*------------------------------------------------------------------
   KINBBDPrecSetup
@@ -366,35 +406,36 @@ int KINBBDPrecGetNumGfnEvals(void *kinmem,
     0 if successful,
     > 0 for a recoverable error - step will be retried.
   ------------------------------------------------------------------*/
-static int KINBBDPrecSetup(N_Vector uu, N_Vector uscale,
-                           N_Vector fval, N_Vector fscale,
-                           void *bbd_data)
+static int KINBBDPrecSetup(N_Vector uu, N_Vector uscale, N_Vector fval,
+                           N_Vector fscale, void* bbd_data)
 {
   int ls_status;
   KBBDPrecData pdata;
   KINMem kin_mem;
   int retval;
 
-  pdata = (KBBDPrecData) bbd_data;
+  pdata = (KBBDPrecData)bbd_data;
 
-  kin_mem = (KINMem) pdata->kin_mem;
+  kin_mem = (KINMem)pdata->kin_mem;
 
   SUNAssignSUNCTX(kin_mem->kin_sunctx);
 
   /* Call KBBDDQJac for a new Jacobian calculation and store in PP */
   retval = SUNCheckCallLastErrNoRet(SUNMatZero(pdata->PP));
-  if (retval) {
+  if (retval)
+  {
     KINProcessError(kin_mem, -1, __LINE__, __func__, __FILE__,
                     MSGBBD_SUNMAT_FAIL);
-    return(SUNLS_UNRECOV_FAILURE);
+    return (SUNLS_UNRECOV_FAILURE);
   }
 
-  retval = KBBDDQJac(pdata, uu, uscale,
-                     pdata->tempv1, pdata->tempv2, pdata->tempv3);
-  if (retval != 0) {
+  retval = KBBDDQJac(pdata, uu, uscale, pdata->tempv1, pdata->tempv2,
+                     pdata->tempv3);
+  if (retval != 0)
+  {
     KINProcessError(kin_mem, -1, __LINE__, __func__, __FILE__,
                     MSGBBD_FUNC_FAILED);
-    return(SUNLS_UNRECOV_FAILURE);
+    return (SUNLS_UNRECOV_FAILURE);
   }
 
   /* Do LU factorization of P and return error flag */
@@ -433,19 +474,18 @@ static int KINBBDPrecSetup(N_Vector uu, N_Vector uscale,
   flag returned from the lienar solver object.
   ------------------------------------------------------------------*/
 
-static int KINBBDPrecSolve(N_Vector uu, N_Vector uscale,
-                           N_Vector fval, N_Vector fscale,
-                           N_Vector vv, void *bbd_data)
+static int KINBBDPrecSolve(N_Vector uu, N_Vector uscale, N_Vector fval,
+                           N_Vector fscale, N_Vector vv, void* bbd_data)
 {
   int ls_status;
   KBBDPrecData pdata;
-  realtype *vd;
-  realtype *zd;
+  realtype* vd;
+  realtype* zd;
   int i;
 
-  pdata = (KBBDPrecData) bbd_data;
+  pdata = (KBBDPrecData)bbd_data;
 
-  SUNAssignSUNCTX(((KINMem) pdata->kin_mem)->kin_sunctx);
+  SUNAssignSUNCTX(((KINMem)pdata->kin_mem)->kin_sunctx);
 
   /* Get data pointers */
   vd = SUNCheckCallLastErrNoRet(N_VGetArrayPointer(vv));
@@ -455,18 +495,14 @@ static int KINBBDPrecSolve(N_Vector uu, N_Vector uscale,
   SUNCheckCallLastErrNoRet(N_VSetArrayPointer(vd, pdata->rlocal));
 
   /* Call banded solver object to do the work */
-  ls_status =
-    SUNCheckCallLastErrNoRet(SUNLinSolSolve(pdata->LS, pdata->PP, pdata->zlocal,
-                                            pdata->rlocal, ZERO));
+  ls_status = SUNCheckCallLastErrNoRet(
+    SUNLinSolSolve(pdata->LS, pdata->PP, pdata->zlocal, pdata->rlocal, ZERO));
 
   /* Copy result into vv */
-  for (i = 0; i < pdata->n_local; i++) {
-    vd[i] = zd[i];
-  }
+  for (i = 0; i < pdata->n_local; i++) { vd[i] = zd[i]; }
 
-  return(ls_status);
+  return (ls_status);
 }
-
 
 /*------------------------------------------------------------------
   KINBBDPrecFree
@@ -478,15 +514,11 @@ static int KINBBDPrecFree(KINMem kin_mem)
   KINLsMem kinls_mem;
   KBBDPrecData pdata;
 
-  if (kin_mem->kin_lmem == NULL) {
-    return (0);
-  }
-  kinls_mem = (KINLsMem) kin_mem->kin_lmem;
+  if (kin_mem->kin_lmem == NULL) { return (0); }
+  kinls_mem = (KINLsMem)kin_mem->kin_lmem;
 
-  if (kinls_mem->pdata == NULL) {
-    return (0);
-  }
-  pdata = (KBBDPrecData) kinls_mem->pdata;
+  if (kinls_mem->pdata == NULL) { return (0); }
+  pdata = (KBBDPrecData)kinls_mem->pdata;
 
   SUNCheckCallNoRet(SUNLinSolFree(pdata->LS));
   SUNCheckCallLastErrNoRet(N_VDestroy(pdata->zlocal));
@@ -499,9 +531,8 @@ static int KINBBDPrecFree(KINMem kin_mem)
   free(pdata);
   pdata = NULL;
 
-  return(0);
+  return (0);
 }
-
 
 /*------------------------------------------------------------------
   KBBDDQJac
@@ -516,8 +547,7 @@ static int KINBBDPrecFree(KINMem kin_mem)
   This routine also assumes that the local elements of a vector
   are stored contiguously.
   ------------------------------------------------------------------*/
-static int KBBDDQJac(KBBDPrecData pdata,
-                     N_Vector uu, N_Vector uscale,
+static int KBBDDQJac(KBBDPrecData pdata, N_Vector uu, N_Vector uscale,
                      N_Vector gu, N_Vector gtemp, N_Vector utemp)
 {
   KINMem kin_mem;
@@ -526,7 +556,7 @@ static int KBBDDQJac(KBBDPrecData pdata,
   sunindextype group, i, j, width, ngroups, i1, i2;
   realtype *udata, *uscdata, *gudata, *gtempdata, *utempdata, *col_j;
 
-  kin_mem = (KINMem) pdata->kin_mem;
+  kin_mem = (KINMem)pdata->kin_mem;
 
   SUNAssignSUNCTX(kin_mem->kin_sunctx);
 
@@ -541,28 +571,26 @@ static int KBBDDQJac(KBBDPrecData pdata,
   utempdata = SUNCheckCallLastErrNoRet(N_VGetArrayPointer(utemp));
 
   /* Call gcomm and gloc to get base value of g(uu) */
-  if (pdata->gcomm != NULL) {
+  if (pdata->gcomm != NULL)
+  {
     retval = pdata->gcomm(pdata->n_local, uu, kin_mem->kin_user_data);
-    if (retval != 0) {
-      return (retval);
-    }
+    if (retval != 0) { return (retval); }
   }
 
   retval = pdata->gloc(pdata->n_local, uu, gu, kin_mem->kin_user_data);
   pdata->nge++;
-  if (retval != 0) {
-    return (retval);
-  }
+  if (retval != 0) { return (retval); }
 
   /* Set bandwidth and number of column groups for band differencing */
-  width = pdata->mldq + pdata->mudq + 1;
+  width   = pdata->mldq + pdata->mudq + 1;
   ngroups = SUNMIN(width, pdata->n_local);
 
   /* Loop over groups */
-  for(group = 1; group <= ngroups; group++) {
-
+  for (group = 1; group <= ngroups; group++)
+  {
     /* increment all u_j in group */
-    for(j = group - 1; j < pdata->n_local; j += width) {
+    for (j = group - 1; j < pdata->n_local; j += width)
+    {
       inc = pdata->rel_uu * SUNMAX(SUNRabs(udata[j]), (ONE / uscdata[j]));
       utempdata[j] += inc;
     }
@@ -570,23 +598,23 @@ static int KBBDDQJac(KBBDPrecData pdata,
     /* Evaluate g with incremented u */
     retval = pdata->gloc(pdata->n_local, utemp, gtemp, kin_mem->kin_user_data);
     pdata->nge++;
-    if (retval != 0) {
-      return (retval);
-    }
+    if (retval != 0) { return (retval); }
 
     /* restore utemp, then form and load difference quotients */
-    for (j = group - 1; j < pdata->n_local; j += width) {
+    for (j = group - 1; j < pdata->n_local; j += width)
+    {
       utempdata[j] = udata[j];
-      col_j = SUNBandMatrix_Column(pdata->PP,j);
-      inc = pdata->rel_uu * SUNMAX(SUNRabs(udata[j]) , (ONE / uscdata[j]));
+      col_j        = SUNBandMatrix_Column(pdata->PP, j);
+      inc     = pdata->rel_uu * SUNMAX(SUNRabs(udata[j]), (ONE / uscdata[j]));
       inc_inv = ONE / inc;
-      i1 = SUNMAX(0, (j - pdata->mukeep));
-      i2 = SUNMIN((j + pdata->mlkeep), (pdata->n_local - 1));
-      for (i = i1; i <= i2; i++) {
+      i1      = SUNMAX(0, (j - pdata->mukeep));
+      i2      = SUNMIN((j + pdata->mlkeep), (pdata->n_local - 1));
+      for (i = i1; i <= i2; i++)
+      {
         SM_COLUMN_ELEMENT_B(col_j, i, j) = inc_inv * (gtempdata[i] - gudata[i]);
       }
     }
   }
 
-  return(0);
+  return (0);
 }

@@ -20,9 +20,9 @@
 #define _NVECTOR_MPIPLUSX_H
 
 #include <mpi.h>
-#include <sundials/sundials_core.h>
 #include <nvector/nvector_mpimanyvector.h>
 #include <sundials/impl/sundials_errors_impl.h>
+#include <sundials/sundials_core.h>
 
 #ifdef __cplusplus /* wrapper to enable C++ usage */
 extern "C" {
@@ -43,7 +43,8 @@ SUNDIALS_STATIC_INLINE
 sunrealtype* N_VGetArrayPointer_MPIPlusX(N_Vector v)
 {
   SUNAssignSUNCTX(v->sunctx);
-  sunrealtype* arr = SUNCheckCallLastErrNoRet(N_VGetSubvectorArrayPointer_MPIManyVector(v, 0));
+  sunrealtype* arr =
+    SUNCheckCallLastErrNoRet(N_VGetSubvectorArrayPointer_MPIManyVector(v, 0));
   return arr;
 }
 
@@ -66,7 +67,8 @@ SUNDIALS_STATIC_INLINE
 sunindextype N_VGetLocalLength_MPIPlusX(N_Vector v)
 {
   SUNAssignSUNCTX(v->sunctx);
-  sunindextype len = SUNCheckCallLastErrNoRet(N_VGetLength(N_VGetLocalVector_MPIPlusX(v)));
+  sunindextype len =
+    SUNCheckCallLastErrNoRet(N_VGetLength(N_VGetLocalVector_MPIPlusX(v)));
   return len;
 }
 
@@ -81,7 +83,7 @@ SUNErrCode N_VEnableFusedOps_MPIPlusX(N_Vector v, booleantype tf)
 SUNDIALS_EXPORT
 void N_VPrint_MPIPlusX(N_Vector x);
 
-SUNDIALS_EXPORT 
+SUNDIALS_EXPORT
 void N_VPrintFile_MPIPlusX(N_Vector x, FILE* outfile);
 
 #ifdef __cplusplus

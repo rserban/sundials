@@ -24,13 +24,13 @@
 #ifndef _SUNLINSOL_BAND_H
 #define _SUNLINSOL_BAND_H
 
+#include <sundials/sundials_band.h>
 #include <sundials/sundials_linearsolver.h>
 #include <sundials/sundials_matrix.h>
 #include <sundials/sundials_nvector.h>
-#include <sundials/sundials_band.h>
 #include <sunmatrix/sunmatrix_band.h>
 
-#ifdef __cplusplus  /* wrapper to enable C++ usage */
+#ifdef __cplusplus /* wrapper to enable C++ usage */
 extern "C" {
 #endif
 
@@ -38,14 +38,14 @@ extern "C" {
  * Band Implementation of SUNLinearSolver
  * --------------------------------------- */
 
-struct _SUNLinearSolverContent_Band {
-  sunindextype  N;
-  sunindextype *pivots;
+struct _SUNLinearSolverContent_Band
+{
+  sunindextype N;
+  sunindextype* pivots;
   sunindextype last_flag;
 };
 
-typedef struct _SUNLinearSolverContent_Band *SUNLinearSolverContent_Band;
-
+typedef struct _SUNLinearSolverContent_Band* SUNLinearSolverContent_Band;
 
 /* --------------------------------------
  * Exported Functions for SUNLINSOL_BAND
@@ -67,8 +67,8 @@ SUNDIALS_EXPORT
 int SUNLinSolSetup_Band(SUNLinearSolver S, SUNMatrix A);
 
 SUNDIALS_EXPORT
-int SUNLinSolSolve_Band(SUNLinearSolver S, SUNMatrix A, N_Vector x,
-                        N_Vector b, realtype tol);
+int SUNLinSolSolve_Band(SUNLinearSolver S, SUNMatrix A, N_Vector x, N_Vector b,
+                        realtype tol);
 
 SUNDIALS_EXPORT
 sunindextype SUNLinSolLastFlag_Band(SUNLinearSolver S);

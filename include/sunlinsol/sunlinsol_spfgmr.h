@@ -32,20 +32,21 @@
 #include <sundials/sundials_matrix.h>
 #include <sundials/sundials_nvector.h>
 
-#ifdef __cplusplus  /* wrapper to enable C++ usage */
+#ifdef __cplusplus /* wrapper to enable C++ usage */
 extern "C" {
 #endif
 
 /* Default SPFGMR solver parameters */
-#define SUNSPFGMR_MAXL_DEFAULT    5
-#define SUNSPFGMR_MAXRS_DEFAULT   0
-#define SUNSPFGMR_GSTYPE_DEFAULT  SUN_MODIFIED_GS
+#define SUNSPFGMR_MAXL_DEFAULT   5
+#define SUNSPFGMR_MAXRS_DEFAULT  0
+#define SUNSPFGMR_GSTYPE_DEFAULT SUN_MODIFIED_GS
 
 /* -----------------------------------------
  * SPFGMR Implementation of SUNLinearSolver
  * ----------------------------------------- */
 
-struct _SUNLinearSolverContent_SPFGMR {
+struct _SUNLinearSolverContent_SPFGMR
+{
   int maxl;
   int pretype;
   int gstype;
@@ -63,22 +64,22 @@ struct _SUNLinearSolverContent_SPFGMR {
 
   N_Vector s1;
   N_Vector s2;
-  N_Vector *V;
-  N_Vector *Z;
-  realtype **Hes;
-  realtype *givens;
+  N_Vector* V;
+  N_Vector* Z;
+  realtype** Hes;
+  realtype* givens;
   N_Vector xcor;
-  realtype *yg;
+  realtype* yg;
   N_Vector vtemp;
 
-  realtype *cv;
-  N_Vector *Xv;
+  realtype* cv;
+  N_Vector* Xv;
 
   int print_level;
   FILE* info_file;
 };
 
-typedef struct _SUNLinearSolverContent_SPFGMR *SUNLinearSolverContent_SPFGMR;
+typedef struct _SUNLinearSolverContent_SPFGMR* SUNLinearSolverContent_SPFGMR;
 
 /* ----------------------------------------
  * Exported Functions for SUNLINSOL_SPFGMR

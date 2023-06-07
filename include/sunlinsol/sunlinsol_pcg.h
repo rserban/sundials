@@ -109,8 +109,8 @@ SUNDIALS_EXPORT
 int SUNLinSolSetup_PCG(SUNLinearSolver S, SUNMatrix nul);
 
 SUNDIALS_EXPORT
-int SUNLinSolSolve_PCG(SUNLinearSolver S, SUNMatrix nul, N_Vector x,
-                       N_Vector b, realtype tol);
+int SUNLinSolSolve_PCG(SUNLinearSolver S, SUNMatrix nul, N_Vector x, N_Vector b,
+                       realtype tol);
 
 SUNDIALS_EXPORT
 int SUNLinSolNumIters_PCG(SUNLinearSolver S);

@@ -115,8 +115,7 @@ SUNDIALS_EXPORT
 void N_VDestroy_Serial(N_Vector v);
 
 SUNDIALS_EXPORT
-void N_VSpace_Serial(N_Vector v, sunindextype* lrw,
-                     sunindextype* liw);
+void N_VSpace_Serial(N_Vector v, sunindextype* lrw, sunindextype* liw);
 
 SUNDIALS_EXPORT
 realtype* N_VGetArrayPointer_Serial(N_Vector v);
@@ -159,8 +158,7 @@ SUNDIALS_EXPORT
 realtype N_VWrmsNorm_Serial(N_Vector x, N_Vector w);
 
 SUNDIALS_EXPORT
-realtype N_VWrmsNormMask_Serial(N_Vector x, N_Vector w,
-                                N_Vector id);
+realtype N_VWrmsNormMask_Serial(N_Vector x, N_Vector w, N_Vector id);
 
 SUNDIALS_EXPORT
 realtype N_VMin_Serial(N_Vector x);
@@ -178,8 +176,7 @@ SUNDIALS_EXPORT
 booleantype N_VInvTest_Serial(N_Vector x, N_Vector z);
 
 SUNDIALS_EXPORT
-booleantype N_VConstrMask_Serial(N_Vector c, N_Vector x,
-                                 N_Vector m);
+booleantype N_VConstrMask_Serial(N_Vector c, N_Vector x, N_Vector m);
 
 SUNDIALS_EXPORT
 realtype N_VMinQuotient_Serial(N_Vector num, N_Vector denom);
@@ -229,8 +226,7 @@ SUNDIALS_EXPORT
 realtype N_VWSqrSumLocal_Serial(N_Vector x, N_Vector w);
 
 SUNDIALS_EXPORT
-realtype N_VWSqrSumMaskLocal_Serial(N_Vector x, N_Vector w,
-                                    N_Vector id);
+realtype N_VWSqrSumMaskLocal_Serial(N_Vector x, N_Vector w, N_Vector id);
 
 /* OPTIONAL XBraid interface operations */
 SUNDIALS_EXPORT

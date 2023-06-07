@@ -156,8 +156,7 @@ SUNLinearSolver SUNLinSolNewEmpty(SUNContext sunctx);
 SUNDIALS_EXPORT
 void SUNLinSolFreeEmpty(SUNLinearSolver S);
 
-SUNDIALS_EXPORT SUNLinearSolver_Type
-SUNLinSolGetType(SUNLinearSolver S);
+SUNDIALS_EXPORT SUNLinearSolver_Type SUNLinSolGetType(SUNLinearSolver S);
 
 SUNDIALS_EXPORT
 SUNLinearSolver_ID SUNLinSolGetID(SUNLinearSolver S);
@@ -184,8 +183,8 @@ SUNDIALS_EXPORT
 int SUNLinSolSetup(SUNLinearSolver S, SUNMatrix A);
 
 SUNDIALS_EXPORT
-int SUNLinSolSolve(SUNLinearSolver S, SUNMatrix A, N_Vector x,
-                   N_Vector b, realtype tol);
+int SUNLinSolSolve(SUNLinearSolver S, SUNMatrix A, N_Vector x, N_Vector b,
+                   realtype tol);
 
 /* TODO(CJB): We should consider changing the return type to long int since
  batched solvers could in theory return a very large number here. */
@@ -219,7 +218,7 @@ SUNErrCode SUNLinSolFree(SUNLinearSolver S);
               or 'numerical' in nature. Do not remove errors which
               unrecoverable but have a recoverable dual.  */
 
-#define SUNLS_SUCCESS 0    /* successful/converged             */
+#define SUNLS_SUCCESS 0 /* successful/converged             */
 
 #define SUNLS_UNRECOV_FAILURE -800 /* generic unrecoverable failure */
 /* DEPRECATED: use SUNErrCode instead */
@@ -240,17 +239,17 @@ SUNErrCode SUNLinSolFree(SUNLinearSolver S);
 #define SUNLS_GS_FAIL            -810 /* Gram-Schmidt failure          */
 #define SUNLS_QRSOL_FAIL         -811 /* QRsol found singular R        */
 /* DEPRECATED: use SUNErrCode instead */
-#define SUNLS_VECTOROP_ERR     -812 /* vector operation error        */
+#define SUNLS_VECTOROP_ERR -812 /* vector operation error        */
 
-#define SUNLS_RECOV_FAILURE    800  /* generic recoverable failure   */
-#define SUNLS_RES_REDUCED      801  /* nonconv. solve, resid reduced */
-#define SUNLS_CONV_FAIL        802  /* nonconvergent solve           */
-#define SUNLS_ATIMES_FAIL_REC  803  /* atimes failed recoverably     */
-#define SUNLS_PSET_FAIL_REC    804  /* pset failed recoverably       */
-#define SUNLS_PSOLVE_FAIL_REC  805  /* psolve failed recoverably     */
-#define SUNLS_PACKAGE_FAIL_REC 806  /* external package recov. fail  */
-#define SUNLS_QRFACT_FAIL      807  /* QRfact found singular matrix  */
-#define SUNLS_LUFACT_FAIL      808  /* LUfact found singular matrix  */
+#define SUNLS_RECOV_FAILURE    800 /* generic recoverable failure   */
+#define SUNLS_RES_REDUCED      801 /* nonconv. solve, resid reduced */
+#define SUNLS_CONV_FAIL        802 /* nonconvergent solve           */
+#define SUNLS_ATIMES_FAIL_REC  803 /* atimes failed recoverably     */
+#define SUNLS_PSET_FAIL_REC    804 /* pset failed recoverably       */
+#define SUNLS_PSOLVE_FAIL_REC  805 /* psolve failed recoverably     */
+#define SUNLS_PACKAGE_FAIL_REC 806 /* external package recov. fail  */
+#define SUNLS_QRFACT_FAIL      807 /* QRfact found singular matrix  */
+#define SUNLS_LUFACT_FAIL      808 /* LUfact found singular matrix  */
 
 /* -----------------------------------------------------------------------------
  * SUNLinearSolver messages

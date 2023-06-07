@@ -73,16 +73,15 @@ SUNNonlinearSolver SUNNonlinSol_NewtonSens(int count, N_Vector y,
 
 /* core functions */
 SUNDIALS_EXPORT
-SUNNonlinearSolver_Type SUNNonlinSolGetType_Newton(SUNNonlinearSolver NLS)
- ;
+SUNNonlinearSolver_Type SUNNonlinSolGetType_Newton(SUNNonlinearSolver NLS);
 
 SUNDIALS_EXPORT
 SUNErrCode SUNNonlinSolInitialize_Newton(SUNNonlinearSolver NLS);
 
 SUNDIALS_EXPORT
-int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS, N_Vector y0,
-                             N_Vector y, N_Vector w, realtype tol,
-                             booleantype callLSetup, void* mem);
+int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS, N_Vector y0, N_Vector y,
+                             N_Vector w, realtype tol, booleantype callLSetup,
+                             void* mem);
 
 SUNDIALS_EXPORT
 SUNErrCode SUNNonlinSolFree_Newton(SUNNonlinearSolver NLS);
@@ -125,7 +124,8 @@ SUNErrCode SUNNonlinSolGetSysFn_Newton(SUNNonlinearSolver NLS,
                                        SUNNonlinSolSysFn* SysFn);
 
 SUNDIALS_DEPRECATED_EXPORT_MSG("Use SUNLogger_SetInfoFilename instead")
-SUNErrCode SUNNonlinSolSetInfoFile_Newton(SUNNonlinearSolver NLS, FILE* info_file);
+SUNErrCode SUNNonlinSolSetInfoFile_Newton(SUNNonlinearSolver NLS,
+                                          FILE* info_file);
 
 SUNDIALS_DEPRECATED_EXPORT_MSG("Use SUNLogger interface instead")
 SUNErrCode SUNNonlinSolSetPrintLevel_Newton(SUNNonlinearSolver NLS,

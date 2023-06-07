@@ -124,8 +124,7 @@ SUNDIALS_EXPORT
 void N_VDestroy_OpenMP(N_Vector v);
 
 SUNDIALS_EXPORT
-void N_VSpace_OpenMP(N_Vector v, sunindextype* lrw,
-                     sunindextype* liw);
+void N_VSpace_OpenMP(N_Vector v, sunindextype* lrw, sunindextype* liw);
 
 SUNDIALS_EXPORT
 realtype* N_VGetArrayPointer_OpenMP(N_Vector v);
@@ -169,8 +168,7 @@ SUNDIALS_EXPORT
 realtype N_VWrmsNorm_OpenMP(N_Vector x, N_Vector w);
 
 SUNDIALS_EXPORT
-realtype N_VWrmsNormMask_OpenMP(N_Vector x, N_Vector w,
-                                N_Vector id);
+realtype N_VWrmsNormMask_OpenMP(N_Vector x, N_Vector w, N_Vector id);
 
 SUNDIALS_EXPORT
 realtype N_VMin_OpenMP(N_Vector x);
@@ -188,8 +186,7 @@ SUNDIALS_EXPORT
 booleantype N_VInvTest_OpenMP(N_Vector x, N_Vector z);
 
 SUNDIALS_EXPORT
-booleantype N_VConstrMask_OpenMP(N_Vector c, N_Vector x,
-                                 N_Vector m);
+booleantype N_VConstrMask_OpenMP(N_Vector c, N_Vector x, N_Vector m);
 
 SUNDIALS_EXPORT
 realtype N_VMinQuotient_OpenMP(N_Vector num, N_Vector denom);

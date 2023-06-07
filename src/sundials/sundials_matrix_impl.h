@@ -15,8 +15,9 @@
 #ifndef _SUNDIALS_MATRIX_IMPL_H
 #define _SUNDIALS_MATRIX_IMPL_H
 
-#include <sundials/sundials_core.h>
 #include <sundials/impl/sundials_errors_impl.h>
+#include <sundials/sundials_core.h>
+
 #include "sundials_logger_impl.h"
 
 #endif /* _SUNDIALS_MATRIX_IMPL_H */

@@ -13,18 +13,19 @@
  * -----------------------------------------------------------------*/
 
 #include <sundials/impl/sundials_errors_impl.h>
-#include "sundials/sundials_types.h"
 #include <sundials/sundials_config.h>
 
+#include "sundials/sundials_types.h"
+
 #if SUNDIALS_MPI_ENABLED
-#include <sundials/sundials_mpi_types.h>
 #include <mpi.h>
+#include <sundials/sundials_mpi_types.h>
 #elif defined(SUNDIALS_HAVE_POSIX_TIMERS)
 #if !defined(_POSIX_C_SOURCE) || (_POSIX_C_SOURCE < 200112L)
 #define _POSIX_C_SOURCE 200112L
 #endif
-#include <time.h>
 #include <stddef.h>
+#include <time.h>
 #include <unistd.h>
 #else
 #error Either MPI_Wtime or clock_getttime is required but neither were found
@@ -32,13 +33,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <sundials/sundials_profiler.h>
 #include <sundials/sundials_math.h>
-#include "sundials_hashmap.h"
-#include "sundials_debug.h"
+#include <sundials/sundials_profiler.h>
 
-#define SUNDIALS_ROOT_TIMER ((const char*) "From profiler epoch")
+#include "sundials_debug.h"
+#include "sundials_hashmap.h"
+
+#define SUNDIALS_ROOT_TIMER ((const char*)"From profiler epoch")
 
 /* Private functions */
 #if SUNDIALS_MPI_ENABLED
@@ -64,21 +65,21 @@ struct _sunTimerStruct
   double average;
   double maximum;
   double elapsed;
-  long   count;
+  long count;
 };
 
 typedef struct _sunTimerStruct sunTimerStruct;
 
 static sunTimerStruct* sunTimerStructNew()
 {
-  sunTimerStruct* ts = (sunTimerStruct*) malloc(sizeof(sunTimerStruct));
+  sunTimerStruct* ts = (sunTimerStruct*)malloc(sizeof(sunTimerStruct));
 #if SUNDIALS_MPI_ENABLED
   ts->tic = 0.0;
   ts->toc = 0.0;
 #else
-  ts->tic = (struct timespec *) malloc(sizeof(struct timespec));
-  ts->toc = (struct timespec *) malloc(sizeof(struct timespec));
-  ts->tic->tv_sec = 0;
+  ts->tic          = (struct timespec*)malloc(sizeof(struct timespec));
+  ts->toc          = (struct timespec*)malloc(sizeof(struct timespec));
+  ts->tic->tv_sec  = 0;
   ts->tic->tv_nsec = 0;
 #endif
   ts->elapsed = 0.0;
@@ -90,7 +91,7 @@ static sunTimerStruct* sunTimerStructNew()
 
 static void sunTimerStructFree(void* TS)
 {
-  sunTimerStruct* ts = (sunTimerStruct*) TS;
+  sunTimerStruct* ts = (sunTimerStruct*)TS;
   if (ts)
   {
 #if !SUNDIALS_MPI_ENABLED
@@ -117,9 +118,8 @@ static void sunStopTiming(sunTimerStruct* entry)
   entry->elapsed += entry->toc - entry->tic;
 #else
   clock_gettime(CLOCK_MONOTONIC, entry->toc);
-  entry->elapsed +=
-    ((double) (entry->toc->tv_sec - entry->tic->tv_sec) +
-     (double) (entry->toc->tv_nsec - entry->tic->tv_nsec) * 1e-9);
+  entry->elapsed += ((double)(entry->toc->tv_sec - entry->tic->tv_sec) +
+                     (double)(entry->toc->tv_nsec - entry->tic->tv_nsec) * 1e-9);
 #endif
   /* Initialize to total value */
   entry->average = entry->elapsed;
@@ -143,7 +143,6 @@ static void sunResetTiming(sunTimerStruct* entry)
   entry->count   = 0;
 }
 
-
 /*
   SUNProfiler.
 
@@ -152,11 +151,11 @@ static void sunResetTiming(sunTimerStruct* entry)
 
 struct _SUNProfiler
 {
-  void*           comm;
-  char*           title;
-  SUNHashMap      map;
+  void* comm;
+  char* title;
+  SUNHashMap map;
   sunTimerStruct* overhead;
-  double          sundials_time;
+  double sundials_time;
 };
 
 SUNErrCode SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
@@ -165,7 +164,7 @@ SUNErrCode SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
   int max_entries;
   char* max_entries_env;
 
-  *p = profiler = (SUNProfiler) malloc(sizeof(struct _SUNProfiler));
+  *p = profiler = (SUNProfiler)malloc(sizeof(struct _SUNProfiler));
   if (!profiler) { return SUN_ERR_MALLOC_FAIL; }
 
   profiler->overhead = sunTimerStructNew();
@@ -179,7 +178,7 @@ SUNErrCode SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
   sunStartTiming(profiler->overhead);
 
   /* Check to see if max entries env variable was set, and use if it was. */
-  max_entries = 2560;
+  max_entries     = 2560;
   max_entries_env = getenv("SUNPROFILER_MAX_ENTRIES");
   if (max_entries_env) max_entries = atoi(max_entries_env);
   if (max_entries <= 0) max_entries = 2560;
@@ -187,7 +186,7 @@ SUNErrCode SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
   /* Create the hashmap used to store the timers */
   if (SUNHashMap_New(max_entries, &profiler->map))
   {
-    sunTimerStructFree((void*) profiler->overhead);
+    sunTimerStructFree((void*)profiler->overhead);
     free(profiler);
     *p = profiler = NULL;
     return SUN_ERR_MALLOC_FAIL;
@@ -199,10 +198,10 @@ SUNErrCode SUNProfiler_Create(void* comm, const char* title, SUNProfiler* p)
   if (comm != NULL)
   {
     profiler->comm = malloc(sizeof(MPI_Comm));
-    MPI_Comm_dup(*((MPI_Comm*) comm), (MPI_Comm*) profiler->comm);
+    MPI_Comm_dup(*((MPI_Comm*)comm), (MPI_Comm*)profiler->comm);
   }
 #else
-  profiler->comm = comm;
+  profiler->comm      = comm;
 #endif
 
   /* Copy the title of the profiler (note strlen does not include terminating
@@ -226,7 +225,7 @@ SUNErrCode SUNProfiler_Free(SUNProfiler* p)
   if (*p)
   {
     SUNHashMap_Destroy(&(*p)->map, sunTimerStructFree);
-    sunTimerStructFree((void*) (*p)->overhead);
+    sunTimerStructFree((void*)(*p)->overhead);
 #if SUNDIALS_MPI_ENABLED
     if ((*p)->comm)
     {
@@ -249,10 +248,10 @@ SUNErrCode SUNProfiler_Begin(SUNProfiler p, const char* name)
 
   sunStartTiming(p->overhead);
 
-  if (SUNHashMap_GetValue(p->map, name, (void**) &timer))
+  if (SUNHashMap_GetValue(p->map, name, (void**)&timer))
   {
     timer = sunTimerStructNew();
-    ier = SUNHashMap_Insert(p->map, name, (void*) timer);
+    ier   = SUNHashMap_Insert(p->map, name, (void*)timer);
     if (ier)
     {
       sunTimerStructFree(timer);
@@ -276,7 +275,7 @@ SUNErrCode SUNProfiler_End(SUNProfiler p, const char* name)
 
   sunStartTiming(p->overhead);
 
-  ier = SUNHashMap_GetValue(p->map, name, (void**) &timer);
+  ier = SUNHashMap_GetValue(p->map, name, (void**)&timer);
   if (ier)
   {
     sunStopTiming(p->overhead);
@@ -292,7 +291,7 @@ SUNErrCode SUNProfiler_End(SUNProfiler p, const char* name)
 
 SUNErrCode SUNProfiler_Reset(SUNProfiler p)
 {
-  int i = 0;
+  int i                 = 0;
   sunTimerStruct* timer = NULL;
 
   /* Reset the overhead timer */
@@ -318,20 +317,20 @@ SUNErrCode SUNProfiler_Reset(SUNProfiler p)
 
 SUNErrCode SUNProfiler_Print(SUNProfiler p, FILE* fp)
 {
-  SUNErrCode ier = 0;
-  int i = 0;
-  int rank = 0;
-  sunTimerStruct* timer = NULL;
+  SUNErrCode ier             = 0;
+  int i                      = 0;
+  int rank                   = 0;
+  sunTimerStruct* timer      = NULL;
   SUNHashMapKeyValue* sorted = NULL;
 
-  if (p == NULL) return(-1);
+  if (p == NULL) return (-1);
   sunStartTiming(p->overhead);
 
   /* Get the total SUNDIALS time up to this point */
   SUNDIALS_MARK_END(p, SUNDIALS_ROOT_TIMER);
   SUNDIALS_MARK_BEGIN(p, SUNDIALS_ROOT_TIMER);
 
-  ier = SUNHashMap_GetValue(p->map, SUNDIALS_ROOT_TIMER, (void**) &timer);
+  ier = SUNHashMap_GetValue(p->map, SUNDIALS_ROOT_TIMER, (void**)&timer);
   if (ier == -1) { return SUN_ERR_PROFILER_MAPGET; }
   if (ier == -2) { return SUN_ERR_PROFILER_MAPKEYNOTFOUND; }
   p->sundials_time = timer->elapsed;
@@ -339,7 +338,7 @@ SUNErrCode SUNProfiler_Print(SUNProfiler p, FILE* fp)
 #if SUNDIALS_MPI_ENABLED
   if (p->comm)
   {
-    MPI_Comm_rank(*((MPI_Comm*) p->comm), &rank);
+    MPI_Comm_rank(*((MPI_Comm*)p->comm), &rank);
     /* Find the max and average time across all ranks */
     sunCollectTimers(p);
   }
@@ -350,20 +349,24 @@ SUNErrCode SUNProfiler_Print(SUNProfiler p, FILE* fp)
     /* Sort the timers in descending order */
     ier = SUNHashMap_Sort(p->map, &sorted, sunCompareTimes);
     if (ier) { return SUN_ERR_PROFILER_MAPSORT; }
-    fprintf(fp, "\n================================================================================================================\n");
+    fprintf(fp, "\n============================================================"
+                "====================================================\n");
     fprintf(fp, "SUNDIALS GIT VERSION: %s\n", SUNDIALS_GIT_VERSION);
     fprintf(fp, "SUNDIALS PROFILER: %s\n", p->title);
-    fprintf(fp, "%-40s\t %% time (inclusive) \t max/rank \t average/rank \t count \n", "Results:");
-    fprintf(fp, "================================================================================================================\n");
+    fprintf(fp, "%-40s\t %% time (inclusive) \t max/rank \t average/rank \t count \n",
+            "Results:");
+    fprintf(fp, "=============================================================="
+                "==================================================\n");
 
 #if SUNDIALS_MPI_ENABLED
     if (p->comm == NULL)
-      printf("WARNING: no MPI communicator provided, times shown are for rank 0\n");
+      printf(
+        "WARNING: no MPI communicator provided, times shown are for rank 0\n");
 #endif
 
     /* Print all the other timers out */
     for (i = 0; i < p->map->size; i++)
-      if (sorted[i]) sunPrintTimers(i, sorted[i], fp, (void*) p);
+      if (sorted[i]) sunPrintTimers(i, sorted[i], fp, (void*)p);
     free(sorted);
   }
 
@@ -372,8 +375,8 @@ SUNErrCode SUNProfiler_Print(SUNProfiler p, FILE* fp)
   if (rank == 0)
   {
     /* Print out the total time and the profiler overhead */
-    fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t -- \t\t -- \n", "Est. profiler overhead",
-            p->overhead->elapsed/p->sundials_time,
+    fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t -- \t\t -- \n",
+            "Est. profiler overhead", p->overhead->elapsed / p->sundials_time,
             p->overhead->elapsed);
 
     /* End of output */
@@ -384,12 +387,14 @@ SUNErrCode SUNProfiler_Print(SUNProfiler p, FILE* fp)
 }
 
 #if SUNDIALS_MPI_ENABLED
-static void sunTimerStructReduceMaxAndSum(void* a, void* b, int* len, MPI_Datatype* dType)
+static void sunTimerStructReduceMaxAndSum(void* a, void* b, int* len,
+                                          MPI_Datatype* dType)
 {
-  sunTimerStruct* a_ts = (sunTimerStruct*) a;
-  sunTimerStruct* b_ts = (sunTimerStruct*) b;
+  sunTimerStruct* a_ts = (sunTimerStruct*)a;
+  sunTimerStruct* b_ts = (sunTimerStruct*)b;
   int i;
-  for (i = 0; i < *len; ++i) {
+  for (i = 0; i < *len; ++i)
+  {
     b_ts[i].average += a_ts[i].elapsed;
     b_ts[i].maximum = SUNMAX(a_ts[i].maximum, b_ts[i].maximum);
   }
@@ -400,24 +405,24 @@ SUNErrCode sunCollectTimers(SUNProfiler p)
 {
   int i, rank, nranks;
 
-  MPI_Comm comm = *((MPI_Comm*) p->comm);
+  MPI_Comm comm = *((MPI_Comm*)p->comm);
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nranks);
 
   sunTimerStruct** values = NULL;
 
   /* Extract the elapsed times from the hash map */
-  SUNHashMap_Values(p->map, (void***) &values, sizeof(sunTimerStruct));
-  sunTimerStruct* reduced = (sunTimerStruct*) malloc(p->map->size*sizeof(sunTimerStruct));
-  for (i = 0; i < p->map->size; ++i)
-    reduced[i] = *values[i];
+  SUNHashMap_Values(p->map, (void***)&values, sizeof(sunTimerStruct));
+  sunTimerStruct* reduced =
+    (sunTimerStruct*)malloc(p->map->size * sizeof(sunTimerStruct));
+  for (i = 0; i < p->map->size; ++i) reduced[i] = *values[i];
 
   /* Register MPI datatype for sunTimerStruct */
   MPI_Datatype tmp_type, MPI_sunTimerStruct;
-  const int block_lens[2] = { 5, 1 };
-  const MPI_Datatype types[2] = { MPI_DOUBLE, MPI_LONG };
-  const MPI_Aint displ[2] = { offsetof(sunTimerStruct, tic),
-                              offsetof(sunTimerStruct, count) };
+  const int block_lens[2]     = {5, 1};
+  const MPI_Datatype types[2] = {MPI_DOUBLE, MPI_LONG};
+  const MPI_Aint displ[2]     = {offsetof(sunTimerStruct, tic),
+                                 offsetof(sunTimerStruct, count)};
   MPI_Aint lb, extent;
 
   MPI_Type_create_struct(2, block_lens, displ, types, &tmp_type);
@@ -448,8 +453,9 @@ SUNErrCode sunCollectTimers(SUNProfiler p)
   MPI_Op_free(&MPI_sunTimerStruct_MAXANDSUM);
 
   /* Update the values that are in this rank's hash map. */
-  for (i = 0; i < p->map->size; ++i) {
-    values[i]->average = reduced[i].average / (realtype) nranks;
+  for (i = 0; i < p->map->size; ++i)
+  {
+    values[i]->average = reduced[i].average / (realtype)nranks;
     values[i]->maximum = reduced[i].maximum;
   }
 
@@ -464,13 +470,15 @@ SUNErrCode sunCollectTimers(SUNProfiler p)
    max across ranks, average across ranks, and the timer counter. */
 void sunPrintTimers(int idx, SUNHashMapKeyValue kv, FILE* fp, void* pvoid)
 {
-  SUNProfiler p = (SUNProfiler) pvoid;
-  sunTimerStruct* ts = (sunTimerStruct*) kv->value;
-  double maximum = ts->maximum;
-  double average = ts->average;
-  double percent = strcmp((const char*) kv->key, (const char*) SUNDIALS_ROOT_TIMER) ? maximum / p->sundials_time * 100 : 100;
-  fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t %.6fs \t %ld\n",
-          kv->key, percent, maximum, average, ts->count);
+  SUNProfiler p      = (SUNProfiler)pvoid;
+  sunTimerStruct* ts = (sunTimerStruct*)kv->value;
+  double maximum     = ts->maximum;
+  double average     = ts->average;
+  double percent = strcmp((const char*)kv->key, (const char*)SUNDIALS_ROOT_TIMER)
+                     ? maximum / p->sundials_time * 100
+                     : 100;
+  fprintf(fp, "%-40s\t %6.2f%% \t         %.6fs \t %.6fs \t %ld\n", kv->key,
+          percent, maximum, average, ts->count);
 }
 
 /* Comparator for qsort that compares key-value pairs
@@ -480,22 +488,17 @@ int sunCompareTimes(const void* l, const void* r)
   double left_max;
   double right_max;
 
-  const SUNHashMapKeyValue left = *((SUNHashMapKeyValue*) l);
-  const SUNHashMapKeyValue right = *((SUNHashMapKeyValue*) r);
+  const SUNHashMapKeyValue left  = *((SUNHashMapKeyValue*)l);
+  const SUNHashMapKeyValue right = *((SUNHashMapKeyValue*)r);
 
-  if (left == NULL && right == NULL)
-    return SUN_SUCCESS;
-  if (left == NULL)
-    return(1);
-  if (right == NULL)
-    return(-1);
+  if (left == NULL && right == NULL) return SUN_SUCCESS;
+  if (left == NULL) return (1);
+  if (right == NULL) return (-1);
 
-  left_max = ((sunTimerStruct*) left->value)->maximum;
-  right_max = ((sunTimerStruct*) right->value)->maximum;
+  left_max  = ((sunTimerStruct*)left->value)->maximum;
+  right_max = ((sunTimerStruct*)right->value)->maximum;
 
-  if (left_max < right_max)
-    return(1);
-  if (left_max > right_max)
-    return(-1);
+  if (left_max < right_max) return (1);
+  if (left_max > right_max) return (-1);
   return SUN_SUCCESS;
 }

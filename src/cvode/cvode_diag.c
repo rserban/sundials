@@ -24,26 +24,15 @@
 #include "cvode_impl.h"
 
 #ifdef SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS
-extern
-int cvDiagSetup_formY(const realtype h,
-                      const realtype r,
-                      const N_Vector fpred,
-                      const N_Vector zn1,
-                      const N_Vector ypred,
-                      N_Vector ftemp,
-                      N_Vector y);
+extern int cvDiagSetup_formY(const realtype h, const realtype r,
+                             const N_Vector fpred, const N_Vector zn1,
+                             const N_Vector ypred, N_Vector ftemp, N_Vector y);
 
-extern
-int cvDiagSetup_buildM(const realtype fract,
-                       const realtype uround,
-                       const realtype h,
-                       const N_Vector ftemp,
-                       const N_Vector fpred,
-                       const N_Vector ewt,
-                       N_Vector bit,
-                       N_Vector bitcomp,
-                       N_Vector y,
-                       N_Vector M);
+extern int cvDiagSetup_buildM(const realtype fract, const realtype uround,
+                              const realtype h, const N_Vector ftemp,
+                              const N_Vector fpred, const N_Vector ewt,
+                              N_Vector bit, N_Vector bitcomp, N_Vector y,
+                              N_Vector M);
 
 int cvDiagSolve_updateM(const realtype r, N_Vector M);
 #endif
@@ -58,7 +47,7 @@ int cvDiagSolve_updateM(const realtype r, N_Vector M);
 static int CVDiagInit(CVodeMem cv_mem);
 
 static int CVDiagSetup(CVodeMem cv_mem, int convfail, N_Vector ypred,
-                       N_Vector fpred, booleantype *jcurPtr, N_Vector vtemp1,
+                       N_Vector fpred, booleantype* jcurPtr, N_Vector vtemp1,
                        N_Vector vtemp2, N_Vector vtemp3);
 
 static int CVDiagSolve(CVodeMem cv_mem, N_Vector b, N_Vector weight,
@@ -68,24 +57,24 @@ static int CVDiagFree(CVodeMem cv_mem);
 
 /* Readability Replacements */
 
-#define lrw1      (cv_mem->cv_lrw1)
-#define liw1      (cv_mem->cv_liw1)
-#define f         (cv_mem->cv_f)
-#define uround    (cv_mem->cv_uround)
-#define tn        (cv_mem->cv_tn)
-#define h         (cv_mem->cv_h)
-#define rl1       (cv_mem->cv_rl1)
-#define gamma     (cv_mem->cv_gamma)
-#define ewt       (cv_mem->cv_ewt)
-#define nfe       (cv_mem->cv_nfe)
-#define zn        (cv_mem->cv_zn)
-#define linit     (cv_mem->cv_linit)
-#define lsetup    (cv_mem->cv_lsetup)
-#define lsolve    (cv_mem->cv_lsolve)
-#define lfree     (cv_mem->cv_lfree)
-#define lmem      (cv_mem->cv_lmem)
-#define vec_tmpl  (cv_mem->cv_tempv)
-#define setupNonNull   (cv_mem->cv_setupNonNull)
+#define lrw1         (cv_mem->cv_lrw1)
+#define liw1         (cv_mem->cv_liw1)
+#define f            (cv_mem->cv_f)
+#define uround       (cv_mem->cv_uround)
+#define tn           (cv_mem->cv_tn)
+#define h            (cv_mem->cv_h)
+#define rl1          (cv_mem->cv_rl1)
+#define gamma        (cv_mem->cv_gamma)
+#define ewt          (cv_mem->cv_ewt)
+#define nfe          (cv_mem->cv_nfe)
+#define zn           (cv_mem->cv_zn)
+#define linit        (cv_mem->cv_linit)
+#define lsetup       (cv_mem->cv_lsetup)
+#define lsolve       (cv_mem->cv_lsolve)
+#define lfree        (cv_mem->cv_lfree)
+#define lmem         (cv_mem->cv_lmem)
+#define vec_tmpl     (cv_mem->cv_tempv)
+#define setupNonNull (cv_mem->cv_setupNonNull)
 
 #define gammasv   (cvdiag_mem->di_gammasv)
 #define M         (cvdiag_mem->di_M)
@@ -112,30 +101,31 @@ static int CVDiagFree(CVodeMem cv_mem);
  * -----------------------------------------------------------------
  */
 
-int CVDiag(void *cvode_mem)
+int CVDiag(void* cvode_mem)
 {
   CVodeMem cv_mem;
   CVDiagMem cvdiag_mem;
 
   /* Return immediately if cvode_mem is NULL */
-  if (cvode_mem == NULL) {
-    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__, MSGDG_CVMEM_NULL);
-    return(CVDIAG_MEM_NULL);
+  if (cvode_mem == NULL)
+  {
+    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__,
+                   MSGDG_CVMEM_NULL);
+    return (CVDIAG_MEM_NULL);
   }
-  cv_mem = (CVodeMem) cvode_mem;
+  cv_mem = (CVodeMem)cvode_mem;
 
   SUNAssignSUNCTX(cv_mem->cv_sunctx);
 
   /* Check if N_VCompare and N_VInvTest are present */
-  if(vec_tmpl->ops->nvcompare == NULL ||
-     vec_tmpl->ops->nvinvtest == NULL) {
-    cvProcessError(cv_mem, CVDIAG_ILL_INPUT, __LINE__, __func__, __FILE__, MSGDG_BAD_NVECTOR);
-    return(CVDIAG_ILL_INPUT);
+  if (vec_tmpl->ops->nvcompare == NULL || vec_tmpl->ops->nvinvtest == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_ILL_INPUT, __LINE__, __func__, __FILE__,
+                   MSGDG_BAD_NVECTOR);
+    return (CVDIAG_ILL_INPUT);
   }
 
-  if (lfree != NULL) {
-    lfree(cv_mem);
-  }
+  if (lfree != NULL) { lfree(cv_mem); }
 
   /* Set four main function fields in cv_mem */
   linit  = CVDiagInit;
@@ -145,45 +135,55 @@ int CVDiag(void *cvode_mem)
 
   /* Get memory for CVDiagMemRec */
   cvdiag_mem = NULL;
-  cvdiag_mem = (CVDiagMem) malloc(sizeof(CVDiagMemRec));
-  if (cvdiag_mem == NULL) {
-    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__, MSGDG_MEM_FAIL);
-    return(CVDIAG_MEM_FAIL);
+  cvdiag_mem = (CVDiagMem)malloc(sizeof(CVDiagMemRec));
+  if (cvdiag_mem == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__,
+                   MSGDG_MEM_FAIL);
+    return (CVDIAG_MEM_FAIL);
   }
 
   last_flag = CVDIAG_SUCCESS;
 
-
   /* Allocate memory for M, bit, and bitcomp */
 
   M = SUNCheckCallLastErrNoRet(N_VClone(vec_tmpl));
-  if (M == NULL) {
-    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__, MSGDG_MEM_FAIL);
-    free(cvdiag_mem); cvdiag_mem = NULL;
-    return(CVDIAG_MEM_FAIL);
+  if (M == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__,
+                   MSGDG_MEM_FAIL);
+    free(cvdiag_mem);
+    cvdiag_mem = NULL;
+    return (CVDIAG_MEM_FAIL);
   }
 
   bit = SUNCheckCallLastErrNoRet(N_VClone(vec_tmpl));
-  if (bit == NULL) {
-    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__, MSGDG_MEM_FAIL);
+  if (bit == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__,
+                   MSGDG_MEM_FAIL);
     SUNCheckCallLastErrNoRet(N_VDestroy(M));
-    free(cvdiag_mem); cvdiag_mem = NULL;
-    return(CVDIAG_MEM_FAIL);
+    free(cvdiag_mem);
+    cvdiag_mem = NULL;
+    return (CVDIAG_MEM_FAIL);
   }
 
   bitcomp = SUNCheckCallLastErrNoRet(N_VClone(vec_tmpl));
-  if (bitcomp == NULL) {
-    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__, MSGDG_MEM_FAIL);
+  if (bitcomp == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_MEM_FAIL, __LINE__, __func__, __FILE__,
+                   MSGDG_MEM_FAIL);
     SUNCheckCallLastErrNoRet(N_VDestroy(M));
     SUNCheckCallLastErrNoRet(N_VDestroy(bit));
-    free(cvdiag_mem); cvdiag_mem = NULL;
-    return(CVDIAG_MEM_FAIL);
+    free(cvdiag_mem);
+    cvdiag_mem = NULL;
+    return (CVDIAG_MEM_FAIL);
   }
 
   /* Attach linear solver memory to integrator memory */
   lmem = cvdiag_mem;
 
-  return(CVDIAG_SUCCESS);
+  return (CVDIAG_SUCCESS);
 }
 
 /*
@@ -192,21 +192,23 @@ int CVDiag(void *cvode_mem)
  * -----------------------------------------------------------------
  */
 
-int CVDiagGetWorkSpace(void *cvode_mem, long int *lenrwLS, long int *leniwLS)
+int CVDiagGetWorkSpace(void* cvode_mem, long int* lenrwLS, long int* leniwLS)
 {
   CVodeMem cv_mem;
 
   /* Return immediately if cvode_mem is NULL */
-  if (cvode_mem == NULL) {
-    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__, MSGDG_CVMEM_NULL);
-    return(CVDIAG_MEM_NULL);
+  if (cvode_mem == NULL)
+  {
+    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__,
+                   MSGDG_CVMEM_NULL);
+    return (CVDIAG_MEM_NULL);
   }
-  cv_mem = (CVodeMem) cvode_mem;
+  cv_mem = (CVodeMem)cvode_mem;
 
-  *lenrwLS = 3*lrw1;
-  *leniwLS = 3*liw1;
+  *lenrwLS = 3 * lrw1;
+  *leniwLS = 3 * liw1;
 
-  return(CVDIAG_SUCCESS);
+  return (CVDIAG_SUCCESS);
 }
 
 /*
@@ -215,27 +217,31 @@ int CVDiagGetWorkSpace(void *cvode_mem, long int *lenrwLS, long int *leniwLS)
  * -----------------------------------------------------------------
  */
 
-int CVDiagGetNumRhsEvals(void *cvode_mem, long int *nfevalsLS)
+int CVDiagGetNumRhsEvals(void* cvode_mem, long int* nfevalsLS)
 {
   CVodeMem cv_mem;
   CVDiagMem cvdiag_mem;
 
   /* Return immediately if cvode_mem is NULL */
-  if (cvode_mem == NULL) {
-    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__, MSGDG_CVMEM_NULL);
-    return(CVDIAG_MEM_NULL);
+  if (cvode_mem == NULL)
+  {
+    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__,
+                   MSGDG_CVMEM_NULL);
+    return (CVDIAG_MEM_NULL);
   }
-  cv_mem = (CVodeMem) cvode_mem;
+  cv_mem = (CVodeMem)cvode_mem;
 
-  if (lmem == NULL) {
-    cvProcessError(cv_mem, CVDIAG_LMEM_NULL, __LINE__, __func__, __FILE__, MSGDG_LMEM_NULL);
-    return(CVDIAG_LMEM_NULL);
+  if (lmem == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_LMEM_NULL, __LINE__, __func__, __FILE__,
+                   MSGDG_LMEM_NULL);
+    return (CVDIAG_LMEM_NULL);
   }
-  cvdiag_mem = (CVDiagMem) lmem;
+  cvdiag_mem = (CVDiagMem)lmem;
 
   *nfevalsLS = nfeDI;
 
-  return(CVDIAG_SUCCESS);
+  return (CVDIAG_SUCCESS);
 }
 
 /*
@@ -244,27 +250,31 @@ int CVDiagGetNumRhsEvals(void *cvode_mem, long int *nfevalsLS)
  * -----------------------------------------------------------------
  */
 
-int CVDiagGetLastFlag(void *cvode_mem, long int *flag)
+int CVDiagGetLastFlag(void* cvode_mem, long int* flag)
 {
   CVodeMem cv_mem;
   CVDiagMem cvdiag_mem;
 
   /* Return immediately if cvode_mem is NULL */
-  if (cvode_mem == NULL) {
-    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__, MSGDG_CVMEM_NULL);
-    return(CVDIAG_MEM_NULL);
+  if (cvode_mem == NULL)
+  {
+    cvProcessError(NULL, CVDIAG_MEM_NULL, __LINE__, __func__, __FILE__,
+                   MSGDG_CVMEM_NULL);
+    return (CVDIAG_MEM_NULL);
   }
-  cv_mem = (CVodeMem) cvode_mem;
+  cv_mem = (CVodeMem)cvode_mem;
 
-  if (lmem == NULL) {
-    cvProcessError(cv_mem, CVDIAG_LMEM_NULL, __LINE__, __func__, __FILE__, MSGDG_LMEM_NULL);
-    return(CVDIAG_LMEM_NULL);
+  if (lmem == NULL)
+  {
+    cvProcessError(cv_mem, CVDIAG_LMEM_NULL, __LINE__, __func__, __FILE__,
+                   MSGDG_LMEM_NULL);
+    return (CVDIAG_LMEM_NULL);
   }
-  cvdiag_mem = (CVDiagMem) lmem;
+  cvdiag_mem = (CVDiagMem)lmem;
 
   *flag = last_flag;
 
-  return(CVDIAG_SUCCESS);
+  return (CVDIAG_SUCCESS);
 }
 
 /*
@@ -273,42 +283,26 @@ int CVDiagGetLastFlag(void *cvode_mem, long int *flag)
  * -----------------------------------------------------------------
  */
 
-char *CVDiagGetReturnFlagName(long int flag)
+char* CVDiagGetReturnFlagName(long int flag)
 {
-  char *name;
+  char* name;
 
-  name = (char *)malloc(30*sizeof(char));
+  name = (char*)malloc(30 * sizeof(char));
 
-  switch(flag) {
-  case CVDIAG_SUCCESS:
-    sprintf(name,"CVDIAG_SUCCESS");
-    break;
-  case CVDIAG_MEM_NULL:
-    sprintf(name,"CVDIAG_MEM_NULL");
-    break;
-  case CVDIAG_LMEM_NULL:
-    sprintf(name,"CVDIAG_LMEM_NULL");
-    break;
-  case CVDIAG_ILL_INPUT:
-    sprintf(name,"CVDIAG_ILL_INPUT");
-    break;
-  case CVDIAG_MEM_FAIL:
-    sprintf(name,"CVDIAG_MEM_FAIL");
-    break;
-  case CVDIAG_INV_FAIL:
-    sprintf(name,"CVDIAG_INV_FAIL");
-    break;
-  case CVDIAG_RHSFUNC_UNRECVR:
-    sprintf(name,"CVDIAG_RHSFUNC_UNRECVR");
-    break;
-  case CVDIAG_RHSFUNC_RECVR:
-    sprintf(name,"CVDIAG_RHSFUNC_RECVR");
-    break;
-  default:
-    sprintf(name,"NONE");
+  switch (flag)
+  {
+  case CVDIAG_SUCCESS: sprintf(name, "CVDIAG_SUCCESS"); break;
+  case CVDIAG_MEM_NULL: sprintf(name, "CVDIAG_MEM_NULL"); break;
+  case CVDIAG_LMEM_NULL: sprintf(name, "CVDIAG_LMEM_NULL"); break;
+  case CVDIAG_ILL_INPUT: sprintf(name, "CVDIAG_ILL_INPUT"); break;
+  case CVDIAG_MEM_FAIL: sprintf(name, "CVDIAG_MEM_FAIL"); break;
+  case CVDIAG_INV_FAIL: sprintf(name, "CVDIAG_INV_FAIL"); break;
+  case CVDIAG_RHSFUNC_UNRECVR: sprintf(name, "CVDIAG_RHSFUNC_UNRECVR"); break;
+  case CVDIAG_RHSFUNC_RECVR: sprintf(name, "CVDIAG_RHSFUNC_RECVR"); break;
+  default: sprintf(name, "NONE");
   }
 
-  return(name);
+  return (name);
 }
 
 /*
@@ -324,12 +318,12 @@ static int CVDiagInit(CVodeMem cv_mem)
 {
   CVDiagMem cvdiag_mem;
 
-  cvdiag_mem = (CVDiagMem) lmem;
+  cvdiag_mem = (CVDiagMem)lmem;
 
   nfeDI = 0;
 
   last_flag = CVDIAG_SUCCESS;
-  return(0);
+  return (0);
 }
 
 /*
@@ -343,7 +337,7 @@ static int CVDiagInit(CVodeMem cv_mem)
  */
 
 static int CVDiagSetup(CVodeMem cv_mem, int convfail, N_Vector ypred,
-                       N_Vector fpred, booleantype *jcurPtr, N_Vector vtemp1,
+                       N_Vector fpred, booleantype* jcurPtr, N_Vector vtemp1,
                        N_Vector vtemp2, N_Vector vtemp3)
 {
   SUNAssignSUNCTX(cv_mem->cv_sunctx);
@@ -354,7 +348,7 @@ static int CVDiagSetup(CVodeMem cv_mem, int convfail, N_Vector ypred,
   CVDiagMem cvdiag_mem;
   int retval;
 
-  cvdiag_mem = (CVDiagMem) lmem;
+  cvdiag_mem = (CVDiagMem)lmem;
 
   /* Rename work vectors for use as temporary values of y and f */
   ftemp = vtemp1;
@@ -377,14 +371,17 @@ static int CVDiagSetup(CVodeMem cv_mem, int convfail, N_Vector ypred,
   /* Evaluate f at perturbed y */
   retval = f(tn, y, M, cv_mem->cv_user_data);
   nfeDI++;
-  if (retval < 0) {
-    cvProcessError(cv_mem, CVDIAG_RHSFUNC_UNRECVR, __LINE__, __func__, __FILE__, MSGDG_RHSFUNC_FAILED);
+  if (retval < 0)
+  {
+    cvProcessError(cv_mem, CVDIAG_RHSFUNC_UNRECVR, __LINE__, __func__, __FILE__,
+                   MSGDG_RHSFUNC_FAILED);
     last_flag = CVDIAG_RHSFUNC_UNRECVR;
-    return(-1);
+    return (-1);
   }
-  if (retval > 0) {
+  if (retval > 0)
+  {
     last_flag = CVDIAG_RHSFUNC_RECVR;
-    return(1);
+    return (1);
   }
 
   /* Construct M = I - gamma*J with J = diag(deltaf_i/deltay_i) */
@@ -411,16 +408,17 @@ static int CVDiagSetup(CVodeMem cv_mem, int convfail, N_Vector ypred,
 
   /* Invert M with test for zero components */
   invOK = SUNCheckCallLastErrNoRet(N_VInvTest(M, M));
-  if (!invOK) {
+  if (!invOK)
+  {
     last_flag = CVDIAG_INV_FAIL;
-    return(1);
+    return (1);
   }
 
   /* Set jcur = SUNTRUE, save gamma in gammasv, and return */
-  *jcurPtr = SUNTRUE;
-  gammasv = gamma;
+  *jcurPtr  = SUNTRUE;
+  gammasv   = gamma;
   last_flag = CVDIAG_SUCCESS;
-  return(0);
+  return (0);
 }
 
 /*
@@ -440,17 +438,15 @@ static int CVDiagSolve(CVodeMem cv_mem, N_Vector b, N_Vector weight,
   realtype r;
   CVDiagMem cvdiag_mem;
 
-  cvdiag_mem = (CVDiagMem) lmem;
+  cvdiag_mem = (CVDiagMem)lmem;
 
   /* If gamma has changed, update factor in M, and save gamma value */
 
-  if (gammasv != gamma) {
+  if (gammasv != gamma)
+  {
     r = gamma / gammasv;
 #ifdef SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS
-    if (cv_mem->cv_usefused)
-    {
-      cvDiagSolve_updateM(r, M);
-    }
+    if (cv_mem->cv_usefused) { cvDiagSolve_updateM(r, M); }
     else
 #endif
     {
@@ -460,7 +456,8 @@ static int CVDiagSolve(CVodeMem cv_mem, N_Vector b, N_Vector weight,
       SUNCheckCallLastErrNoRet(N_VAddConst(M, ONE, M));
     }
     invOK = SUNCheckCallLastErrNoRet(N_VInvTest(M, M));
-    if (!invOK) {
+    if (!invOK)
+    {
       last_flag = CVDIAG_INV_FAIL;
       return (1);
     }
@@ -471,7 +468,7 @@ static int CVDiagSolve(CVodeMem cv_mem, N_Vector b, N_Vector weight,
   SUNCheckCallLastErrNoRet(N_VProd(b, M, b));
 
   last_flag = CVDIAG_SUCCESS;
-  return(0);
+  return (0);
 }
 
 /*
@@ -487,7 +484,7 @@ static int CVDiagFree(CVodeMem cv_mem)
   SUNAssignSUNCTX(cv_mem->cv_sunctx);
   CVDiagMem cvdiag_mem;
 
-  cvdiag_mem = (CVDiagMem) lmem;
+  cvdiag_mem = (CVDiagMem)lmem;
 
   SUNCheckCallLastErrNoRet(N_VDestroy(M));
   SUNCheckCallLastErrNoRet(N_VDestroy(bit));
@@ -495,5 +492,5 @@ static int CVDiagFree(CVodeMem cv_mem)
   free(cvdiag_mem);
   cv_mem->cv_lmem = NULL;
 
-  return(0);
+  return (0);
 }

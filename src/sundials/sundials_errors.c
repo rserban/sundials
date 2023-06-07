@@ -12,13 +12,14 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <sundials/sundials_core.h>
 #include <sundials/impl/sundials_errors_impl.h>
+#include <sundials/sundials_core.h>
 
 static inline char* combineFileAndLine(int line, const char* file)
 {
-  size_t total_str_len = strlen(file) + 6; /* TODO(CJB): need to figure out width of line */
-  char* file_and_line  = malloc(total_str_len * sizeof(char));
+  size_t total_str_len = strlen(file) + 6; /* TODO(CJB): need to figure out
+                                              width of line */
+  char* file_and_line = malloc(total_str_len * sizeof(char));
   snprintf(file_and_line, total_str_len, "%s:%d", file, line);
   return file_and_line;
 }
@@ -35,7 +36,8 @@ SUNErrHandler SUNErrHandler_Create(SUNErrHandlerFn eh_fn, void* eh_data)
 
 void SUNErrHandler_Destroy(SUNErrHandler eh)
 {
-  while (eh != NULL) {
+  while (eh != NULL)
+  {
     SUNErrHandler next_eh = eh->previous;
     free(eh);
     eh = next_eh;
@@ -47,7 +49,8 @@ const char* SUNGetErrMsg(SUNErrCode code, SUNContext sunctx)
 #define SUN_EXPAND_TO_CASES(name, description) \
   case name: return description; break;
 
-  switch (code) {
+  switch (code)
+  {
     SUN_ERR_CODE_LIST(SUN_EXPAND_TO_CASES)
   default: return "unknown error";
   }
@@ -55,20 +58,21 @@ const char* SUNGetErrMsg(SUNErrCode code, SUNContext sunctx)
   return NULL;
 }
 
-int SUNLogErrHandlerFn(int line, const char* func, const char* file, const char* msg, SUNErrCode err_code,
-                       void* err_ctx, SUNContext sunctx)
+int SUNLogErrHandlerFn(int line, const char* func, const char* file,
+                       const char* msg, SUNErrCode err_code, void* err_ctx,
+                       SUNContext sunctx)
 {
   char* file_and_line = combineFileAndLine(line, file);
-  if (msg == NULL) {
-    msg = SUNGetErrMsg(err_code, sunctx);
-  }
-  SUNLogger_QueueMsg(sunctx->logger, SUN_LOGLEVEL_ERROR, file_and_line, func, msg);
+  if (msg == NULL) { msg = SUNGetErrMsg(err_code, sunctx); }
+  SUNLogger_QueueMsg(sunctx->logger, SUN_LOGLEVEL_ERROR, file_and_line, func,
+                     msg);
   free(file_and_line);
   return 0;
 }
 
-int SUNAbortErrHandlerFn(int line, const char* func, const char* file, const char* msg, SUNErrCode err_code,
-                         void* err_ctx, SUNContext sunctx)
+int SUNAbortErrHandlerFn(int line, const char* func, const char* file,
+                         const char* msg, SUNErrCode err_code, void* err_ctx,
+                         SUNContext sunctx)
 {
   char* file_and_line = combineFileAndLine(line, file);
   SUNLogger_QueueMsg(sunctx->logger, SUN_LOGLEVEL_ERROR, file_and_line, func,
@@ -79,12 +83,14 @@ int SUNAbortErrHandlerFn(int line, const char* func, const char* file, const cha
   return 0;
 }
 
-int SUNAssertErrHandlerFn(int line, const char* func, const char* file, const char* stmt, SUNErrCode err_code,
-                          void* err_ctx, SUNContext sunctx)
+int SUNAssertErrHandlerFn(int line, const char* func, const char* file,
+                          const char* stmt, SUNErrCode err_code, void* err_ctx,
+                          SUNContext sunctx)
 {
   char* file_and_line = combineFileAndLine(line, file);
   SUNLogger_QueueMsg(sunctx->logger, SUN_LOGLEVEL_ERROR, file_and_line, func,
-                     "SUNAssertErrHandler: assert(%s) failed... terminating\n", stmt);
+                     "SUNAssertErrHandler: assert(%s) failed... terminating\n",
+                     stmt);
   free(file_and_line);
   abort();
   return 0;
