@@ -43,4 +43,4 @@ detailed in the following subsections.
    Skeleton
    User_callable
    MRIStepCoupling
-   Custom_Inner_Stepper/index
+   Inner_Stepper/index

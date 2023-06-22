@@ -892,7 +892,7 @@ structures are held internally to the linear solver itself, and are not
 provided by the SUNDIALS package.
 
 Support for user-defined inner (fast) integrators has been to the MRIStep
-module. See :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper` for more information on providing
+module. See :numref:`ARKODE.Usage.MRIStep.InnerStepper` for more information on providing
 a user-defined integration method.
 
 Added the functions :c:func:`ARKStepSetNlsRhsFn()` and

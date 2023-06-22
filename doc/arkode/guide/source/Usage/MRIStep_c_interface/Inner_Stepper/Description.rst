@@ -12,39 +12,38 @@
    SUNDIALS Copyright End
    ----------------------------------------------------------------
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description:
 
 The MRIStepInnerStepper Class
 -----------------------------
 
 As with other SUNDIALS classes, the :c:type:`MRIStepInnerStepper` abstract base
 class is implemented using a C structure containing a ``content`` pointer to the
-derived class member data and a structure of function pointers the derived class
-implementations of the virtual methods. The :c:type:`MRIStepInnerStepper`
-type is defined in ``include/arkode/arkode.h`` as
+derived class member data and a structure of function pointers wherein the
+derived class implements the base class virtual methods.
+The :c:type:`MRIStepInnerStepper` type is defined in ``include/arkode/arkode.h`` as
 
 .. c:type:: struct _MRIStepInnerStepper *MRIStepInnerStepper
 
 The actual definitions of the ``_MRIStepInnerStepper`` structure and the
 corresponding operations structure are kept private to allow for the object
 internals to change without impacting user code. The following sections describe
-the :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods` and the virtual
-:numref:`ARKODE.Usage.MRIStep.CustomInnerStepper.Description.ImplMethods` that a must be
-provided by a derived class.
+the base (:numref:`ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods`)
+and virtual methods (:numref:`ARKODE.Usage.MRIStep.InnerStepper.Description.ImplMethods`)
+that a must be provided by a derived class.
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods:
 
 Base Class Methods
 ^^^^^^^^^^^^^^^^^^
 
-This section describes methods provided by the :c:type:`MRIStepInnerStepper`
-abstract base class that aid the user in implementing derived classes. This
-includes functions for creating and destroying a generic base class object,
-attaching and retrieving the derived class ``content`` pointer, setting function
-pointers to derived class method implementations, and accessing base class data
-e.g., for computing the forcing term :eq:`ARKODE_MRI_forcing_poly`.
+The :c:type:`MRIStepInnerStepper` abstract base class provides a number of methods to
+aid the user in implementing derived classes. This includes functions for creating
+and destroying a generic base class object, attaching and retrieving the derived class
+``content`` pointer, setting function pointers to derived class method implementations,
+and accessing base class data e.g., for computing the forcing term :eq:`ARKODE_MRI_forcing_poly`.
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.CreateDestroy:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.CreateDestroy:
 
 Creating and Destroying an Object
 """""""""""""""""""""""""""""""""
@@ -54,13 +53,11 @@ Creating and Destroying an Object
    This function creates an :c:type:`MRIStepInnerStepper` object to which a user
    should attach the member data (content) pointer and method function pointers.
 
-   **Arguments:**
-      * ``sunctx`` -- the SUNDIALS simulation context.
-      * ``stepper`` -- a pointer to an inner stepper object.
+   :param sunctx: the SUNDIALS simulation context.
+   :param stepper: a pointer to an inner stepper object.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_MEM_FAIL if a memory allocation error occurs
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_MEM_FAIL: if a memory allocation error occurs
 
    **Example usage:**
 
@@ -75,8 +72,8 @@ Creating and Destroying an Object
 
    .. note::
 
-      See :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.Content` and
-      :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.AttachFunctions`
+      See :numref:`ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.Content` and
+      :numref:`ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.AttachFunctions`
       for details on how to attach member data and method function pointers.
 
 
@@ -84,11 +81,9 @@ Creating and Destroying an Object
 
    This function destroys an :c:type:`MRIStepInnerStepper` object.
 
-   **Arguments:**
-      * *stepper* -- a pointer to an inner stepper object.
+   :param stepper: a pointer to an inner stepper object.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
+   :retval ARK_SUCCESS: if successful
 
    **Example usage:**
 
@@ -106,7 +101,7 @@ Creating and Destroying an Object
       base class structure itself. The user is responsible for freeing any
       memory allocated for the member data (content).
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.Content:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.Content:
 
 Attaching and Accessing the Content Pointer
 """""""""""""""""""""""""""""""""""""""""""
@@ -116,13 +111,11 @@ Attaching and Accessing the Content Pointer
    This function attaches a member data (content) pointer to an
    :c:type:`MRIStepInnerStepper` object.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *content* -- a pointer to the stepper member data.
+   :param stepper: an inner stepper object.
+   :param content: a pointer to the stepper member data.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -141,13 +134,11 @@ Attaching and Accessing the Content Pointer
    This function retrieves the member data (content) pointer from an
    :c:type:`MRIStepInnerStepper` object.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *content* -- a pointer to set to the stepper member data pointer.
+   :param stepper: an inner stepper object.
+   :param content: a pointer to set to the stepper member data pointer.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -164,7 +155,7 @@ Attaching and Accessing the Content Pointer
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.AttachFunctions:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.AttachFunctions:
 
 Setting Member Functions
 """"""""""""""""""""""""
@@ -174,13 +165,11 @@ Setting Member Functions
    This function attaches an :c:type:`MRIStepInnerEvolveFn` function to an
    :c:type:`MRIStepInnerStepper` object.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *fn* -- the :c:type:`MRIStepInnerStepper` function to attach.
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerStepper` function to attach.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -198,13 +187,11 @@ Setting Member Functions
    This function attaches an :c:type:`MRIStepInnerFullRhsFn` function to an
    :c:type:`MRIStepInnerStepper` object.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *fn* -- the :c:type:`MRIStepInnerFullRhsFn` function to attach.
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerFullRhsFn` function to attach.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -222,13 +209,11 @@ Setting Member Functions
    This function attaches an :c:type:`MRIStepInnerResetFn` function to an
    :c:type:`MRIStepInnerStepper` object.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *fn* -- the :c:type:`MRIStepInnerResetFn` function to attach.
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerResetFn` function to attach.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -240,7 +225,7 @@ Setting Member Functions
    **Example codes:**
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.Forcing:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.Forcing:
 
 Applying and Accessing Forcing Data
 """""""""""""""""""""""""""""""""""
@@ -259,14 +244,12 @@ data necessary to construct the inner (fast) forcing polynomial.
    time *t* and adds it to input vector *ff*, i.e., the inner (fast) right-hand
    side vector.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *t* -- the time at which the forcing should be evaluated.
-      * *f* -- the vector to which the forcing should be applied.
+   :param stepper: an inner stepper object.
+   :param t: the time at which the forcing should be evaluated.
+   :param f: the vector to which the forcing should be applied.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -286,19 +269,17 @@ data necessary to construct the inner (fast) forcing polynomial.
    normalized time :math:`\tau = (t - t_{n,i-1}^S)/(h^S \Delta c_i^S)` and the
    array of polynomial coefficient vectors :math:`\hat{\gamma}^{\{k\}}_i`.
 
-   **Arguments:**
-      * *stepper* -- an inner stepper object.
-      * *tshift* -- the time shift to apply to the current time when computing the
-        forcing, :math:`t_{n,i-1}^S`.
-      * *tscale* -- the time scaling to apply to the current time when computing
-        the forcing, :math:`h^S \Delta c_i^S`.
-      * *forcing* -- a pointer to an array of forcing vectors,
-        :math:`\hat{\gamma}^{\{k\}}_i`.
-      * *nforcing* -- the number of forcing vectors.
+   :param stepper: an inner stepper object.
+   :param tshift: the time shift to apply to the current time when computing the
+                  forcing, :math:`t_{n,i-1}^S`.
+   :param tscale: the time scaling to apply to the current time when computing
+                  the forcing, :math:`h^S \Delta c_i^S`.
+   :param forcing: a pointer to an array of forcing vectors,
+                   :math:`\hat{\gamma}^{\{k\}}_i`.
+   :param nforcing: the number of forcing vectors.
 
-   **Return value:**
-      * ARK_SUCCESS if successful
-      * ARK_ILL_INPUT if the stepper is ``NULL``
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
 
    **Example usage:**
 
@@ -330,7 +311,7 @@ data necessary to construct the inner (fast) forcing polynomial.
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Description.ImplMethods:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Description.ImplMethods:
 
 Implementation Specific Methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

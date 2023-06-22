@@ -12,7 +12,7 @@
    SUNDIALS Copyright End
    ----------------------------------------------------------------
 
-.. _ARKODE.Usage.MRIStep.CustomInnerStepper.Implementing:
+.. _ARKODE.Usage.MRIStep.InnerStepper.Implementing:
 
 Implementing an MRIStepInnerStepper
 -----------------------------------
@@ -27,7 +27,7 @@ To create an MRIStepInnerStepper implementation:
    the :c:type:`MRIStepInnerStepper` member functions.
 
 #. Define implementations of the required member functions (see
-   :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper.Description.ImplMethods`).
+   :numref:`ARKODE.Usage.MRIStep.InnerStepper.Description.ImplMethods`).
 
    These are typically user-defined functions in C, member functions of the
    user-defined structure or class in C++, or functions contained in the
@@ -49,7 +49,7 @@ To create an MRIStepInnerStepper implementation:
       content is a C structure.
 
    #. Attach the member function implementations using the functions described
-      in :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper.Description.BaseMethods.AttachFunctions`.
+      in :numref:`ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.AttachFunctions`.
 
 #. Attach the :c:type:`MRIStepInnerStepper` object to the MRIStep memory
    structure with :c:func:`MRIStepCreate`.

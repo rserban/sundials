@@ -92,7 +92,7 @@ specific name of the function to be called or macro to be referenced.
 
    * If supplying a user-defined fast (inner) integrator, create the
      ``MRIStepInnerStepper`` object as described in section
-     :numref:`ARKODE.Usage.MRIStep.CustomInnerStepper`.
+     :numref:`ARKODE.Usage.MRIStep.InnerStepper`.
 
    .. note::
 

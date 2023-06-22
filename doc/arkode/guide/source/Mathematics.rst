@@ -530,7 +530,7 @@ step:
 The fast (inner) IVP solve can be carried out using either the ARKStep module
 (allowing for explicit, implicit, or ImEx treatments of the fast time scale with
 fixed or adaptive steps), or a user-defined integration method (see section
-:numref:`ARKODE.Usage.MRIStep.CustomInnerStepper`).
+:numref:`ARKODE.Usage.MRIStep.InnerStepper`).
 
 The final abscissa is :math:`c^S_{s+1}=1` and the coefficients
 :math:`\omega_{i,j}` and :math:`\gamma_{i,j}` are polynomials in time that
