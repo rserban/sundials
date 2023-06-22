@@ -225,6 +225,79 @@ Setting Member Functions
    **Example codes:**
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
+.. c:function:: int MRIStepInnerStepper_GetAccumulatedErrorFn(MRIStepInnerStepper stepper, MRIStepInnerGetAccumulatedError fn)
+
+   This function attaches an :c:type:`MRIStepInnerGetAccumulatedError` function to an
+   :c:type:`MRIStepInnerStepper` object.
+
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerGetAccumulatedError` function to attach.
+
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
+
+   **Example usage:**
+
+   .. code-block:: C
+
+      /* set the inner stepper accumulated error 'get' function */
+      flag = MRIStepInnerStepper_GetAccumulatedErrorFn(inner_stepper, MyAccumErr);
+
+.. c:function:: int MRIStepInnerStepper_ResetAccumulatedErrorFn(MRIStepInnerStepper stepper, MRIStepInnerResetAccumulatedError fn)
+
+   This function attaches an :c:type:`MRIStepInnerResetAccumulatedError` function to an
+   :c:type:`MRIStepInnerStepper` object.
+
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerResetAccumulatedError` function to attach.
+
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
+
+   **Example usage:**
+
+   .. code-block:: C
+
+      /* set the inner stepper accumulated error 'reset' function */
+      flag = MRIStepInnerStepper_ResetAccumulatedErrorFn(inner_stepper, MyResetAccumErr);
+
+.. c:function:: int MRIStepInnerStepper_SetFixedStepFn(MRIStepInnerStepper stepper, MRIStepInnerSetFixedStep fn)
+
+   This function attaches an :c:type:`MRIStepInnerSetFixedStep` function to an
+   :c:type:`MRIStepInnerStepper` object.
+
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerSetFixedStep` function to attach.
+
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
+
+   **Example usage:**
+
+   .. code-block:: C
+
+      /* set the inner stepper fixed step size function */
+      flag = MRIStepInnerStepper_SetFixedStep(inner_stepper, MySetFixedStep);
+
+.. c:function:: int MRIStepInnerStepper_SetRTolFactorFn(MRIStepInnerStepper stepper, MRIStepInnerSetRTolFactor fn)
+
+   This function attaches an :c:type:`MRIStepInnerSetRTolFactor` function to an
+   :c:type:`MRIStepInnerStepper` object.
+
+   :param stepper: an inner stepper object.
+   :param fn: the :c:type:`MRIStepInnerSetRTolFactor` function to attach.
+
+   :retval ARK_SUCCESS: if successful
+   :retval ARK_ILL_INPUT: if the stepper is ``NULL``
+
+   **Example usage:**
+
+   .. code-block:: C
+
+      /* set the inner stepper relative tolerance scaling factor function */
+      flag = MRIStepInnerStepper_SetRTolFactorFn(inner_stepper, MySetRTolFactor);
+
+
 .. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.Forcing:
 
 Applying and Accessing Forcing Data
@@ -374,6 +447,7 @@ member functions:
    **Example codes:**
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
+
 Optional Member Functions
 """""""""""""""""""""""""
 
@@ -397,3 +471,64 @@ following member functions:
 
    **Example codes:**
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
+
+
+.. c:type:: int (*MRIStepInnerGetAccumulatedError)(MRIStepInnerStepper stepper, realtype* accum_error)
+
+   This function returns an estimate of the accumulated solution error arising from the inner stepper.
+
+   **Arguments:**
+      * *stepper* -- the inner stepper object.
+      * *accum_error* -- estimation of the accumulated solution error.
+
+   **Return value:**
+      An :c:type:`MRIStepInnerGetAccumulatedError` should return 0 if successful, a positive
+      value if a recoverable error occurred, or a negative value if it failed
+      unrecoverably.
+
+
+
+.. c:type:: int (*MRIStepInnerResetAccumulatedError)(MRIStepInnerStepper stepper)
+
+   This function resets the inner stepper's accumulated solution error to zero.
+
+   **Arguments:**
+      * *stepper* -- the inner stepper object.
+
+   **Return value:**
+      An :c:type:`MRIStepInnerResetAccumulatedError` should return 0 if successful, a positive
+      value if a recoverable error occurred, or a negative value if it failed
+      unrecoverably.
+
+
+
+.. c:type:: int (*MRIStepInnerSetFixedStep)(MRIStepInnerStepper stepper, realtype h)
+
+   This function accepts a fixed step size for the inner stepper to use.
+
+   **Arguments:**
+      * *stepper* -- the inner stepper object.
+      * *h* -- fixed step size to use on the upcoming solve.
+
+   **Return value:**
+      An :c:type:`MRIStepInnerSetFixedStep` should return 0 if successful, a positive
+      value if a recoverable error occurred, or a negative value if it failed
+      unrecoverably.
+
+
+
+.. c:type:: int (*MRIStepInnerSetRTolFactor)(MRIStepInnerStepper stepper, realtype rtolfac)
+
+   This function accepts a factor for the inner stepper to scale its current relative tolerance for an adaptive solve.
+
+   **Arguments:**
+      * *stepper* -- the inner stepper object.
+      * *rtolfac* -- relative tolerance factor to use on the upcoming solve, e.g.,
+        *rtolfac = 2* indicates that the current relative tolerance should increase
+        by a factor of 2, while *rtolfac = 0.1* indicates that it should shrink by
+        a factor of 10.
+
+   **Return value:**
+      An :c:type:`MRIStepInnerSetTolFactor` should return 0 if successful, a positive
+      value if a recoverable error occurred, or a negative value if it failed
+      unrecoverably.
