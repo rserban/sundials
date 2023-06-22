@@ -87,7 +87,7 @@ are defined ``arkode/arkode_mristep.h``.
 
    +---------------------------------------------+--------------------------------------------------------------------+
    | Function name                               | Description                                                        |
-   +---------------------------------------------+--------------------------------------------------------------------+
+   +=============================================+====================================================================+
    | :c:func:`MRIStepCoupling_LoadTable()`       | Loads a pre-defined MRIStepCoupling table by ID                    |
    +---------------------------------------------+--------------------------------------------------------------------+
    | :c:func:`MRIStepCoupling_LoadTableByName()` | Loads a pre-defined MRIStepCoupling table by name                  |
@@ -114,13 +114,10 @@ are defined ``arkode/arkode_mristep.h``.
    set of coupling tables and their corresponding identifiers, see
    :numref:`ARKODE.Usage.MRIStep.MRIStepCoupling.Tables`.
 
+   :param method: the coupling table identifier.
 
-   **Arguments:**
-      * ``method`` -- the coupling table identifier.
-
-   **Return value:**
-      * An :c:type:`MRIStepCoupling` structure if successful.
-      * A ``NULL`` pointer if *method* was invalid or an allocation error occurred.
+   :return value:  An :c:type:`MRIStepCoupling` structure if successful. A ``NULL``
+                   pointer if *method* was invalid or an allocation error occurred.
 
 
 .. c:function:: MRIStepCoupling MRIStepCoupling_LoadTableByName(const char *method)
@@ -129,14 +126,11 @@ are defined ``arkode/arkode_mristep.h``.
    set of coupling tables and their corresponding name, see
    :numref:`ARKODE.Usage.MRIStep.MRIStepCoupling.Tables`.
 
+   :param method: the coupling table name.
 
-   **Arguments:**
-      * ``method`` -- the coupling table name.
-
-   **Return value:**
-      * An :c:type:`MRIStepCoupling` structure if successful.
-      * A ``NULL`` pointer if *method* was invalid, *method* was
-        ``"ARKODE_MRI_NONE"``, or an allocation error occurred.
+   :return value: An :c:type:`MRIStepCoupling` structure if successful.
+                  A ``NULL`` pointer if *method* was invalid, *method* was
+                  ``"ARKODE_MRI_NONE"``, or an allocation error occurred.
 
    .. note::
 
@@ -147,16 +141,14 @@ are defined ``arkode/arkode_mristep.h``.
 
    Allocates an empty MRIStepCoupling table.
 
-   **Arguments:**
-      * ``nmat`` -- number of :math:`\Omega^{\{k\}}` and/or :math:`\Gamma^{\{k\}}`
-        matrices in the coupling table.
-      * ``stages`` -- number of stages in the coupling table.
-      * ``type`` -- the method type: explicit (0), implicit (1), or ImEx (2).
+   :param nmat: number of :math:`\Omega^{\{k\}}` and/or :math:`\Gamma^{\{k\}}`
+                matrices in the coupling table.
+   :param stages: number of stages in the coupling table.
+   :param type: the method type: explicit (0), implicit (1), or ImEx (2).
 
-   **Return value:**
-      * An :c:type:`MRIStepCoupling` structure if successful.
-      * A ``NULL`` pointer if *stages* or *type* was invalid or an allocation error
-        occurred.
+   :return value: An :c:type:`MRIStepCoupling` structure if successful.
+                  A ``NULL`` pointer if *stages* or *type* was invalid or an allocation error
+                  occurred.
 
    .. note::
 
@@ -169,27 +161,25 @@ are defined ``arkode/arkode_mristep.h``.
 
    Allocates a coupling table and fills it with the given values.
 
-   **Arguments:**
-      * ``nmat`` -- number of :math:`\Omega^{\{k\}}` and/or :math:`\Gamma^{\{k\}}`
-        matrices in the coupling table.
-      * ``stages`` -- number of stages in the method.
-      * ``q`` -- global order of accuracy for the method.
-      * ``p`` -- global order of accuracy for the embedded method.
-      * ``W`` -- array of coefficients defining the explicit coupling matrices
-        :math:`\Omega^{\{k\}}`. The entries should be stored as a 1D array of size
-        ``nmat * stages * stages``, in row-major order. If the slow method is
-        implicit pass ``NULL``.
-      * ``G`` -- array of coefficients defining the implicit coupling matrices
-        :math:`\Gamma^{\{k\}}`. The entries should be stored as a 1D array of size
-        ``nmat * stages * stages``, in row-major order. If the slow method is
-        explicit pass ``NULL``.
-      * ``c`` -- array of slow abscissae for the MRI method. The entries should be
-        stored as a 1D array of length ``stages``.
+   :param nmat: number of :math:`\Omega^{\{k\}}` and/or :math:`\Gamma^{\{k\}}`
+                matrices in the coupling table.
+   :param stages: number of stages in the method.
+   :param q: global order of accuracy for the method.
+   :param p: global order of accuracy for the embedded method.
+   :param W: array of coefficients defining the explicit coupling matrices
+             :math:`\Omega^{\{k\}}`. The entries should be stored as a 1D array of size
+             ``nmat * stages * stages``, in row-major order. If the slow method is
+             implicit pass ``NULL``.
+   :param G: array of coefficients defining the implicit coupling matrices
+             :math:`\Gamma^{\{k\}}`. The entries should be stored as a 1D array of size
+             ``nmat * stages * stages``, in row-major order. If the slow method is
+             explicit pass ``NULL``.
+   :param c: array of slow abscissae for the MRI method. The entries should be
+             stored as a 1D array of length ``stages``.
 
-   **Return value:**
-      * An :c:type:`MRIStepCoupling` structure if successful.
-      * A ``NULL`` pointer if ``stages`` was invalid, an allocation error occurred,
-        or the input data arrays are inconsistent with the method type.
+   :return value:  An :c:type:`MRIStepCoupling` structure if successful.
+                   A ``NULL`` pointer if ``stages`` was invalid, an allocation error occurred,
+                   or the input data arrays are inconsistent with the method type.
 
    .. note::
 
@@ -201,14 +191,12 @@ are defined ``arkode/arkode_mristep.h``.
    Creates an MRI coupling table for a traditional MIS method based on the slow
    Butcher table *B*, following the formula shown in :eq:`ARKODE_MIS_to_MRI`
 
-   **Arguments:**
-      * ``B`` -- the :c:type:`ARKodeButcherTable` for the 'slow' MIS method.
-      * ``q`` -- the overall order of the MIS/MRI method.
-      * ``p`` -- the overall order of the MIS/MRI embedding.
+   :param B: the :c:type:`ARKodeButcherTable` for the 'slow' MIS method.
+   :param q: the overall order of the MIS/MRI method.
+   :param p: the overall order of the MIS/MRI embedding.
 
-   **Return value:**
-      * An :c:type:`MRIStepCoupling` structure if successful.
-      * A ``NULL`` pointer if an allocation error occurred.
+   :return value: An :c:type:`MRIStepCoupling` structure if successful.
+                  A ``NULL`` pointer if an allocation error occurred.
 
    .. note::
 
@@ -230,44 +218,37 @@ are defined ``arkode/arkode_mristep.h``.
 
    Creates copy of the given coupling table.
 
-   **Arguments:**
-      * ``C`` -- the coupling table to copy.
+   :param C: the coupling table to copy.
 
-   **Return value:**
-      * An :c:type:`MRIStepCoupling` structure if successful.
-      * A ``NULL`` pointer if an allocation error occurred.
+   :return value: An :c:type:`MRIStepCoupling` structure if successful.
+                  A ``NULL`` pointer if an allocation error occurred.
 
 
 .. c:function:: void MRIStepCoupling_Space(MRIStepCoupling C, sunindextype *liw, sunindextype *lrw)
 
    Get the real and integer workspace size for a coupling table.
 
-   **Arguments:**
-      * ``C`` -- the coupling table.
-      * ``lenrw`` -- the number of ``realtype`` values in the coupling table
-        workspace.
-      * ``leniw`` -- the number of integer values in the coupling table workspace.
+   :param C: the coupling table.
+   :param lenrw: the number of ``realtype`` values in the coupling table
+                 workspace.
+   :param leniw: the number of integer values in the coupling table workspace.
 
-   **Return value:**
-      * *ARK_SUCCESS* if successful.
-      * *ARK_MEM_NULL* if the Butcher table memory was ``NULL``.
+   :retval ARK_SUCCESS: if successful.
+   :retval ARK_MEM_NULL: if the Butcher table memory was ``NULL``.
 
 
 .. c:function:: void MRIStepCoupling_Free(MRIStepCoupling C)
 
    Deallocate the coupling table memory.
 
-   **Arguments:**
-      * ``C`` -- the coupling table.
-
+   :param C: the coupling table.
 
 .. c:function:: void MRIStepCoupling_Write(MRIStepCoupling C, FILE *outfile)
 
    Write the coupling table to the provided file pointer.
 
-   **Arguments:**
-      * ``C`` -- the coupling table.
-      * ``outfile`` -- pointer to use for printing the table.
+   :param C: the coupling table.
+   :param outfile: pointer to use for printing the table.
 
    .. note::
 
