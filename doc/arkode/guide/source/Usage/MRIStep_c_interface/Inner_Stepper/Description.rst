@@ -225,7 +225,7 @@ Setting Member Functions
    **Example codes:**
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
-.. c:function:: int MRIStepInnerStepper_GetAccumulatedErrorFn(MRIStepInnerStepper stepper, MRIStepInnerGetAccumulatedError fn)
+.. c:function:: int MRIStepInnerStepper_SetAccumulatedErrorGetFn(MRIStepInnerStepper stepper, MRIStepInnerGetAccumulatedError fn)
 
    This function attaches an :c:type:`MRIStepInnerGetAccumulatedError` function to an
    :c:type:`MRIStepInnerStepper` object.
@@ -241,9 +241,9 @@ Setting Member Functions
    .. code-block:: C
 
       /* set the inner stepper accumulated error 'get' function */
-      flag = MRIStepInnerStepper_GetAccumulatedErrorFn(inner_stepper, MyAccumErr);
+      flag = MRIStepInnerStepper_SetAccumulatedErrorGetFn(inner_stepper, MyAccumErr);
 
-.. c:function:: int MRIStepInnerStepper_ResetAccumulatedErrorFn(MRIStepInnerStepper stepper, MRIStepInnerResetAccumulatedError fn)
+.. c:function:: int MRIStepInnerStepper_SetAccumulatedErrorResetFn(MRIStepInnerStepper stepper, MRIStepInnerResetAccumulatedError fn)
 
    This function attaches an :c:type:`MRIStepInnerResetAccumulatedError` function to an
    :c:type:`MRIStepInnerStepper` object.
@@ -259,7 +259,7 @@ Setting Member Functions
    .. code-block:: C
 
       /* set the inner stepper accumulated error 'reset' function */
-      flag = MRIStepInnerStepper_ResetAccumulatedErrorFn(inner_stepper, MyResetAccumErr);
+      flag = MRIStepInnerStepper_SetAccumulatedErrorResetFn(inner_stepper, MyResetAccumErr);
 
 .. c:function:: int MRIStepInnerStepper_SetFixedStepFn(MRIStepInnerStepper stepper, MRIStepInnerSetFixedStep fn)
 

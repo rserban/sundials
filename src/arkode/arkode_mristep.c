@@ -2660,6 +2660,106 @@ int MRIStepInnerStepper_SetResetFn(MRIStepInnerStepper stepper,
 }
 
 
+int MRIStepInnerStepper_SetAccumulatedErrorGetFn(MRIStepInnerStepper stepper,
+                                                 MRIStepInnerGetAccumulatedError fn)
+{
+  if (stepper == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetAccumulatedErrorGetFn",
+                    "Inner stepper memory is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  if (stepper->ops == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetAccumulatedErrorGetFn",
+                    "Inner stepper operations structure is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  stepper->ops->geterror = fn;
+
+  return ARK_SUCCESS;
+}
+
+
+int MRIStepInnerStepper_SetAccumulatedErrorResetFn(MRIStepInnerStepper stepper,
+                                                   MRIStepInnerResetAccumulatedError fn)
+{
+  if (stepper == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetAccumulatedErrorResetFn",
+                    "Inner stepper memory is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  if (stepper->ops == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetAccumulatedErrorResetFn",
+                    "Inner stepper operations structure is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  stepper->ops->reseterror = fn;
+
+  return ARK_SUCCESS;
+}
+
+
+int MRIStepInnerStepper_SetFixedStepFn(MRIStepInnerStepper stepper,
+                                       MRIStepInnerSetFixedStep fn)
+{
+  if (stepper == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetFixedStepFn",
+                    "Inner stepper memory is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  if (stepper->ops == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetFixedStepFn",
+                    "Inner stepper operations structure is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  stepper->ops->setfixedstep = fn;
+
+  return ARK_SUCCESS;
+}
+
+
+int MRIStepInnerStepper_SetRTolFactorFn(MRIStepInnerStepper stepper,
+                                        MRIStepInnerSetRTolFactor fn)
+{
+  if (stepper == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetRTolFactorFn",
+                    "Inner stepper memory is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  if (stepper->ops == NULL)
+  {
+    arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepInnerStepper_SetRTolFactorFn",
+                    "Inner stepper operations structure is NULL");
+    return ARK_ILL_INPUT;
+  }
+
+  stepper->ops->setrtolfactor = fn;
+
+  return ARK_SUCCESS;
+}
+
+
 int MRIStepInnerStepper_AddForcing(MRIStepInnerStepper stepper,
                                    realtype t, N_Vector f)
 {
@@ -2736,6 +2836,36 @@ int mriStepInnerStepper_HasRequiredOps(MRIStepInnerStepper stepper)
 }
 
 
+/* Check whether stepper supports fast/slow stepsize adaptivity */
+booleantype mriStepInnerStepper_SupportsStepAdaptivity(MRIStepInnerStepper stepper)
+{
+  if (stepper == NULL) return SUNFALSE;
+  if (stepper->ops == NULL) return SUNFALSE;
+
+  if (stepper->ops->geterror &&
+      stepper->ops->reseterror &&
+      stepper->ops->setfixedstep)
+    return SUNTRUE;
+  else
+    return SUNFALSE;
+}
+
+
+/* Check whether stepper supports fast/slow tolerance adaptivity */
+booleantype mriStepInnerStepper_SupportsRTolAdaptivity(MRIStepInnerStepper stepper)
+{
+  if (stepper == NULL) return SUNFALSE;
+  if (stepper->ops == NULL) return SUNFALSE;
+
+  if (stepper->ops->geterror &&
+      stepper->ops->reseterror &&
+      stepper->ops->setrtolfactor)
+    return SUNTRUE;
+  else
+    return SUNFALSE;
+}
+
+
 /* Evolve the inner (fast) ODE */
 int mriStepInnerStepper_Evolve(MRIStepInnerStepper stepper,
                                realtype t0, realtype tout, N_Vector y)
@@ -2796,6 +2926,74 @@ int mriStepInnerStepper_Reset(MRIStepInnerStepper stepper,
     return stepper->last_flag;
   } else {
     /* assume stepper uses input state and does not need to be reset */
+    return ARK_SUCCESS;
+  }
+}
+
+
+/* Gets the inner (fast) stepper accumulated error */
+int mriStepInnerStepper_GetError(MRIStepInnerStepper stepper,
+                                 realtype* accum_error)
+{
+  if (stepper == NULL) return ARK_ILL_INPUT;
+  if (stepper->ops == NULL) return ARK_ILL_INPUT;
+
+  if (stepper->ops->geterror) {
+    stepper->last_flag = stepper->ops->geterror(stepper, accum_error);
+    return stepper->last_flag;
+  } else {
+    /* assume stepper provides exact solution */
+    *accum_error = RCONST(0.0);
+    return ARK_SUCCESS;
+  }
+}
+
+
+/* Resets the inner (fast) stepper accumulated error */
+int mriStepInnerStepper_ResetError(MRIStepInnerStepper stepper)
+{
+  if (stepper == NULL) return ARK_ILL_INPUT;
+  if (stepper->ops == NULL) return ARK_ILL_INPUT;
+
+  if (stepper->ops->geterror) {
+    stepper->last_flag = stepper->ops->reseterror(stepper);
+    return stepper->last_flag;
+  } else {
+    /* assume stepper provides exact solution and needs no reset */
+    return ARK_SUCCESS;
+  }
+}
+
+
+/* Sets the inner (fast) stepper fixed step size */
+int mriStepInnerStepper_SetFixedStep(MRIStepInnerStepper stepper,
+                                     realtype h)
+{
+  if (stepper == NULL) return ARK_ILL_INPUT;
+  if (stepper->ops == NULL) return ARK_ILL_INPUT;
+
+  if (stepper->ops->geterror) {
+    stepper->last_flag = stepper->ops->setfixedstep(stepper, h);
+    return stepper->last_flag;
+  } else {
+    /* assume stepper provides exact solution using infinitesimally small step */
+    return ARK_SUCCESS;
+  }
+}
+
+
+/* Sets the inner (fast) stepper relative tolerance scaling factor */
+int mriStepInnerStepper_SetRTolFactor(MRIStepInnerStepper stepper,
+                                      realtype rtolfac)
+{
+  if (stepper == NULL) return ARK_ILL_INPUT;
+  if (stepper->ops == NULL) return ARK_ILL_INPUT;
+
+  if (stepper->ops->geterror) {
+    stepper->last_flag = stepper->ops->setrtolfactor(stepper, rtolfac);
+    return stepper->last_flag;
+  } else {
+    /* assume stepper provides exact solution */
     return ARK_SUCCESS;
   }
 }

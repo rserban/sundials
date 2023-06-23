@@ -149,9 +149,13 @@ typedef struct _MRIStepInnerStepper_Ops *MRIStepInnerStepper_Ops;
 
 struct _MRIStepInnerStepper_Ops
 {
-  MRIStepInnerEvolveFn  evolve;
-  MRIStepInnerFullRhsFn fullrhs;
-  MRIStepInnerResetFn   reset;
+  MRIStepInnerEvolveFn              evolve;
+  MRIStepInnerFullRhsFn             fullrhs;
+  MRIStepInnerResetFn               reset;
+  MRIStepInnerGetAccumulatedError   geterror;
+  MRIStepInnerResetAccumulatedError reseterror;
+  MRIStepInnerSetFixedStep          setfixedstep;
+  MRIStepInnerSetRTolFactor         setrtolfactor;
 };
 
 struct _MRIStepInnerStepper
@@ -235,6 +239,8 @@ int mriStep_NlsConvTest(SUNNonlinearSolver NLS, N_Vector y, N_Vector del,
 
 /* Inner stepper functions */
 int mriStepInnerStepper_HasRequiredOps(MRIStepInnerStepper stepper);
+booleantype mriStepInnerStepper_SupportsStepAdaptivity(MRIStepInnerStepper stepper);
+booleantype mriStepInnerStepper_SupportsRTolAdaptivity(MRIStepInnerStepper stepper);
 int mriStepInnerStepper_Evolve(MRIStepInnerStepper stepper,
                                realtype t0, realtype tout, N_Vector y);
 int mriStepInnerStepper_FullRhs(MRIStepInnerStepper stepper,
@@ -242,6 +248,10 @@ int mriStepInnerStepper_FullRhs(MRIStepInnerStepper stepper,
                                 int mode);
 int mriStepInnerStepper_Reset(MRIStepInnerStepper stepper,
                               realtype tR, N_Vector yR);
+int mriStepInnerStepper_GetError(MRIStepInnerStepper stepper, realtype* accum_error);
+int mriStepInnerStepper_ResetError(MRIStepInnerStepper stepper);
+int mriStepInnerStepper_SetFixedStep(MRIStepInnerStepper stepper, realtype h);
+int mriStepInnerStepper_SetRTolFactor(MRIStepInnerStepper stepper, realtype rtolfac);
 int mriStepInnerStepper_AllocVecs(MRIStepInnerStepper stepper, int count,
                                   N_Vector tmpl);
 int mriStepInnerStepper_Resize(MRIStepInnerStepper stepper,
