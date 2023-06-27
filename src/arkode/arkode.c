@@ -148,6 +148,11 @@ ARKodeMem arkCreate(SUNContext sunctx)
   ark_mem->h   = ZERO;
   ark_mem->h0u = ZERO;
 
+  /* No accumulated error estimates or strategy */
+  ark_mem->AccumErrorType = 0;
+  ark_mem->SAccumError = ZERO;
+  ark_mem->VAccumError = NULL;
+
   /* Set default values for integrator optional inputs */
   iret = arkSetDefaults(ark_mem);
   if (iret != ARK_SUCCESS) {
@@ -2370,6 +2375,13 @@ int arkCompleteStep(ARKodeMem ark_mem, realtype dsm)
                      "step = %li, h = %"RSYM", tcur = %"RSYM,
                      ark_mem->nst, ark_mem->h, ark_mem->tcur);
 #endif
+
+  /* store this step's contribution to accumulated temporal error */
+  if (ark_mem->AccumErrorType == 1) {
+    ark_mem->SAccumError += dsm;
+  } else if (ark_mem->AccumErrorType == 2) {
+    N_VLinearSum(ONE, ark_mem->VAccumError, ONE, ark_mem->tempv1, ark_mem->VAccumError);
+  }
 
   /* apply user-supplied step postprocessing function (if supplied) */
   if (ark_mem->ProcessStep != NULL) {

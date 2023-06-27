@@ -1259,10 +1259,121 @@ int arkSetMaxConvFails(void *arkode_mem, int maxncf)
 }
 
 
+/*---------------------------------------------------------------
+  arkSetAccumulatedErrorType:
+
+  This routine sets the accumulated temporal error estimation 
+  strategy:
+     0 => no accumulation
+     1 => scalar accumulation (disallows cancellation)
+     2 => vector accumulation (allows cancellation)
+  ---------------------------------------------------------------*/
+int arkSetAccumulatedErrorType(void *arkode_mem, int accum_type)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE",
+                    "arkSetAccumulatedErrorType", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+
+  /* Store accumulation type based on input value, allocating 
+     vector accumulation storage if necessary */
+  if (accum_type == 1) {
+    ark_mem->AccumErrorType = 1;
+    ark_mem->SAccumError = ZERO;
+    return(ARK_SUCCESS);
+  } else if (accum_type == 2) {
+    ark_mem->AccumErrorType = 2;
+    if (ark_mem->VAccumError == NULL) {
+      if (!arkAllocVec(ark_mem, ark_mem->yn, &ark_mem->VAccumError)) {
+        arkProcessError(ark_mem, ARK_MEM_FAIL, "ARKODE",
+                        "arkSetAccumulatedErrorType", 
+                        "vector allocation failure");
+        return(ARK_MEM_FAIL);
+      }
+    }
+    N_VConst(ZERO, ark_mem->VAccumError);
+    return(ARK_SUCCESS);
+  } else if (accum_type == 0) {
+    ark_mem->AccumErrorType = 0;
+    return(ARK_SUCCESS);
+  } else {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
+                    "arkSetAccumulatedErrorType", 
+                    "illegal accumulation type");
+    return(ARK_ILL_INPUT);
+  }
+}
+
+
+/*---------------------------------------------------------------
+  arkResetAccumulatedError:
+
+  This routine resets the accumulated temporal error estimate.
+  ---------------------------------------------------------------*/
+int arkResetAccumulatedError(void *arkode_mem)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE",
+                    "arkResetAccumulatedError", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+
+  /* Reset based on error accumulation type */
+  if (ark_mem->AccumErrorType == 1) {
+    ark_mem->SAccumError = ZERO;
+    return(ARK_SUCCESS);
+  } else if (ark_mem->AccumErrorType == 2) {
+    N_VConst(ZERO, ark_mem->VAccumError);
+    return(ARK_SUCCESS);
+  } else {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
+                    "arkResetAccumulatedError", 
+                    "cannot reset illegal accumulation type");
+    return(ARK_ILL_INPUT);
+  }
+}
+
 
 /*===============================================================
   ARKODE optional output utility functions
   ===============================================================*/
+
+/*---------------------------------------------------------------
+  arkGetAccumulatedError:
+
+  This routine returns the accumulated temporal error estimate.
+  ---------------------------------------------------------------*/
+int arkGetAccumulatedError(void *arkode_mem, realtype *accum_error)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE",
+                    "arkGetAccumulatedError", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+
+  /* Fill output based on error accumulation type */
+  if (ark_mem->AccumErrorType == 1) {
+    *accum_error = ark_mem->SAccumError;
+    return(ARK_SUCCESS);
+  } else if (ark_mem->AccumErrorType == 2) {
+    *accum_error = N_VWrmsNorm(ark_mem->VAccumError, ark_mem->ewt);
+    return(ARK_SUCCESS);
+  } else {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
+                    "arkGetAccumulatedError", 
+                    "cannot retrieve illegal accumulation type");
+    return(ARK_ILL_INPUT);
+  }
+
+  return(ARK_SUCCESS);
+}
 
 /*---------------------------------------------------------------
   arkGetNumStepAttempts:
@@ -1461,6 +1572,26 @@ int arkGetResWeights(void *arkode_mem, N_Vector rweight)
   ark_mem = (ARKodeMem) arkode_mem;
 
   N_VScale(ONE, ark_mem->rwt, rweight);
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  arkGetEstLocalErrors:
+
+  This routine returns the current local temporal error estimate.
+  ---------------------------------------------------------------*/
+int arkGetEstLocalErrors(void *arkode_mem, N_Vector ele)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE",
+                    "arkGetEstLocalErrors", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+
+  N_VScale(ONE, ark_mem->tempv1, ele);
   return(ARK_SUCCESS);
 }
 

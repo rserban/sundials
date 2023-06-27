@@ -130,6 +130,11 @@ Updated the F2003 utility routines :c:func:`SUNDIALSFileOpen` and :c:func:`SUNDI
 to support user specification of ``stdout`` and ``stderr`` strings for the output
 file names.
 
+Added functionality to ARKStep and ERKStep to accumulate a temporal error 
+estimate over multiple time steps.  See the routines :c:func:`ARKStepSetAccumulatedErrorType`,
+:c:func:`ARKStepResetAccumulatedError`, :c:func:`ARKStepGetAccumulatedError`, 
+:c:func:`ERKStepSetAccumulatedErrorType`, :c:func:`ERKStepResetAccumulatedError`, and :c:func:`ERKStepGetAccumulatedError` for details.
+
 Changes in v5.5.1
 -----------------
 

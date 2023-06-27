@@ -313,6 +313,13 @@ SUNDIALS_EXPORT int ARKStepGetDky(void *arkode_mem, realtype t,
 SUNDIALS_EXPORT int ARKStepComputeState(void *arkode_mem, N_Vector zcor,
                                         N_Vector z);
 
+/* Utility functions to reset/get accumulated temporal error estimate */
+SUNDIALS_EXPORT int ARKStepSetAccumulatedErrorType(void *arkode_mem,
+                                                   int accum_type);
+SUNDIALS_EXPORT int ARKStepResetAccumulatedError(void *arkode_mem);
+SUNDIALS_EXPORT int ARKStepGetAccumulatedError(void *arkode_mem,
+                                               realtype* accum_error);
+
 /* Optional output functions */
 SUNDIALS_EXPORT int ARKStepGetNumExpSteps(void *arkode_mem,
                                           long int *expsteps);

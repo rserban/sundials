@@ -373,8 +373,8 @@ typedef struct ARKodeMemRec {
   long int nconstrfails;  /* number of constraint failures              */
 
   /* Diagnostic output */
-  booleantype report;   /* flag to enable/disable diagnostic output    */
-  FILE       *diagfp;   /* diagnostic outputs are sent to diagfp   */
+  booleantype report;   /* flag to enable/disable diagnostic output */
+  FILE       *diagfp;   /* diagnostic outputs are sent to diagfp    */
 
   /* Space requirements for ARKODE */
   sunindextype lrw1;        /* no. of realtype words in 1 N_Vector          */
@@ -387,6 +387,10 @@ typedef struct ARKodeMemRec {
   realtype    tn;           /* time of last successful step                */
   realtype    hold;         /* last successful h value used                */
   realtype    tolsf;        /* tolerance scale factor (suggestion to user) */
+  int AccumErrorType;       /* accumulated error estimation type:
+                               none (0), scalar (1), vector (2)            */
+  realtype SAccumError;     /* scalar accumulated error estimate           */
+  N_Vector VAccumError;     /* vector accumulated error estimate           */
   booleantype VabstolMallocDone;
   booleantype VRabstolMallocDone;
   booleantype MallocDone;
@@ -1001,6 +1005,9 @@ int arkSetMaxCFailGrowth(void *arkode_mem, realtype etacf);
 int arkSetStabilityFn(void *arkode_mem, ARKExpStabFn EStab, void *estab_data);
 int arkSetMaxErrTestFails(void *arkode_mem, int maxnef);
 int arkSetMaxConvFails(void *arkode_mem, int maxncf);
+int arkSetAccumulatedErrorType(void *arkode_mem, int accum_type);
+int arkResetAccumulatedError(void *arkode_mem);
+int arkGetAccumulatedError(void *arkode_mem, realtype* accum_error);
 int arkGetWorkSpace(void *arkode_mem, long int *lenrw, long int *leniw);
 int arkGetNumStepAttempts(void *arkode_mem, long int *nstep_attempts);
 int arkGetNumSteps(void *arkode_mem, long int *nsteps);
@@ -1012,6 +1019,7 @@ int arkGetCurrentTime(void *arkode_mem, realtype *tcur);
 int arkGetTolScaleFactor(void *arkode_mem, realtype *tolsfac);
 int arkGetErrWeights(void *arkode_mem, N_Vector eweight);
 int arkGetResWeights(void *arkode_mem, N_Vector rweight);
+int arkGetEstLocalErrors(void *arkode_mem, N_Vector ele);
 int arkGetNumGEvals(void *arkode_mem, long int *ngevals);
 int arkGetRootInfo(void *arkode_mem, int *rootsfound);
 int arkGetNumConstrFails(void *arkode_mem, long int *nconstrfails);

@@ -190,6 +190,14 @@ SUNDIALS_EXPORT int ERKStepEvolve(void *arkode_mem, realtype tout,
 SUNDIALS_EXPORT int ERKStepGetDky(void *arkode_mem, realtype t,
                                   int k, N_Vector dky);
 
+
+/* Utility functions to reset/get accumulated temporal error estimate */
+SUNDIALS_EXPORT int ERKStepSetAccumulatedErrorType(void *arkode_mem,
+                                                   int accum_type);
+SUNDIALS_EXPORT int ERKStepResetAccumulatedError(void *arkode_mem);
+SUNDIALS_EXPORT int ERKStepGetAccumulatedError(void *arkode_mem,
+                                               realtype* accum_error);
+
 /* Optional output functions */
 SUNDIALS_EXPORT int ERKStepGetNumExpSteps(void *arkode_mem,
                                           long int *expsteps);

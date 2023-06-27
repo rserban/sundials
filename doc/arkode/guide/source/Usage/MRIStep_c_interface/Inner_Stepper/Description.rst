@@ -469,6 +469,11 @@ following member functions:
       value if a recoverable error occurred, or a negative value if it failed
       unrecoverably.
 
+   **Notes:**
+      If provided, the :c:type:`MRIStepInnerResetFn` function will always be called
+      *before* any calls to the :c:type:`MRIStepInnerEvolveFn` function.
+
+
    **Example codes:**
       * ``examples/arkode/CXX_parallel/ark_diffusion_reaction_p.cpp``
 
@@ -486,6 +491,18 @@ following member functions:
       value if a recoverable error occurred, or a negative value if it failed
       unrecoverably.
 
+   **Notes:**
+      This function is only called when multirate temporal adaptivity has been enabled,
+      using a :c:type:`SUNControl` module having type ``SUNDIALS_CONTROL_MRI_H`` or
+      ``SUNDIALS_CONTROL_MRI_TOL``.
+
+      If provided, the :c:type:`MRIStepInnerGetAccumulatedError` function will always
+      be called *after* a preceding call to the :c:type:`MRIStepInnerResetAccumulatedError`
+      function.
+
+      Both the :c:type:`MRIStepInnerGetAccumulatedError` and
+      :c:type:`MRIStepInnerResetAccumulatedError` functions should be provided, or not; if only
+      one is provided then MRIStep will disable multirate temporal adaptivity and call neither.
 
 
 .. c:type:: int (*MRIStepInnerResetAccumulatedError)(MRIStepInnerStepper stepper)
@@ -500,6 +517,21 @@ following member functions:
       value if a recoverable error occurred, or a negative value if it failed
       unrecoverably.
 
+   **Notes:**
+      This function is only called when multirate temporal adaptivity has been enabled,
+      using a :c:type:`SUNControl` module having type ``SUNDIALS_CONTROL_MRI_H`` or
+      ``SUNDIALS_CONTROL_MRI_TOL``.
+
+      The :c:type:`MRIStepInnerResetAccumulatedError` function will always be called
+      *before* any calls to the :c:type:`MRIStepInnerGetAccumulatedError` function.
+
+      Both the :c:type:`MRIStepInnerGetAccumulatedError` and
+      :c:type:`MRIStepInnerResetAccumulatedError` functions should be provided, or not; if only
+      one is provided then MRIStep will disable multirate temporal adaptivity and call neither.
+
+      This function peforms a different role within MRIStep than the
+      :c:type:`MRIStepInnerResetFn`, and thus an implementation should make no
+      assumptions about the frequency/ordering of calls to either.
 
 
 .. c:type:: int (*MRIStepInnerSetFixedStep)(MRIStepInnerStepper stepper, realtype h)
@@ -515,6 +547,9 @@ following member functions:
       value if a recoverable error occurred, or a negative value if it failed
       unrecoverably.
 
+   **Notes:**
+      This function is only called when multirate temporal adaptivity has been enabled
+      using a :c:type:`SUNControl` module having type ``SUNDIALS_CONTROL_MRI_H``.
 
 
 .. c:type:: int (*MRIStepInnerSetRTolFactor)(MRIStepInnerStepper stepper, realtype rtolfac)
@@ -532,3 +567,7 @@ following member functions:
       An :c:type:`MRIStepInnerSetTolFactor` should return 0 if successful, a positive
       value if a recoverable error occurred, or a negative value if it failed
       unrecoverably.
+
+   **Notes:**
+      This function is only called when multirate temporal adaptivity has been enabled
+      using a :c:type:`SUNControl` module having type ``SUNDIALS_CONTROL_MRI_TOL``.

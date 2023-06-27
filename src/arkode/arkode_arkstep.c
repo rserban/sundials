@@ -2563,8 +2563,8 @@ int arkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsmPtr)
   retval = N_VLinearCombination(nvec, cvals, Xvecs, y);
   if (retval != 0) return(ARK_VECTOROP_ERR);
 
-  /* Compute yerr (if step adaptivity enabled) */
-  if (!ark_mem->fixedstep) {
+  /* Compute yerr (if step adaptivity or error accumulation enabled) */
+  if (!ark_mem->fixedstep || ark_mem->AccumErrorType) {
 
     /* set arrays for fused vector operation */
     nvec = 0;
@@ -2666,8 +2666,8 @@ int arkStep_ComputeSolutions_MassFixed(ARKodeMem ark_mem, realtype *dsmPtr)
   N_VLinearSum(ONE, ark_mem->yn, ONE, y, y);
 
 
-  /* compute yerr (if step adaptivity enabled) */
-  if (!ark_mem->fixedstep) {
+  /* compute yerr (if step adaptivity or error accumulation enabled) */
+  if (!ark_mem->fixedstep || ark_mem->AccumErrorType) {
 
     /* compute yerr RHS vector */
     /*   set arrays for fused vector operation */

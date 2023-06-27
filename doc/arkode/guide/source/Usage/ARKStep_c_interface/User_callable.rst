@@ -3238,6 +3238,9 @@ No. of local error test failures that have occurred    :c:func:`ARKStepGetNumErr
 No. of failed steps due to a nonlinear solver failure  :c:func:`ARKStepGetNumStepSolveFails()`
 Current ERK and DIRK Butcher tables                    :c:func:`ARKStepGetCurrentButcherTables()`
 Estimated local truncation error vector                :c:func:`ARKStepGetEstLocalErrors()`
+Accumulated temporal error estimation strategy         :c:func:`ARKStepSetAccumulatedErrorType()`
+Reset accumulated temporal error estimate              :c:func:`ARKStepResetAccumulatedError()`
+Get accumulated temporal error estimate                :c:func:`ARKStepGetAccumulatedError()`
 Single accessor to many statistics at once             :c:func:`ARKStepGetTimestepperStats()`
 Number of constraint test failures                     :c:func:`ARKStepGetNumConstrFails()`
 Retrieve a pointer for user data                       :c:func:`ARKStepGetUserData`
@@ -3642,6 +3645,66 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
       two vectors.  Thus, for example, if there were recent error test
       failures, the components causing the failures are those with largest
       values for the products, denoted loosely as ``eweight[i]*ele[i]``.
+
+
+
+.. c:function:: int ARKStepSetAccumulatedErrorType(void* arkode_mem, int accum_type)
+
+   Sets the strategy to use for accumulating a temporal error estimate 
+   over multiple time steps.
+
+   **Arguments:**
+      * *arkode_mem* -- pointer to the ARKStep memory block.
+      * *accum_type* -- accumulation strategy:
+        * 0 -- no accumulation.
+        * 1 -- scalar-valued accumulation (no cancellation possible).
+        * 2 -- vector-valued accumulation (cancellation possible).
+
+   **Return value:**
+      * *ARK_SUCCESS* if successful
+      * *ARK_MEM_NULL* if the ARKStep memory was ``NULL``
+      * *ARK_MEM_FAIL* if vector-valued accumulation chosen, but the 
+        corresponding storage could not be allocated
+      * *ARK_ILL_INPUT* if *accum_type* was illegal
+
+   **Notes:**
+      At each step, ARKStep computes both a solution and embedding, 
+      :math:`y_n` and :math:`\tilde{y}_n`, resulting in a vector-valued 
+      local temporal error estimate, :math:`y_n - \tilde{y}_n`.  Accumulation 
+      strategy 1 computes :math:`\Sum_n \|y_n - \tilde{y}_n\|_{WRMS}`, while
+      accumulation strategy 2 computes :math:`\left\| \Sum_n (y_n - \tilde{y}_n)\right\|`,
+      where either sum is taken over all steps since the accumulation estimate was created or reset (whichever came most recently), and the norm is taken using the tolerance-informed error-weight vector (see :c:func:`ARKStepGetErrWeights``).
+
+   .. versionadded:: 5.6.0
+
+
+.. c:function:: int ARKStepResetAccumulatedError(void* arkode_mem)
+
+   Resets the accumulated temporal error estimate.
+
+   **Arguments:**
+      * *arkode_mem* -- pointer to the ARKStep memory block.
+
+   **Return value:**
+      * *ARK_SUCCESS* if successful
+      * *ARK_MEM_NULL* if the ARKStep memory was ``NULL``
+
+   .. versionadded:: 5.6.0
+
+
+.. c:function:: int ARKStepGetAccumulatedError(void* arkode_mem, realtype* accum_error)
+
+   Gets the accumulated temporal error estimate.
+
+   **Arguments:**
+      * *arkode_mem* -- pointer to the ARKStep memory block.
+      * *accum_error* -- pointer to accumulated error scalar.
+
+   **Return value:**
+      * *ARK_SUCCESS* if successful
+      * *ARK_MEM_NULL* if the ARKStep memory was ``NULL``
+
+   .. versionadded:: 5.6.0
 
 
 

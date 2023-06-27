@@ -109,6 +109,15 @@ int ARKStepSetMaxConvFails(void *arkode_mem, int maxncf) {
 int ARKStepSetFixedStep(void *arkode_mem, realtype hfixed) {
   return(arkSetFixedStep(arkode_mem, hfixed)); }
 
+/*---------------------------------------------------------------
+  Wrapper functions for accumulated temporal error estimation.
+  ---------------------------------------------------------------*/
+int ARKStepSetAccumulatedErrorType(void *arkode_mem, int accum_type) {
+  return(arkSetAccumulatedErrorType(arkode_mem, accum_type)); }
+int ARKStepResetAccumulatedError(void *arkode_mem) {
+  return(arkResetAccumulatedError(arkode_mem)); }
+int ARKStepGetAccumulatedError(void *arkode_mem, realtype* accum_error) {
+  return(arkGetAccumulatedError(arkode_mem, accum_error)); }
 
 /*---------------------------------------------------------------
   These wrappers for ARKLs module 'set' routines all are
@@ -177,6 +186,8 @@ int ARKStepGetErrWeights(void *arkode_mem, N_Vector eweight) {
   return(arkGetErrWeights(arkode_mem, eweight)); }
 int ARKStepGetResWeights(void *arkode_mem, N_Vector rweight) {
   return(arkGetResWeights(arkode_mem, rweight)); }
+int ARKStepGetEstLocalErrors(void *arkode_mem, N_Vector ele) {
+  return(arkGetEstLocalErrors(arkode_mem, ele)); }
 int ARKStepGetWorkSpace(void *arkode_mem, long int *lenrw, long int *leniw) {
   return(arkGetWorkSpace(arkode_mem, lenrw, leniw)); }
 int ARKStepGetNumGEvals(void *arkode_mem, long int *ngevals) {
@@ -1489,31 +1500,6 @@ int ARKStepGetCurrentButcherTables(void *arkode_mem,
   /* get tables from step_mem */
   *Bi = step_mem->Bi;
   *Be = step_mem->Be;
-  return(ARK_SUCCESS);
-}
-
-
-/*---------------------------------------------------------------
-  ARKStepGetEstLocalErrors: (updated to the correct vector, but
-  need to verify that it is unchanged between filling the
-  estimated error and the end of the time step)
-
-  Returns an estimate of the local error
-  ---------------------------------------------------------------*/
-int ARKStepGetEstLocalErrors(void *arkode_mem, N_Vector ele)
-{
-  ARKodeMem ark_mem;
-  ARKodeARKStepMem step_mem;
-  int retval;
-
-  /* access ARKodeARKStepMem structure */
-  retval = arkStep_AccessStepMem(arkode_mem, "ARKStepGetEstLocalErrors",
-                                 &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS)  return(retval);
-
-  /* copy vector to output */
-  N_VScale(ONE, ark_mem->tempv1, ele);
-
   return(ARK_SUCCESS);
 }
 

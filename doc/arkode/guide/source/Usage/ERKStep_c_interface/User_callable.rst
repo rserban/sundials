@@ -1611,51 +1611,57 @@ Main solver optional output functions
 .. _ARKODE.Usage.ERKStep.ERKStepMainOutputsTable:
 .. table:: Main solver optional output functions
 
-   +------------------------------------------------------+-------------------------------------------+
-   | Optional output                                      | Function name                             |
-   +------------------------------------------------------+-------------------------------------------+
-   | Size of ERKStep real and integer workspaces          | :c:func:`ERKStepGetWorkSpace()`           |
-   +------------------------------------------------------+-------------------------------------------+
-   | Cumulative number of internal steps                  | :c:func:`ERKStepGetNumSteps()`            |
-   +------------------------------------------------------+-------------------------------------------+
-   | Actual initial time step size used                   | :c:func:`ERKStepGetActualInitStep()`      |
-   +------------------------------------------------------+-------------------------------------------+
-   | Step size used for the last successful step          | :c:func:`ERKStepGetLastStep()`            |
-   +------------------------------------------------------+-------------------------------------------+
-   | Step size to be attempted on the next step           | :c:func:`ERKStepGetCurrentStep()`         |
-   +------------------------------------------------------+-------------------------------------------+
-   | Current internal time reached by the solver          | :c:func:`ERKStepGetCurrentTime()`         |
-   +------------------------------------------------------+-------------------------------------------+
-   | Suggested factor for tolerance scaling               | :c:func:`ERKStepGetTolScaleFactor()`      |
-   +------------------------------------------------------+-------------------------------------------+
-   | Error weight vector for state variables              | :c:func:`ERKStepGetErrWeights()`          |
-   +------------------------------------------------------+-------------------------------------------+
-   | Single accessor to many statistics at once           | :c:func:`ERKStepGetStepStats()`           |
-   +------------------------------------------------------+-------------------------------------------+
-   | Print all statistics                                 | :c:func:`ERKStepPrintAllStats`            |
-   +------------------------------------------------------+-------------------------------------------+
-   | Name of constant associated with a return flag       | :c:func:`ERKStepGetReturnFlagName()`      |
-   +------------------------------------------------------+-------------------------------------------+
-   | No. of explicit stability-limited steps              | :c:func:`ERKStepGetNumExpSteps()`         |
-   +------------------------------------------------------+-------------------------------------------+
-   | No. of accuracy-limited steps                        | :c:func:`ERKStepGetNumAccSteps()`         |
-   +------------------------------------------------------+-------------------------------------------+
-   | No. of attempted steps                               | :c:func:`ERKStepGetNumStepAttempts()`     |
-   +------------------------------------------------------+-------------------------------------------+
-   | No. of calls to *f* function                         | :c:func:`ERKStepGetNumRhsEvals()`         |
-   +------------------------------------------------------+-------------------------------------------+
-   | No. of local error test failures that have occurred  | :c:func:`ERKStepGetNumErrTestFails()`     |
-   +------------------------------------------------------+-------------------------------------------+
-   | Current ERK Butcher table                            | :c:func:`ERKStepGetCurrentButcherTable()` |
-   +------------------------------------------------------+-------------------------------------------+
-   | Estimated local truncation error vector              | :c:func:`ERKStepGetEstLocalErrors()`      |
-   +------------------------------------------------------+-------------------------------------------+
-   | Single accessor to many statistics at once           | :c:func:`ERKStepGetTimestepperStats()`    |
-   +------------------------------------------------------+-------------------------------------------+
-   | Number of constraint test failures                   | :c:func:`ERKStepGetNumConstrFails()`      |
-   +------------------------------------------------------+-------------------------------------------+
-   | Retrieve a pointer for user data                     |  :c:func:`ERKStepGetUserData`             |
-   +------------------------------------------------------+-------------------------------------------+
+   +------------------------------------------------------+--------------------------------------------+
+   | Optional output                                      | Function name                              |
+   +------------------------------------------------------+--------------------------------------------+
+   | Size of ERKStep real and integer workspaces          | :c:func:`ERKStepGetWorkSpace()`            |
+   +------------------------------------------------------+--------------------------------------------+
+   | Cumulative number of internal steps                  | :c:func:`ERKStepGetNumSteps()`             |
+   +------------------------------------------------------+--------------------------------------------+
+   | Actual initial time step size used                   | :c:func:`ERKStepGetActualInitStep()`       |
+   +------------------------------------------------------+--------------------------------------------+
+   | Step size used for the last successful step          | :c:func:`ERKStepGetLastStep()`             |
+   +------------------------------------------------------+--------------------------------------------+
+   | Step size to be attempted on the next step           | :c:func:`ERKStepGetCurrentStep()`          |
+   +------------------------------------------------------+--------------------------------------------+
+   | Current internal time reached by the solver          | :c:func:`ERKStepGetCurrentTime()`          |
+   +------------------------------------------------------+--------------------------------------------+
+   | Suggested factor for tolerance scaling               | :c:func:`ERKStepGetTolScaleFactor()`       |
+   +------------------------------------------------------+--------------------------------------------+
+   | Error weight vector for state variables              | :c:func:`ERKStepGetErrWeights()`           |
+   +------------------------------------------------------+--------------------------------------------+
+   | Single accessor to many statistics at once           | :c:func:`ERKStepGetStepStats()`            |
+   +------------------------------------------------------+--------------------------------------------+
+   | Print all statistics                                 | :c:func:`ERKStepPrintAllStats()`           |
+   +------------------------------------------------------+--------------------------------------------+
+   | Name of constant associated with a return flag       | :c:func:`ERKStepGetReturnFlagName()`       |
+   +------------------------------------------------------+--------------------------------------------+
+   | No. of explicit stability-limited steps              | :c:func:`ERKStepGetNumExpSteps()`          |
+   +------------------------------------------------------+--------------------------------------------+
+   | No. of accuracy-limited steps                        | :c:func:`ERKStepGetNumAccSteps()`          |
+   +------------------------------------------------------+--------------------------------------------+
+   | No. of attempted steps                               | :c:func:`ERKStepGetNumStepAttempts()`      |
+   +------------------------------------------------------+--------------------------------------------+
+   | No. of calls to *f* function                         | :c:func:`ERKStepGetNumRhsEvals()`          |
+   +------------------------------------------------------+--------------------------------------------+
+   | No. of local error test failures that have occurred  | :c:func:`ERKStepGetNumErrTestFails()`      |
+   +------------------------------------------------------+--------------------------------------------+
+   | Current ERK Butcher table                            | :c:func:`ERKStepGetCurrentButcherTable()`  |
+   +------------------------------------------------------+--------------------------------------------+
+   | Estimated local truncation error vector              | :c:func:`ERKStepGetEstLocalErrors()`       |
+   +------------------------------------------------------+--------------------------------------------+
+   | Accumulated temporal error estimation strategy       | :c:func:`ERKStepSetAccumulatedErrorType()` |
+   +------------------------------------------------------+--------------------------------------------+
+   | Reset acumulated temporal error estimate             | :c:func:`ERKStepResetAccumulatedError()`   |
+   +------------------------------------------------------+--------------------------------------------+
+   | Get accumulated temporal error estimate              | :c:func:`ERKStepGetAccumulatedError()`     |
+   +------------------------------------------------------+--------------------------------------------+
+   | Single accessor to many statistics at once           | :c:func:`ERKStepGetTimestepperStats()`     |
+   +------------------------------------------------------+--------------------------------------------+
+   | Number of constraint test failures                   | :c:func:`ERKStepGetNumConstrFails()`       |
+   +------------------------------------------------------+--------------------------------------------+
+   | Retrieve a pointer for user data                     |  :c:func:`ERKStepGetUserData`              |
+   +------------------------------------------------------+--------------------------------------------+
 
 
 
@@ -1980,6 +1986,65 @@ Main solver optional output functions
       two vectors.  Thus, for example, if there were recent error test
       failures, the components causing the failures are those with largest
       values for the products, denoted loosely as ``eweight[i]*ele[i]``.
+
+
+.. c:function:: int ERKStepSetAccumulatedErrorType(void* arkode_mem, int accum_type)
+
+   Sets the strategy to use for accumulating a temporal error estimate 
+   over multiple time steps.
+
+   **Arguments:**
+      * *arkode_mem* -- pointer to the ERKStep memory block.
+      * *accum_type* -- accumulation strategy:
+        * 0 -- no accumulation.
+        * 1 -- scalar-valued accumulation (no cancellation possible).
+        * 2 -- vector-valued accumulation (cancellation possible).
+
+   **Return value:**
+      * *ARK_SUCCESS* if successful
+      * *ARK_MEM_NULL* if the ERKStep memory was ``NULL``
+      * *ARK_MEM_FAIL* if vector-valued accumulation chosen, but the 
+        corresponding storage could not be allocated
+      * *ARK_ILL_INPUT* if *accum_type* was illegal
+
+   **Notes:**
+      At each step, ERKStep computes both a solution and embedding, 
+      :math:`y_n` and :math:`\tilde{y}_n`, resulting in a vector-valued 
+      local temporal error estimate, :math:`y_n - \tilde{y}_n`.  Accumulation 
+      strategy 1 computes :math:`\Sum_n \|y_n - \tilde{y}_n\|_{WRMS}`, while
+      accumulation strategy 2 computes :math:`\left\| \Sum_n (y_n - \tilde{y}_n)\right\|`,
+      where either sum is taken over all steps since the accumulation estimate was created or reset (whichever came most recently), and the norm is taken using the tolerance-informed error-weight vector (see :c:func:`ERKStepGetErrWeights``).
+
+   .. versionadded:: 5.6.0
+
+
+.. c:function:: int ERKStepResetAccumulatedError(void* arkode_mem)
+
+   Resets the accumulated temporal error estimate.
+
+   **Arguments:**
+      * *arkode_mem* -- pointer to the ERKStep memory block.
+
+   **Return value:**
+      * *ARK_SUCCESS* if successful
+      * *ARK_MEM_NULL* if the ERKStep memory was ``NULL``
+
+   .. versionadded:: 5.6.0
+
+
+.. c:function:: int ERKStepGetAccumulatedError(void* arkode_mem, realtype* accum_error)
+
+   Gets the accumulated temporal error estimate.
+
+   **Arguments:**
+      * *arkode_mem* -- pointer to the ERKStep memory block.
+      * *accum_error* -- pointer to accumulated error scalar.
+
+   **Return value:**
+      * *ARK_SUCCESS* if successful
+      * *ARK_MEM_NULL* if the ARKStep memory was ``NULL``
+
+   .. versionadded:: 5.6.0
 
 
 
