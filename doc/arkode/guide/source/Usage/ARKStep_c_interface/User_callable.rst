@@ -3656,6 +3656,7 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
    **Arguments:**
       * *arkode_mem* -- pointer to the ARKStep memory block.
       * *accum_type* -- accumulation strategy:
+
         * 0 -- no accumulation.
         * 1 -- scalar-valued accumulation (no cancellation possible).
         * 2 -- vector-valued accumulation (cancellation possible).
@@ -3671,8 +3672,8 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
       At each step, ARKStep computes both a solution and embedding, 
       :math:`y_n` and :math:`\tilde{y}_n`, resulting in a vector-valued 
       local temporal error estimate, :math:`y_n - \tilde{y}_n`.  Accumulation 
-      strategy 1 computes :math:`\Sum_n \|y_n - \tilde{y}_n\|_{WRMS}`, while
-      accumulation strategy 2 computes :math:`\left\| \Sum_n (y_n - \tilde{y}_n)\right\|`,
+      strategy 1 computes :math:`\sum_n \|y_n - \tilde{y}_n\|_{WRMS}`, while
+      accumulation strategy 2 computes :math:`\left\| \sum_n (y_n - \tilde{y}_n)\right\|_{WRMS}`,
       where either sum is taken over all steps since the accumulation estimate was 
       created or reset (whichever came most recently), and the norm is taken using the 
       tolerance-informed error-weight vector (see :c:func:`ARKStepGetErrWeights`).
