@@ -1759,6 +1759,11 @@ booleantype arkResizeVectors(ARKodeMem ark_mem, ARKVecResizeFn resize,
                     liw_diff, tmpl, &ark_mem->constraints))
     return(SUNFALSE);
 
+  /* VAccumError */
+  if (!arkResizeVec(ark_mem, resize, resize_data, lrw_diff,
+                    liw_diff, tmpl, &ark_mem->VAccumError))
+    return(SUNFALSE);
+
   return(SUNTRUE);
 }
 
@@ -1781,6 +1786,8 @@ void arkFreeVectors(ARKodeMem ark_mem)
   arkFreeVec(ark_mem, &ark_mem->yn);
   arkFreeVec(ark_mem, &ark_mem->fn);
   arkFreeVec(ark_mem, &ark_mem->Vabstol);
+  arkFreeVec(ark_mem, &ark_mem->VRabstol);
+  arkFreeVec(ark_mem, &ark_mem->VAccumError);
   arkFreeVec(ark_mem, &ark_mem->constraints);
 }
 
