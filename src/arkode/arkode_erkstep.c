@@ -512,14 +512,6 @@ int erkStep_Init(void* arkode_mem, int init_type)
   if (init_type == RESIZE_INIT || init_type == RESET_INIT)
     return(ARK_SUCCESS);
 
-  /* enforce use of arkEwtSmallReal if using a fixed step size
-     and an internal error weight function */
-  if ( ark_mem->fixedstep && !ark_mem->user_efun ) {
-    ark_mem->user_efun = SUNFALSE;
-    ark_mem->efun      = arkEwtSetSmallReal;
-    ark_mem->e_data    = ark_mem;
-  }
-
   /* Create Butcher table (if not already set) */
   retval = erkStep_SetButcherTable(ark_mem);
   if (retval != ARK_SUCCESS) {
