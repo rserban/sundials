@@ -3673,7 +3673,9 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
       local temporal error estimate, :math:`y_n - \tilde{y}_n`.  Accumulation 
       strategy 1 computes :math:`\Sum_n \|y_n - \tilde{y}_n\|_{WRMS}`, while
       accumulation strategy 2 computes :math:`\left\| \Sum_n (y_n - \tilde{y}_n)\right\|`,
-      where either sum is taken over all steps since the accumulation estimate was created or reset (whichever came most recently), and the norm is taken using the tolerance-informed error-weight vector (see :c:func:`ARKStepGetErrWeights``).
+      where either sum is taken over all steps since the accumulation estimate was 
+      created or reset (whichever came most recently), and the norm is taken using the 
+      tolerance-informed error-weight vector (see :c:func:`ARKStepGetErrWeights`).
 
    .. versionadded:: 5.6.0
 
