@@ -21,6 +21,9 @@
 #include <arkode/arkode_erkstep.h>
 #include "arkode_impl.h"
 
+/* access to MRIStepInnerStepper_Create */
+#include "arkode/arkode_mristep.h"
+
 #ifdef __cplusplus  /* wrapper to enable C++ usage */
 extern "C" {
 #endif
@@ -61,6 +64,13 @@ typedef struct ARKodeERKStepMemRec {
   /* Reusable arrays for fused vector operations */
   realtype* cvals;
   N_Vector* Xvecs;
+  int       nfusedopvecs;  /* length of cvals and Xvecs arrays */
+
+  /* Data for using ERKStep with external polynomial forcing */
+  realtype    tshift;      /* time normalization shift    */
+  realtype    tscale;      /* time normalization scaling  */
+  N_Vector*   forcing;     /* array of forcing vectors    */
+  int         nforcing;    /* number of forcing vectors   */
 
 } *ARKodeERKStepMem;
 
@@ -82,6 +92,18 @@ booleantype erkStep_CheckNVector(N_Vector tmpl);
 int erkStep_SetButcherTable(ARKodeMem ark_mem);
 int erkStep_CheckButcherTable(ARKodeMem ark_mem);
 int erkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsm);
+void erkStep_ApplyForcing(ARKodeERKStepMem step_mem, realtype t,
+                          realtype s, int *nvec);
+
+/* private functions for interfacing with MRIStep */
+int erkStep_SetInnerForcing(void* arkode_mem, realtype tshift, realtype tscale,
+                            N_Vector *f, int nvecs);
+int erkStep_MRIStepInnerEvolve(MRIStepInnerStepper stepper,
+                               realtype t0, realtype tout, N_Vector y);
+int erkStep_MRIStepInnerFullRhs(MRIStepInnerStepper stepper, realtype t,
+                                N_Vector y, N_Vector f, int mode);
+int erkStep_MRIStepInnerReset(MRIStepInnerStepper stepper, realtype tR,
+                              N_Vector yR);
 
 /*===============================================================
   Reusable ERKStep Error Messages

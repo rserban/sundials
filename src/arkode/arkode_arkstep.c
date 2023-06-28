@@ -2705,7 +2705,7 @@ int arkStep_ComputeSolutions_MassFixed(ARKodeMem ark_mem, realtype *dsmPtr)
 
 
 /*---------------------------------------------------------------
-  Utility routines for interfacing with MRIStep
+  Utility routines for ARKStep to serve as an MRIStepInnerStepper
   ---------------------------------------------------------------*/
 
 

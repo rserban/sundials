@@ -268,6 +268,10 @@ SUNDIALS_EXPORT void ERKStepFree(void **arkode_mem);
 /* Output the ERKStep memory structure (useful when debugging) */
 SUNDIALS_EXPORT void ERKStepPrintMem(void* arkode_mem, FILE* outfile);
 
+/* Utility to wrap ERKStep as an MRIStepInnerStepper */
+SUNDIALS_EXPORT int ERKStepCreateMRIStepInnerStepper(void *arkode_mem,
+                                                     MRIStepInnerStepper *stepper);
+
 
 #ifdef __cplusplus
 }

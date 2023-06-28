@@ -476,7 +476,7 @@ SUNDIALS_EXPORT void ARKStepFree(void **arkode_mem);
 /* Output the ARKStep memory structure (useful when debugging) */
 SUNDIALS_EXPORT void ARKStepPrintMem(void* arkode_mem, FILE* outfile);
 
-/* MRIStep interface functions */
+/* Utility to wrap ARKStep as an MRIStepInnerStepper */
 SUNDIALS_EXPORT int ARKStepCreateMRIStepInnerStepper(void *arkode_mem,
                                                      MRIStepInnerStepper *stepper);
 
