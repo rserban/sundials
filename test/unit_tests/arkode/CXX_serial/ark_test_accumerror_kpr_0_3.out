@@ -1,0 +1,29 @@
+
+Accumulated error estimation test (Nonlinear Kvaerno-Prothero-Robinson problem):
+    time domain:  (-3,7]
+    DIRK solver, order = 3
+    Adaptive runs
+    G = -100
+    e = 0.5
+
+ Adaptive-step runs:
+ -----------------------------------------------------
+   Rtol: 0.01
+     acc type = 1,  dsm = 1.96668,  dsm_est = 0.104969,  dsm/dsm_est = 18.7358
+     acc type = 2,  dsm = 1.96668,  dsm_est = 0.0273323,  dsm/dsm_est = 71.9544
+   Rtol: 0.001
+     acc type = 1,  dsm = 0.445877,  dsm_est = 0.235992,  dsm/dsm_est = 1.88938
+     acc type = 2,  dsm = 0.445877,  dsm_est = 0.069042,  dsm/dsm_est = 6.45806
+   Rtol: 0.0001
+     acc type = 1,  dsm = 0.592612,  dsm_est = 0.192308,  dsm/dsm_est = 3.08158
+     acc type = 2,  dsm = 0.592612,  dsm_est = 0.0170465,  dsm/dsm_est = 34.7644
+   Rtol: 1e-05
+     acc type = 1,  dsm = 0.589338,  dsm_est = 0.321109,  dsm/dsm_est = 1.83532
+     acc type = 2,  dsm = 0.589338,  dsm_est = 0.0224254,  dsm/dsm_est = 26.2799
+   Rtol: 1e-06
+     acc type = 1,  dsm = 0.683117,  dsm_est = 0.353549,  dsm/dsm_est = 1.93217
+     acc type = 2,  dsm = 0.683117,  dsm_est = 0.0234807,  dsm/dsm_est = 29.0926
+   Rtol: 1e-07
+     acc type = 1,  dsm = 0.746238,  dsm_est = 0.381211,  dsm/dsm_est = 1.95754
+     acc type = 2,  dsm = 0.746238,  dsm_est = 0.00888471,  dsm/dsm_est = 83.9912
+   ------------------------------------------------------
