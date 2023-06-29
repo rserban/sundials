@@ -1234,6 +1234,22 @@ int ERKStepCreateMRIStepInnerStepper(void *inner_arkode_mem,
                                           erkStep_MRIStepInnerReset);
   if (retval != ARK_SUCCESS) return(retval);
 
+  retval = MRIStepInnerStepper_SetAccumulatedErrorGetFn(*stepper,
+                               erkStep_MRIStepInnerGetAccumulatedError);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  retval = MRIStepInnerStepper_SetAccumulatedErrorResetFn(*stepper,
+                               erkStep_MRIStepInnerResetAccumulatedError);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  retval = MRIStepInnerStepper_SetFixedStepFn(*stepper,
+                               erkStep_MRIStepInnerSetFixedStep);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  retval = MRIStepInnerStepper_SetRTolFactorFn(*stepper,
+                               erkStep_MRIStepInnerSetRTolFactor);
+  if (retval != ARK_SUCCESS) return(retval);
+
   return(ARK_SUCCESS);
 }
 
@@ -1325,6 +1341,100 @@ int erkStep_MRIStepInnerReset(MRIStepInnerStepper stepper, realtype tR,
   if (retval != ARK_SUCCESS) return(retval);
 
   return(ERKStepReset(arkode_mem, tR, yR));
+}
+
+
+/*------------------------------------------------------------------------------
+  erkStep_MRIStepInnerGetAccumulatedError
+
+  Implementation of MRIStepInnerGetAccumulatedError to retrieve the accumulated
+  temporal error estimate from the inner (fast) stepper.
+  ----------------------------------------------------------------------------*/
+
+int erkStep_MRIStepInnerGetAccumulatedError(MRIStepInnerStepper stepper,
+                                            realtype* accum_error)
+{
+  void* arkode_mem;
+  int   retval;
+
+  /* extract the ARKODE memory struct */
+  retval = MRIStepInnerStepper_GetContent(stepper, &arkode_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  return(ERKStepGetAccumulatedError(arkode_mem, accum_error));
+}
+
+
+/*------------------------------------------------------------------------------
+  erkStep_MRIStepInnerResetAccumulatedError
+
+  Implementation of MRIStepInnerResetAccumulatedError to reset the accumulated
+  temporal error estimator in the inner (fast) stepper.
+  ----------------------------------------------------------------------------*/
+
+int erkStep_MRIStepInnerResetAccumulatedError(MRIStepInnerStepper stepper)
+{
+  void* arkode_mem;
+  int   retval;
+
+  /* extract the ARKODE memory struct */
+  retval = MRIStepInnerStepper_GetContent(stepper, &arkode_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  return(ERKStepResetAccumulatedError(arkode_mem));
+}
+
+
+/*------------------------------------------------------------------------------
+  erkStep_MRIStepInnerSetFixedStep
+
+  Implementation of MRIStepInnerSetFixedStep to set a fixed step size for
+  the upcoming evolution using the inner (fast) stepper.
+  ----------------------------------------------------------------------------*/
+
+int erkStep_MRIStepInnerSetFixedStep(MRIStepInnerStepper stepper, realtype h)
+{
+  void* arkode_mem;
+  int   retval;
+
+  /* extract the ARKODE memory struct */
+  retval = MRIStepInnerStepper_GetContent(stepper, &arkode_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  return(ERKStepSetFixedStep(arkode_mem, h));
+}
+
+
+/*------------------------------------------------------------------------------
+  erkStep_MRIStepInnerSetRTolFactor
+
+  Implementation of MRIStepInnerSetRTolFactor to set a relative tolerance
+  scaling factor for the upcoming evolution using the inner (fast) stepper.
+  ----------------------------------------------------------------------------*/
+
+int erkStep_MRIStepInnerSetRTolFactor(MRIStepInnerStepper stepper,
+                                      realtype rtolfac)
+{
+  void* arkode_mem;
+  ARKodeMem ark_mem;
+  int   retval;
+
+  /* extract the ARKODE memory struct */
+  retval = MRIStepInnerStepper_GetContent(stepper, &arkode_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE::ERKStep",
+                    "erkStep_MRIStepInnerSetRTolFactor", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+
+  if (rtolfac > ZERO) {
+    ark_mem->reltol += rtolfac;
+    return(ARK_SUCCESS);
+  } else {
+    return(ARK_ILL_INPUT);
+  }
 }
 
 

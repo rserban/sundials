@@ -104,6 +104,13 @@ int erkStep_MRIStepInnerFullRhs(MRIStepInnerStepper stepper, realtype t,
                                 N_Vector y, N_Vector f, int mode);
 int erkStep_MRIStepInnerReset(MRIStepInnerStepper stepper, realtype tR,
                               N_Vector yR);
+int erkStep_MRIStepInnerGetAccumulatedError(MRIStepInnerStepper stepper,
+                                            realtype* accum_error);
+int erkStep_MRIStepInnerResetAccumulatedError(MRIStepInnerStepper stepper);
+int erkStep_MRIStepInnerSetFixedStep(MRIStepInnerStepper stepper, realtype h);
+int erkStep_MRIStepInnerSetRTolFactor(MRIStepInnerStepper stepper,
+                                      realtype rtolfac);
+
 
 /*===============================================================
   Reusable ERKStep Error Messages

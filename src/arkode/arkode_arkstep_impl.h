@@ -228,6 +228,12 @@ int arkStep_MRIStepInnerFullRhs(MRIStepInnerStepper stepper, realtype t,
                                 N_Vector y, N_Vector f, int mode);
 int arkStep_MRIStepInnerReset(MRIStepInnerStepper stepper, realtype tR,
                               N_Vector yR);
+int arkStep_MRIStepInnerGetAccumulatedError(MRIStepInnerStepper stepper,
+                                            realtype* accum_error);
+int arkStep_MRIStepInnerResetAccumulatedError(MRIStepInnerStepper stepper);
+int arkStep_MRIStepInnerSetFixedStep(MRIStepInnerStepper stepper, realtype h);
+int arkStep_MRIStepInnerSetRTolFactor(MRIStepInnerStepper stepper,
+                                      realtype rtolfac);
 
 
 /*===============================================================
