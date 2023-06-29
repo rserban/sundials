@@ -226,6 +226,8 @@ int SUNLinSolSolve_SuperLUDIST(SUNLinearSolver S, SUNMatrix A,
           SLU_GRID(S), SLU_LU(S), SLU_SOLVESTRUCT(S), &SLU_BERR(S), SLU_STAT(S),
           &retval);
 
+  PStatClear(SLU_STAT(S));
+
   if (retval != 0) {
     /* retval should never be < 0, and if it is > than ncol it means a memory
        allocation error occured. If 0 < retval <= ncol, then U is singular and
