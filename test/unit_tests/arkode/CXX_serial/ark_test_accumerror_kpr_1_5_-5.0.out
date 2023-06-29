@@ -1,29 +1,18 @@
 
 Accumulated error estimation test (Nonlinear Kvaerno-Prothero-Robinson problem):
     time domain:  (-3,7]
-    ERK solver, order = 5
-    Adaptive runs
     G = -5
     e = 0.5
+    ERK solver, order = 5
 
  Adaptive-step runs:
- -----------------------------------------------------
    Rtol: 0.01
-     acc type = 1,  dsm = 5.14486e-05,  dsm_est = 0.000264708,  dsm/dsm_est = 0.19436
-     acc type = 2,  dsm = 5.14486e-05,  dsm_est = 2.57056e-05,  dsm/dsm_est = 2.00146
-   Rtol: 0.001
-     acc type = 1,  dsm = 0.000674765,  dsm_est = 0.0026511,  dsm/dsm_est = 0.254523
-     acc type = 2,  dsm = 0.000674765,  dsm_est = 0.000269314,  dsm/dsm_est = 2.5055
+     acc type = 1,  dsm = 5.14486e-05,  dsm_est = 0.000264708,  dsm/dsm_est = 0.19436,  nsteps = 51
+     acc type = 2,  dsm = 5.14486e-05,  dsm_est = 2.57056e-05,  dsm/dsm_est = 2.00146,  nsteps = 51
    Rtol: 0.0001
-     acc type = 1,  dsm = 0.00506319,  dsm_est = 0.0259179,  dsm/dsm_est = 0.195355
-     acc type = 2,  dsm = 0.00506319,  dsm_est = 0.00254625,  dsm/dsm_est = 1.98849
-   Rtol: 1e-05
-     acc type = 1,  dsm = 0.0501482,  dsm_est = 0.249194,  dsm/dsm_est = 0.201242
-     acc type = 2,  dsm = 0.0501482,  dsm_est = 0.0283222,  dsm/dsm_est = 1.77063
+     acc type = 1,  dsm = 0.00506319,  dsm_est = 0.0259179,  dsm/dsm_est = 0.195355,  nsteps = 52
+     acc type = 2,  dsm = 0.00506319,  dsm_est = 0.00254625,  dsm/dsm_est = 1.98849,  nsteps = 52
    Rtol: 1e-06
-     acc type = 1,  dsm = 0.108917,  dsm_est = 0.474888,  dsm/dsm_est = 0.229352
-     acc type = 2,  dsm = 0.108917,  dsm_est = 0.138055,  dsm/dsm_est = 0.788937
-   Rtol: 1e-07
-     acc type = 1,  dsm = 0.0947839,  dsm_est = 0.501389,  dsm/dsm_est = 0.189043
-     acc type = 2,  dsm = 0.0947839,  dsm_est = 0.211334,  dsm/dsm_est = 0.448502
+     acc type = 1,  dsm = 0.108917,  dsm_est = 0.474888,  dsm/dsm_est = 0.229352,  nsteps = 71
+     acc type = 2,  dsm = 0.108917,  dsm_est = 0.138055,  dsm/dsm_est = 0.788937,  nsteps = 71
    ------------------------------------------------------

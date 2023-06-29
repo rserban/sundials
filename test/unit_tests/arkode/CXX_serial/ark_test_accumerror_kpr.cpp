@@ -163,18 +163,13 @@ int main(int argc, char *argv[])
   // Initial problem output (and set implicit solver tolerances as needed)
   cout << "\nAccumulated error estimation test (Nonlinear Kvaerno-Prothero-Robinson problem):\n";
   cout << "    time domain:  (" << T0 << "," << Tf << "]\n";
+  cout << "    G = " << udata.G << endl;
+  cout << "    e = " << udata.e << endl;
   if (rk_type == 0) {
     cout << "    DIRK solver, order = " << order << endl;
   } else if (rk_type == 1) {
     cout << "    ERK solver, order = " << order << endl;
   }
-  if (adaptive) {
-    cout << "    Adaptive runs\n";
-  } else {
-    cout << "    Fixed-step runs\n";
-  }
-  cout << "    G = " << udata.G << endl;
-  cout << "    e = " << udata.e << endl;
 
   //
   // Problem Setup
@@ -311,18 +306,17 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
 {
   // Reused variables
   int retval;
+  long int nsteps;
   realtype dsm_est;
   realtype t = T0;
 
   // Set testing tolerances
   realtype abstol = RCONST(1.e-12);
-  vector<realtype> rtols = {RCONST(1.e-2), RCONST(1.e-3), RCONST(1.e-4),
-                            RCONST(1.e-5), RCONST(1.e-6), RCONST(1.e-7)};
+  vector<realtype> rtols = {RCONST(1.e-2), RCONST(1.e-4), RCONST(1.e-6)};
   vector<int> accum_types = {1, 2};
 
   // Loop over tolerances
   cout << "\n Adaptive-step runs:\n";
-  cout << " -----------------------------------------------------\n";
   for (size_t irtol=0; irtol<rtols.size(); irtol++) {
 
     cout << "   Rtol: " << rtols[irtol] << endl;
@@ -351,6 +345,8 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
         if (check_retval(&retval, "ARKStepEvolve", 1)) break;
         retval = ARKStepGetAccumulatedError(arkode_mem, &dsm_est);
         if (check_retval(&retval, "ARKStepGetAccumulatedError", 1)) break;
+        retval = ARKStepGetNumSteps(arkode_mem, &nsteps);
+        if (check_retval(&retval, "ARKStepGetNumSteps", 1)) break;
       } else {            // ERK
         retval = ERKStepReInit(arkode_mem, fn, T0, y);
         if (check_retval(&retval, "ERKStepReInit", 1)) return 1;
@@ -368,6 +364,8 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
         if (check_retval(&retval, "ERKStepEvolve", 1)) break;
         retval = ERKStepGetAccumulatedError(arkode_mem, &dsm_est);
         if (check_retval(&retval, "ERKStepGetAccumulatedError", 1)) break;
+        retval = ERKStepGetNumSteps(arkode_mem, &nsteps);
+        if (check_retval(&retval, "ERKStepGetNumSteps", 1)) break;
       }
 
       // Compute/print solution error
@@ -378,6 +376,7 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
            << ",  dsm = " << dsm
            << ",  dsm_est = " << dsm_est
            << ",  dsm/dsm_est = " << dsm/dsm_est
+           << ",  nsteps = " << nsteps
            << endl;
     }
   }
@@ -391,18 +390,18 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
 {
   // local variables
   int retval;
+  long int nsteps;
   realtype dsm_est;
   realtype t = T0;
 
   // Set array of fixed step sizes to use, storage for corresponding errors/orders
   realtype hmax = (Tf - T0)/1000;
   if (rk_type == 1) hmax = min(hmax, ONE/abs(udata.G));
-  vector<realtype> hvals = {hmax, hmax/2, hmax/4, hmax/8, hmax/16, hmax/32, hmax/64, hmax/128};
+  vector<realtype> hvals = {hmax, hmax/4, hmax/16, hmax/64};
   vector<int> accum_types = {1, 2};
 
   // Loop over step sizes
   cout << "\n Fixed-step runs:\n";
-  cout << " -----------------------------------------------------\n";
   for (size_t ih=0; ih<hvals.size(); ih++) {
 
     cout << "   H: " << hvals[ih] << endl;
@@ -439,6 +438,8 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
         if (check_retval(&retval, "ARKStepEvolve", 1)) break;
         retval = ARKStepGetAccumulatedError(arkode_mem, &dsm_est);
         if (check_retval(&retval, "ARKStepGetAccumulatedError", 1)) break;
+        retval = ARKStepGetNumSteps(arkode_mem, &nsteps);
+        if (check_retval(&retval, "ARKStepGetNumSteps", 1)) break;
       } else {            // ERK
         retval = ERKStepReInit(arkode_mem, fn, T0, y);
         if (check_retval(&retval, "ERKStepReInit", 1)) return 1;
@@ -456,6 +457,8 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
         if (check_retval(&retval, "ERKStepEvolve", 1)) break;
         retval = ERKStepGetAccumulatedError(arkode_mem, &dsm_est);
         if (check_retval(&retval, "ERKStepGetAccumulatedError", 1)) break;
+        retval = ERKStepGetNumSteps(arkode_mem, &nsteps);
+        if (check_retval(&retval, "ERKStepGetNumSteps", 1)) break;
       }
 
       // Compute/print solution error
@@ -466,6 +469,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
            << ",  dsm = " << dsm
            << ",  dsm_est = " << dsm_est
            << ",  dsm/dsm_est = " << dsm/dsm_est
+           << ",  nsteps = " << nsteps
            << endl;
     }
   }

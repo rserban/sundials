@@ -4,26 +4,15 @@ Accumulated error estimation test (Brusselator ODE problem):
     initial conditions:  u0 = 3,  v0 = 3,  w0 = 3.5
     problem parameters:  a = 0.5,  b = 3,  ep = 0.0005
     DIRK solver, order = 5
-    Adaptive runs
 
  Adaptive-step runs:
- -----------------------------------------------------
    Rtol: 0.01
-     acc type = 1,  dsm = 0.225032,  dsm_est = 0.0034359,  dsm/dsm_est = 65.4942
-     acc type = 2,  dsm = 0.225032,  dsm_est = 0.00513385,  dsm/dsm_est = 43.8329
-   Rtol: 0.001
-     acc type = 1,  dsm = 0.855697,  dsm_est = 0.00673451,  dsm/dsm_est = 127.062
-     acc type = 2,  dsm = 0.855697,  dsm_est = 0.0180656,  dsm/dsm_est = 47.3661
+     acc type = 1,  dsm = 0.225032,  dsm_est = 0.0034359,  dsm/dsm_est = 65.4942,  nsteps = 19
+     acc type = 2,  dsm = 0.225032,  dsm_est = 0.00513385,  dsm/dsm_est = 43.8329,  nsteps = 19
    Rtol: 0.0001
-     acc type = 1,  dsm = 1.04807,  dsm_est = 0.0117724,  dsm/dsm_est = 89.0278
-     acc type = 2,  dsm = 1.04807,  dsm_est = 0.00454833,  dsm/dsm_est = 230.429
-   Rtol: 1e-05
-     acc type = 1,  dsm = 0.21519,  dsm_est = 0.0106132,  dsm/dsm_est = 20.2756
-     acc type = 2,  dsm = 0.21519,  dsm_est = 0.0079126,  dsm/dsm_est = 27.1958
+     acc type = 1,  dsm = 1.04807,  dsm_est = 0.0117724,  dsm/dsm_est = 89.0278,  nsteps = 46
+     acc type = 2,  dsm = 1.04807,  dsm_est = 0.00454833,  dsm/dsm_est = 230.429,  nsteps = 46
    Rtol: 1e-06
-     acc type = 1,  dsm = 0.0625929,  dsm_est = 0.0152961,  dsm/dsm_est = 4.09208
-     acc type = 2,  dsm = 0.0625929,  dsm_est = 0.015167,  dsm/dsm_est = 4.12693
-   Rtol: 1e-07
-     acc type = 1,  dsm = 0.0993085,  dsm_est = 0.0185454,  dsm/dsm_est = 5.35488
-     acc type = 2,  dsm = 0.0993085,  dsm_est = 0.0237023,  dsm/dsm_est = 4.18984
+     acc type = 1,  dsm = 0.0625929,  dsm_est = 0.0152961,  dsm/dsm_est = 4.09208,  nsteps = 79
+     acc type = 2,  dsm = 0.0625929,  dsm_est = 0.015167,  dsm/dsm_est = 4.12693,  nsteps = 79
    ------------------------------------------------------
