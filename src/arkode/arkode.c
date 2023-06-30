@@ -2388,6 +2388,8 @@ int arkCompleteStep(ARKodeMem ark_mem, realtype dsm)
     ark_mem->SAccumError += dsm;
   } else if (ark_mem->AccumErrorType == 2) {
     N_VLinearSum(ONE, ark_mem->VAccumError, ONE, ark_mem->tempv1, ark_mem->VAccumError);
+  } else if (ark_mem->AccumErrorType == 3) {
+    ark_mem->SAccumError = SUNMAX(dsm, ark_mem->SAccumError);
   }
 
   /* apply user-supplied step postprocessing function (if supplied) */
