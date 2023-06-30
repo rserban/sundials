@@ -453,6 +453,8 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
         if (check_retval(&retval, "ERKStepSetFixedStep", 1)) return 1;
         retval = ERKStepSetMaxNumSteps(arkode_mem, 1000000);
         if (check_retval(&retval, "ERKStepSetMaxNumSteps", 1)) return(1);
+        retval = ERKStepSStolerances(arkode_mem, RCONST(1.e-9), RCONST(1.e-12));
+        if (check_retval(&retval, "ERKStepSStolerances", 1)) return 1;
         retval = ERKStepSetStopTime(arkode_mem, Tf);
         if (check_retval(&retval, "ERKStepSetStopTime", 1)) return 1;
         retval = ERKStepEvolve(arkode_mem, Tf, y, &t, ARK_NORMAL);
@@ -533,6 +535,8 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
       if (check_retval(&retval, "ERKStepSetMaxNumSteps", 1)) return(1);
       retval = ERKStepSetStopTime(arkode_mem, Tf);
       if (check_retval(&retval, "ERKStepSetStopTime", 1)) return 1;
+      retval = ERKStepSStolerances(arkode_mem, RCONST(1.e-9), RCONST(1.e-12));
+      if (check_retval(&retval, "ERKStepSStolerances", 1)) return 1;
       retval = ERKStepEvolve(arkode_mem, Tf, y, &t, ARK_NORMAL);
       if (check_retval(&retval, "ERKStepEvolve", 1)) break;
       retval = ERKStepGetNumSteps(arkode_mem, &nsteps);
