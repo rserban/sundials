@@ -390,9 +390,11 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
 {
   // local variables
   int retval;
-  long int nsteps;
+  long int nsteps, nsteps2;
   realtype dsm_est;
-  realtype t = T0;
+  realtype t, t2;
+  N_Vector y2 = N_VClone(y);
+  N_Vector ewt = N_VClone(y);
 
   // Set array of fixed step sizes to use, storage for corresponding errors/orders
   realtype hmax = (Tf - T0)/1000;
@@ -406,7 +408,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
 
     cout << "   H: " << hvals[ih] << endl;
 
-    // Loop over accumulation types
+    // Loop over built-in accumulation types
     for (size_t iaccum=0; iaccum<accum_types.size(); iaccum++) {
 
       // Reset integrator for this run, and evolve to Tf
@@ -472,9 +474,106 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
            << ",  nsteps = " << nsteps
            << endl;
     }
+
+    // Test double fixed-step run error estimator
+    t = T0;
+    retval = Ytrue(T0, y);
+    if (check_retval(&retval, "Ytrue", 1)) return 1;
+    t2 = T0;
+    retval = Ytrue(T0, y2);
+    if (check_retval(&retval, "Ytrue", 1)) return 1;
+    if (rk_type == 0) {  // DIRK
+      retval = ARKStepReInit(arkode_mem, NULL, fn, T0, y);
+      if (check_retval(&retval, "ARKStepReInit", 1)) return 1;
+      retval = ARKStepSetAccumulatedErrorType(arkode_mem, 0);
+      if (check_retval(&retval, "ARKStepSetAccumulatedErrorType", 1)) return 1;
+      retval = ARKStepSetFixedStep(arkode_mem, hvals[ih]);
+      if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
+      retval = ARKStepSetMaxNumSteps(arkode_mem, 1000000);
+      if (check_retval(&retval, "ARKStepSetMaxNumSteps", 1)) return(1);
+      retval = ARKStepSetStopTime(arkode_mem, Tf);
+      if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+      retval = ARKStepSStolerances(arkode_mem, RCONST(1.e-9), RCONST(1.e-12));
+      if (check_retval(&retval, "ARKStepSStolerances", 1)) return 1;
+      retval = ARKStepSetJacEvalFrequency(arkode_mem, 1);
+      if (check_retval(&retval, "ARKStepSetJacEvalFrequency", 1)) return 1;
+      retval = ARKStepSetLSetupFrequency(arkode_mem, 1);
+      if (check_retval(&retval, "ARKStepSetLSetupFrequency", 1)) return 1;
+      retval = ARKStepSetMaxNonlinIters(arkode_mem, 20);
+      if (check_retval(&retval, "ARKStepSetMaxNonlinIters", 1)) return 1;
+      retval = ARKStepEvolve(arkode_mem, Tf, y, &t, ARK_NORMAL);
+      if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+      retval = ARKStepGetNumSteps(arkode_mem, &nsteps);
+      if (check_retval(&retval, "ARKStepGetNumSteps", 1)) break;
+
+      retval = ARKStepReInit(arkode_mem, NULL, fn, T0, y2);
+      if (check_retval(&retval, "ARKStepReInit", 1)) return 1;
+      retval = ARKStepSetFixedStep(arkode_mem, 2.0*hvals[ih]);
+      if (check_retval(&retval, "ARKStepSetFixedStep", 1)) return 1;
+      retval = ARKStepSetStopTime(arkode_mem, Tf);
+      if (check_retval(&retval, "ARKStepSetStopTime", 1)) return 1;
+      retval = ARKStepEvolve(arkode_mem, Tf, y2, &t2, ARK_NORMAL);
+      if (check_retval(&retval, "ARKStepEvolve", 1)) break;
+      retval = ARKStepGetNumSteps(arkode_mem, &nsteps2);
+      if (check_retval(&retval, "ARKStepGetNumSteps", 1)) break;
+
+      retval = ARKStepGetErrWeights(arkode_mem, ewt);
+      if (check_retval(&retval, "ARKStepGetErrWeights", 1)) break;
+      N_VLinearSum(1.0, y2, -1.0, y, y2);
+      dsm_est = N_VWrmsNorm(y2, ewt);
+      nsteps += nsteps2;
+    } else {            // ERK
+      retval = ERKStepReInit(arkode_mem, fn, T0, y);
+      if (check_retval(&retval, "ERKStepReInit", 1)) return 1;
+      retval = ERKStepSetAccumulatedErrorType(arkode_mem, 0);
+      if (check_retval(&retval, "ERKStepSetAccumulatedErrorType", 1)) return 1;
+      retval = ERKStepSetFixedStep(arkode_mem, hvals[ih]);
+      if (check_retval(&retval, "ERKStepSetFixedStep", 1)) return 1;
+      retval = ERKStepSetMaxNumSteps(arkode_mem, 1000000);
+      if (check_retval(&retval, "ERKStepSetMaxNumSteps", 1)) return(1);
+      retval = ERKStepSetStopTime(arkode_mem, Tf);
+      if (check_retval(&retval, "ERKStepSetStopTime", 1)) return 1;
+      retval = ERKStepEvolve(arkode_mem, Tf, y, &t, ARK_NORMAL);
+      if (check_retval(&retval, "ERKStepEvolve", 1)) break;
+      retval = ERKStepGetNumSteps(arkode_mem, &nsteps);
+      if (check_retval(&retval, "ERKStepGetNumSteps", 1)) break;
+
+      retval = ERKStepReInit(arkode_mem, fn, T0, y2);
+      if (check_retval(&retval, "ERKStepReInit", 1)) return 1;
+      retval = ERKStepSetFixedStep(arkode_mem, 2.0*hvals[ih]);
+      if (check_retval(&retval, "ERKStepSetFixedStep", 1)) return 1;
+      retval = ERKStepSetStopTime(arkode_mem, Tf);
+      if (check_retval(&retval, "ERKStepSetStopTime", 1)) return 1;
+      retval = ERKStepEvolve(arkode_mem, Tf, y2, &t2, ARK_NORMAL);
+      if (check_retval(&retval, "ERKStepEvolve", 1)) break;
+      retval = ERKStepGetNumSteps(arkode_mem, &nsteps2);
+      if (check_retval(&retval, "ERKStepGetNumSteps", 1)) break;
+
+      retval = ERKStepGetErrWeights(arkode_mem, ewt);
+      if (check_retval(&retval, "ERKStepGetErrWeights", 1)) break;
+      N_VLinearSum(1.0, y2, -1.0, y, y2);
+      dsm_est = N_VWrmsNorm(y2, ewt);
+      nsteps += nsteps2;
+    }
+    realtype udsm = abs(NV_Ith_S(y,0)-utrue(t))/((1.e-12) + (1.e-9)*abs(utrue(t)));
+    realtype vdsm = abs(NV_Ith_S(y,1)-vtrue(t))/((1.e-12) + (1.e-9)*abs(vtrue(t)));
+    realtype dsm = sqrt(0.5*(udsm*udsm + vdsm*vdsm));
+    cout << "     acc type = " << 3
+         << ",  dsm = " << dsm
+         << ",  dsm_est = " << dsm_est
+         << ",  dsm/dsm_est = " << dsm/dsm_est
+         << ",  nsteps = " << nsteps
+         << endl;
+
+
+    // Test max-step run error estimator
+
+
   }
   cout << "   ------------------------------------------------------\n";
 
+  N_VDestroy(y2);
+  N_VDestroy(ewt);
   return(0);
 }
 
