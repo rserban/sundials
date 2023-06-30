@@ -486,7 +486,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
     realtype vdsm = abs(NV_Ith_S(y,1)-NV_Ith_S(yref,1))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,1)));
     realtype wdsm = abs(NV_Ith_S(y,2)-NV_Ith_S(yref,2))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,2)));
     realtype dsm = sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
-    cout << "     acc type = " << 3
+    cout << "     acc type = " << 4
          << ",  dsm = " << dsm
          << ",  dsm_est = " << dsm_est
          << ",  dsm/dsm_est = " << dsm/dsm_est

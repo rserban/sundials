@@ -1265,8 +1265,9 @@ int arkSetMaxConvFails(void *arkode_mem, int maxncf)
   This routine sets the accumulated temporal error estimation
   strategy:
      0 => no accumulation
-     1 => scalar accumulation (disallows cancellation)
+     1 => scalar 'mean' accumulation (disallows cancellation)
      2 => vector accumulation (allows cancellation)
+     3 => scalar 'max' accumulation (disallows cancellation)
   ---------------------------------------------------------------*/
 int arkSetAccumulatedErrorType(void *arkode_mem, int accum_type)
 {
@@ -1298,7 +1299,13 @@ int arkSetAccumulatedErrorType(void *arkode_mem, int accum_type)
     }
     N_VConst(ZERO, ark_mem->VAccumError);
     return(ARK_SUCCESS);
-  } else if (accum_type == 0) {
+  } else if (accum_type == 3) {
+    ark_mem->AccumErrorType = 3;
+    ark_mem->AccumErrorStep = ark_mem->nst;
+    ark_mem->SAccumError = ZERO;
+    return(ARK_SUCCESS);
+  }
+    else if (accum_type == 0) {
     ark_mem->AccumErrorType = 0;
     return(ARK_SUCCESS);
   } else {
@@ -1326,7 +1333,7 @@ int arkResetAccumulatedError(void *arkode_mem)
   ark_mem = (ARKodeMem) arkode_mem;
 
   /* Reset based on error accumulation type */
-  if (ark_mem->AccumErrorType == 1) {
+  if ((ark_mem->AccumErrorType == 1) || (ark_mem->AccumErrorType == 3)){
     ark_mem->AccumErrorStep = ark_mem->nst;
     ark_mem->SAccumError = ZERO;
     return(ARK_SUCCESS);
@@ -1371,6 +1378,9 @@ int arkGetAccumulatedError(void *arkode_mem, realtype *accum_error)
     return(ARK_SUCCESS);
   } else if (ark_mem->AccumErrorType == 2) {
     *accum_error = N_VWrmsNorm(ark_mem->VAccumError, ark_mem->ewt) / steps;
+    return(ARK_SUCCESS);
+  } else if (ark_mem->AccumErrorType == 3) {
+    *accum_error = ark_mem->SAccumError;
     return(ARK_SUCCESS);
   } else {
     arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
