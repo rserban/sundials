@@ -315,7 +315,7 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
   // Set testing tolerances
   realtype abstol = RCONST(1.e-12);
   vector<realtype> rtols = {RCONST(1.e-2), RCONST(1.e-4), RCONST(1.e-6)};
-  vector<int> accum_types = {1, 2};
+  vector<int> accum_types = {1, 2, 3};
 
   // Loop over tolerances
   cout << "\n Adaptive-step runs:\n";
@@ -381,7 +381,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
   // Set array of fixed step sizes to use, storage for corresponding errors/orders
   realtype hmax = (Tf - T0)/200;
   vector<realtype> hvals = {hmax, hmax/4, hmax/16, hmax/64};
-  vector<int> accum_types = {1, 2};
+  vector<int> accum_types = {1, 2, 3};
 
   // Loop over step sizes
   cout << "\n Fixed-step runs:\n";
