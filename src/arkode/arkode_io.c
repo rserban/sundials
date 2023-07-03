@@ -1374,13 +1374,14 @@ int arkGetAccumulatedError(void *arkode_mem, realtype *accum_error)
 
   /* Fill output based on error accumulation type */
   if (ark_mem->AccumErrorType == 1) {
-    *accum_error = ark_mem->SAccumError / steps;
+    *accum_error = ark_mem->SAccumError / steps * ark_mem->reltol;
     return(ARK_SUCCESS);
   } else if (ark_mem->AccumErrorType == 2) {
-    *accum_error = N_VWrmsNorm(ark_mem->VAccumError, ark_mem->ewt) / steps;
+    *accum_error = N_VWrmsNorm(ark_mem->VAccumError, ark_mem->ewt)
+                 / steps * ark_mem->reltol;
     return(ARK_SUCCESS);
   } else if (ark_mem->AccumErrorType == 3) {
-    *accum_error = ark_mem->SAccumError;
+    *accum_error = ark_mem->SAccumError * ark_mem->reltol;
     return(ARK_SUCCESS);
   } else {
     arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",

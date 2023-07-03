@@ -371,7 +371,7 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
       // Compute/print solution error
       realtype udsm = abs(NV_Ith_S(y,0)-utrue(t))/(abstol + rtols[irtol]*abs(utrue(t)));
       realtype vdsm = abs(NV_Ith_S(y,1)-vtrue(t))/(abstol + rtols[irtol]*abs(vtrue(t)));
-      realtype dsm = sqrt(0.5*(udsm*udsm + vdsm*vdsm));
+      realtype dsm = rtols[irtol]*sqrt(0.5*(udsm*udsm + vdsm*vdsm));
       cout << "     acc type = " << accum_types[iaccum]
            << ",  dsm = " << dsm
            << ",  dsm_est = " << dsm_est
@@ -466,7 +466,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
       // Compute/print solution error
       realtype udsm = abs(NV_Ith_S(y,0)-utrue(t))/((1.e-12) + (1.e-9)*abs(utrue(t)));
       realtype vdsm = abs(NV_Ith_S(y,1)-vtrue(t))/((1.e-12) + (1.e-9)*abs(vtrue(t)));
-      realtype dsm = sqrt(0.5*(udsm*udsm + vdsm*vdsm));
+      realtype dsm = (1.e-9)*sqrt(0.5*(udsm*udsm + vdsm*vdsm));
       cout << "     acc type = " << accum_types[iaccum]
            << ",  dsm = " << dsm
            << ",  dsm_est = " << dsm_est
@@ -557,7 +557,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
     }
     realtype udsm = abs(NV_Ith_S(y,0)-utrue(t))/((1.e-12) + (1.e-9)*abs(utrue(t)));
     realtype vdsm = abs(NV_Ith_S(y,1)-vtrue(t))/((1.e-12) + (1.e-9)*abs(vtrue(t)));
-    realtype dsm = sqrt(0.5*(udsm*udsm + vdsm*vdsm));
+    realtype dsm = (1.e-9)*sqrt(0.5*(udsm*udsm + vdsm*vdsm));
     cout << "     acc type = " << 4
          << ",  dsm = " << dsm
          << ",  dsm_est = " << dsm_est

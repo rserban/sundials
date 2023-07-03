@@ -352,7 +352,7 @@ static int adaptive_run(void *arkode_mem, N_Vector y, realtype T0,
       realtype udsm = abs(NV_Ith_S(y,0)-NV_Ith_S(yref,0))/(abstol + rtols[irtol]*abs(NV_Ith_S(yref,0)));
       realtype vdsm = abs(NV_Ith_S(y,1)-NV_Ith_S(yref,1))/(abstol + rtols[irtol]*abs(NV_Ith_S(yref,1)));
       realtype wdsm = abs(NV_Ith_S(y,2)-NV_Ith_S(yref,2))/(abstol + rtols[irtol]*abs(NV_Ith_S(yref,2)));
-      realtype dsm = sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
+      realtype dsm = rtols[irtol]*sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
       cout << "     acc type = " << accum_types[iaccum]
            << ",  dsm = " << dsm
            << ",  dsm_est = " << dsm_est
@@ -428,7 +428,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
       realtype udsm = abs(NV_Ith_S(y,0)-NV_Ith_S(yref,0))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,0)));
       realtype vdsm = abs(NV_Ith_S(y,1)-NV_Ith_S(yref,1))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,1)));
       realtype wdsm = abs(NV_Ith_S(y,2)-NV_Ith_S(yref,2))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,2)));
-      realtype dsm = sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
+      realtype dsm = (1.e-9)*sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
       cout << "     acc type = " << accum_types[iaccum]
            << ",  dsm = " << dsm
            << ",  dsm_est = " << dsm_est
@@ -485,7 +485,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
     realtype udsm = abs(NV_Ith_S(y,0)-NV_Ith_S(yref,0))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,0)));
     realtype vdsm = abs(NV_Ith_S(y,1)-NV_Ith_S(yref,1))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,1)));
     realtype wdsm = abs(NV_Ith_S(y,2)-NV_Ith_S(yref,2))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,2)));
-    realtype dsm = sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
+    realtype dsm = (1.e-9)*sqrt((udsm*udsm + vdsm*vdsm + wdsm*wdsm)/3);
     cout << "     acc type = " << 4
          << ",  dsm = " << dsm
          << ",  dsm_est = " << dsm_est
