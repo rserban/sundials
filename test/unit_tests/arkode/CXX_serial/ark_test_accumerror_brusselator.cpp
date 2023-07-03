@@ -479,7 +479,7 @@ static int fixed_run(void *arkode_mem, N_Vector y, realtype T0, realtype Tf,
     retval = ARKStepGetErrWeights(arkode_mem, ewt);
     if (check_retval(&retval, "ARKStepGetErrWeights", 1)) break;
     N_VLinearSum(1.0, y2, -1.0, y, y2);
-    dsm_est = N_VWrmsNorm(y2, ewt);
+    dsm_est = (1.e-9)*N_VWrmsNorm(y2, ewt);
     nsteps += nsteps2;
 
     realtype udsm = abs(NV_Ith_S(y,0)-NV_Ith_S(yref,0))/((1.e-12) + (1.e-9)*abs(NV_Ith_S(yref,0)));
