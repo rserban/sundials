@@ -22,10 +22,11 @@
 #include <arkode/arkode_butcher.h>
 #include <arkode/arkode_butcher_dirk.h>
 #include <arkode/arkode_butcher_erk.h>
-#include "arkode_adapt_impl.h"
 #include "arkode_root_impl.h"
 #include <sundials/sundials_context.h>
 #include <sundials/sundials_linearsolver.h>
+#include <sundials/sundials_control.h>
+#include <sundials/sundials_heuristics.h>
 #include "sundials_context_impl.h"
 #include "sundials_logger_impl.h"
 
@@ -240,6 +241,25 @@ int arkInterpEvaluate(void* arkode_mem, ARKInterp interp,
                       realtype tau, int d, int order, N_Vector yout);
 
 
+/* =======================================================================
+ * User-provided stability function wrapper structure and utility routines
+ * ======================================================================= */
+
+struct ARKUserStabilityDataMem {
+  ARKExpStabFn EStab;  /* user-provided stability function */
+  void* estab_data;    /* user-provided data pointer */
+  void* arkode_mem;    /* ARKODE time-stepper memory */
+};
+
+typedef struct ARKUserStabilityDataMem *ARKUserStabilityData;
+
+void* ARKUserStability(void* arkode_mem, ARKExpStabFn EStab,
+                       void* estab_data);
+
+void ARKUserStability_Free(void* sdata);
+
+int ARKControlExpStab(realtype *hstab, void* user_data);
+
 /*===============================================================
   ARKODE data structures
   ===============================================================*/
@@ -341,8 +361,6 @@ typedef struct ARKodeMemRec {
   /* Time step data */
   realtype hin;                /* initial step size                        */
   realtype h;                  /* current step size                        */
-  realtype hmin;               /* |h| >= hmin                              */
-  realtype hmax_inv;           /* |h| <= 1/hmax_inv                        */
   realtype hprime;             /* next actual step size to be used         */
   realtype next_h;             /* next dynamical step size (only used in
                                   getCurrenStep); note that this could
@@ -352,7 +370,8 @@ typedef struct ARKodeMemRec {
                                   (changes with each stage)                */
   realtype tretlast;           /* value of tret last returned by ARKODE    */
   booleantype fixedstep;       /* flag to disable temporal adaptivity      */
-  ARKodeHAdaptMem hadapt_mem;  /* time step adaptivity structure           */
+  SUNControl hcontroller;      /* temporal error controller                */
+  SUNHeuristics hconstraints;  /* time step constraint heuristics          */
 
 
   /* Limits and various solver parameters */
@@ -960,9 +979,9 @@ int arkCheckConvergence(ARKodeMem ark_mem, int *nflagPtr, int *ncfPtr);
 int arkCheckConstraints(ARKodeMem ark_mem, int *nflag, int *constrfails);
 int arkCheckTemporalError(ARKodeMem ark_mem, int *nflagPtr, int *nefPtr,
                           realtype dsm);
-int arkAccessHAdaptMem(void* arkode_mem, const char *fname,
-                       ARKodeMem *ark_mem, ARKodeHAdaptMem *hadapt_mem);
 
+int arkSetController(void *arkode_mem, SUNControl C);
+int arkSetHeuristics(void *arkode_mem, SUNHeuristics H);
 int arkSetDefaults(void *arkode_mem);
 int arkSetDenseOrder(void *arkode_mem, int dord);
 int arkSetInterpolantType(void *arkode_mem, int itype);

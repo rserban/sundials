@@ -29,6 +29,8 @@
 #include "arkode_interp_impl.h"
 #include <sundials/sundials_math.h>
 #include <sundials/sundials_types.h>
+#include <suncontrol/suncontrol_pid.h>
+#include <sunheuristics/sunheuristics_default.h>
 
 
 /*===============================================================
@@ -47,6 +49,7 @@
 ARKodeMem arkCreate(SUNContext sunctx)
 {
   int iret;
+  long int lenrw, leniw;
   ARKodeMem ark_mem;
 
   if (!sunctx) {
@@ -117,15 +120,27 @@ ARKodeMem arkCreate(SUNContext sunctx)
   /* No user_data pointer yet */
   ark_mem->user_data = NULL;
 
-  /* Allocate step adaptivity structure and note storage */
-  ark_mem->hadapt_mem = arkAdaptInit();
-  if (ark_mem->hadapt_mem == NULL) {
+  /* Allocate default step controller (PID) and note storage */
+  ark_mem->hcontroller = SUNControlPID(sunctx);
+  if (ark_mem->hcontroller == NULL) {
     arkProcessError(NULL, ARK_MEM_FAIL, "ARKODE", "arkCreate",
-                    "Allocation of step adaptivity structure failed");
+                    "Allocation of step controller object failed");
     return(NULL);
   }
-  ark_mem->lrw += ARK_ADAPT_LRW;
-  ark_mem->liw += ARK_ADAPT_LIW;
+  (void) SUNControlSpace(ark_mem->hcontroller, &lenrw, &leniw);
+  ark_mem->lrw += lenrw;
+  ark_mem->liw += leniw;
+
+  /* Allocate default heuristic structure and note storage */
+  ark_mem->hconstraints = SUNHeuristicsDefault(sunctx);
+  if (ark_mem->hconstraints == NULL) {
+    arkProcessError(NULL, ARK_MEM_FAIL, "ARKODE", "arkCreate",
+                    "Allocation of step heuristics object failed");
+    return(NULL);
+  }
+  (void) SUNHeuristicsSpace(ark_mem->hconstraints, &lenrw, &leniw);
+  ark_mem->lrw += lenrw;
+  ark_mem->liw += leniw;
 
   /* Initialize the interpolation structure to NULL */
   ark_mem->interp = NULL;
@@ -873,13 +888,6 @@ int arkEvolve(ARKodeMem ark_mem, realtype tout, N_Vector yout,
         if (kflag < 0)  break;
       }
 
-      /* if we've made it here then no nonrecoverable failures occurred; someone above
-         has recommended an 'eta' value for the next step -- enforce bounds on that value
-         and set upcoming step size */
-      ark_mem->eta = SUNMIN(ark_mem->eta, ark_mem->hadapt_mem->etamax);
-      ark_mem->eta = SUNMAX(ark_mem->eta, ark_mem->hmin / SUNRabs(ark_mem->h));
-      ark_mem->eta /= SUNMAX(ONE, SUNRabs(ark_mem->h) * ark_mem->hmax_inv*ark_mem->eta);
-
       /* if ignoring temporal error test result (XBraid) force step to pass */
       if (ark_mem->force_pass) {
         ark_mem->last_kflag = kflag;
@@ -889,9 +897,6 @@ int arkEvolve(ARKodeMem ark_mem, realtype tout, N_Vector yout,
 
       /* break attempt loop on successful step */
       if (kflag == ARK_SUCCESS)  break;
-
-      /* unsuccessful step, if |h| = hmin, return ARK_ERR_FAILURE */
-      if (SUNRabs(ark_mem->h) <= ark_mem->hmin*ONEPSM) return(ARK_ERR_FAILURE);
 
       /* update h, hprime and next_h for next iteration */
       ark_mem->h *= ark_mem->eta;
@@ -1080,11 +1085,11 @@ void arkFree(void **arkode_mem)
   /* free vector storage */
   arkFreeVectors(ark_mem);
 
-  /* free the time step adaptivity module */
-  if (ark_mem->hadapt_mem != NULL) {
-    free(ark_mem->hadapt_mem);
-    ark_mem->hadapt_mem = NULL;
-  }
+  /* free the time step controller object */
+  SUNControlDestroy(ark_mem->hcontroller);
+
+  /* free the time step heuristics object */
+  SUNHeuristicsDestroy(ark_mem->hconstraints);
 
   /* free the interpolation module */
   if (ark_mem->interp != NULL) {
@@ -1212,6 +1217,7 @@ int arkInit(ARKodeMem ark_mem, realtype t0, N_Vector y0,
             int init_type)
 {
   booleantype stepperOK, nvectorOK, allocOK;
+  int retval;
   sunindextype lrw1, liw1;
 
   /* Check ark_mem */
@@ -1313,15 +1319,19 @@ int arkInit(ARKodeMem ark_mem, realtype t0, N_Vector y0,
     /* Tolerance scale factor */
     ark_mem->tolsf = ONE;
 
-    /* Adaptivity counters */
-    ark_mem->hadapt_mem->nst_acc = 0;
-    ark_mem->hadapt_mem->nst_exp = 0;
-
-    /* Error and step size history */
-    ark_mem->hadapt_mem->ehist[0] = ONE;
-    ark_mem->hadapt_mem->ehist[1] = ONE;
-    ark_mem->hadapt_mem->hhist[0] = ZERO;
-    ark_mem->hadapt_mem->hhist[1] = ZERO;
+    /* Reset error controller and heuristics objects */
+    retval = SUNControlReset(ark_mem->hcontroller);
+    if (retval != SUNCONTROL_SUCCESS) {
+      arkProcessError(ark_mem, ARK_CONTROLLER_ERR, "ARKODE", "arkInit",
+                      "Unable to reset error controller object");
+      return(ARK_CONTROLLER_ERR);
+    }
+    retval = SUNHeuristicsReset(ark_mem->hconstraints);
+    if (retval != SUNHEURISTICS_SUCCESS) {
+      arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkInit",
+                      "Unable to reset step heuristics object");
+      return(ARK_HEURISTICS_ERR);
+    }
 
     /* Indicate that evaluation of the full RHS is not required after each step,
        this flag is updated to SUNTRUE by the interpolation module initialization
@@ -1389,17 +1399,17 @@ void arkPrintMem(ARKodeMem ark_mem, FILE *outfile)
   fprintf(outfile, "eta = %" RSYM"\n", ark_mem->eta);
   fprintf(outfile, "tcur = %" RSYM"\n", ark_mem->tcur);
   fprintf(outfile, "tretlast = %" RSYM"\n", ark_mem->tretlast);
-  fprintf(outfile, "hmin = %" RSYM"\n", ark_mem->hmin);
-  fprintf(outfile, "hmax_inv = %" RSYM"\n", ark_mem->hmax_inv);
   fprintf(outfile, "h0u = %" RSYM"\n", ark_mem->h0u);
   fprintf(outfile, "tn = %" RSYM"\n", ark_mem->tn);
   fprintf(outfile, "hold = %" RSYM"\n", ark_mem->hold);
   fprintf(outfile, "maxnef = %i\n", ark_mem->maxnef);
   fprintf(outfile, "maxncf = %i\n", ark_mem->maxncf);
 
-  /* output time-stepping adaptivity structure */
-  fprintf(outfile, "timestep adaptivity structure:\n");
-  arkPrintAdaptMem(ark_mem->hadapt_mem, outfile);
+  /* output time-stepping controller object */
+  (void) SUNControlWrite(ark_mem->hcontroller, outfile);
+
+  /* output time-stepping heuristics object */
+  (void) SUNHeuristicsWrite(ark_mem->hconstraints, outfile);
 
   /* output inequality constraints quantities */
   fprintf(outfile, "constraintsSet = %i\n", ark_mem->constraintsSet);
@@ -1802,7 +1812,7 @@ void arkFreeVectors(ARKodeMem ark_mem)
 int arkInitialSetup(ARKodeMem ark_mem, realtype tout)
 {
   int retval, hflag, istate;
-  realtype tout_hin, rh, htmp;
+  realtype tout_hin, htmp;
   booleantype conOK;
 
   /* Set up the time stepper module */
@@ -1932,21 +1942,39 @@ int arkInitialSetup(ARKodeMem ark_mem, realtype tout)
         istate = arkHandleFailure(ark_mem, hflag);
         return(istate);
       }
-      /* Use first step growth factor for estimated h */
-      ark_mem->hadapt_mem->etamax = ark_mem->hadapt_mem->etamx1;
+      /* Reset time step heuristic controller object */
+      retval = SUNHeuristicsReset(ark_mem->hconstraints);
+      if (retval != 0) {
+        arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkInitialSetup",
+                        "Failure resetting heuristics object");
+        return(ARK_HEURISTICS_ERR);
+      }
     } else if (ark_mem->nst == 0) {
-      /* Use first step growth factor for user defined h */
-      ark_mem->hadapt_mem->etamax = ark_mem->hadapt_mem->etamx1;
+      /* Reset time step heuristic controller object */
+      retval = SUNHeuristicsReset(ark_mem->hconstraints);
+      if (retval != 0) {
+        arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkInitialSetup",
+                        "Failure resetting heuristics object");
+        return(ARK_HEURISTICS_ERR);
+      }
     } else {
-      /* Use standard growth factor (e.g., for reset) */
-      ark_mem->hadapt_mem->etamax = ark_mem->hadapt_mem->growth;
+      /* Notify time step heuristic controller object of previous successful steps */
+      retval = SUNHeuristicsUpdate(ark_mem->hconstraints);
+      if (retval != 0) {
+        arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkInitialSetup",
+                        "Failure updating heuristics object");
+        return(ARK_HEURISTICS_ERR);
+      }
     }
 
     /* Enforce step size bounds */
-    rh = SUNRabs(ark_mem->h)*ark_mem->hmax_inv;
-    if (rh > ONE) ark_mem->h /= rh;
-    if (SUNRabs(ark_mem->h) < ark_mem->hmin)
-      ark_mem->h *= ark_mem->hmin/SUNRabs(ark_mem->h);
+    retval = SUNHeuristicsBoundFirstStep(ark_mem->hconstraints, ark_mem->h,
+                                         &(ark_mem->h));
+    if (retval != SUNHEURISTICS_SUCCESS) {
+      arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkInitialSetup",
+                      "Error in call to SUNHeuristicsBoundFirstStep");
+      return(ARK_HEURISTICS_ERR);
+    }
 
     /* Check for approach to tstop */
     if (ark_mem->tstopset) {
@@ -2408,20 +2436,27 @@ int arkCompleteStep(ARKodeMem ark_mem, realtype dsm)
   /* update yn to current solution */
   N_VScale(ONE, ark_mem->ycur, ark_mem->yn);
 
-  /* Update step size and error history arrays */
-  ark_mem->hadapt_mem->ehist[1] = ark_mem->hadapt_mem->ehist[0];
-  ark_mem->hadapt_mem->ehist[0] = dsm*ark_mem->hadapt_mem->bias;
-  ark_mem->hadapt_mem->hhist[1] = ark_mem->hadapt_mem->hhist[0];
-  ark_mem->hadapt_mem->hhist[0] = ark_mem->h;
+  /* Notify time step controller object of successful step */
+  retval = SUNControlUpdate(ark_mem->hcontroller, ark_mem->h, dsm);
+  if (retval != 0) {
+    arkProcessError(ark_mem, ARK_CONTROLLER_ERR, "ARKODE", "arkCompleteStep",
+                    "Failure updating controller object");
+    return(ARK_CONTROLLER_ERR);
+  }
+
+  /* Notify time step heuristics object of successful step */
+  retval = SUNHeuristicsUpdate(ark_mem->hconstraints);
+  if (retval != 0) {
+    arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkCompleteStep",
+                    "Failure updating heuristics object");
+    return(ARK_CONTROLLER_ERR);
+  }
 
   /* update scalar quantities */
   ark_mem->nst++;
   ark_mem->hold   = ark_mem->h;
   ark_mem->tn     = ark_mem->tcur;
   ark_mem->hprime = ark_mem->h * ark_mem->eta;
-
-  /* Reset growth factor for subsequent time step */
-  ark_mem->hadapt_mem->etamax = ark_mem->hadapt_mem->growth;
 
   /* Turn off flag indicating initial step and first stage */
   ark_mem->initsetup  = SUNFALSE;
@@ -2849,25 +2884,17 @@ int arkPredict_Bootstrap(ARKodeMem ark_mem, realtype hj,
   --------------------------------------------------------------*/
 int arkCheckConvergence(ARKodeMem ark_mem, int *nflagPtr, int *ncfPtr)
 {
-  ARKodeHAdaptMem hadapt_mem;
+  int retval;
+  realtype hnew;
 
+  /* If nonlinear solver succeeded, return with ARK_SUCCESS */
   if (*nflagPtr == ARK_SUCCESS) return(ARK_SUCCESS);
 
   /* The nonlinear soln. failed; increment ncfn */
   ark_mem->ncfn++;
 
-  /* If fixed time stepping, then return with convergence failure */
-  if (ark_mem->fixedstep) return(ARK_CONV_FAILURE);
-
-  /* Otherwise, access adaptivity structure */
-  if (ark_mem->hadapt_mem == NULL) {
-    arkProcessError(ark_mem, ARK_MEM_NULL, "ARKODE", "arkCheckConvergence",
-                    MSG_ARKADAPT_NO_MEM);
-    return(ARK_MEM_NULL);
-  }
-  hadapt_mem = ark_mem->hadapt_mem;
-
-  /* Return if lsetup, lsolve, or rhs failed unrecoverably */
+  /* Return with an appropriate error condition if lsetup, lsolve, or
+     rhs failed unrecoverably */
   if (*nflagPtr < 0) {
     if (*nflagPtr == ARK_LSETUP_FAIL)       return(ARK_LSETUP_FAIL);
     else if (*nflagPtr == ARK_LSOLVE_FAIL)  return(ARK_LSOLVE_FAIL);
@@ -2875,26 +2902,31 @@ int arkCheckConvergence(ARKodeMem ark_mem, int *nflagPtr, int *ncfPtr)
     else                                    return(ARK_NLS_OP_ERR);
   }
 
-  /* At this point, nflag = CONV_FAIL or RHSFUNC_RECVR; increment ncf */
-  (*ncfPtr)++;
-  hadapt_mem->etamax = ONE;
-
-  /* If we had maxncf failures, or if |h| = hmin,
-     return ARK_CONV_FAILURE or ARK_REPTD_RHSFUNC_ERR. */
-  if ((*ncfPtr == ark_mem->maxncf) ||
-      (SUNRabs(ark_mem->h) <= ark_mem->hmin*ONEPSM)) {
+  /* If we already had maxncf failures, return ARK_CONV_FAILURE or
+     ARK_REPTD_RHSFUNC_ERR. */
+  if (*ncfPtr == ark_mem->maxncf) {
     if (*nflagPtr == CONV_FAIL)     return(ARK_CONV_FAILURE);
     if (*nflagPtr == RHSFUNC_RECVR) return(ARK_REPTD_RHSFUNC_ERR);
   }
 
-  /* Reduce step size due to convergence failure */
-  ark_mem->eta = hadapt_mem->etacf;
+  /* Attempt step reduction via heuristics control */
+  retval = SUNHeuristicsConvFail(ark_mem->hconstraints, ark_mem->h, &hnew);
 
-  /* Signal for Jacobian/preconditioner setup */
-  *nflagPtr = PREV_CONV_FAIL;
+  /* If step reduction successful: store step 'eta', increment ncf, signal
+     for Jacobian/preconditioner setup, and return to reattempt the step.
+     Otherwise, return ARK_CONV_FAILURE or ARK_HEURISTICS_ERR,
+     depending on the circumstances */
+  if (retval == SUNHEURISTICS_SUCCESS) {
+    ark_mem->eta = hnew / ark_mem->h;
+    (*ncfPtr)++;
+    *nflagPtr = PREV_CONV_FAIL;
+    return(PREDICT_AGAIN);
+  } else if (retval == SUNHEURISTICS_CANNOT_DECREASE) {
+    return(ARK_CONV_FAILURE);
+  } else {
+    return(ARK_HEURISTICS_ERR);
+  }
 
-  /* Return to reattempt the step */
-  return(PREDICT_AGAIN);
 }
 
 
@@ -2909,6 +2941,8 @@ int arkCheckConvergence(ARKodeMem ark_mem, int *nflagPtr, int *ncfPtr)
 int arkCheckConstraints(ARKodeMem ark_mem, int *constrfails, int *nflag)
 {
   booleantype constraintsPassed;
+  realtype hnew;
+  int retval;
   N_Vector mm  = ark_mem->tempv4;
   N_Vector tmp = ark_mem->tempv1;
 
@@ -2928,14 +2962,17 @@ int arkCheckConstraints(ARKodeMem ark_mem, int *constrfails, int *nflag)
   /* Return with error if using fixed step sizes */
   if (ark_mem->fixedstep) return(ARK_CONSTR_FAIL);
 
-  /* Return with error if |h| == hmin */
-  if (SUNRabs(ark_mem->h) <= ark_mem->hmin*ONEPSM) return(ARK_CONSTR_FAIL);
-
-  /* Reduce h by computing eta = h'/h */
+  /* Recommend step size adjustment to satisfy constraints */
   N_VLinearSum(ONE, ark_mem->yn, -ONE, ark_mem->ycur, tmp);
   N_VProd(mm, tmp, tmp);
-  ark_mem->eta = RCONST(0.9)*N_VMinQuotient(ark_mem->yn, tmp);
-  ark_mem->eta = SUNMAX(ark_mem->eta, TENTH);
+  hnew = ark_mem->h * SUNMAX(RCONST(0.9)*N_VMinQuotient(ark_mem->yn, tmp), TENTH);
+
+  /* Check if step size reduction is possible; if so adjust recommended step to meet bounds */
+  retval = SUNHeuristicsBoundReduction(ark_mem->hconstraints, ark_mem->h, hnew, &hnew);
+  if (retval != SUNHEURISTICS_SUCCESS) { return(ARK_CONSTR_FAIL); }
+
+  /* Compute step size change for subsequent use */
+  ark_mem->eta = hnew / ark_mem->h;
 
   /* Signal for Jacobian/preconditioner setup */
   *nflag = PREV_CONV_FAIL;
@@ -2959,32 +2996,33 @@ int arkCheckConstraints(ARKodeMem ark_mem, int *constrfails, int *nflag)
 
   If the test fails:
     - if maxnef error test failures have occurred or if
-      SUNRabs(h) = hmin, we return ARK_ERR_FAILURE.
+      no stepsize reduction is possible, we return ARK_ERR_FAILURE.
     - otherwise: set *nflagPtr to PREV_ERR_FAIL, and
       return TRY_AGAIN.
   --------------------------------------------------------------*/
 int arkCheckTemporalError(ARKodeMem ark_mem, int *nflagPtr, int *nefPtr, realtype dsm)
 {
   int retval;
-  realtype ttmp;
-  long int nsttmp;
-  ARKodeHAdaptMem hadapt_mem;
+  realtype hnew;
 
-  /* Access hadapt_mem structure */
-  if (ark_mem->hadapt_mem == NULL) {
-    arkProcessError(ark_mem, ARK_MEM_NULL, "ARKODE", "arkCheckTemporalError",
-                    MSG_ARKADAPT_NO_MEM);
-    return(ARK_MEM_NULL);
+  /* Request new stepsize from controller */
+  retval = SUNControlEstimateStep(ark_mem->hcontroller, ark_mem->h, dsm, &hnew);
+  if (retval != SUNCONTROL_SUCCESS) {
+    arkProcessError(ark_mem, ARK_CONTROLLER_ERR, "ARKODE", "arkCheckTemporalError",
+                    "Controller unable to recommend a step size");
+    return(ARK_CONTROLLER_ERR);
   }
-  hadapt_mem = ark_mem->hadapt_mem;
 
-  /* consider change of step size for next step attempt (may be
-     larger/smaller than current step, depending on dsm) */
-  ttmp = (dsm <= ONE) ? ark_mem->tn + ark_mem->h : ark_mem->tn;
-  nsttmp = (dsm <= ONE) ? ark_mem->nst+1 : ark_mem->nst;
-  retval = arkAdapt((void*) ark_mem, hadapt_mem, ark_mem->ycur, ttmp,
-                    ark_mem->h, dsm, nsttmp);
-  if (retval != ARK_SUCCESS)  return(ARK_ERR_FAILURE);
+  /* Perform heuristic controls on recommended step size */
+  retval = SUNHeuristicsConstrainStep(ark_mem->hconstraints, ark_mem->h, hnew, &hnew);
+  if (retval != SUNHEURISTICS_SUCCESS) {
+    arkProcessError(ark_mem, ARK_HEURISTICS_ERR, "ARKODE", "arkCheckTemporalError",
+                    "Heuristics unable to constrain recommended step");
+    return(ARK_HEURISTICS_ERR);
+  }
+
+  /* Store step size recommendation in ark_mem->eta */
+  ark_mem->eta = hnew / ark_mem->h;
 
   /* If est. local error norm dsm passes test, return ARK_SUCCESS */
   if (dsm <= ONE) return(ARK_SUCCESS);
@@ -2997,41 +3035,21 @@ int arkCheckTemporalError(ARKodeMem ark_mem, int *nflagPtr, int *nefPtr, realtyp
   /* At maxnef failures, return ARK_ERR_FAILURE */
   if (*nefPtr == ark_mem->maxnef)  return(ARK_ERR_FAILURE);
 
-  /* Set etamax=1 to prevent step size increase at end of this step */
-  hadapt_mem->etamax = ONE;
+  /* Attempt step reduction via heuristics control */
+  retval = SUNHeuristicsETestFail(ark_mem->hconstraints, ark_mem->h,
+                                  hnew, *nefPtr, &hnew);
 
-  /* Enforce failure bounds on eta, update h, and return for retry of step */
-  if (*nefPtr >= hadapt_mem->small_nef)
-    ark_mem->eta = SUNMIN(ark_mem->eta, hadapt_mem->etamxf);
-
-  return(TRY_AGAIN);
-}
-
-
-/*---------------------------------------------------------------
-  arkAccessHAdaptMem:
-
-  Shortcut routine to unpack ark_mem and hadapt_mem structures from
-  void* pointer.  If either is missing it returns ARK_MEM_NULL.
-  ---------------------------------------------------------------*/
-int arkAccessHAdaptMem(void* arkode_mem, const char *fname,
-                       ARKodeMem *ark_mem, ARKodeHAdaptMem *hadapt_mem)
-{
-
-  /* access ARKodeMem structure */
-  if (arkode_mem==NULL) {
-    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE",
-                    fname, MSG_ARK_NO_MEM);
-    return(ARK_MEM_NULL);
+  /* If step reduction successful, store result and return to reattempt
+     the step.  Otherwise, return ARK_ERR_FAILURE or ARK_HEURISTICS_ERR,
+     depending on the circumstances */
+  if (retval == SUNHEURISTICS_SUCCESS) {
+    ark_mem->eta = hnew / ark_mem->h;
+    return(TRY_AGAIN);
+  } else if (retval == SUNHEURISTICS_CANNOT_DECREASE) {
+    return(ARK_ERR_FAILURE);
+  } else {
+    return(ARK_HEURISTICS_ERR);
   }
-  *ark_mem = (ARKodeMem) arkode_mem;
-  if ((*ark_mem)->hadapt_mem==NULL) {
-    arkProcessError(*ark_mem, ARK_MEM_NULL, "ARKODE",
-                    fname, MSG_ARKADAPT_NO_MEM);
-    return(ARK_MEM_NULL);
-  }
-  *hadapt_mem = (ARKodeHAdaptMem) (*ark_mem)->hadapt_mem;
-  return(ARK_SUCCESS);
 }
 
 

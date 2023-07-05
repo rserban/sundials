@@ -479,6 +479,34 @@ SWIGEXPORT int _wrap_FERKStepSetTableName(void *farg1, SwigArrayWrapper *farg2) 
 }
 
 
+SWIGEXPORT int _wrap_FERKStepSetController(void *farg1, SUNControl farg2) {
+  int fresult ;
+  void *arg1 = (void *) 0 ;
+  SUNControl arg2 = (SUNControl) 0 ;
+  int result;
+  
+  arg1 = (void *)(farg1);
+  arg2 = (SUNControl)(farg2);
+  result = (int)ERKStepSetController(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
+SWIGEXPORT int _wrap_FERKStepSetHeuristics(void *farg1, SUNHeuristics farg2) {
+  int fresult ;
+  void *arg1 = (void *) 0 ;
+  SUNHeuristics arg2 = (SUNHeuristics) 0 ;
+  int result;
+  
+  arg1 = (void *)(farg1);
+  arg2 = (SUNHeuristics)(farg2);
+  result = (int)ERKStepSetHeuristics(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
 SWIGEXPORT int _wrap_FERKStepSetCFLFraction(void *farg1, double const *farg2) {
   int fresult ;
   void *arg1 = (void *) 0 ;

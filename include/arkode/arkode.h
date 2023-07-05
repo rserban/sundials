@@ -132,6 +132,10 @@ extern "C" {
 
 #define ARK_CONTEXT_ERR            -42
 
+#define ARK_CONTROLLER_ERR         -43
+
+#define ARK_HEURISTICS_ERR         -44
+
 #define ARK_UNRECOGNIZED_ERROR     -99
 
 /* ------------------------------
@@ -175,6 +179,7 @@ typedef int (*ARKStagePredictFn)(realtype t, N_Vector zpred,
  * -------------------------- */
 
 typedef _SUNDIALS_STRUCT_ _MRIStepInnerStepper *MRIStepInnerStepper;
+
 
 #ifdef __cplusplus
 }

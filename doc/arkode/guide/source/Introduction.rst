@@ -130,6 +130,15 @@ Updated the F2003 utility routines :c:func:`SUNDIALSFileOpen` and :c:func:`SUNDI
 to support user specification of ``stdout`` and ``stderr`` strings for the output
 file names.
 
+Added :c:type:`SUNControl` and :c:type:`SUNHeuristics` base classes.  Ported
+ARKODE's internal implementations of time step control and heuristic
+constraints into implementations of these classes, and updated ARKODE to use
+these objects instead of its own implementations.  Added
+:c:func:`ARKStepSetController`,  :c:func:`ARKStepSetHeuristics`,
+:c:func:`ERKStepSetController`, and :c:func:`ERKStepSetHeuristics` routines
+so that users can modify controller/heuristic parameters, or even provide
+custom implementations.
+
 Added functionality to ARKStep and ERKStep to accumulate a temporal error
 estimate over multiple time steps.  See the routines :c:func:`ARKStepSetAccumulatedErrorType`,
 :c:func:`ARKStepResetAccumulatedError`, :c:func:`ARKStepGetAccumulatedError`,

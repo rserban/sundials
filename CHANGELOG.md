@@ -10,6 +10,14 @@ Updated the F2003 utility routines `SUNDIALSFileOpen` and `SUNDIALSFileClose`
 to support user specification of `stdout` and `stderr` strings for the output
 file names.
 
+Added `SUNControl` and `SUNHeuristics` base classes.  Ported ARKODE's internal
+implementations of time step control and heuristic constraints into
+implementations of these classes, and updated ARKODE to use these objects
+instead of its own implementations.  Added `ARKStepSetController`,
+`ARKStepSetHeuristics`, `ERKStepSetController`, and `ERKStepSetHeuristics`
+routines so that users can modify controller/heuristic parameters, or even
+provide custom implementations.
+
 ## Changes to SUNDIALS in release 6.5.1
 
 Added the functions `ARKStepClearStopTime`, `ERKStepClearStopTime`,
