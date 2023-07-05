@@ -2105,6 +2105,62 @@ SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetResetFn(void *farg1, MRIStepInnerRe
 }
 
 
+SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetAccumulatedErrorGetFn(void *farg1, MRIStepInnerGetAccumulatedError farg2) {
+  int fresult ;
+  MRIStepInnerStepper arg1 = (MRIStepInnerStepper) 0 ;
+  MRIStepInnerGetAccumulatedError arg2 = (MRIStepInnerGetAccumulatedError) 0 ;
+  int result;
+  
+  arg1 = (MRIStepInnerStepper)(farg1);
+  arg2 = (MRIStepInnerGetAccumulatedError)(farg2);
+  result = (int)MRIStepInnerStepper_SetAccumulatedErrorGetFn(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
+SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetAccumulatedErrorResetFn(void *farg1, MRIStepInnerResetAccumulatedError farg2) {
+  int fresult ;
+  MRIStepInnerStepper arg1 = (MRIStepInnerStepper) 0 ;
+  MRIStepInnerResetAccumulatedError arg2 = (MRIStepInnerResetAccumulatedError) 0 ;
+  int result;
+  
+  arg1 = (MRIStepInnerStepper)(farg1);
+  arg2 = (MRIStepInnerResetAccumulatedError)(farg2);
+  result = (int)MRIStepInnerStepper_SetAccumulatedErrorResetFn(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
+SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetFixedStepFn(void *farg1, MRIStepInnerSetFixedStep farg2) {
+  int fresult ;
+  MRIStepInnerStepper arg1 = (MRIStepInnerStepper) 0 ;
+  MRIStepInnerSetFixedStep arg2 = (MRIStepInnerSetFixedStep) 0 ;
+  int result;
+  
+  arg1 = (MRIStepInnerStepper)(farg1);
+  arg2 = (MRIStepInnerSetFixedStep)(farg2);
+  result = (int)MRIStepInnerStepper_SetFixedStepFn(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
+SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetRTolFactorFn(void *farg1, MRIStepInnerSetRTolFactor farg2) {
+  int fresult ;
+  MRIStepInnerStepper arg1 = (MRIStepInnerStepper) 0 ;
+  MRIStepInnerSetRTolFactor arg2 = (MRIStepInnerSetRTolFactor) 0 ;
+  int result;
+  
+  arg1 = (MRIStepInnerStepper)(farg1);
+  arg2 = (MRIStepInnerSetRTolFactor)(farg2);
+  result = (int)MRIStepInnerStepper_SetRTolFactorFn(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
 SWIGEXPORT int _wrap_FMRIStepInnerStepper_AddForcing(void *farg1, double const *farg2, N_Vector farg3) {
   int fresult ;
   MRIStepInnerStepper arg1 = (MRIStepInnerStepper) 0 ;
