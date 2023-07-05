@@ -3758,7 +3758,7 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
       * *arkode_mem* -- pointer to the ARKStep memory block.
       * *accum_type* -- accumulation strategy:
 
-        * 0 -- maximum accumulation.
+        * 0 -- maximum accumulation (default).
         * 1 -- additive accumulation.
 
    **Return value:**
@@ -3808,6 +3808,11 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
    **Return value:**
       * *ARK_SUCCESS* if successful
       * *ARK_MEM_NULL* if the ARKStep memory was ``NULL``
+
+   **Notes:**
+      This routine is only useful if a Runge--Kutta method with an embedding is used
+      by ARKStep.  If a non-embedded method is used then this routine will always return
+      ``*accum_error = 0.0``.
 
    .. versionadded:: 5.6.0
 
