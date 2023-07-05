@@ -7,15 +7,12 @@ Accumulated error estimation test (Nonlinear Kvaerno-Prothero-Robinson problem):
 
  Adaptive-step runs:
    Rtol: 0.01
+     acc type = 0,  dsm = 0.0196668,  dsm_est = 0.00322959,  dsm/dsm_est = 6.08955,  nsteps = 13
      acc type = 1,  dsm = 0.0196668,  dsm_est = 0.00104969,  dsm/dsm_est = 18.7358,  nsteps = 13
-     acc type = 2,  dsm = 0.0196668,  dsm_est = 0.000273323,  dsm/dsm_est = 71.9544,  nsteps = 13
-     acc type = 3,  dsm = 0.0196668,  dsm_est = 0.00322959,  dsm/dsm_est = 6.08955,  nsteps = 13
    Rtol: 0.0001
+     acc type = 0,  dsm = 5.92612e-05,  dsm_est = 7.92698e-05,  dsm/dsm_est = 0.747589,  nsteps = 40
      acc type = 1,  dsm = 5.92612e-05,  dsm_est = 1.92308e-05,  dsm/dsm_est = 3.08158,  nsteps = 40
-     acc type = 2,  dsm = 5.92612e-05,  dsm_est = 1.70465e-06,  dsm/dsm_est = 34.7644,  nsteps = 40
-     acc type = 3,  dsm = 5.92612e-05,  dsm_est = 7.92698e-05,  dsm/dsm_est = 0.747589,  nsteps = 40
    Rtol: 1e-06
+     acc type = 0,  dsm = 6.83117e-07,  dsm_est = 8.37007e-07,  dsm/dsm_est = 0.816142,  nsteps = 142
      acc type = 1,  dsm = 6.83117e-07,  dsm_est = 3.53549e-07,  dsm/dsm_est = 1.93217,  nsteps = 142
-     acc type = 2,  dsm = 6.83117e-07,  dsm_est = 2.34807e-08,  dsm/dsm_est = 29.0926,  nsteps = 142
-     acc type = 3,  dsm = 6.83117e-07,  dsm_est = 8.37007e-07,  dsm/dsm_est = 0.816142,  nsteps = 142
    ------------------------------------------------------

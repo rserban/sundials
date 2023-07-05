@@ -2520,6 +2520,7 @@ int arkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsmPtr)
   N_Vector y, yerr;
   realtype* cvals;
   N_Vector* Xvecs;
+  booleantype embedded;
   ARKodeARKStepMem step_mem;
 
   /* access ARKodeARKStepMem structure */
@@ -2563,8 +2564,13 @@ int arkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsmPtr)
   retval = N_VLinearCombination(nvec, cvals, Xvecs, y);
   if (retval != 0) return(ARK_VECTOROP_ERR);
 
-  /* Compute yerr (if step adaptivity or error accumulation enabled) */
-  if (!ark_mem->fixedstep || ark_mem->AccumErrorType) {
+  /* Compute yerr (if embedding coefficients are enabled) */
+  embedded = SUNTRUE;
+  if (step_mem->explicit)
+    if (step_mem->Be->d == NULL) { embedded = SUNFALSE; }
+  if (step_mem->implicit)
+    if (step_mem->Bi->d == NULL) { embedded = SUNFALSE; }
+  if (embedded) {
 
     /* set arrays for fused vector operation */
     nvec = 0;
@@ -2613,6 +2619,7 @@ int arkStep_ComputeSolutions_MassFixed(ARKodeMem ark_mem, realtype *dsmPtr)
   N_Vector y, yerr;
   realtype* cvals;
   N_Vector* Xvecs;
+  booleantype embedded;
   ARKodeARKStepMem step_mem;
 
   /* access ARKodeARKStepMem structure */
@@ -2666,8 +2673,13 @@ int arkStep_ComputeSolutions_MassFixed(ARKodeMem ark_mem, realtype *dsmPtr)
   N_VLinearSum(ONE, ark_mem->yn, ONE, y, y);
 
 
-  /* compute yerr (if step adaptivity or error accumulation enabled) */
-  if (!ark_mem->fixedstep || ark_mem->AccumErrorType) {
+  /* Compute yerr (if embedding coefficients are enabled) */
+  embedded = SUNTRUE;
+  if (step_mem->explicit)
+    if (step_mem->Be->d == NULL) { embedded = SUNFALSE; }
+  if (step_mem->implicit)
+    if (step_mem->Bi->d == NULL) { embedded = SUNFALSE; }
+  if (embedded) {
 
     /* compute yerr RHS vector */
     /*   set arrays for fused vector operation */

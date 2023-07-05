@@ -1165,8 +1165,8 @@ int erkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsmPtr)
   retval = N_VLinearCombination(nvec, cvals, Xvecs, y);
   if (retval != 0) return(ARK_VECTOROP_ERR);
 
-  /* Compute yerr (if step adaptivity or error accumulation enabled) */
-  if (!ark_mem->fixedstep || ark_mem->AccumErrorType) {
+  /* Compute yerr (if embedding coefficients are enabled) */
+  if (step_mem->B->d) {
 
     /* set arrays for fused vector operation */
     nvec = 0;

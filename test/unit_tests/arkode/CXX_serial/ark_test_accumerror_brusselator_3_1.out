@@ -7,15 +7,12 @@ Accumulated error estimation test (Brusselator ODE problem):
 
  Adaptive-step runs:
    Rtol: 0.01
+     acc type = 0,  dsm = 0.0154122,  dsm_est = 0.00276848,  dsm/dsm_est = 5.56701,  nsteps = 38
      acc type = 1,  dsm = 0.0154122,  dsm_est = 0.000203081,  dsm/dsm_est = 75.8916,  nsteps = 38
-     acc type = 2,  dsm = 0.0154122,  dsm_est = 9.64939e-05,  dsm/dsm_est = 159.722,  nsteps = 38
-     acc type = 3,  dsm = 0.0154122,  dsm_est = 0.00276848,  dsm/dsm_est = 5.56701,  nsteps = 38
    Rtol: 0.0001
+     acc type = 0,  dsm = 0.000113571,  dsm_est = 7.81825e-05,  dsm/dsm_est = 1.45265,  nsteps = 72
      acc type = 1,  dsm = 0.000113571,  dsm_est = 2.0693e-05,  dsm/dsm_est = 5.4884,  nsteps = 72
-     acc type = 2,  dsm = 0.000113571,  dsm_est = 4.39049e-06,  dsm/dsm_est = 25.8676,  nsteps = 72
-     acc type = 3,  dsm = 0.000113571,  dsm_est = 7.81825e-05,  dsm/dsm_est = 1.45265,  nsteps = 72
    Rtol: 1e-06
+     acc type = 0,  dsm = 7.17408e-07,  dsm_est = 9.59761e-07,  dsm/dsm_est = 0.747486,  nsteps = 274
      acc type = 1,  dsm = 7.17408e-07,  dsm_est = 3.115e-07,  dsm/dsm_est = 2.30308,  nsteps = 274
-     acc type = 2,  dsm = 7.17408e-07,  dsm_est = 8.11372e-08,  dsm/dsm_est = 8.84192,  nsteps = 274
-     acc type = 3,  dsm = 7.17408e-07,  dsm_est = 9.59761e-07,  dsm/dsm_est = 0.747486,  nsteps = 274
    ------------------------------------------------------

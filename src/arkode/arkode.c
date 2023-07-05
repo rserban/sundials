@@ -148,10 +148,9 @@ ARKodeMem arkCreate(SUNContext sunctx)
   ark_mem->h   = ZERO;
   ark_mem->h0u = ZERO;
 
-  /* No accumulated error estimates or strategy */
+  /* Accumulated error estimation strategy */
   ark_mem->AccumErrorType = 0;
-  ark_mem->SAccumError = ZERO;
-  ark_mem->VAccumError = NULL;
+  ark_mem->AccumError = ZERO;
 
   /* Set default values for integrator optional inputs */
   iret = arkSetDefaults(ark_mem);
@@ -1759,11 +1758,6 @@ booleantype arkResizeVectors(ARKodeMem ark_mem, ARKVecResizeFn resize,
                     liw_diff, tmpl, &ark_mem->constraints))
     return(SUNFALSE);
 
-  /* VAccumError */
-  if (!arkResizeVec(ark_mem, resize, resize_data, lrw_diff,
-                    liw_diff, tmpl, &ark_mem->VAccumError))
-    return(SUNFALSE);
-
   return(SUNTRUE);
 }
 
@@ -1787,7 +1781,6 @@ void arkFreeVectors(ARKodeMem ark_mem)
   arkFreeVec(ark_mem, &ark_mem->fn);
   arkFreeVec(ark_mem, &ark_mem->Vabstol);
   arkFreeVec(ark_mem, &ark_mem->VRabstol);
-  arkFreeVec(ark_mem, &ark_mem->VAccumError);
   arkFreeVec(ark_mem, &ark_mem->constraints);
 }
 
@@ -2384,12 +2377,10 @@ int arkCompleteStep(ARKodeMem ark_mem, realtype dsm)
 #endif
 
   /* store this step's contribution to accumulated temporal error */
-  if (ark_mem->AccumErrorType == 1) {
-    ark_mem->SAccumError += dsm;
-  } else if (ark_mem->AccumErrorType == 2) {
-    N_VLinearSum(ONE, ark_mem->VAccumError, ONE, ark_mem->tempv1, ark_mem->VAccumError);
-  } else if (ark_mem->AccumErrorType == 3) {
-    ark_mem->SAccumError = SUNMAX(dsm, ark_mem->SAccumError);
+  if (ark_mem->AccumErrorType == 0) {
+    ark_mem->AccumError = SUNMAX(dsm, ark_mem->AccumError);
+  } else if (ark_mem->AccumErrorType == 1) {
+    ark_mem->AccumError += dsm;
   }
 
   /* apply user-supplied step postprocessing function (if supplied) */

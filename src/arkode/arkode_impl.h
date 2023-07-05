@@ -388,10 +388,9 @@ typedef struct ARKodeMemRec {
   realtype    hold;         /* last successful h value used                */
   realtype    tolsf;        /* tolerance scale factor (suggestion to user) */
   int AccumErrorType;       /* accumulated error estimation type:
-                               none (0), scalar (1), vector (2)            */
+                               scalar-max (0), scalar-sum (1)              */
   long int AccumErrorStep;  /* time step of last accumulated error reset   */
-  realtype SAccumError;     /* scalar accumulated error estimate           */
-  N_Vector VAccumError;     /* vector accumulated error estimate           */
+  realtype AccumError;      /* accumulated error estimate                  */
   booleantype VabstolMallocDone;
   booleantype VRabstolMallocDone;
   booleantype MallocDone;

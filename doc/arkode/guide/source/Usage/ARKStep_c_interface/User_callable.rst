@@ -3657,27 +3657,22 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
       * *arkode_mem* -- pointer to the ARKStep memory block.
       * *accum_type* -- accumulation strategy:
 
-        * 1 -- scalar-valued additive accumulation (no cancellation possible).
-        * 2 -- vector-valued additive accumulation (cancellation possible).
-        * 3 -- vector-valued maximum accumulation (no cancellation possible).
+        * 0 -- maximum accumulation.
+        * 1 -- additive accumulation.
 
    **Return value:**
       * *ARK_SUCCESS* if successful
       * *ARK_MEM_NULL* if the ARKStep memory was ``NULL``
-      * *ARK_MEM_FAIL* if vector-valued accumulation chosen, but the
-        corresponding storage could not be allocated
       * *ARK_ILL_INPUT* if *accum_type* was illegal
 
    **Notes:**
       At each step, ARKStep computes both a solution and embedding,
       :math:`y_n` and :math:`\tilde{y}_n`, resulting in a vector-valued
       local temporal error estimate, :math:`y_n - \tilde{y}_n`.  Accumulation
-      strategy 1 computes
-      :math:`\frac{\text{reltol}}{N} \sum_{n\in N} \|y_n - \tilde{y}_n\|_{WRMS}`,
-      accumulation strategy 2 computes
-      :math:`\frac{\text{reltol}}{N} \left\| \sum_{n\in N} (y_n - \tilde{y}_n)\right\|_{WRMS}`,
-      while accumulation strategy 3 computes
+      strategy 0 computes
       :math:`\text{reltol} \max_{n\in N} \|y_n - \tilde{y}_n\|_{WRMS}`,
+      while accumulation strategy 1 computes
+      :math:`\frac{\text{reltol}}{N} \sum_{n\in N} \|y_n - \tilde{y}_n\|_{WRMS}`,
       where the sum or maximum is taken over all steps since the accumulation estimate was
       created or reset (whichever came most recently), :math:`n\in N`, the norm is
       taken using the tolerance-informed error-weight vector
@@ -3707,7 +3702,7 @@ Retrieve a pointer for user data                       :c:func:`ARKStepGetUserDa
 
    **Arguments:**
       * *arkode_mem* -- pointer to the ARKStep memory block.
-      * *accum_error* -- pointer to accumulated error scalar.
+      * *accum_error* -- pointer to accumulated error estimate.
 
    **Return value:**
       * *ARK_SUCCESS* if successful

@@ -1264,10 +1264,8 @@ int arkSetMaxConvFails(void *arkode_mem, int maxncf)
 
   This routine sets the accumulated temporal error estimation
   strategy:
-     0 => no accumulation
-     1 => scalar 'mean' accumulation (disallows cancellation)
-     2 => vector accumulation (allows cancellation)
-     3 => scalar 'max' accumulation (disallows cancellation)
+     0 => scalar 'max' accumulation
+     1 => scalar 'mean' accumulation
   ---------------------------------------------------------------*/
 int arkSetAccumulatedErrorType(void *arkode_mem, int accum_type)
 {
@@ -1279,41 +1277,19 @@ int arkSetAccumulatedErrorType(void *arkode_mem, int accum_type)
   }
   ark_mem = (ARKodeMem) arkode_mem;
 
-  /* Store accumulation type based on input value, allocating
-     vector accumulation storage if necessary */
-  if (accum_type == 1) {
-    ark_mem->AccumErrorType = 1;
-    ark_mem->AccumErrorStep = ark_mem->nst;
-    ark_mem->SAccumError = ZERO;
-    return(ARK_SUCCESS);
-  } else if (accum_type == 2) {
-    ark_mem->AccumErrorType = 2;
-    ark_mem->AccumErrorStep = ark_mem->nst;
-    if (ark_mem->VAccumError == NULL) {
-      if (!arkAllocVec(ark_mem, ark_mem->yn, &ark_mem->VAccumError)) {
-        arkProcessError(ark_mem, ARK_MEM_FAIL, "ARKODE",
-                        "arkSetAccumulatedErrorType",
-                        "vector allocation failure");
-        return(ARK_MEM_FAIL);
-      }
-    }
-    N_VConst(ZERO, ark_mem->VAccumError);
-    return(ARK_SUCCESS);
-  } else if (accum_type == 3) {
-    ark_mem->AccumErrorType = 3;
-    ark_mem->AccumErrorStep = ark_mem->nst;
-    ark_mem->SAccumError = ZERO;
-    return(ARK_SUCCESS);
-  }
-    else if (accum_type == 0) {
-    ark_mem->AccumErrorType = 0;
-    return(ARK_SUCCESS);
-  } else {
+  /* Check for valid accumulation type */
+  if ((accum_type < 0) || (accum_type > 1)) {
     arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
                     "arkSetAccumulatedErrorType",
                     "illegal accumulation type");
     return(ARK_ILL_INPUT);
   }
+
+  /* Store type, reset accumulated error value and counter, and return */
+  ark_mem->AccumErrorType = accum_type;
+  ark_mem->AccumErrorStep = ark_mem->nst;
+  ark_mem->AccumError = ZERO;
+  return(ARK_SUCCESS);
 }
 
 
@@ -1332,21 +1308,10 @@ int arkResetAccumulatedError(void *arkode_mem)
   }
   ark_mem = (ARKodeMem) arkode_mem;
 
-  /* Reset based on error accumulation type */
-  if ((ark_mem->AccumErrorType == 1) || (ark_mem->AccumErrorType == 3)){
-    ark_mem->AccumErrorStep = ark_mem->nst;
-    ark_mem->SAccumError = ZERO;
-    return(ARK_SUCCESS);
-  } else if (ark_mem->AccumErrorType == 2) {
-    ark_mem->AccumErrorStep = ark_mem->nst;
-    N_VConst(ZERO, ark_mem->VAccumError);
-    return(ARK_SUCCESS);
-  } else {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
-                    "arkResetAccumulatedError",
-                    "cannot reset illegal accumulation type");
-    return(ARK_ILL_INPUT);
-  }
+  /* Reset value and counter, and return */
+  ark_mem->AccumErrorStep = ark_mem->nst;
+  ark_mem->AccumError = ZERO;
+  return(ARK_SUCCESS);
 }
 
 
@@ -1369,25 +1334,15 @@ int arkGetAccumulatedError(void *arkode_mem, realtype *accum_error)
   }
   ark_mem = (ARKodeMem) arkode_mem;
 
-  /* Get number of steps since last accumulated error reset */
-  long int steps = ark_mem->nst - ark_mem->AccumErrorStep;
+  /* Get number of steps since last accumulated error reset
+     (set floor of 1 to safeguard against division-by-zero) */
+  long int steps = SUNMAX(1, ark_mem->nst - ark_mem->AccumErrorStep);
 
   /* Fill output based on error accumulation type */
-  if (ark_mem->AccumErrorType == 1) {
-    *accum_error = ark_mem->SAccumError / steps * ark_mem->reltol;
-    return(ARK_SUCCESS);
-  } else if (ark_mem->AccumErrorType == 2) {
-    *accum_error = N_VWrmsNorm(ark_mem->VAccumError, ark_mem->ewt)
-                 / steps * ark_mem->reltol;
-    return(ARK_SUCCESS);
-  } else if (ark_mem->AccumErrorType == 3) {
-    *accum_error = ark_mem->SAccumError * ark_mem->reltol;
-    return(ARK_SUCCESS);
-  } else {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
-                    "arkGetAccumulatedError",
-                    "cannot retrieve illegal accumulation type");
-    return(ARK_ILL_INPUT);
+  if (ark_mem->AccumErrorType == 0) {
+    *accum_error = ark_mem->AccumError * ark_mem->reltol;
+  } else if (ark_mem->AccumErrorType == 1) {
+    *accum_error = ark_mem->AccumError * ark_mem->reltol / steps;
   }
 
   return(ARK_SUCCESS);
