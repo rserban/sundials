@@ -24,7 +24,7 @@ GENERIC=fsundials_types_mod fsundials_nvector_mod fsundials_matrix_mod fsundials
 NVECTOR=openmp pthreads serial parallel manyvector mpiplusx
 SUNMATRIX=band dense sparse
 SUNHEURISTICS=default unconstrained
-SUNCONTROL=expgus imexgus i impgus pid pi
+SUNCONTROL=expgus imexgus i impgus pid pi mricc mrihtol mrill mripid mripi
 SUNLINSOL=band dense klu spbcgs spfgmr spgmr sptfqmr pcg
 SUNNONLINSOL=newton fixedpoint
 
