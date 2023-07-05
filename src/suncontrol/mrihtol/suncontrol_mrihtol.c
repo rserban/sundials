@@ -50,14 +50,14 @@ SUNControl SUNControlMRIHTol(SUNContext sunctx, SUNControl HControl,
 
   /* Attach operations */
   C->ops->getid             = SUNControlGetID_MRIHTol;
-  C->ops->estimatemristeps  = SUNControlEstimateMRISteps_MRIHTol;
+  C->ops->estimatemristeps  = SUNControlEstimateMRIStepTol_MRIHTol;
   C->ops->reset             = SUNControlReset_MRIHTol;
   C->ops->setdefaults       = SUNControlSetDefaults_MRIHTol;
   C->ops->write             = SUNControlWrite_MRIHTol;
   C->ops->setmethodorder    = SUNControlSetMethodOrder_MRIHTol;
   C->ops->setembeddingorder = SUNControlSetEmbeddingOrder_MRIHTol;
   C->ops->seterrorbias      = SUNControlSetErrorBias_MRIHTol;
-  C->ops->updatemritol      = SUNControlUpdateMRIH_MRIHTol;
+  C->ops->updatemritol      = SUNControlUpdateMRITol_MRIHTol;
   C->ops->space             = SUNControlSpace_MRIHTol;
 
   /* Create content */
@@ -77,8 +77,8 @@ SUNControl SUNControlMRIHTol(SUNContext sunctx, SUNControl HControl,
   SUNControlSetEmbeddingOrder(TolControl, 1);
 
   /* Attach input controllers */
-  C->HControl = HControl;
-  C->TolControl = TolControl;
+  content->HControl = HControl;
+  content->TolControl = TolControl;
 
   /* Attach content */
   C->content = content;
@@ -145,10 +145,10 @@ int SUNControlWrite_MRIHTol(SUNControl C, FILE *fptr)
   /* Write both sub-controllers, and return with success */
   fprintf(fptr, "Multirate H-Tol SUNControl module:\n");
   fprintf(fptr, "\nSlow step controller:\n");
-  int retval= SUNControlWrite(SC_MRIHTOL_CSLOW(C));
+  int retval= SUNControlWrite(SC_MRIHTOL_CSLOW(C), fptr);
   if (retval != SUNCONTROL_SUCCESS) { return retval; }
   fprintf(fptr, "\nFast tolerance controller:\n");
-  int retval= SUNControlWrite(SC_MRIHTOL_CFAST(C));
+  retval= SUNControlWrite(SC_MRIHTOL_CFAST(C), fptr);
   if (retval != SUNCONTROL_SUCCESS) { return retval; }
   return SUNCONTROL_SUCCESS;
 }
@@ -176,9 +176,9 @@ int SUNControlSetErrorBias_MRIHTol(SUNControl C, realtype bias)
   return SUNCONTROL_SUCCESS;
 }
 
-int SUNControlUpdateMRIH_MRIHTol(SUNControl C, realtype H,
-                                 realtype tolfac, realtype DSM,
-                                 realtype dsm)
+int SUNControlUpdateMRITol_MRIHTol(SUNControl C, realtype H,
+                                   realtype tolfac, realtype DSM,
+                                   realtype dsm)
 {
   /* Update sub-controllers, and return with success */
   int retval;

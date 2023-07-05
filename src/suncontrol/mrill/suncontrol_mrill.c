@@ -74,8 +74,6 @@ SUNControl SUNControlMRILL(SUNContext sunctx, int P, int p)
   C->ops->reset             = SUNControlReset_MRILL;
   C->ops->setdefaults       = SUNControlSetDefaults_MRILL;
   C->ops->write             = SUNControlWrite_MRILL;
-  C->ops->setmethodorder    = SUNControlSetMethodOrder_MRILL;
-  C->ops->setembeddingorder = SUNControlSetEmbeddingOrder_MRILL;
   C->ops->seterrorbias      = SUNControlSetErrorBias_MRILL;
   C->ops->updatemrih        = SUNControlUpdateMRIH_MRILL;
   C->ops->space             = SUNControlSpace_MRILL;
