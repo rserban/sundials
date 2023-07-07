@@ -933,10 +933,17 @@ void arkFreeVectors(ARKodeMem ark_mem);
 int arkInitialSetup(ARKodeMem ark_mem, realtype tout);
 int arkStopTests(ARKodeMem ark_mem, realtype tout, N_Vector yout,
                  realtype *tret, int itask, int *ier);
-int arkHin(ARKodeMem ark_mem, realtype tout);
+int arkHin(ARKodeMem ark_mem, realtype tcur, realtype tout,
+           N_Vector ycur, N_Vector fcur, N_Vector ytmp,
+           N_Vector temp1, N_Vector temp2,
+           ARKTimestepFullRHSFn rhs, realtype* h);
 realtype arkUpperBoundH0(ARKodeMem ark_mem,
-                         realtype tdist);
-int arkYddNorm(ARKodeMem ark_mem, realtype hg,
+                         realtype tdist,
+                         N_Vector y, N_Vector f,
+                         N_Vector temp1, N_Vector temp2);
+int arkYddNorm(ARKodeMem ark_mem, realtype hg, realtype t,
+               N_Vector y, N_Vector f, N_Vector ycur,
+               N_Vector temp1, ARKTimestepFullRHSFn rhs,
                realtype *yddnrm);
 
 int arkCompleteStep(ARKodeMem ark_mem, realtype dsm);
