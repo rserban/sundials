@@ -226,6 +226,7 @@ int MRIStepSetDefaults(void* arkode_mem)
   step_mem->jcur           = SUNFALSE;
   step_mem->convfail       = ARK_NO_FAILURES;
   step_mem->stage_predict  = NULL;           /* no user-supplied stage predictor */
+  step_mem->inner_hfactor  = ZERO;
 
   return(ARK_SUCCESS);
 }
@@ -738,6 +739,45 @@ int MRIStepSetDeduceImplicitRhs(void *arkode_mem, sunbooleantype deduce)
   if (retval != ARK_SUCCESS) return(retval);
 
   step_mem->deduce_rhs = deduce;
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  MRIStepSetFastErrorStepFactor:
+
+  Specifies a fast stepsize factor to use when estimating the
+  accumulated fast time scale solution error when MRI adaptivity
+  is enabled.  The fast integrator is run twice over each fast
+  time interval, once using the inner step size h, and again
+  using hfactor*h.  This is only needed when the results from
+  mriStepInnerStepper_GetError() cannot be trusted.  In our
+  tests, we found this to be the case when the inner integrator
+  uses fixed step sizes.
+
+  An argument of 0 disables this fast error estimation strategy.
+  Arguments of hfactor < 0 or hfactor == 1 are illegal.
+  All other positive hfactor values will *attempt* to be used.
+  ---------------------------------------------------------------*/
+int MRIStepSetFastErrorStepFactor(void *arkode_mem, realtype hfactor)
+{
+  ARKodeMem        ark_mem;
+  ARKodeMRIStepMem step_mem;
+  int              retval;
+
+  /* access ARKodeMRIStepMem structure and set function pointer */
+  retval = mriStep_AccessStepMem(arkode_mem, "MRIStepSetFastErrorStepFactor",
+                                 &ark_mem, &step_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  /* return with error on illegal input */
+  if ((hfactor < ZERO) || (hfactor == ONE)) {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                    "MRIStepSetFastErrorStepFactor",
+                    "Illegal input; must be >0 and not identically 1");
+    return(ARK_ILL_INPUT);
+  }
+  step_mem->inner_hfactor = hfactor;
   return(ARK_SUCCESS);
 }
 

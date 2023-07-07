@@ -37,6 +37,11 @@ extern "C" {
 #define MRISTAGE_DIRK_NOFAST 2
 #define MRISTAGE_DIRK_FAST   3
 
+/* Adaptivity type identifiers */
+#define MRIADAPT_NONE    0
+#define MRIADAPT_HH      1
+#define MRIADAPT_HTOL    2
+
 /* Implicit solver constants (duplicate from arkode_arkstep_impl.h) */
 #define MAXCOR    3              /* max number of nonlinear iterations */
 #define CRDOWN    RCONST(0.3)    /* constant to estimate the convergence
@@ -126,6 +131,13 @@ typedef struct ARKodeMRIStepMemRec {
   MRIStepPreInnerFn  pre_inner_evolve;
   MRIStepPostInnerFn post_inner_evolve;
 
+  /* MRI adaptivity parameters */
+  int      adaptivity_type;   /* MRIADAPT_NONE, MRIADAPT_HH or MRIADAPT_HTOL */
+  realtype inner_hfactor;     /* h factor for inner stepper error estimation */
+  realtype inner_control;     /* prev control parameter (h or tolfac) */
+  realtype inner_dsm;         /* prev inner stepper accumulated error */
+  realtype inner_control_new; /* upcoming control parameter */
+
   /* Counters */
   long int nfse;          /* num fse calls                    */
   long int nfsi;          /* num fsi calls                    */
@@ -155,7 +167,7 @@ struct _MRIStepInnerStepper_Ops
   MRIStepInnerGetAccumulatedError   geterror;
   MRIStepInnerResetAccumulatedError reseterror;
   MRIStepInnerSetFixedStep          setfixedstep;
-  MRIStepInnerSetRTolFactor         setrtolfactor;
+  MRIStepInnerSetRTol               setrtol;
 };
 
 struct _MRIStepInnerStepper
@@ -251,7 +263,7 @@ int mriStepInnerStepper_Reset(MRIStepInnerStepper stepper,
 int mriStepInnerStepper_GetError(MRIStepInnerStepper stepper, realtype* accum_error);
 int mriStepInnerStepper_ResetError(MRIStepInnerStepper stepper);
 int mriStepInnerStepper_SetFixedStep(MRIStepInnerStepper stepper, realtype h);
-int mriStepInnerStepper_SetRTolFactor(MRIStepInnerStepper stepper, realtype rtolfac);
+int mriStepInnerStepper_SetRTol(MRIStepInnerStepper stepper, realtype rtol);
 int mriStepInnerStepper_AllocVecs(MRIStepInnerStepper stepper, int count,
                                   N_Vector tmpl);
 int mriStepInnerStepper_Resize(MRIStepInnerStepper stepper,
@@ -269,6 +281,34 @@ int mriStep_ComputeInnerForcing(ARKodeMem ark_mem, ARKodeMRIStepMem step_mem,
 /* Return effective RK coefficients (nofast stage) */
 int mriStep_RKCoeffs(MRIStepCoupling MRIC, int is, int *stage_map,
                      realtype *Ae_row, realtype *Ai_row);
+
+
+/*===============================================================
+  MRIStep SUNControl wrapper module -- this is used to insert
+  MRIStep in-between ARKODE at the "slow" time scale, and the
+  inner-steppers that comprise the MRI time-step evolution.
+  ===============================================================*/
+
+typedef struct _mriStepControlContent {
+  ARKodeMem ark_mem;         /* ARKODE memory pointer */
+  ARKodeMRIStepMem step_mem; /* MRIStep memory pointer */
+  SUNControl C;              /* attached controller pointer */
+} *mriStepControlContent;
+#define MRICONTROL_C(C)  ( ((mriStepControlContent)(C->content))->C )
+#define MRICONTROL_A(C)  ( ((mriStepControlContent)(C->content))->ark_mem )
+#define MRICONTROL_S(C)  ( ((mriStepControlContent)(C->content))->step_mem )
+
+SUNControl mriStepControl(void *arkode_mem, SUNControl C);
+SUNControl_ID SUNControlGetID_mriStepControl(SUNControl C);
+int SUNControlEstimateStep_mriStepControl(SUNControl C, realtype h,
+                                          realtype dsm, realtype* hnew);
+int SUNControlReset_mriStepControl(SUNControl C);
+int SUNControlWrite_mriStepControl(SUNControl C, FILE* fptr);
+int SUNControlSetMethodOrder_mriStepControl(SUNControl C, int q);
+int SUNControlSetEmbeddingOrder_mriStepControl(SUNControl C, int p);
+int SUNControlUpdate_mriStepControl(SUNControl C, realtype h, realtype dsm);
+int SUNControlSpace_mriStepControl(SUNControl C, long int *lenrw,
+                                   long int *leniw);
 
 /*===============================================================
   Reusable MRIStep Error Messages

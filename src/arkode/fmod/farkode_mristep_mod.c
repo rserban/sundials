@@ -1255,6 +1255,20 @@ SWIGEXPORT int _wrap_FMRIStepSetDeduceImplicitRhs(void *farg1, int const *farg2)
 }
 
 
+SWIGEXPORT int _wrap_FMRIStepSetFastErrorStepFactor(void *farg1, double const *farg2) {
+  int fresult ;
+  void *arg1 = (void *) 0 ;
+  realtype arg2 ;
+  int result;
+  
+  arg1 = (void *)(farg1);
+  arg2 = (realtype)(*farg2);
+  result = (int)MRIStepSetFastErrorStepFactor(arg1,arg2);
+  fresult = (int)(result);
+  return fresult;
+}
+
+
 SWIGEXPORT int _wrap_FMRIStepSetJacFn(void *farg1, ARKLsJacFn farg2) {
   int fresult ;
   void *arg1 = (void *) 0 ;
@@ -2147,15 +2161,15 @@ SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetFixedStepFn(void *farg1, MRIStepInn
 }
 
 
-SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetRTolFactorFn(void *farg1, MRIStepInnerSetRTolFactor farg2) {
+SWIGEXPORT int _wrap_FMRIStepInnerStepper_SetRTolFn(void *farg1, MRIStepInnerSetRTol farg2) {
   int fresult ;
   MRIStepInnerStepper arg1 = (MRIStepInnerStepper) 0 ;
-  MRIStepInnerSetRTolFactor arg2 = (MRIStepInnerSetRTolFactor) 0 ;
+  MRIStepInnerSetRTol arg2 = (MRIStepInnerSetRTol) 0 ;
   int result;
   
   arg1 = (MRIStepInnerStepper)(farg1);
-  arg2 = (MRIStepInnerSetRTolFactor)(farg2);
-  result = (int)MRIStepInnerStepper_SetRTolFactorFn(arg1,arg2);
+  arg2 = (MRIStepInnerSetRTol)(farg2);
+  result = (int)MRIStepInnerStepper_SetRTolFn(arg1,arg2);
   fresult = (int)(result);
   return fresult;
 }

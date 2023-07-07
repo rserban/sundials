@@ -131,8 +131,8 @@ void* MRIStepCreate(ARKRhsFn fse, ARKRhsFn fsi, realtype t0, N_Vector y0,
   step_mem->implicit_rhs = (fsi == NULL) ? SUNFALSE : SUNTRUE;
 
   /* Update the ARKODE workspace requirements */
-  ark_mem->liw += 42;  /* fcn/data ptr, int, long int, sunindextype, booleantype */
-  ark_mem->lrw += 10;
+  ark_mem->liw += 43;  /* fcn/data ptr, int, long int, sunindextype, booleantype */
+  ark_mem->lrw += 13;
 
   /* Create a default Newton NLS object (just in case; will be deleted if
      the user attaches a nonlinear solver) */
@@ -173,6 +173,12 @@ void* MRIStepCreate(ARKRhsFn fse, ARKRhsFn fsi, realtype t0, N_Vector y0,
   /* Initialize fused op work space */
   step_mem->cvals        = NULL;
   step_mem->Xvecs        = NULL;
+
+  /* Initialize adaptivity parameters */
+  step_mem->adaptivity_type = 0;
+  step_mem->inner_control = ZERO;
+  step_mem->inner_dsm = ONE;
+  step_mem->inner_control_new = ZERO;
 
   /* Initialize pre and post inner evolve functions */
   step_mem->pre_inner_evolve  = NULL;
@@ -1207,6 +1213,38 @@ int mriStep_Init(void* arkode_mem, int init_type)
     }
   }
 
+  /* TO-DO: Perform checks related to time step adaptivity:
+     - Remove MRIADAPT_NONE, MRIADAPT_HH and MRIADAPT_HTOL constants and
+       step_mem->adaptivity_type.  Instead call
+       SUNControlGetID(ark_mem->hcontroller) to find the adaptivity type,
+       and compare this with the SUNControl_ID constants.
+     - Ensure that SUNControlGetID(ark_mem->hcontroller) is one of
+       SUNDIALS_CONTROL_MRI_H, SUNDIALS_CONTROL_MRI_TOL, or
+       SUNDIALS_CONTROL_NONE; otherwise issue an error message about an
+       unusable controller.
+     - SUNDIALS_CONTROL_MRI_H requirements:
+       - check that the inner integrator supports step adaptivity by calling
+         mriStepInnerStepper_SupportsStepAdaptivity
+       - ensure that the MRI method includes embedding coefficients
+       - if ARKODE's initial step is not yet set, then call an internal
+         routine to estimate the initial slow step size.
+       - if step_mem->inner_control is not set (how would it be set otherwise?),
+         then check whether MRIStepInnerFullRhsFn 'fullrhs' is supplied:
+         - if so, then call internal routine to estimate initial fast step size.
+         - if not, then set step_mem->inner_control to equal H/100.
+     - SUNDIALS_CONTROL_MRI_TOL requirements:
+       - check that the inner integrator supports RTol adaptivity by calling
+         mriStepInnerStepper_SupportsRTolAdaptivity
+       - ensure that the MRI method includes embedding coefficients
+       - if ARKODE's initial step is not yet set, then call an internal
+         routine to estimate the initial slow step size.
+       - if step_mem->inner_control is not yet set (how would it be set otherwise?),
+         then initialize it to 1.
+     - SUNDIALS_CONTROL_NONE requirements:
+       - user-supplied time-step size must be provided, and ark_mem->fixedstep == SUNTRUE
+       - ensure that inner_control is left unset?
+   */
+
   /* Signal to shared arkode module that fullrhs is required after each step */
   ark_mem->call_fullrhs = SUNTRUE;
 
@@ -1447,15 +1485,33 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
   int is;                      /* current stage index        */
   int retval;                  /* reusable return flag       */
 
+  /* access the MRIStep mem structure */
+  retval = mriStep_AccessStepMem(arkode_mem, "mriStep_TakeStep",
+                                 &ark_mem, &step_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
   /* initialize algebraic solver convergence flag to success;
      error estimate to zero */
   *nflagPtr = ARK_SUCCESS;
   *dsmPtr = ZERO;
 
-  /* access the MRIStep mem structure */
-  retval = mriStep_AccessStepMem(arkode_mem, "mriStep_TakeStep",
-                                 &ark_mem, &step_mem);
-  if (retval != ARK_SUCCESS) return(retval);
+  /* if MRI adaptivity is enabled: reset fast accumulated error,
+     and send appropriate control parameter to the fast integrator */
+  if (step_mem->adaptivity_type != MRIADAPT_NONE) {
+    step_mem->inner_dsm = ZERO;
+    retval = mriStepInnerStepper_ResetError(step_mem->stepper);
+    if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
+  }
+  if (step_mem->adaptivity_type == MRIADAPT_HH) {
+    retval = mriStepInnerStepper_SetFixedStep(step_mem->stepper,
+                                              step_mem->inner_control);
+    if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
+  }
+  if (step_mem->adaptivity_type == MRIADAPT_HTOL) {
+    retval = mriStepInnerStepper_SetRTol(step_mem->stepper,
+                                         step_mem->inner_control*ark_mem->reltol);
+    if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
+  }
 
 #ifdef SUNDIALS_DEBUG
   printf("    MRIStep step %li,  stage 0,  h = %"RSYM",  t_n = %"RSYM"\n",
@@ -1611,6 +1667,12 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
                      "ycur =", "");
   N_VPrintFile(ark_mem->ycur, ARK_LOGGER->debug_fp);
 #endif
+
+  /* if MRI adaptivity is enabled: compute slow time scale
+     error and store in dsmPtr */
+  if (step_mem->adaptivity_type != MRIADAPT_NONE) {
+    /*** FILL THIS IN ***/
+  }
 
   /* Solver diagnostics reporting */
   if (ark_mem->report)
@@ -1953,9 +2015,10 @@ int mriStep_CheckCoupling(ARKodeMem ark_mem)
 int mriStep_StageERKFast(ARKodeMem ark_mem,
                          ARKodeMRIStepMem step_mem, int is)
 {
-  realtype cdiff;    /* stage time increment */
-  realtype t0;       /* start time for stage */
-  int retval;        /* reusable return flag */
+  realtype cdiff;                     /* stage time increment */
+  realtype t0;                        /* start time for stage */
+  int retval;                         /* reusable return flag */
+  N_Vector ytilde = ark_mem->tempv2;  /* scratch vector */
 
 #ifdef SUNDIALS_DEBUG
   printf("    MRIStep ERK fast stage\n");
@@ -1981,10 +2044,53 @@ int mriStep_StageERKFast(ARKodeMem ark_mem,
     if (retval != 0) return(ARK_OUTERTOINNER_FAIL);
   }
 
+  /* if adaptivity is enabled, get fast temporal error estimate */
+  if (step_mem->adaptivity_type != MRIADAPT_NONE) {
+
+    /* if we trust inner integrator accumulated error estimate, call it here */
+    if (step_mem->inner_hfactor == ZERO) {
+      retval = mriStepInnerStepper_GetError(step_mem->stepper, &(step_mem->inner_dsm));
+      if (retval != 0) return(ARK_INNERSTEP_FAIL);
+    } else {
+      /* store initial condition for subsequent fast error estimation */
+      N_VScale(ONE, ark_mem->ycur, ytilde);
+    }
+  }
+
   /* advance inner method in time */
   retval = mriStepInnerStepper_Evolve(step_mem->stepper, t0, ark_mem->tcur,
                                       ark_mem->ycur);
   if (retval < 0) return(ARK_INNERSTEP_FAIL);
+
+  /* manually accumulate fast error estimate, if needed */
+  if ((step_mem->adaptivity_type != MRIADAPT_NONE) && (step_mem->inner_hfactor != ZERO)) {
+
+    /* reset fast integrator for time interval */
+    retval = mriStepInnerStepper_Reset(step_mem->stepper, t0, ytilde);
+    if (retval < 0) return(ARK_INNERSTEP_FAIL);
+
+    /* update fixed-step size for fast integrator */
+    retval = mriStepInnerStepper_SetFixedStep(step_mem->stepper,
+                                              step_mem->inner_control*step_mem->inner_hfactor);
+    if (retval < 0) return(ARK_INNERSTEP_FAIL);
+
+    /* evolve fast integrator using modified step size */
+    retval = mriStepInnerStepper_Evolve(step_mem->stepper, t0, ark_mem->tcur, ytilde);
+    if (retval < 0) return(ARK_INNERSTEP_FAIL);
+
+    /* compute solution difference */
+    N_VLinearSum(ONE, ytilde, -ONE, ark_mem->ycur, ytilde);
+
+    /* accumulate fast error estimate */
+    step_mem->inner_dsm = SUNMAX(step_mem->inner_dsm, ark_mem->reltol * N_VWrmsNorm(ytilde, ark_mem->ewt));
+
+    /* reset fast integrator to result from main evolution */
+    retval = mriStepInnerStepper_Reset(step_mem->stepper, ark_mem->tcur, ark_mem->ycur);
+    if (retval < 0) return(ARK_INNERSTEP_FAIL);
+    retval = mriStepInnerStepper_SetFixedStep(step_mem->stepper, step_mem->inner_control);
+    if (retval < 0) return(ARK_INNERSTEP_FAIL);
+
+  }
 
   /* post inner evolve function (if supplied) */
   if (step_mem->post_inner_evolve) {
@@ -2735,13 +2841,13 @@ int MRIStepInnerStepper_SetFixedStepFn(MRIStepInnerStepper stepper,
 }
 
 
-int MRIStepInnerStepper_SetRTolFactorFn(MRIStepInnerStepper stepper,
-                                        MRIStepInnerSetRTolFactor fn)
+int MRIStepInnerStepper_SetRTolFn(MRIStepInnerStepper stepper,
+                                  MRIStepInnerSetRTol fn)
 {
   if (stepper == NULL)
   {
     arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
-                    "MRIStepInnerStepper_SetRTolFactorFn",
+                    "MRIStepInnerStepper_SetRTolFn",
                     "Inner stepper memory is NULL");
     return ARK_ILL_INPUT;
   }
@@ -2749,12 +2855,12 @@ int MRIStepInnerStepper_SetRTolFactorFn(MRIStepInnerStepper stepper,
   if (stepper->ops == NULL)
   {
     arkProcessError(NULL, ARK_ILL_INPUT, "ARKODE::MRIStep",
-                    "MRIStepInnerStepper_SetRTolFactorFn",
+                    "MRIStepInnerStepper_SetRTolFn",
                     "Inner stepper operations structure is NULL");
     return ARK_ILL_INPUT;
   }
 
-  stepper->ops->setrtolfactor = fn;
+  stepper->ops->setrtol = fn;
 
   return ARK_SUCCESS;
 }
@@ -2774,7 +2880,7 @@ int MRIStepInnerStepper_AddForcing(MRIStepInnerStepper stepper,
     return ARK_ILL_INPUT;
   }
 
-  /* always append the constant forcing term */
+  /* retain input RHS vector */
   stepper->vals[0] = ONE;
   stepper->vecs[0] = f;
 
@@ -2859,7 +2965,7 @@ booleantype mriStepInnerStepper_SupportsRTolAdaptivity(MRIStepInnerStepper stepp
 
   if (stepper->ops->geterror &&
       stepper->ops->reseterror &&
-      stepper->ops->setrtolfactor)
+      stepper->ops->setrtol)
     return SUNTRUE;
   else
     return SUNFALSE;
@@ -2972,7 +3078,7 @@ int mriStepInnerStepper_SetFixedStep(MRIStepInnerStepper stepper,
   if (stepper == NULL) return ARK_ILL_INPUT;
   if (stepper->ops == NULL) return ARK_ILL_INPUT;
 
-  if (stepper->ops->geterror) {
+  if (stepper->ops->setfixedstep) {
     stepper->last_flag = stepper->ops->setfixedstep(stepper, h);
     return stepper->last_flag;
   } else {
@@ -2983,14 +3089,14 @@ int mriStepInnerStepper_SetFixedStep(MRIStepInnerStepper stepper,
 
 
 /* Sets the inner (fast) stepper relative tolerance scaling factor */
-int mriStepInnerStepper_SetRTolFactor(MRIStepInnerStepper stepper,
-                                      realtype rtolfac)
+int mriStepInnerStepper_SetRTol(MRIStepInnerStepper stepper,
+                                realtype rtol)
 {
   if (stepper == NULL) return ARK_ILL_INPUT;
   if (stepper->ops == NULL) return ARK_ILL_INPUT;
 
-  if (stepper->ops->geterror) {
-    stepper->last_flag = stepper->ops->setrtolfactor(stepper, rtolfac);
+  if (stepper->ops->setrtol) {
+    stepper->last_flag = stepper->ops->setrtol(stepper, rtol);
     return stepper->last_flag;
   } else {
     /* assume stepper provides exact solution */
@@ -3128,6 +3234,133 @@ void mriStepInnerStepper_PrintMem(MRIStepInnerStepper stepper,
 
   return;
 }
+
+
+/*------------------------------------
+  MRIStep SUNControl wrapper functions
+  ------------------------------------*/
+
+SUNControl mriStepControl(void *arkode_mem, SUNControl CMRI)
+{
+  SUNControl C;
+  mriStepControlContent content;
+  ARKodeMem ark_mem;
+  ARKodeMRIStepMem step_mem;
+  int retval;
+
+  /* Return with failure if input controller is NULL or has
+     unsupported type */
+  if (CMRI == NULL) { return (NULL); }
+  if ((SUNControlGetID(CMRI) != SUNDIALS_CONTROL_MRI_H) &&
+      (SUNControlGetID(CMRI) != SUNDIALS_CONTROL_MRI_TOL))
+    { return (NULL); }
+
+  /* Return with failure if stepper is inaccessible */
+  retval = mriStep_AccessStepMem(arkode_mem, "MRIStepReInit",
+                                 &ark_mem, &step_mem);
+  if (retval != ARK_SUCCESS) return(NULL);
+
+  /* Create an empty controller object */
+  C = NULL;
+  C = SUNControlNewEmpty(CMRI->sunctx);
+  if (C == NULL) { return (NULL); }
+
+  /* Attach operations */
+  C->ops->getid             = SUNControlGetID_mriStepControl;
+  C->ops->estimatestep      = SUNControlEstimateStep_mriStepControl;
+  C->ops->reset             = SUNControlReset_mriStepControl;
+  C->ops->write             = SUNControlWrite_mriStepControl;
+  C->ops->setmethodorder    = SUNControlSetMethodOrder_mriStepControl;
+  C->ops->setembeddingorder = SUNControlSetEmbeddingOrder_mriStepControl;
+  C->ops->update            = SUNControlUpdate_mriStepControl;
+  C->ops->space             = SUNControlSpace_mriStepControl;
+
+  /* Create content */
+  content = NULL;
+  content = (mriStepControlContent)malloc(sizeof *content);
+  if (content == NULL)
+  {
+    SUNControlDestroy(C);
+    return (NULL);
+  }
+
+  /* Attach ARKODE memory, MRI stepper memory and MRI controller objects */
+  content->ark_mem  = ark_mem;
+  content->step_mem = step_mem;
+  content->C = CMRI;
+
+  /* Attach content and return */
+  C->content = content;
+  return (C);
+}
+
+int SUNControlEstimateStep_mriStepControl(SUNControl C, realtype H,
+                                          realtype DSM, realtype* Hnew)
+{
+  /* Shortcuts to ARKODE and MRIStep memory */
+  ARKodeMem ark_mem = MRICONTROL_A(C);
+  ARKodeMRIStepMem step_mem = MRICONTROL_S(C);
+  if ((ark_mem == NULL) || (step_mem == NULL)) { return SUNCONTROL_MEM_FAIL; }
+
+  /* Estimate slow stepsize based on MRI controller type */
+  if (SUNControlGetID(MRICONTROL_C(C)) == SUNDIALS_CONTROL_MRI_H) {
+    return SUNControlEstimateMRISteps(MRICONTROL_C(C),
+                                      H, step_mem->inner_control,
+                                      DSM, step_mem->inner_dsm,
+                                      Hnew, &(step_mem->inner_control_new));
+  } else {  /* SUNDIALS_CONTROL_MRI_TOL */
+    return SUNControlEstimateStepTol(MRICONTROL_C(C),
+                                     H, step_mem->inner_control,
+                                     DSM, step_mem->inner_dsm,
+                                     Hnew, &(step_mem->inner_control_new));
+  }
+}
+
+int SUNControlUpdate_mriStepControl(SUNControl C, realtype H, realtype DSM)
+{
+  /* Shortcuts to ARKODE and MRIStep memory */
+  ARKodeMem ark_mem = MRICONTROL_A(C);
+  ARKodeMRIStepMem step_mem = MRICONTROL_S(C);
+  if ((ark_mem == NULL) || (step_mem == NULL)) { return SUNCONTROL_MEM_FAIL; }
+
+  /* Update MRI controller based on its type */
+  int retval;
+  if (SUNControlGetID(MRICONTROL_C(C)) == SUNDIALS_CONTROL_MRI_H) {
+    retval = SUNControlUpdateMRIH(MRICONTROL_C(C),
+                                  H, step_mem->inner_control,
+                                  DSM, step_mem->inner_dsm);
+  } else {  /* SUNDIALS_CONTROL_MRI_TOL */
+    retval = SUNControlUpdateMRITol(MRICONTROL_C(C),
+                                    H, step_mem->inner_control,
+                                    DSM, step_mem->inner_dsm);
+  }
+  if (retval != SUNCONTROL_SUCCESS) { return(retval); }
+
+  /* Update inner controller parameter to most-recent prediction */
+  step_mem->inner_control = step_mem->inner_control_new;
+
+  /* return with success*/
+  return SUNCONTROL_SUCCESS;
+}
+
+SUNControl_ID SUNControlGetID_mriStepControl(SUNControl C)
+{ return SUNDIALS_CONTROL_H; }
+
+int SUNControlReset_mriStepControl(SUNControl C)
+{ return SUNControlReset(MRICONTROL_C(C)); }
+
+int SUNControlWrite_mriStepControl(SUNControl C, FILE* fptr)
+{ return SUNControlWrite(MRICONTROL_C(C), fptr); }
+
+int SUNControlSetMethodOrder_mriStepControl(SUNControl C, int q)
+{ return SUNControlSetMethodOrder(MRICONTROL_C(C), q); }
+
+int SUNControlSetEmbeddingOrder_mriStepControl(SUNControl C, int p)
+{ return SUNControlSetEmbeddingOrder(MRICONTROL_C(C), p); }
+
+int SUNControlSpace_mriStepControl(SUNControl C, long int *lenrw,
+                                   long int *leniw)
+{ return SUNControlSpace(MRICONTROL_C(C), lenrw, leniw); }
 
 /*===============================================================
   EOF
