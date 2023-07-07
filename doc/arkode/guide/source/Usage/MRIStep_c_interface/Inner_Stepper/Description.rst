@@ -279,13 +279,13 @@ Setting Member Functions
       /* set the inner stepper fixed step size function */
       flag = MRIStepInnerStepper_SetFixedStep(inner_stepper, MySetFixedStep);
 
-.. c:function:: int MRIStepInnerStepper_SetRTolFactorFn(MRIStepInnerStepper stepper, MRIStepInnerSetRTolFactor fn)
+.. c:function:: int MRIStepInnerStepper_SetRTolFn(MRIStepInnerStepper stepper, MRIStepInnerSetRTol fn)
 
-   This function attaches an :c:type:`MRIStepInnerSetRTolFactor` function to an
+   This function attaches an :c:type:`MRIStepInnerSetRTol` function to an
    :c:type:`MRIStepInnerStepper` object.
 
    :param stepper: an inner stepper object.
-   :param fn: the :c:type:`MRIStepInnerSetRTolFactor` function to attach.
+   :param fn: the :c:type:`MRIStepInnerSetRTol` function to attach.
 
    :retval ARK_SUCCESS: if successful
    :retval ARK_ILL_INPUT: if the stepper is ``NULL``
@@ -294,8 +294,8 @@ Setting Member Functions
 
    .. code-block:: C
 
-      /* set the inner stepper relative tolerance scaling factor function */
-      flag = MRIStepInnerStepper_SetRTolFactorFn(inner_stepper, MySetRTolFactor);
+      /* set the inner stepper relative tolerance function */
+      flag = MRIStepInnerStepper_SetRTolFn(inner_stepper, MySetRTol);
 
 
 .. _ARKODE.Usage.MRIStep.InnerStepper.Description.BaseMethods.Forcing:
@@ -552,22 +552,23 @@ following member functions:
       using a :c:type:`SUNControl` module having type ``SUNDIALS_CONTROL_MRI_H``.
 
 
-.. c:type:: int (*MRIStepInnerSetRTolFactor)(MRIStepInnerStepper stepper, realtype rtolfac)
+.. c:type:: int (*MRIStepInnerSetRTol)(MRIStepInnerStepper stepper, realtype rtol)
 
-   This function accepts a factor for the inner stepper to scale its current relative tolerance for an adaptive solve.
+   This function accepts a relative tolerance for the inner stepper to use in its upcoming adaptive solve.
 
    **Arguments:**
       * *stepper* -- the inner stepper object.
-      * *rtolfac* -- relative tolerance factor to use on the upcoming solve, e.g.,
-        *rtolfac = 2* indicates that the current relative tolerance should increase
-        by a factor of 2, while *rtolfac = 0.1* indicates that it should shrink by
-        a factor of 10.
+      * *rtol* -- relative tolerance to use on the upcoming solve.
 
    **Return value:**
-      An :c:type:`MRIStepInnerSetTolFactor` should return 0 if successful, a positive
+      An :c:type:`MRIStepInnerSetRTol` should return 0 if successful, a positive
       value if a recoverable error occurred, or a negative value if it failed
       unrecoverably.
 
    **Notes:**
       This function is only called when multirate temporal adaptivity has been enabled
       using a :c:type:`SUNControl` module having type ``SUNDIALS_CONTROL_MRI_TOL``.
+
+      It is assumed that if the inner stepper supports absolute tolerances as well, then
+      these have been set up directly by the user to indicate the "noise" level for
+      solution components.

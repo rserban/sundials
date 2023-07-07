@@ -1258,8 +1258,8 @@ int ERKStepCreateMRIStepInnerStepper(void *inner_arkode_mem,
                                erkStep_MRIStepInnerSetFixedStep);
   if (retval != ARK_SUCCESS) return(retval);
 
-  retval = MRIStepInnerStepper_SetRTolFactorFn(*stepper,
-                               erkStep_MRIStepInnerSetRTolFactor);
+  retval = MRIStepInnerStepper_SetRTolFn(*stepper,
+                               erkStep_MRIStepInnerSetRTol);
   if (retval != ARK_SUCCESS) return(retval);
 
   return(ARK_SUCCESS);
@@ -1418,14 +1418,13 @@ int erkStep_MRIStepInnerSetFixedStep(MRIStepInnerStepper stepper, realtype h)
 
 
 /*------------------------------------------------------------------------------
-  erkStep_MRIStepInnerSetRTolFactor
+  erkStep_MRIStepInnerSetRTol
 
-  Implementation of MRIStepInnerSetRTolFactor to set a relative tolerance
-  scaling factor for the upcoming evolution using the inner (fast) stepper.
+  Implementation of MRIStepInnerSetRTol to set a relative tolerance for the
+  upcoming evolution using the inner (fast) stepper.
   ----------------------------------------------------------------------------*/
 
-int erkStep_MRIStepInnerSetRTolFactor(MRIStepInnerStepper stepper,
-                                      realtype rtolfac)
+int erkStep_MRIStepInnerSetRTol(MRIStepInnerStepper stepper, realtype rtol)
 {
   void* arkode_mem;
   ARKodeMem ark_mem;
@@ -1436,13 +1435,13 @@ int erkStep_MRIStepInnerSetRTolFactor(MRIStepInnerStepper stepper,
   if (retval != ARK_SUCCESS) return(retval);
   if (arkode_mem==NULL) {
     arkProcessError(NULL, ARK_MEM_NULL, "ARKODE::ERKStep",
-                    "erkStep_MRIStepInnerSetRTolFactor", MSG_ARK_NO_MEM);
+                    "erkStep_MRIStepInnerSetRTol", MSG_ARK_NO_MEM);
     return(ARK_MEM_NULL);
   }
   ark_mem = (ARKodeMem) arkode_mem;
 
-  if (rtolfac > ZERO) {
-    ark_mem->reltol += rtolfac;
+  if (rtol > ZERO) {
+    ark_mem->reltol = rtol;
     return(ARK_SUCCESS);
   } else {
     return(ARK_ILL_INPUT);

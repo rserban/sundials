@@ -139,8 +139,7 @@ typedef int (*MRIStepInnerResetAccumulatedError)(MRIStepInnerStepper stepper);
 typedef int (*MRIStepInnerSetFixedStep)(MRIStepInnerStepper stepper,
                                         realtype h);
 
-typedef int (*MRIStepInnerSetRTolFactor)(MRIStepInnerStepper stepper,
-                                         realtype rtolfac);
+typedef int (*MRIStepInnerSetRTol)(MRIStepInnerStepper stepper, realtype rtol);
 
 /*---------------------------------------------------------------
   MRI coupling data structure and associated utility routines
@@ -291,6 +290,8 @@ SUNDIALS_EXPORT int MRIStepSetStagePredictFn(void *arkode_mem,
                                              ARKStagePredictFn PredictStage);
 SUNDIALS_EXPORT int MRIStepSetDeduceImplicitRhs(void *arkode_mem,
                                                 sunbooleantype deduce);
+SUNDIALS_EXPORT int MRIStepSetFastErrorStepFactor(void *arkode_mem,
+                                                  realtype hfactor);
 
 /* Linear solver interface optional input functions -- must be called
    AFTER MRIStepSetLinearSolver */
@@ -459,8 +460,8 @@ int MRIStepInnerStepper_SetFixedStepFn(MRIStepInnerStepper stepper,
                                        MRIStepInnerSetFixedStep fn);
 
 SUNDIALS_EXPORT
-int MRIStepInnerStepper_SetRTolFactorFn(MRIStepInnerStepper stepper,
-                                        MRIStepInnerSetRTolFactor fn);
+int MRIStepInnerStepper_SetRTolFn(MRIStepInnerStepper stepper,
+                                  MRIStepInnerSetRTol fn);
 
 SUNDIALS_EXPORT
 int MRIStepInnerStepper_AddForcing(MRIStepInnerStepper stepper, realtype t, N_Vector f);
