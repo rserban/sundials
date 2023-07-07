@@ -260,7 +260,7 @@ SWIGEXPORT int _wrap_FSUNControlGetID_MRIHTol(SUNControl farg1) {
 }
 
 
-SWIGEXPORT int _wrap_FSUNControlEstimateMRIStepTol_MRIHTol(SUNControl farg1, double const *farg2, double const *farg3, double const *farg4, double const *farg5, double *farg6, double *farg7) {
+SWIGEXPORT int _wrap_FSUNControlEstimateStepTol_MRIHTol(SUNControl farg1, double const *farg2, double const *farg3, double const *farg4, double const *farg5, double *farg6, double *farg7) {
   int fresult ;
   SUNControl arg1 = (SUNControl) 0 ;
   realtype arg2 ;
@@ -278,7 +278,7 @@ SWIGEXPORT int _wrap_FSUNControlEstimateMRIStepTol_MRIHTol(SUNControl farg1, dou
   arg5 = (realtype)(*farg5);
   arg6 = (realtype *)(farg6);
   arg7 = (realtype *)(farg7);
-  result = (int)SUNControlEstimateMRIStepTol_MRIHTol(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  result = (int)SUNControlEstimateStepTol_MRIHTol(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
   fresult = (int)(result);
   return fresult;
 }

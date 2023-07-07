@@ -49,10 +49,10 @@ SUNControl SUNControlMRIHTol_GetFastController(SUNControl C);
 SUNDIALS_EXPORT
 SUNControl_ID SUNControlGetID_MRIHTol(SUNControl C);
 SUNDIALS_EXPORT
-int SUNControlEstimateMRIStepTol_MRIHTol(SUNControl C, realtype H,
-                                         realtype tolfac, realtype DSM,
-                                         realtype dsm, realtype *Hnew,
-                                         realtype* tolfacnew);
+int SUNControlEstimateStepTol_MRIHTol(SUNControl C, realtype H,
+                                      realtype tolfac, realtype DSM,
+                                      realtype dsm, realtype *Hnew,
+                                      realtype* tolfacnew);
 SUNDIALS_EXPORT
 int SUNControlReset_MRIHTol(SUNControl C);
 SUNDIALS_EXPORT

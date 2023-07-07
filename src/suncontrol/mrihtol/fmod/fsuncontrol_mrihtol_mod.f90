@@ -31,7 +31,7 @@ module fsuncontrol_mrihtol_mod
  public :: FSUNControlMRIHTol_GetSlowController
  public :: FSUNControlMRIHTol_GetFastController
  public :: FSUNControlGetID_MRIHTol
- public :: FSUNControlEstimateMRIStepTol_MRIHTol
+ public :: FSUNControlEstimateStepTol_MRIHTol
  public :: FSUNControlReset_MRIHTol
  public :: FSUNControlSetDefaults_MRIHTol
  public :: FSUNControlWrite_MRIHTol
@@ -77,8 +77,8 @@ type(C_PTR), value :: farg1
 integer(C_INT) :: fresult
 end function
 
-function swigc_FSUNControlEstimateMRIStepTol_MRIHTol(farg1, farg2, farg3, farg4, farg5, farg6, farg7) &
-bind(C, name="_wrap_FSUNControlEstimateMRIStepTol_MRIHTol") &
+function swigc_FSUNControlEstimateStepTol_MRIHTol(farg1, farg2, farg3, farg4, farg5, farg6, farg7) &
+bind(C, name="_wrap_FSUNControlEstimateStepTol_MRIHTol") &
 result(fresult)
 use, intrinsic :: ISO_C_BINDING
 type(C_PTR), value :: farg1
@@ -228,7 +228,7 @@ fresult = swigc_FSUNControlGetID_MRIHTol(farg1)
 swig_result = fresult
 end function
 
-function FSUNControlEstimateMRIStepTol_MRIHTol(c, h, tolfac, dsm, dsm4, hnew, tolfacnew) &
+function FSUNControlEstimateStepTol_MRIHTol(c, h, tolfac, dsm, dsm4, hnew, tolfacnew) &
 result(swig_result)
 use, intrinsic :: ISO_C_BINDING
 integer(C_INT) :: swig_result
@@ -255,7 +255,7 @@ farg4 = dsm
 farg5 = dsm4
 farg6 = c_loc(hnew(1))
 farg7 = c_loc(tolfacnew(1))
-fresult = swigc_FSUNControlEstimateMRIStepTol_MRIHTol(farg1, farg2, farg3, farg4, farg5, farg6, farg7)
+fresult = swigc_FSUNControlEstimateStepTol_MRIHTol(farg1, farg2, farg3, farg4, farg5, farg6, farg7)
 swig_result = fresult
 end function
 

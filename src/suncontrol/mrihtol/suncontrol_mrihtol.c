@@ -50,7 +50,7 @@ SUNControl SUNControlMRIHTol(SUNContext sunctx, SUNControl HControl,
 
   /* Attach operations */
   C->ops->getid             = SUNControlGetID_MRIHTol;
-  C->ops->estimatemristeps  = SUNControlEstimateMRIStepTol_MRIHTol;
+  C->ops->estimatesteptol   = SUNControlEstimateStepTol_MRIHTol;
   C->ops->reset             = SUNControlReset_MRIHTol;
   C->ops->setdefaults       = SUNControlSetDefaults_MRIHTol;
   C->ops->write             = SUNControlWrite_MRIHTol;
@@ -104,7 +104,7 @@ SUNControl SUNControlMRIHTol_GetFastController(SUNControl C)
 
 SUNControl_ID SUNControlGetID_MRIHTol(SUNControl C) { return SUNDIALS_CONTROL_MRI_TOL; }
 
-int SUNControlEstimateMRIStepTol_MRIHTol(SUNControl C, realtype H,
+int SUNControlEstimateStepTol_MRIHTol(SUNControl C, realtype H,
                                          realtype tolfac, realtype DSM,
                                          realtype dsm, realtype *Hnew,
                                          realtype* tolfacnew)
