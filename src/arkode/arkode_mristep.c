@@ -1232,10 +1232,14 @@ int mriStep_Init(void* arkode_mem, int init_type)
       return (ARK_ILL_INPUT);
     }
   } else if (adapt_type == SUNDIALS_CONTROL_MRI_TOL) {
-    /* TO-DO:  Verify that
-       - ensure that the MRI method includes embedding coefficients.  */
+    /* Verify that the MRI method includes an embedding. */
+    if (step_mem->MRIC->p == 0) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
+                      "Timestep adaptivity enabled, but non-embedded MRI table specified");
+      return (ARK_ILL_INPUT);
+    }
 
-    /* verify that adaptivity type is supported by inner stepper */
+    /* Verify that adaptivity type is supported by inner stepper */
     if (!mriStepInnerStepper_SupportsRTolAdaptivity(step_mem->stepper)) {
       arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
                       "MRI-TOL SUNController provided, but unsupported by inner stepper");
@@ -1264,8 +1268,12 @@ int mriStep_Init(void* arkode_mem, int init_type)
     /* initialize fast stepper to use the same relative tolerance as MRIStep */
     step_mem->inner_control = ONE;
   } else {
-    /* TO-DO:  Verify that
-       - ensure that the MRI method includes embedding coefficients. */
+    /* Verify that the MRI method includes an embedding. */
+    if (step_mem->MRIC->p == 0) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
+                      "Timestep adaptivity enabled, but non-embedded MRI table specified");
+      return (ARK_ILL_INPUT);
+    }
 
     /* verify that adaptivity type is supported by inner stepper */
     if (!mriStepInnerStepper_SupportsStepAdaptivity(step_mem->stepper)) {

@@ -169,7 +169,7 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK45a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
 
 ARK_MRI_TABLE(ARKODE_MRI_GARK_IRK21a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     MRIStepCoupling C;
-    ARKodeButcherTable B = ARKodeButcherTable_Alloc(3, SUNFALSE);
+    ARKodeButcherTable B = ARKodeButcherTable_Alloc(3, SUNTRUE);
 
     B->q=2;
     B->p=1;
