@@ -85,13 +85,17 @@ typedef enum {
   ARKODE_IMEX_MRI_GARK3a,
   ARKODE_IMEX_MRI_GARK3b,
   ARKODE_IMEX_MRI_GARK4,
-  ARKODE_MAX_MRI_NUM = ARKODE_IMEX_MRI_GARK4
+  ARKODE_MRI_GARK_ERK22a,
+  ARKODE_MRI_GARK_ERK22b,
+  ARKODE_MRI_GARK_SDIRK33a,
+  ARKODE_MAX_MRI_NUM = ARKODE_MRI_GARK_SDIRK33a
 } ARKODE_MRITableID;
 
 
 /* Default MRI coupling tables for each order */
 
 static const int MRISTEP_DEFAULT_3         = ARKODE_MIS_KW3;
+static const int MRISTEP_DEFAULT_EXPL_2    = ARKODE_MRI_GARK_ERK22a;
 static const int MRISTEP_DEFAULT_EXPL_3    = ARKODE_MIS_KW3;
 static const int MRISTEP_DEFAULT_EXPL_4    = ARKODE_MRI_GARK_ERK45a;
 static const int MRISTEP_DEFAULT_IMPL_SD_2 = ARKODE_MRI_GARK_IRK21a;
@@ -146,13 +150,13 @@ typedef int (*MRIStepInnerSetRTol)(MRIStepInnerStepper stepper, realtype rtol);
   ---------------------------------------------------------------*/
 struct MRIStepCouplingMem
 {
-  int nmat;        /* number of MRI coupling matrices                   */
-  int stages;      /* size of coupling matrices (stages * stages)       */
-  int q;           /* method order of accuracy                          */
-  int p;           /* embedding order of accuracy                       */
-  realtype *c;     /* stage abscissae                                   */
-  realtype ***W;   /* explicit coupling matrices [nmat][stages][stages] */
-  realtype ***G;   /* implicit coupling matrices [nmat][stages][stages] */
+  int nmat;        /* number of MRI coupling matrices                     */
+  int stages;      /* size of coupling matrices ((stages+1) * stages)     */
+  int q;           /* method order of accuracy                            */
+  int p;           /* embedding order of accuracy                         */
+  realtype *c;     /* stage abscissae                                     */
+  realtype ***W;   /* explicit coupling matrices [nmat][stages+1][stages] */
+  realtype ***G;   /* implicit coupling matrices [nmat][stages+1][stages] */
 };
 
 typedef _SUNDIALS_STRUCT_ MRIStepCouplingMem *MRIStepCoupling;

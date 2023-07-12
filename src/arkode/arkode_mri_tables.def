@@ -33,15 +33,18 @@
 
      imeth                       order   type    QP
     ------------------------------------------------
-     ARKODE_MIS_KW3                     3       E       Y
-     ARKODE_MRI_GARK_ERK33a             3       E       Y
-     ARKODE_MRI_GARK_ERK45a             4       E       Y
-     ARKODE_MRI_GARK_IRK21a             2       ID      Y
-     ARKODE_MRI_GARK_ESDIRK34a          3       ID      Y
-     ARKODE_MRI_GARK_ESDIRK46a          4       ID      Y
-     ARKODE_IMEX_MRI_GARK3a             3       ID      Y
-     ARKODE_IMEX_MRI_GARK3b             3       ID      Y
-     ARKODE_IMEX_MRI_GARK4              4       ID      Y
+     ARKODE_MIS_KW3              3       E       Y
+     ARKODE_MRI_GARK_ERK22a      2       E       Y
+     ARKODE_MRI_GARK_ERK22b      2       E       Y
+     ARKODE_MRI_GARK_ERK33a      3       E       Y
+     ARKODE_MRI_GARK_ERK45a      4       E       Y
+     ARKODE_MRI_GARK_IRK21a      2       ID      Y
+     ARKODE_MRI_GARK_ESDIRK34a   3       ID      Y
+     ARKODE_MRI_GARK_SDIRK33a    3       ID      Y
+     ARKODE_MRI_GARK_ESDIRK46a   4       ID      Y
+     ARKODE_IMEX_MRI_GARK3a      3       ID      Y
+     ARKODE_IMEX_MRI_GARK3b      3       ID      Y
+     ARKODE_IMEX_MRI_GARK4       4       ID      Y
     ------------------------------------------------
 */
 
@@ -56,11 +59,42 @@ ARK_MRI_TABLE(ARKODE_MIS_KW3, { /* Schlegel et al., JCAM 226:345-357, 2009 */
     return C;
   })
 
+ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK22a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
+    MRIStepCoupling C = MRIStepCoupling_Alloc(1, 3, MRISTEP_EXPLICIT);
+
+    C->q = 2;
+    C->p = 1;
+
+    C->c[1] = RCONST(0.5);
+    C->c[2] = ONE;
+
+    C->W[0][1][0] =  RCONST(0.5);
+    C->W[0][2][0] = -RCONST(0.5);
+    C->W[0][2][1] =  TWO;
+    C->W[0][3][0] =  RCONST(0.5);
+    return C;
+  })
+
+ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK22b, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
+    MRIStepCoupling C = MRIStepCoupling_Alloc(1, 3, MRISTEP_EXPLICIT);
+
+    C->q = 2;
+    C->p = 1;
+
+    C->c[1] = ONE;
+    C->c[2] = ONE;
+
+    C->W[0][1][0] =  ONE;
+    C->W[0][2][0] = -RCONST(0.5);
+    C->W[0][2][1] =  ONE;
+    return C;
+  })
+
 ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK33a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     MRIStepCoupling C = MRIStepCoupling_Alloc(2, 4, MRISTEP_EXPLICIT);
 
     C->q = 3;
-    C->p = 0;
+    C->p = 2;
 
     C->c[1] = ONE/RCONST(3.0);
     C->c[2] = TWO/RCONST(3.0);
@@ -71,6 +105,9 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK33a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     C->W[0][2][1] =  TWO/RCONST(3.0);
     C->W[0][3][1] = -TWO/RCONST(3.0);
     C->W[0][3][2] =  ONE;
+    C->W[0][4][0] =  ONE/RCONST(12.0);
+    C->W[0][4][1] = -ONE/RCONST(3.0);
+    C->W[0][4][2] =  RCONST(7.0)/RCONST(12.0);
 
     C->W[1][3][0] =  ONE/TWO;
     C->W[1][3][2] = -ONE/TWO;
@@ -78,10 +115,11 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK33a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
   })
 
 ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK45a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
+    /* Embedding coefficients CORRECTED in A. Sandu, arxiv:1808.02759, 2018 */
     MRIStepCoupling C = MRIStepCoupling_Alloc(2, 6, MRISTEP_EXPLICIT);
 
     C->q = 4;
-    C->p = 0;
+    C->p = 3;
 
     C->c[1] = RCONST(0.2);
     C->c[2] = RCONST(0.4);
@@ -104,6 +142,11 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK45a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     C->W[0][5][2] = -RCONST(1360217.0)/RCONST(1139280.0);
     C->W[0][5][3] = -RCONST(148789.0)/RCONST(56964.0);
     C->W[0][5][4] =  RCONST(147889.0)/RCONST(45120.0);
+    C->W[0][6][0] = -RCONST(1482837.0)/RCONST(759520.0);
+    C->W[0][6][1] =  RCONST(175781.0)/RCONST(71205.0);
+    C->W[0][6][2] = -RCONST(790577.0)/RCONST(1139280.0);
+    C->W[0][6][3] = -RCONST(6379.0)/RCONST(56964.0);
+    C->W[0][6][4] =  RCONST(47.0)/RCONST(96.0);
 
     C->W[1][2][0] =  RCONST(503.0)/RCONST(80.0);
     C->W[1][2][1] = -RCONST(503.0)/RCONST(80.0);
@@ -119,6 +162,8 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ERK45a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     C->W[1][5][2] =  ONE;
     C->W[1][5][3] =  RCONST(5.0);
     C->W[1][5][4] = -RCONST(41933.0)/RCONST(7520.0);
+    C->W[1][6][0] =  RCONST(6213)/RCONST(1880);
+    C->W[1][6][1] = -RCONST(6213)/RCONST(1880);
     return C;
   })
 
@@ -127,6 +172,7 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_IRK21a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     ARKodeButcherTable B = ARKodeButcherTable_Alloc(3, SUNFALSE);
 
     B->q=2;
+    B->p=1;
 
     B->c[1] = ONE;
     B->c[2] = ONE;
@@ -138,7 +184,9 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_IRK21a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
     B->b[0] = RCONST(0.5);
     B->b[2] = RCONST(0.5);
 
-    C = MRIStepCoupling_MIStoMRI(B, 2, 0);
+    B->d[2] = RCONST(1.0);
+
+    C = MRIStepCoupling_MIStoMRI(B, 2, 1);
     ARKodeButcherTable_Free(B);
     return C;
   })
@@ -148,7 +196,7 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ESDIRK34a, { /* A. Sandu, SINUM 57:2300-2327, 2019
     realtype beta = RCONST(0.4358665215084589994160194511935568425);
 
     C->q = 3;
-    C->p = 0;
+    C->p = 2;
 
     C->c[1] = ONE/RCONST(3.0);
     C->c[2] = ONE/RCONST(3.0);
@@ -170,6 +218,43 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ESDIRK34a, { /* A. Sandu, SINUM 57:2300-2327, 2019
     C->G[0][5][4] =  RCONST(-0.9934660860338359976640778047742273701);
     C->G[0][6][0] = -beta;
     C->G[0][6][6] =  beta;
+    C->G[0][7][0] =  RCONST(0.2453831999117524372455680781104585876241);
+    C->G[0][7][2] =  RCONST(0.4204215033044044563073464989473988121422);
+    C->G[0][7][4] = -RCONST(1.576992606344066224351397232226173387157);
+    C->G[0][7][6] =  RCONST(0.9111879031279093307984826551683159873903);
+    return C;
+  })
+
+ARK_MRI_TABLE(ARKODE_MRI_GARK_SDIRK33a, { /* A. Sandu, SINUM 57:2300-2327, 2019 */
+    MRIStepCoupling C = MRIStepCoupling_Alloc(1, 7, MRISTEP_IMPLICIT);
+    realtype beta = RCONST(0.4358665215084589994160194511935568425);
+
+    C->q = 3;
+    C->p = 2;
+
+    C->c[1] = beta;
+    C->c[2] = beta;
+    C->c[3] = RCONST(0.7179332607542294952377136908475758057246);
+    C->c[4] = RCONST(0.7179332607542294952377136908475758057246);
+    C->c[5] = ONE;
+    C->c[6] = ONE;
+
+    C->G[0][1][0] =  ONE/RCONST(3.0);
+    C->G[0][2][0] = -beta;
+    C->G[0][2][2] =  beta;
+    C->G[0][3][0] = -RCONST(0.3045790611944504997383150224015087837084);
+    C->G[0][3][2] =  RCONST(0.6379123945277838330716483557348421170418);
+    C->G[0][4][0] =  RCONST(0.2116913105640266700296121974124437851914);
+    C->G[0][4][2] = -RCONST(0.6475578320724856739159276833552033362993);
+    C->G[0][4][4] =  beta;
+    C->G[0][5][0] =  RCONST(0.4454209388055495002616849775984912162916);
+    C->G[0][5][2] =  RCONST(0.8813784805616198486169102995058803214733);
+    C->G[0][5][4] = -RCONST(0.9934660860338360155452619437710382044315);
+    C->G[0][6][0] = -beta;
+    C->G[0][6][6] =  beta;
+    C->G[0][7][2] = -RCONST(0.3221815853422345616880179885050316914282);
+    C->G[0][7][4] =  RCONST(0.6443631706844691080578839615430464872725);
+    C->G[0][7][6] = -RCONST(0.3221815853422345463698659730380147958443);
     return C;
   })
 
@@ -177,7 +262,7 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ESDIRK46a, { /* A. Sandu, SINUM 57:2300-2327, 2019
     MRIStepCoupling C = MRIStepCoupling_Alloc(2, 11, MRISTEP_IMPLICIT);
 
     C->q = 4;
-    C->p = 0;
+    C->p = 3;
 
     C->c[1]  = ONE/RCONST(5.0);
     C->c[2]  = ONE/RCONST(5.0);
@@ -225,6 +310,12 @@ ARK_MRI_TABLE(ARKODE_MRI_GARK_ESDIRK46a, { /* A. Sandu, SINUM 57:2300-2327, 2019
     C->G[0][10][6]  =  RCONST(127.0)/RCONST(300.0);
     C->G[0][10][8]  = -RCONST(313.0)/RCONST(300.0);
     C->G[0][10][10] =  ONE/RCONST(4.0);
+    C->G[0][11][0]  = -ONE/RCONST(4.0);
+    C->G[0][11][2]  =  RCONST(5595.0)/RCONST(8804.0);
+    C->G[0][11][4]  = -RCONST(2445.0)/RCONST(8804.0);
+    C->G[0][11][6]  = -RCONST(4225.0)/RCONST(8804.0);
+    C->G[0][11][8]  =  RCONST(2205.0)/RCONST(4402.0);
+    C->G[0][11][10] = -RCONST(567.0)/RCONST(4402.0);
 
     C->G[1][3][0]  = -RCONST(1674554930619.0)/RCONST(964681845400.0);
     C->G[1][3][2]  =  RCONST(1674554930619.0)/RCONST(964681845400.0);
@@ -463,4 +554,3 @@ ARK_MRI_TABLE(ARKODE_IMEX_MRI_GARK4, { /* R. Chinomona & D. Reynolds SINUM 43(5)
     C->G[1][9][8]   =  RCONST(2.61047101304182849292578695498722043);
     return C;
   })
-

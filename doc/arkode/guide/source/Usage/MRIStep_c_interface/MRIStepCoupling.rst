@@ -24,7 +24,7 @@ custom set of slow-to-fast time scale coupling coefficients by constructing a
 coupling table and attaching it with :c:func:`MRIStepSetCoupling()`.
 
 As described in :numref:`ARKODE.Mathematics.MRIStep`, the coupling from the slow time
-scale to the fast time scale is encoded by a vector of slow 'stage time'
+scale to the fast time scale is encoded by a vector of slow "stage time"
 abscissae, :math:`c^S \in \mathbb{R}^{s+1}` and a set of coupling matrices
 :math:`\Gamma^{\{k\}}\in\mathbb{R}^{(s+1)\times(s+1)}` and
 :math:`\Omega^{\{k\}}\in\mathbb{R}^{(s+1)\times(s+1)}`. An ``MRIStepCoupling``
@@ -60,12 +60,12 @@ and the members of the strucutre are:
      the embedding, respectively,
 
    * ``W`` is a three-dimensional array with dimensions
-     ``[nmat][stages][stages]`` containing the method's :math:`\Omega^{\{k\}}`
+     ``[nmat][stages+1][stages]`` containing the method's :math:`\Omega^{\{k\}}`
      coupling matrices for the slow-nonstiff (explicit) terms in
      :eq:`ARKODE_IVP_two_rate`,
 
    * ``G`` is a three-dimensional array with dimensions
-     ``[nmat][stages][stages]`` containing the method's :math:`\Gamma^{\{k\}}`
+     ``[nmat][stages+1][stages]`` containing the method's :math:`\Gamma^{\{k\}}`
      coupling matrices for the slow-stiff (implicit) terms in
      :eq:`ARKODE_IVP_two_rate`, and
 
@@ -167,13 +167,9 @@ are defined ``arkode/arkode_mristep.h``.
    :param q: global order of accuracy for the method.
    :param p: global order of accuracy for the embedded method.
    :param W: array of coefficients defining the explicit coupling matrices
-             :math:`\Omega^{\{k\}}`. The entries should be stored as a 1D array of size
-             ``nmat * stages * stages``, in row-major order. If the slow method is
-             implicit pass ``NULL``.
+             :math:`\Omega^{\{k\}}`. If the slow method is implicit pass ``NULL``.
    :param G: array of coefficients defining the implicit coupling matrices
-             :math:`\Gamma^{\{k\}}`. The entries should be stored as a 1D array of size
-             ``nmat * stages * stages``, in row-major order. If the slow method is
-             explicit pass ``NULL``.
+             :math:`\Gamma^{\{k\}}`. If the slow method is explicit pass ``NULL``.
    :param c: array of slow abscissae for the MRI method. The entries should be
              stored as a 1D array of length ``stages``.
 
@@ -183,8 +179,17 @@ are defined ``arkode/arkode_mristep.h``.
 
    .. note::
 
-      As embeddings are not currently supported in MRIStep, ``p`` should be
-      equal to zero.
+      The arrays *W* and *G* are assumed to have different sizes depending
+      on the embedding input, *p*.
+
+      Non-embedded methods should be indicated by an input *p=0*, in which
+      case *W* and/or *G* should have entries stored as a 1D array of size
+      ``nmat * stages * stages``, in row-major order.
+
+      Embedded methods should be indicated by an input *p>0*, in which
+      case *W* and/or *G* should have entries stored as a 1D array of size
+      ``nmat * (stages+1) * stages``, in row-major order.  The additional
+      "row" is assumed to hold the embedding coefficients.
 
 .. c:function:: MRIStepCoupling MRIStepCoupling_MIStoMRI(ARKodeButcherTable B, int q, int p)
 
@@ -210,8 +215,7 @@ are defined ``arkode/arkode_mristep.h``.
       for the Runge--Kutta method encoded in *B*, which is why these arguments
       should be supplied separately.
 
-      As embeddings are not currently supported in MRIStep, then *p* should be
-      equal to zero.
+      If *p>0* is input, then the table *B* must include embedding coefficients.
 
 
 .. c:function:: MRIStepCoupling MRIStepCoupling_Copy(MRIStepCoupling C)
@@ -285,26 +289,29 @@ with values specified for each method below (e.g., ``ARKODE_MIS_KW3``).
 .. table:: Explicit MRI-GARK coupling tables. The default method for each order
            is marked with an asterisk (:math:`^*`).
 
-   ==========================  ===========  =====================
-   Table name                  Order        Reference
-   ==========================  ===========  =====================
-   ``ARKODE_MIS_KW3``          :math:`3^*`  :cite:p:`Schlegel:09`
-   ``ARKODE_MRI_GARK_ERK33a``  3            :cite:p:`Sandu:19`
-   ``ARKODE_MRI_GARK_ERK45a``  :math:`4^*`  :cite:p:`Sandu:19`
-   ==========================  ===========  =====================
+   ==========================  ============  ===============  =====================
+   Table name                  Method Order  Embedding Order  Reference
+   ==========================  ============  ===============  =====================
+   ``ARKODE_MIS_KW3``          :math:`3^*`   0                :cite:p:`Schlegel:09`
+   ``ARKODE_MRI_GARK_ERK22a``  :math:`2^*`   1                :cite:p:`Sandu:19`
+   ``ARKODE_MRI_GARK_ERK22b``  2             1                :cite:p:`Sandu:19`
+   ``ARKODE_MRI_GARK_ERK33a``  3             2                :cite:p:`Sandu:19`
+   ``ARKODE_MRI_GARK_ERK45a``  :math:`4^*`   3                :cite:p:`Sandu:19`
+   ==========================  ============  ===============  =====================
 
 
 .. table:: Diagonally-implicit, solve-decoupled MRI-GARK coupling tables. The
            default method for each order is marked with an asterisk
            (:math:`^*`).
 
-   =============================  ===========  ===============  ==================
-   Table name                     Order        Implicit Solves  Reference
-   =============================  ===========  ===============  ==================
-   ``ARKODE_MRI_GARK_IRK21a``     :math:`2^*`  1                :cite:p:`Sandu:19`
-   ``ARKODE_MRI_GARK_ESDIRK34a``  :math:`3^*`  3                :cite:p:`Sandu:19`
-   ``ARKODE_MRI_GARK_ESDIRK46a``  :math:`4^*`  5                :cite:p:`Sandu:19`
-   =============================  ===========  ===============  ==================
+   =============================  ============  ===============  ===============  ==================
+   Table name                     Method Order  Embedding Order  Implicit Solves  Reference
+   =============================  ============  ===============  ===============  ==================
+   ``ARKODE_MRI_GARK_IRK21a``     :math:`2^*`   1                1                :cite:p:`Sandu:19`
+   ``ARKODE_MRI_GARK_ESDIRK34a``  :math:`3^*`   2                3                :cite:p:`Sandu:19`
+   ``ARKODE_MRI_GARK_SDIRK33a``   3             2                3                :cite:p:`Sandu:19`
+   ``ARKODE_MRI_GARK_ESDIRK46a``  :math:`4^*`   3                5                :cite:p:`Sandu:19`
+   =============================  ============  ===============  ===============  ==================
 
 
 .. table:: Diagonally-implicit, solve-decoupled IMEX-MRI-GARK coupling tables.
