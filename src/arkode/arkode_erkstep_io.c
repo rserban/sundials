@@ -57,6 +57,9 @@ int ERKStepSetInitStep(void *arkode_mem, realtype hin) {
   return(arkSetInitStep(arkode_mem, hin)); }
 int ERKStepSetStopTime(void *arkode_mem, realtype tstop) {
   return(arkSetStopTime(arkode_mem, tstop)); }
+int ERKStepSetInterpolateStopTime(void *arkode_mem,
+                                  booleantype interp) {
+  return(arkSetInterpolateStopTime(arkode_mem, interp)); }
 int ERKStepClearStopTime(void *arkode_mem) {
   return(arkClearStopTime(arkode_mem)); }
 int ERKStepSetRootDirection(void *arkode_mem, int *rootdir) {

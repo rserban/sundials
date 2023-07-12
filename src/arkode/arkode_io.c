@@ -87,6 +87,7 @@ int arkSetDefaults(void *arkode_mem)
   ark_mem->maxconstrfails          = MAXCONSTRFAILS; /* max number of constraint fails */
   ark_mem->hin                     = ZERO;           /* determine initial step on-the-fly */
   ark_mem->tstopset                = SUNFALSE;       /* no stop time set */
+  ark_mem->tstopinterp             = SUNFALSE;       /* copy at stop time */
   ark_mem->tstop                   = ZERO;           /* no fixed stop time */
   ark_mem->diagfp                  = NULL;           /* no solver diagnostics file */
   ark_mem->report                  = SUNFALSE;       /* don't report solver diagnostics */
@@ -537,6 +538,26 @@ int arkSetStopTime(void *arkode_mem, realtype tstop)
   ark_mem->tstop    = tstop;
   ark_mem->tstopset = SUNTRUE;
 
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  arkSetInterpolateStopTime:
+
+  Specifies to use interpolation to fill the solution output at
+  the stop time (instead of a copy).
+  ---------------------------------------------------------------*/
+int arkSetInterpolateStopTime(void *arkode_mem, booleantype interp)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "ARKODE",
+                    "arkSetInterpolateStopTime", MSG_ARK_NO_MEM);
+    return (ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+  ark_mem->tstopinterp = interp;
   return(ARK_SUCCESS);
 }
 

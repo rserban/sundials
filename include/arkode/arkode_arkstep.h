@@ -260,6 +260,8 @@ SUNDIALS_EXPORT int ARKStepSetMinStep(void *arkode_mem,
 SUNDIALS_DEPRECATED_EXPORT_MSG("use SUNHeuristics instead")
 SUNDIALS_EXPORT int ARKStepSetMaxStep(void *arkode_mem,
                                       realtype hmax);
+SUNDIALS_EXPORT int ARKStepSetInterpolateStopTime(void *arkode_mem,
+                                                  booleantype interp);
 SUNDIALS_EXPORT int ARKStepSetStopTime(void *arkode_mem,
                                        realtype tstop);
 SUNDIALS_EXPORT int ARKStepClearStopTime(void *arkode_mem);
