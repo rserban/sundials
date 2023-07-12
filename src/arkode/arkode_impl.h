@@ -368,6 +368,7 @@ typedef struct ARKodeMemRec {
   realtype eta;                /* eta = hprime / h                         */
   realtype tcur;               /* current internal value of t
                                   (changes with each stage)                */
+  realtype tout;               /* user's requested output time             */
   realtype tretlast;           /* value of tret last returned by ARKODE    */
   booleantype fixedstep;       /* flag to disable temporal adaptivity      */
   SUNControl hcontroller;      /* temporal error controller                */

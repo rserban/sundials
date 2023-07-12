@@ -175,7 +175,6 @@ void* MRIStepCreate(ARKRhsFn fse, ARKRhsFn fsi, realtype t0, N_Vector y0,
   step_mem->Xvecs        = NULL;
 
   /* Initialize adaptivity parameters */
-  step_mem->adaptivity_type = 0;
   step_mem->inner_control = ZERO;
   step_mem->inner_dsm = ONE;
   step_mem->inner_control_new = ZERO;
@@ -981,6 +980,7 @@ int mriStep_Init(void* arkode_mem, int init_type)
   ARKodeMRIStepMem step_mem;
   int retval, j;
   booleantype reset_efun;
+  SUNControl_ID adapt_type;
 
   /* access ARKodeMRIStepMem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_Init",
@@ -1213,41 +1213,115 @@ int mriStep_Init(void* arkode_mem, int init_type)
     }
   }
 
-  /* TO-DO: Perform checks related to time step adaptivity:
-     - Remove MRIADAPT_NONE, MRIADAPT_HH and MRIADAPT_HTOL constants and
-       step_mem->adaptivity_type.  Instead call
-       SUNControlGetID(ark_mem->hcontroller) to find the adaptivity type,
-       and compare this with the SUNControl_ID constants.
-     - Ensure that SUNControlGetID(ark_mem->hcontroller) is one of
-       SUNDIALS_CONTROL_MRI_H, SUNDIALS_CONTROL_MRI_TOL, or
-       SUNDIALS_CONTROL_NONE; otherwise issue an error message about an
-       unusable controller.
-     - SUNDIALS_CONTROL_MRI_H requirements:
-       - check that the inner integrator supports step adaptivity by calling
-         mriStepInnerStepper_SupportsStepAdaptivity
-       - ensure that the MRI method includes embedding coefficients
-       - if ARKODE's initial step is not yet set, then call an internal
-         routine to estimate the initial slow step size.
-       - if step_mem->inner_control is not set (how would it be set otherwise?),
-         then check whether MRIStepInnerFullRhsFn 'fullrhs' is supplied:
-         - if so, then call internal routine to estimate initial fast step size.
-         - if not, then set step_mem->inner_control to equal H/100.
-     - SUNDIALS_CONTROL_MRI_TOL requirements:
-       - check that the inner integrator supports RTol adaptivity by calling
-         mriStepInnerStepper_SupportsRTolAdaptivity
-       - ensure that the MRI method includes embedding coefficients
-       - if ARKODE's initial step is not yet set, then call an internal
-         routine to estimate the initial slow step size.
-       - if step_mem->inner_control is not yet set (how would it be set otherwise?),
-         then initialize it to 1.
-     - SUNDIALS_CONTROL_NONE requirements:
-       - user-supplied time-step size must be provided, and ark_mem->fixedstep == SUNTRUE
-       - ensure that inner_control is left unset?
-   */
+  /* get timestep adaptivity type, and return an error if an
+     incompatible type is detected */
+  adapt_type = SUNControlGetID(ark_mem->hcontroller);
+  if ((adapt_type != SUNDIALS_CONTROL_MRI_H) &&
+      (adapt_type != SUNDIALS_CONTROL_MRI_TOL) &&
+      (adapt_type != SUNDIALS_CONTROL_NONE)) {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
+                    "SUNController type is unsupported by MRIStep");
+    return (ARK_ILL_INPUT);
+  }
+
+  /* Perform timestep adaptivity checks and setup */
+  if (adapt_type == SUNDIALS_CONTROL_NONE) {
+    if ((ark_mem->hin == ZERO) || (ark_mem->fixedstep == SUNFALSE)) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
+                      "Timestep adaptivity disabled, but missing user-defined fixed stepsize");
+      return (ARK_ILL_INPUT);
+    }
+  } else if (adapt_type == SUNDIALS_CONTROL_MRI_TOL) {
+    /* TO-DO:  Verify that
+       - ensure that the MRI method includes embedding coefficients.  */
+
+    /* verify that adaptivity type is supported by inner stepper */
+    if (!mriStepInnerStepper_SupportsRTolAdaptivity(step_mem->stepper)) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
+                      "MRI-TOL SUNController provided, but unsupported by inner stepper");
+      return (ARK_ILL_INPUT);
+    }
+
+    /* Estimate initial slow step size (store in ark_mem->hin) */
+    if (ark_mem->hin == ZERO) {
+      /* tempv1 = fslow(t0, y0) */
+      if(mriStep_SlowRHS(arkode_mem, ark_mem->tcur, ark_mem->yn,
+                         ark_mem->tempv1, ARK_FULLRHS_START) != ARK_SUCCESS) {
+        arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKODE::MRIStep", "mriStep_Init",
+                        "error calling slow RHS function(s)");
+        return (ARK_RHSFUNC_FAIL);
+      }
+      /* compute initial slow step size */
+      retval = mriStep_Hin(ark_mem, ark_mem->tcur, ark_mem->tout, ark_mem->yn,
+                           ark_mem->tempv1, ark_mem->ycur, ark_mem->tempv2,
+                           ark_mem->tempv3, mriStep_SlowRHS, &(ark_mem->hin));
+      if (retval != ARK_SUCCESS) {
+        retval = arkHandleFailure(ark_mem, retval);
+        return(retval);
+      }
+    }
+
+    /* initialize fast stepper to use the same relative tolerance as MRIStep */
+    step_mem->inner_control = ONE;
+  } else {
+    /* TO-DO:  Verify that
+       - ensure that the MRI method includes embedding coefficients. */
+
+    /* verify that adaptivity type is supported by inner stepper */
+    if (!mriStepInnerStepper_SupportsStepAdaptivity(step_mem->stepper)) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep", "mriStep_Init",
+                      "MRI-H SUNController provided, but unsupported by inner stepper");
+      return (ARK_ILL_INPUT);
+    }
+
+    /* Estimate initial slow step size (store in ark_mem->hin) */
+    if (ark_mem->hin == ZERO) {
+      /* tempv1 = fslow(t0, y0) */
+      if(mriStep_SlowRHS(arkode_mem, ark_mem->tcur, ark_mem->yn,
+                         ark_mem->tempv1, ARK_FULLRHS_START) != ARK_SUCCESS) {
+        arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKODE::MRIStep", "mriStep_Init",
+                        "error calling slow RHS function(s)");
+        return (ARK_RHSFUNC_FAIL);
+      }
+
+      /* compute initial slow step size */
+      retval = mriStep_Hin(ark_mem, ark_mem->tcur, ark_mem->tout, ark_mem->yn,
+                           ark_mem->tempv1, ark_mem->ycur, ark_mem->tempv2,
+                           ark_mem->tempv3, mriStep_SlowRHS, &(ark_mem->hin));
+      if (retval != ARK_SUCCESS) {
+        retval = arkHandleFailure(ark_mem, retval);
+        return(retval);
+      }
+    }
+
+    /* initialize fast stepper fixed step size (store in step_mem->inner_control) */
+    if (step_mem->stepper->ops->fullrhs) {
+      /* tempv1 = ffast(t0, y0) */
+      if(mriStep_FastRHS(arkode_mem, ark_mem->tcur, ark_mem->yn,
+                         ark_mem->tempv1, ARK_FULLRHS_START) != ARK_SUCCESS) {
+        arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKODE::MRIStep", "mriStep_Init",
+                        "error calling fast RHS function(s)");
+        return (ARK_RHSFUNC_FAIL);
+      }
+
+      /* compute initial fast step size */
+      retval = arkHin(ark_mem, ark_mem->tcur, ark_mem->tout, ark_mem->yn,
+                      ark_mem->tempv1, ark_mem->ycur, ark_mem->tempv2,
+                      ark_mem->tempv3, mriStep_FastRHS, &(step_mem->inner_control));
+      if (retval != ARK_SUCCESS) {
+        retval = arkHandleFailure(ark_mem, retval);
+        return(retval);
+      }
+
+    } else {
+      /* set step_mem->inner_control to equal H/100 */
+      step_mem->inner_control = SUN_RCONST(0.01) * ark_mem->hin;
+    }
+  }
 
   /* Signal to shared arkode module that fullrhs is required after each step */
+  /* TO-DO: verify whether this is actually required */
   ark_mem->call_fullrhs = SUNTRUE;
-
   return(ARK_SUCCESS);
 }
 
@@ -1293,7 +1367,12 @@ int mriStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
 
   /* ARK_FULLRHS_START: called at the beginning of a simulation
      Store the vector fs(t,y) in F[0] for possible reuse
-     in the first stage of the subsequent time step */
+     in the first stage of the subsequent time step
+
+     TO-DO: add some flag to step_mem such that if SlowRHS were
+     already called to determine h0, then the initial calls to
+     fse and fsi are omitted.
+  */
   case ARK_FULLRHS_START:
 
     /* call fse if the problem has an explicit component */
@@ -1484,6 +1563,7 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
   ARKodeMRIStepMem step_mem;   /* outer stepper memory       */
   int is;                      /* current stage index        */
   int retval;                  /* reusable return flag       */
+  SUNControl_ID adapt_type;    /* timestep adaptivity type   */
 
   /* access the MRIStep mem structure */
   retval = mriStep_AccessStepMem(arkode_mem, "mriStep_TakeStep",
@@ -1497,17 +1577,18 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
 
   /* if MRI adaptivity is enabled: reset fast accumulated error,
      and send appropriate control parameter to the fast integrator */
-  if (step_mem->adaptivity_type != MRIADAPT_NONE) {
+  adapt_type = SUNControlGetID(ark_mem->hcontroller);
+  if (adapt_type != SUNDIALS_CONTROL_NONE) {
     step_mem->inner_dsm = ZERO;
     retval = mriStepInnerStepper_ResetError(step_mem->stepper);
     if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
   }
-  if (step_mem->adaptivity_type == MRIADAPT_HH) {
+  if (adapt_type == SUNDIALS_CONTROL_MRI_H) {
     retval = mriStepInnerStepper_SetFixedStep(step_mem->stepper,
                                               step_mem->inner_control);
     if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
   }
-  if (step_mem->adaptivity_type == MRIADAPT_HTOL) {
+  if (adapt_type == SUNDIALS_CONTROL_MRI_TOL) {
     retval = mriStepInnerStepper_SetRTol(step_mem->stepper,
                                          step_mem->inner_control*ark_mem->reltol);
     if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
@@ -1670,8 +1751,8 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
 
   /* if MRI adaptivity is enabled: compute slow time scale
      error and store in dsmPtr */
-  if (step_mem->adaptivity_type != MRIADAPT_NONE) {
-    /*** FILL THIS IN ***/
+  if (adapt_type != SUNDIALS_CONTROL_NONE) {
+    /*** TO-DO: FILL THIS IN ***/
   }
 
   /* Solver diagnostics reporting */
@@ -2045,7 +2126,7 @@ int mriStep_StageERKFast(ARKodeMem ark_mem,
   }
 
   /* if adaptivity is enabled, get fast temporal error estimate */
-  if (step_mem->adaptivity_type != MRIADAPT_NONE) {
+  if (SUNControlGetID(ark_mem->hcontroller) != SUNDIALS_CONTROL_NONE) {
 
     /* if we trust inner integrator accumulated error estimate, call it here */
     if (step_mem->inner_hfactor == ZERO) {
@@ -2063,7 +2144,8 @@ int mriStep_StageERKFast(ARKodeMem ark_mem,
   if (retval < 0) return(ARK_INNERSTEP_FAIL);
 
   /* manually accumulate fast error estimate, if needed */
-  if ((step_mem->adaptivity_type != MRIADAPT_NONE) && (step_mem->inner_hfactor != ZERO)) {
+  if ((SUNControlGetID(ark_mem->hcontroller) == SUNDIALS_CONTROL_MRI_H) &&
+      (step_mem->inner_hfactor != ZERO)) {
 
     /* reset fast integrator for time interval */
     retval = mriStepInnerStepper_Reset(step_mem->stepper, t0, ytilde);
@@ -2291,6 +2373,9 @@ int mriStep_StageDIRKNoFast(ARKodeMem ark_mem, ARKodeMRIStepMem step_mem,
 
   This routine additionally returns a success/failure flag:
      ARK_SUCCESS -- successful evaluation
+
+  TO-DO: update this routine to also support computation of teh forcing
+  vectors for the embedding stage.
   ---------------------------------------------------------------*/
 
 int mriStep_ComputeInnerForcing(ARKodeMem ark_mem, ARKodeMRIStepMem step_mem,
@@ -2600,6 +2685,133 @@ int mriStep_StageSetup(ARKodeMem ark_mem)
 
   /* return with success */
   return (ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  mriStep_SlowRHS:
+
+  Wrapper routine to call the user-supplied slow RHS functions,
+  f(t,y) = fse(t,y) + fsi(t,y), with API matching
+  ARKTimestepFullRHSFn.  This is only used to determine an
+  initial slow time-step size to use when one is not specified
+  by the user (i.e., mode should correspond with
+  ARK_FULLRHS_OTHER.
+  ---------------------------------------------------------------*/
+int mriStep_SlowRHS(void* arkode_mem, realtype t, N_Vector y,
+                    N_Vector f, int mode)
+{
+  ARKodeMem ark_mem;
+  ARKodeMRIStepMem step_mem;
+  int retval;
+
+  /* access ARKodeMRIStepMem structure */
+  retval = mriStep_AccessStepMem(arkode_mem, "mriStep_SlowRHS",
+                                 &ark_mem, &step_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  /* call fse if the problem has an explicit component */
+  if (step_mem->explicit_rhs) {
+    retval = step_mem->fse(t, y, step_mem->Fse[0], ark_mem->user_data);
+    step_mem->nfse++;
+    if (retval != 0) {
+      arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKODE::MRIStep",
+                      "mriStep_FullRHS", MSG_ARK_RHSFUNC_FAILED, t);
+      return(ARK_RHSFUNC_FAIL);
+    }
+  }
+
+  /* call fsi if the problem has an implicit component */
+  if (step_mem->implicit_rhs) {
+    retval = step_mem->fsi(t, y, step_mem->Fsi[0], ark_mem->user_data);
+    step_mem->nfsi++;
+    if (retval != 0) {
+      arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKODE::MRIStep",
+                      "mriStep_FullRHS", MSG_ARK_RHSFUNC_FAILED, t);
+      return(ARK_RHSFUNC_FAIL);
+    }
+  }
+
+  /* combine RHS vectors into output */
+  if (step_mem->explicit_rhs && step_mem->implicit_rhs) { /* ImEx */
+    N_VLinearSum(ONE, step_mem->Fse[0], ONE, step_mem->Fsi[0], f);
+  } else {                                                /* implicit */
+    if (step_mem->implicit_rhs) {
+      N_VScale(ONE, step_mem->Fsi[0], f);
+    } else {                                              /* explicit */
+      N_VScale(ONE, step_mem->Fse[0], f);
+    }
+  }
+
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  mriStep_FastRHS:
+
+  This is just a wrapper to call the fast RHS function,
+  f(t,y) = ff(t,y), with API matching ARKTimestepFullRHSFn.  This
+  is only used to determine an initial fast time-step size to use
+  when one is not specified by the user and H-H MRI time step
+  adaptivity is enabled.
+  ---------------------------------------------------------------*/
+int mriStep_FastRHS(void* arkode_mem, realtype t, N_Vector y,
+                    N_Vector f, int mode)
+{
+  ARKodeMem ark_mem;
+  ARKodeMRIStepMem step_mem;
+  int retval;
+
+  /* access ARKodeMRIStepMem structure */
+  retval = mriStep_AccessStepMem(arkode_mem, "mriStep_FastRHS",
+                                 &ark_mem, &step_mem);
+  if (retval != ARK_SUCCESS) return(retval);
+
+  /* call ff */
+  retval = mriStepInnerStepper_FullRhs(step_mem->stepper, t, y, f,
+                                       ARK_FULLRHS_OTHER);
+  if (retval != ARK_SUCCESS) {
+    arkProcessError(ark_mem, ARK_RHSFUNC_FAIL, "ARKODE::MRIStep",
+                    "mriStep_FastRHS", MSG_ARK_RHSFUNC_FAILED, t);
+    return(ARK_RHSFUNC_FAIL);
+  }
+
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  mriStep_Hin
+
+  This routine computes a tentative initial step size h0.  This
+  employs the same safeguards as ARKODE's arkHin utility routine,
+  but employs a simpler algorithm that estimates the first step
+  such that an explicit Euler step (for only the slow RHS
+  routine(s)) would be within user-specified tolerances of the
+  initial condition.
+  ---------------------------------------------------------------*/
+int mriStep_Hin(ARKodeMem ark_mem, realtype tcur, realtype tout,
+                N_Vector ycur, N_Vector fcur, N_Vector ytmp,
+                N_Vector temp1, N_Vector temp2,
+                ARKTimestepFullRHSFn rhs, realtype* h)
+{
+  int sign;
+  realtype tdiff, tdist, tround, fnorm, h0_inv, h0;
+
+  /* If tout is too close to tn, give up */
+  if ((tdiff = tout-tcur) == ZERO) return(ARK_TOO_CLOSE);
+  sign = (tdiff > ZERO) ? 1 : -1;
+  tdist = SUNRabs(tdiff);
+  tround = ark_mem->uround * SUNMAX(SUNRabs(tcur), SUNRabs(tout));
+  if (tdist < TWO*tround) return(ARK_TOO_CLOSE);
+
+  /* h0 should bound the change due to a forward Euler step, and
+     include safeguard against "too-small" ||f(t0,y0)||: */
+  fnorm = N_VWrmsNorm(fcur, ark_mem->ewt) / H0_BIAS;
+  h0_inv = SUNMAX(ONE/H0_UBFACTOR/tdist, fnorm);
+  *h = sign * h0_inv;
+  return(ARK_SUCCESS);
 }
 
 
@@ -2935,6 +3147,7 @@ int mriStepInnerStepper_HasRequiredOps(MRIStepInnerStepper stepper)
   if (stepper == NULL) return ARK_ILL_INPUT;
   if (stepper->ops == NULL) return ARK_ILL_INPUT;
 
+  /* TO-DO: remove requirement of fullrhs, unless actually necessary */
   if (stepper->ops->evolve && stepper->ops->fullrhs)
     return ARK_SUCCESS;
   else

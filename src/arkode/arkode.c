@@ -705,6 +705,8 @@ int arkEvolve(ARKodeMem ark_mem, realtype tout, N_Vector yout,
     ark_mem->root_mem->taskc = itask;
   }
 
+  /* store copy of tout, in case it is required for stepper initialization */
+  ark_mem->tout = tout;
 
   /* perform first-step-specific initializations:
      - initialize tret values to initialization time
@@ -1802,8 +1804,8 @@ void arkFreeVectors(ARKodeMem ark_mem)
   the first internal step after initialization, reinitialization,
   a reset() call, or a resize() call, including:
   - input consistency checks
-  - (re)initializes the stepper
   - computes error and residual weights
+  - (re)initializes the stepper
   - (re)initialize the interpolation structure
   - checks for valid initial step input or estimates first step
   - checks for approach to tstop
@@ -1814,26 +1816,6 @@ int arkInitialSetup(ARKodeMem ark_mem, realtype tout)
   int retval, hflag, istate;
   realtype tout_hin, htmp;
   booleantype conOK;
-
-  /* Set up the time stepper module */
-  if (ark_mem->step_init == NULL) {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
-                    "arkInitialSetup", "Time stepper module is missing");
-    return(ARK_ILL_INPUT);
-  }
-  retval = ark_mem->step_init(ark_mem, ark_mem->init_type);
-  if (retval != ARK_SUCCESS) {
-    arkProcessError(ark_mem, retval, "ARKODE", "arkInitialSetup",
-                    "Error in initialization of time stepper module");
-    return(retval);
-  }
-
-  /* Check that user has supplied an initial step size if fixedstep mode is on */
-  if ( (ark_mem->fixedstep) && (ark_mem->hin == ZERO) ) {
-    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup",
-                    "Fixed step mode enabled, but no step size set");
-    return(ARK_ILL_INPUT);
-  }
 
   /* If using a built-in routine for error/residual weights with abstol==0,
      ensure that N_VMin is available */
@@ -1847,25 +1829,6 @@ int arkInitialSetup(ARKodeMem ark_mem, realtype tout)
     arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup",
                     "N_VMin unimplemented (required by residual-weight function)");
     return(ARK_ILL_INPUT);
-  }
-
-  /* Test input tstop for legality (correct direction of integration) */
-  if ( ark_mem->tstopset ) {
-    htmp = (ark_mem->h == ZERO) ? tout - ark_mem->tcur : ark_mem->h;
-    if ( (ark_mem->tstop - ark_mem->tcur) * htmp <= ZERO ) {
-      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup",
-                      MSG_ARK_BAD_TSTOP, ark_mem->tstop, ark_mem->tcur);
-      return(ARK_ILL_INPUT);
-    }
-  }
-
-  /* Check to see if y0 satisfies constraints */
-  if (ark_mem->constraintsSet) {
-    conOK = N_VConstrMask(ark_mem->constraints, ark_mem->yn, ark_mem->tempv1);
-    if (!conOK) {
-      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup", MSG_ARK_Y0_FAIL_CONSTR);
-      return(ARK_ILL_INPUT);
-    }
   }
 
   /* Load initial error weights */
@@ -1892,6 +1855,45 @@ int arkInitialSetup(ARKodeMem ark_mem, realtype tout)
       else
         arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
                         "arkInitialSetup", MSG_ARK_BAD_RWT);
+      return(ARK_ILL_INPUT);
+    }
+  }
+
+  /* Set up the time stepper module */
+  if (ark_mem->step_init == NULL) {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE",
+                    "arkInitialSetup", "Time stepper module is missing");
+    return(ARK_ILL_INPUT);
+  }
+  retval = ark_mem->step_init(ark_mem, ark_mem->init_type);
+  if (retval != ARK_SUCCESS) {
+    arkProcessError(ark_mem, retval, "ARKODE", "arkInitialSetup",
+                    "Error in initialization of time stepper module");
+    return(retval);
+  }
+
+  /* Check that user has supplied an initial step size if fixedstep mode is on */
+  if ( (ark_mem->fixedstep) && (ark_mem->hin == ZERO) ) {
+    arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup",
+                    "Fixed step mode enabled, but no step size set");
+    return(ARK_ILL_INPUT);
+  }
+
+  /* Test input tstop for legality (correct direction of integration) */
+  if ( ark_mem->tstopset ) {
+    htmp = (ark_mem->h == ZERO) ? tout - ark_mem->tcur : ark_mem->h;
+    if ( (ark_mem->tstop - ark_mem->tcur) * htmp <= ZERO ) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup",
+                      MSG_ARK_BAD_TSTOP, ark_mem->tstop, ark_mem->tcur);
+      return(ARK_ILL_INPUT);
+    }
+  }
+
+  /* Check to see if y0 satisfies constraints */
+  if (ark_mem->constraintsSet) {
+    conOK = N_VConstrMask(ark_mem->constraints, ark_mem->yn, ark_mem->tempv1);
+    if (!conOK) {
+      arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE", "arkInitialSetup", MSG_ARK_Y0_FAIL_CONSTR);
       return(ARK_ILL_INPUT);
     }
   }

@@ -37,11 +37,6 @@ extern "C" {
 #define MRISTAGE_DIRK_NOFAST 2
 #define MRISTAGE_DIRK_FAST   3
 
-/* Adaptivity type identifiers */
-#define MRIADAPT_NONE    0
-#define MRIADAPT_HH      1
-#define MRIADAPT_HTOL    2
-
 /* Implicit solver constants (duplicate from arkode_arkstep_impl.h) */
 #define MAXCOR    3              /* max number of nonlinear iterations */
 #define CRDOWN    RCONST(0.3)    /* constant to estimate the convergence
@@ -132,7 +127,6 @@ typedef struct ARKodeMRIStepMemRec {
   MRIStepPostInnerFn post_inner_evolve;
 
   /* MRI adaptivity parameters */
-  int      adaptivity_type;   /* MRIADAPT_NONE, MRIADAPT_HH or MRIADAPT_HTOL */
   realtype inner_hfactor;     /* h factor for inner stepper error estimation */
   realtype inner_control;     /* prev control parameter (h or tolfac) */
   realtype inner_dsm;         /* prev inner stepper accumulated error */
@@ -239,6 +233,15 @@ int mriStep_Predict(ARKodeMem ark_mem, int istage, N_Vector yguess);
 int mriStep_StageSetup(ARKodeMem ark_mem);
 int mriStep_NlsInit(ARKodeMem ark_mem);
 int mriStep_Nls(ARKodeMem ark_mem, int nflag);
+
+int mriStep_SlowRHS(void* arkode_mem, realtype t, N_Vector y,
+                    N_Vector f, int mode);
+int mriStep_FastRHS(void* arkode_mem, realtype t, N_Vector y,
+                    N_Vector f, int mode);
+int mriStep_Hin(ARKodeMem ark_mem, realtype tcur, realtype tout,
+                N_Vector ycur, N_Vector fcur, N_Vector ytmp,
+                N_Vector temp1, N_Vector temp2,
+                ARKTimestepFullRHSFn rhs, realtype* h);
 
 /* private functions passed to nonlinear solver */
 int mriStep_NlsResidual(N_Vector yy, N_Vector res, void* arkode_mem);
