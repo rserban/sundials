@@ -319,7 +319,7 @@ int MRIStepSetOrder(void *arkode_mem, int ord)
   if (retval) return(retval);
 
   /* check for illegal inputs */
-  if (ord < 3 || ord > 4) {
+  if (ord < 2 || ord > 4) {
     step_mem->q = 3;
   } else {
     step_mem->q = ord;

@@ -1834,12 +1834,13 @@ booleantype mriStep_CheckNVector(N_Vector tmpl)
   mriStep_SetCoupling
 
   This routine determines the MRI method to use, based on the
-  desired accuracy.
+  desired accuracy and fixed/adaptive time stepping choice.
   ---------------------------------------------------------------*/
 int mriStep_SetCoupling(ARKodeMem ark_mem)
 {
   ARKodeMRIStepMem step_mem;
   sunindextype Cliw, Clrw;
+  booleantype adaptive;
 
   /* access ARKodeMRIStepMem structure */
   if (ark_mem->step_mem==NULL) {
@@ -1852,24 +1853,32 @@ int mriStep_SetCoupling(ARKodeMem ark_mem)
   /* if coupling has already been specified, just return */
   if (step_mem->MRIC != NULL) return(ARK_SUCCESS);
 
-  /* select method based on order and type */
+  /* select method based on order, type, and adaptivity */
+  adaptive = (SUNControlGetID(ark_mem->hcontroller) != SUNDIALS_CONTROL_NONE);
 
   /**** ImEx methods ****/
   if (step_mem->implicit_rhs && step_mem->explicit_rhs) {
 
-    switch (step_mem->q) {
-    case 3:
-      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMEX_SD_3);
-      break;
-    case 4:
-      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMEX_SD_4);
-      break;
-    default:
+    if (adaptive) {
       arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep",
                       "mriStep_SetCoupling",
-                      "No MRI method at requested order, using q=3.");
-      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMEX_SD_3);
-      break;
+                      "No adaptive ImEx MRI methods are yet available.");
+      step_mem->MRIC = NULL;
+    } else {
+      switch (step_mem->q) {
+      case 3:
+        step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMEX_SD_3);
+        break;
+      case 4:
+        step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMEX_SD_4);
+        break;
+      default:
+        arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep",
+                        "mriStep_SetCoupling",
+                        "No ImEx MRI method at requested order, using q=3.");
+        step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMEX_SD_3);
+        break;
+      }
     }
 
   /**** implicit methods ****/
@@ -1877,7 +1886,7 @@ int mriStep_SetCoupling(ARKodeMem ark_mem)
 
     switch (step_mem->q) {
     case 2:
-      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMPL_SD_3);
+      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMPL_SD_2);
       break;
     case 3:
       step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMPL_SD_3);
@@ -1888,7 +1897,7 @@ int mriStep_SetCoupling(ARKodeMem ark_mem)
     default:
       arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep",
                       "mriStep_SetCoupling",
-                      "No MRI method at requested order, using q=3.");
+                      "No implicit MRI method at requested order, using q=3.");
       step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_IMPL_SD_3);
       break;
     }
@@ -1897,16 +1906,24 @@ int mriStep_SetCoupling(ARKodeMem ark_mem)
   } else {
 
     switch (step_mem->q) {
-    case 3:
-      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_EXPL_3);
+    case 2:
+      step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_EXPL_2);
       break;
+    case 3:
+      if (adaptive) {
+        step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_EXPL_3_AD);
+        break;
+      } else {
+        step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_EXPL_3);
+        break;
+      }
     case 4:
       step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_EXPL_4);
       break;
     default:
       arkProcessError(ark_mem, ARK_ILL_INPUT, "ARKODE::MRIStep",
                       "mriStep_SetCoupling",
-                      "No MRI method at requested order, using q=3.");
+                      "No explicit MRI method at requested order, using q=3.");
       step_mem->MRIC = MRIStepCoupling_LoadTable(MRISTEP_DEFAULT_EXPL_3);
       break;
     }
