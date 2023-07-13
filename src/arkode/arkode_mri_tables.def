@@ -25,27 +25,28 @@
   below.
 
   The 'type' column denotes whether the method is explicit (E),
-  or solve-decoupled implicit (ID).
+  solve-decoupled implicit (ID), or solve-decoupled ImEx (IED).
 
   The 'QP' column denotes whether the coefficients of the method
   are known precisely enough for use in quad precision (128-bit)
   calculations.
 
-     imeth                       order   type    QP
-    ------------------------------------------------
-     ARKODE_MIS_KW3              3       E       Y
-     ARKODE_MRI_GARK_ERK22a      2       E       Y
-     ARKODE_MRI_GARK_ERK22b      2       E       Y
-     ARKODE_MRI_GARK_ERK33a      3       E       Y
-     ARKODE_MRI_GARK_ERK45a      4       E       Y
-     ARKODE_MRI_GARK_IRK21a      2       ID      Y
-     ARKODE_MRI_GARK_ESDIRK34a   3       ID      Y
-     ARKODE_MRI_GARK_SDIRK33a    3       ID      Y
-     ARKODE_MRI_GARK_ESDIRK46a   4       ID      Y
-     ARKODE_IMEX_MRI_GARK3a      3       ID      Y
-     ARKODE_IMEX_MRI_GARK3b      3       ID      Y
-     ARKODE_IMEX_MRI_GARK4       4       ID      Y
-    ------------------------------------------------
+                                 method  embedding
+     imeth                       order   order      type    QP
+    -----------------------------------------------------------
+     ARKODE_MIS_KW3              3       0          E       Y
+     ARKODE_MRI_GARK_ERK22a      2       1          E       Y
+     ARKODE_MRI_GARK_ERK22b      2       1          E       Y
+     ARKODE_MRI_GARK_ERK33a      3       2          E       Y
+     ARKODE_MRI_GARK_ERK45a      4       3          E       Y
+     ARKODE_MRI_GARK_IRK21a      2       1          ID      Y
+     ARKODE_MRI_GARK_ESDIRK34a   3       2          ID      Y
+     ARKODE_MRI_GARK_SDIRK33a    3       2          ID      Y
+     ARKODE_MRI_GARK_ESDIRK46a   4       3          ID      Y
+     ARKODE_IMEX_MRI_GARK3a      3       0          IED     Y
+     ARKODE_IMEX_MRI_GARK3b      3       0          IED     Y
+     ARKODE_IMEX_MRI_GARK4       4       0          IED     Y
+    -----------------------------------------------------------
 */
 
 ARK_MRI_TABLE(ARKODE_MRI_NONE, {
