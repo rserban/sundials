@@ -95,8 +95,10 @@ typedef enum {
 /* Default MRI coupling tables for each order */
 
 static const int MRISTEP_DEFAULT_3         = ARKODE_MIS_KW3;
+static const int MRISTEP_DEFAULT_3_AD      = ARKODE_MRI_GARK_ERK33a;
 static const int MRISTEP_DEFAULT_EXPL_2    = ARKODE_MRI_GARK_ERK22a;
 static const int MRISTEP_DEFAULT_EXPL_3    = ARKODE_MIS_KW3;
+static const int MRISTEP_DEFAULT_EXPL_3_AD = ARKODE_MRI_GARK_ERK33a;
 static const int MRISTEP_DEFAULT_EXPL_4    = ARKODE_MRI_GARK_ERK45a;
 static const int MRISTEP_DEFAULT_IMPL_SD_2 = ARKODE_MRI_GARK_IRK21a;
 static const int MRISTEP_DEFAULT_IMPL_SD_3 = ARKODE_MRI_GARK_ESDIRK34a;
