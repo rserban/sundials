@@ -275,10 +275,10 @@ SUNDIALS_EXPORT int MRIStepSetMaxConvFails(void *arkode_mem,
                                            int maxncf);
 SUNDIALS_EXPORT int MRIStepSetNonlinConvCoef(void *arkode_mem,
                                              realtype nlscoef);
-/* SUNDIALS_EXPORT int MRIStepSetConstraints(void *arkode_mem, */
-/*                                           N_Vector constraints); */
-/* SUNDIALS_EXPORT int MRIStepSetMaxNumConstrFails(void *arkode_mem, */
-/*                                                 int maxfails); */
+SUNDIALS_EXPORT int MRIStepSetConstraints(void *arkode_mem,
+                                          N_Vector constraints);
+SUNDIALS_EXPORT int MRIStepSetMaxNumConstrFails(void *arkode_mem,
+                                                int maxfails);
 SUNDIALS_EXPORT int MRIStepSetMaxNumSteps(void *arkode_mem,
                                           long int mxsteps);
 SUNDIALS_EXPORT int MRIStepSetMaxHnilWarns(void *arkode_mem,
@@ -399,8 +399,8 @@ SUNDIALS_EXPORT int MRIStepGetNumGEvals(void *arkode_mem,
                                         long int *ngevals);
 SUNDIALS_EXPORT int MRIStepGetRootInfo(void *arkode_mem,
                                        int *rootsfound);
-/* SUNDIALS_EXPORT int MRIStepGetNumConstrFails(void *arkode_mem, */
-/*                                              long int *nconstrfails); */
+SUNDIALS_EXPORT int MRIStepGetNumConstrFails(void *arkode_mem,
+                                             long int *nconstrfails);
 SUNDIALS_EXPORT int MRIStepGetLastInnerStepFlag(void *arkode_mem,
                                                 int *flag);
 SUNDIALS_EXPORT int MRIStepGetUserData(void *arkode_mem,
@@ -466,10 +466,6 @@ SUNDIALS_EXPORT void MRIStepFree(void **arkode_mem);
 
 /* Output the MRIStep memory structure (useful when debugging) */
 SUNDIALS_EXPORT void MRIStepPrintMem(void* arkode_mem, FILE* outfile);
-
-/* /\* Utility to wrap MRIStep itself as an MRIStepInnerStepper *\/ */
-/* SUNDIALS_EXPORT int MRIStepCreateMRIStepInnerStepper(void *arkode_mem, */
-/*                                                      MRIStepInnerStepper *stepper); */
 
 /* Custom inner stepper functions */
 SUNDIALS_EXPORT

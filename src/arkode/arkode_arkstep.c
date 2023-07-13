@@ -2107,7 +2107,7 @@ int arkStep_CheckButcherTables(ARKodeMem ark_mem)
     return(ARK_INVALID_TABLE);
   }
 
-  /* check that embedding order p > 0 */
+  /* check that embedding order p > 0 (if adaptive) */
   if ((step_mem->p < 1) && (!ark_mem->fixedstep)) {
     arkProcessError(ark_mem, ARK_INVALID_TABLE, "ARKODE::ARKStep",
                     "arkStep_CheckButcherTables",
@@ -2115,7 +2115,7 @@ int arkStep_CheckButcherTables(ARKodeMem ark_mem)
     return(ARK_INVALID_TABLE);
   }
 
-  /* check that embedding exists */
+  /* check that embedding exists (if adaptive) */
   if ((step_mem->p > 0) && (!ark_mem->fixedstep)) {
     if (step_mem->implicit) {
       if (step_mem->Bi->d == NULL) {
@@ -2532,7 +2532,6 @@ int arkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsmPtr)
   N_Vector y, yerr;
   realtype* cvals;
   N_Vector* Xvecs;
-  booleantype embedded;
   ARKodeARKStepMem step_mem;
 
   /* access ARKodeARKStepMem structure */
@@ -2576,13 +2575,8 @@ int arkStep_ComputeSolutions(ARKodeMem ark_mem, realtype *dsmPtr)
   retval = N_VLinearCombination(nvec, cvals, Xvecs, y);
   if (retval != 0) return(ARK_VECTOROP_ERR);
 
-  /* Compute yerr (if embedding coefficients are enabled) */
-  embedded = SUNTRUE;
-  if (step_mem->explicit)
-    if (step_mem->Be->d == NULL) { embedded = SUNFALSE; }
-  if (step_mem->implicit)
-    if (step_mem->Bi->d == NULL) { embedded = SUNFALSE; }
-  if (embedded) {
+  /* Compute yerr (if adaptivity is enabled) */
+  if (!ark_mem->fixedstep) {
 
     /* set arrays for fused vector operation */
     nvec = 0;
@@ -2631,7 +2625,6 @@ int arkStep_ComputeSolutions_MassFixed(ARKodeMem ark_mem, realtype *dsmPtr)
   N_Vector y, yerr;
   realtype* cvals;
   N_Vector* Xvecs;
-  booleantype embedded;
   ARKodeARKStepMem step_mem;
 
   /* access ARKodeARKStepMem structure */
@@ -2685,13 +2678,8 @@ int arkStep_ComputeSolutions_MassFixed(ARKodeMem ark_mem, realtype *dsmPtr)
   N_VLinearSum(ONE, ark_mem->yn, ONE, y, y);
 
 
-  /* Compute yerr (if embedding coefficients are enabled) */
-  embedded = SUNTRUE;
-  if (step_mem->explicit)
-    if (step_mem->Be->d == NULL) { embedded = SUNFALSE; }
-  if (step_mem->implicit)
-    if (step_mem->Bi->d == NULL) { embedded = SUNFALSE; }
-  if (embedded) {
+  /* Compute yerr (if adaptivity is enabled) */
+  if (!ark_mem->fixedstep) {
 
     /* compute yerr RHS vector */
     /*   set arrays for fused vector operation */

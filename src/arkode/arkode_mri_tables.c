@@ -561,12 +561,14 @@ void MRIStepCoupling_Write(MRIStepCoupling MRIC, FILE *outfile)
  * MRISTAGE_DIRK_NOFAST -- standard DIRK stage
  * MRISTAGE_DIRK_FAST   -- coupled DIRK + MIS-like stage
  *
- * for each nontrivial stage in an MRI-like method. Otherwise (i.e., stage is
- * not in [1,MRIC->stages-1]), returns ARK_INVALID_TABLE (<0).
+ * for each nontrivial stage, or embedding stage, in an MRI-like method.
+ * Otherwise (i.e., stage is not in [1,MRIC->stages]), returns
+ * ARK_INVALID_TABLE (<0).
  *
- * The stage type is determined by 2 factors:
+ * The stage type is determined by 2 factors (for normal stages):
  * (a) Sum |MRIC->G[:][is][is]| (nonzero => DIRK)
  * (b) MRIC->c[is] - MRIC->c[is-1]  (nonzero => fast)
+ * Similar tests are used for embedding stages.
  * ---------------------------------------------------------------------------*/
 
 int mriStepCoupling_GetStageType(MRIStepCoupling MRIC, int is)
@@ -575,17 +577,27 @@ int mriStepCoupling_GetStageType(MRIStepCoupling MRIC, int is)
   realtype Gabs, cdiff;
   const realtype tol = RCONST(100.0) * UNIT_ROUNDOFF;
 
-  if ((is < 1) || (is >= MRIC->stages)) return ARK_INVALID_TABLE;
+  if ((is < 1) || (is > MRIC->stages)) return ARK_INVALID_TABLE;
 
-  /* sum of stage diagonal entries across implicit tables */
-  Gabs = ZERO;
-  if (MRIC->G)
-    for (i = 0; i < MRIC->nmat; i++)
-      Gabs += SUNRabs(MRIC->G[i][is][is]);
+  /* separately handle an embedding "stage" from normal stages */
+  if (is <= MRIC->stages) {   /* normal */
+    /* sum of stage diagonal entries across implicit tables */
+    Gabs = ZERO;
+    if (MRIC->G)
+      for (i = 0; i < MRIC->nmat; i++)
+        Gabs += SUNRabs(MRIC->G[i][is][is]);
 
-  /* abscissae difference */
-  cdiff = MRIC->c[is] - MRIC->c[is-1];
+    /* abscissae difference */
+    cdiff = MRIC->c[is] - MRIC->c[is-1];
+  } else {                    /* embedding */
+    Gabs = ZERO;
+    if (MRIC->G)
+      for (i = 0; i < MRIC->nmat; i++)
+        Gabs += SUNRabs(MRIC->G[i][is][is-1]);
+    cdiff = MRIC->c[is] - MRIC->c[is-2];
+  }
 
+  /* make determination */
   if (Gabs > tol) {     /* DIRK */
     if (cdiff > tol) {  /* Fast */
       return(MRISTAGE_DIRK_FAST);

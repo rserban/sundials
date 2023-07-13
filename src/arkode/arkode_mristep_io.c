@@ -73,10 +73,10 @@ int MRIStepSetController(void *arkode_mem, SUNControl C) {
   return(arkSetController(arkode_mem, C)); }
 int MRIStepSetHeuristics(void *arkode_mem, SUNHeuristics H) {
   return(arkSetHeuristics(arkode_mem, H)); }
-/* int MRIStepSetConstraints(void *arkode_mem, N_Vector constraints) { */
-/*   return(arkSetConstraints(arkode_mem, constraints)); } */
-/* int MRIStepSetMaxNumConstrFails(void *arkode_mem, int maxfails) { */
-/*   return(arkSetMaxNumConstrFails(arkode_mem, maxfails)); } */
+int MRIStepSetConstraints(void *arkode_mem, N_Vector constraints) {
+  return(arkSetConstraints(arkode_mem, constraints)); }
+int MRIStepSetMaxNumConstrFails(void *arkode_mem, int maxfails) {
+  return(arkSetMaxNumConstrFails(arkode_mem, maxfails)); }
 
 /*---------------------------------------------------------------
   Wrapper functions for accumulated temporal error estimation.
@@ -153,8 +153,8 @@ int MRIStepGetActualInitStep(void *arkode_mem, realtype *hinused) {
   return(arkGetActualInitStep(arkode_mem, hinused)); }
 int MRIStepGetCurrentStep(void *arkode_mem, realtype *hcur) {
   return(arkGetCurrentStep(arkode_mem, hcur)); }
-/* int MRIStepGetNumConstrFails(void *arkode_mem, long int *nconstrfails) { */
-/*   return(arkGetNumConstrFails(arkode_mem, nconstrfails)); } */
+int MRIStepGetNumConstrFails(void *arkode_mem, long int *nconstrfails) {
+  return(arkGetNumConstrFails(arkode_mem, nconstrfails)); }
 
 /*---------------------------------------------------------------
   These wrappers for ARKLs module 'get' routines all are
