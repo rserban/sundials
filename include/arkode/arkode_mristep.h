@@ -21,6 +21,8 @@
 #include <sundials/sundials_nvector.h>
 #include <sundials/sundials_linearsolver.h>
 #include <sundials/sundials_nonlinearsolver.h>
+#include <sundials/sundials_control.h>
+#include <sundials/sundials_heuristics.h>
 #include <arkode/arkode.h>
 #include <arkode/arkode_ls.h>
 #include <arkode/arkode_butcher_erk.h>
@@ -247,10 +249,14 @@ SUNDIALS_EXPORT int MRIStepSetNonlinearSolver(void *arkode_mem,
 SUNDIALS_EXPORT int MRIStepSetNlsRhsFn(void *arkode_mem, ARKRhsFn nls_fs);
 SUNDIALS_EXPORT int MRIStepSetLinear(void *arkode_mem, int timedepend);
 SUNDIALS_EXPORT int MRIStepSetNonlinear(void *arkode_mem);
+SUNDIALS_EXPORT int MRIStepSetDeduceImplicitRhs(void *arkode_mem,
+                                                sunbooleantype deduce);
 SUNDIALS_EXPORT int MRIStepSetCoupling(void *arkode_mem,
                                        MRIStepCoupling MRIC);
-SUNDIALS_EXPORT int MRIStepSetMaxNumSteps(void *arkode_mem,
-                                          long int mxsteps);
+SUNDIALS_EXPORT int MRIStepSetController(void *arkode_mem,
+                                         SUNControl C);
+SUNDIALS_EXPORT int MRIStepSetHeuristics(void *arkode_mem,
+                                         SUNHeuristics H);
 SUNDIALS_EXPORT int MRIStepSetNonlinCRDown(void *arkode_mem,
                                            realtype crdown);
 SUNDIALS_EXPORT int MRIStepSetNonlinRDiv(void *arkode_mem,
@@ -261,12 +267,24 @@ SUNDIALS_EXPORT int MRIStepSetLSetupFrequency(void *arkode_mem,
                                               int msbp);
 SUNDIALS_EXPORT int MRIStepSetPredictorMethod(void *arkode_mem,
                                               int method);
+SUNDIALS_EXPORT int MRIStepSetMaxErrTestFails(void *arkode_mem,
+                                              int maxnef);
 SUNDIALS_EXPORT int MRIStepSetMaxNonlinIters(void *arkode_mem,
                                              int maxcor);
+SUNDIALS_EXPORT int MRIStepSetMaxConvFails(void *arkode_mem,
+                                           int maxncf);
 SUNDIALS_EXPORT int MRIStepSetNonlinConvCoef(void *arkode_mem,
                                              realtype nlscoef);
+/* SUNDIALS_EXPORT int MRIStepSetConstraints(void *arkode_mem, */
+/*                                           N_Vector constraints); */
+/* SUNDIALS_EXPORT int MRIStepSetMaxNumConstrFails(void *arkode_mem, */
+/*                                                 int maxfails); */
+SUNDIALS_EXPORT int MRIStepSetMaxNumSteps(void *arkode_mem,
+                                          long int mxsteps);
 SUNDIALS_EXPORT int MRIStepSetMaxHnilWarns(void *arkode_mem,
                                            int mxhnil);
+SUNDIALS_EXPORT int MRIStepSetInitStep(void *arkode_mem,
+                                       realtype hin);
 SUNDIALS_EXPORT int MRIStepSetStopTime(void *arkode_mem,
                                        realtype tstop);
 SUNDIALS_EXPORT int MRIStepSetInterpolateStopTime(void *arkode_mem,
@@ -296,8 +314,6 @@ SUNDIALS_EXPORT int MRIStepSetPostInnerFn(void *arkode_mem,
                                           MRIStepPostInnerFn postfn);
 SUNDIALS_EXPORT int MRIStepSetStagePredictFn(void *arkode_mem,
                                              ARKStagePredictFn PredictStage);
-SUNDIALS_EXPORT int MRIStepSetDeduceImplicitRhs(void *arkode_mem,
-                                                sunbooleantype deduce);
 SUNDIALS_EXPORT int MRIStepSetFastErrorStepFactor(void *arkode_mem,
                                                   realtype hfactor);
 
@@ -334,21 +350,41 @@ SUNDIALS_EXPORT int MRIStepGetDky(void *arkode_mem, realtype t,
 SUNDIALS_EXPORT int MRIStepComputeState(void *arkode_mem, N_Vector zcor,
                                         N_Vector z);
 
+/* Utility functions to reset/get accumulated temporal error estimate */
+SUNDIALS_EXPORT int MRIStepSetAccumulatedErrorType(void *arkode_mem,
+                                                   int accum_type);
+SUNDIALS_EXPORT int MRIStepResetAccumulatedError(void *arkode_mem);
+SUNDIALS_EXPORT int MRIStepGetAccumulatedError(void *arkode_mem,
+                                               realtype* accum_error);
 /* Optional output functions */
+SUNDIALS_EXPORT int MRIStepGetNumExpSteps(void *arkode_mem,
+                                          long int *expsteps);
+SUNDIALS_EXPORT int MRIStepGetNumAccSteps(void *arkode_mem,
+                                          long int *accsteps);
+SUNDIALS_EXPORT int MRIStepGetNumStepAttempts(void *arkode_mem,
+                                              long int *step_attempts);
 SUNDIALS_EXPORT int MRIStepGetNumRhsEvals(void *arkode_mem,
                                           long int *nfse_evals,
                                           long int *nfsi_evals);
 SUNDIALS_EXPORT int MRIStepGetNumLinSolvSetups(void *arkode_mem,
                                                long int *nlinsetups);
+SUNDIALS_EXPORT int MRIStepGetNumErrTestFails(void *arkode_mem,
+                                              long int *netfails);
 SUNDIALS_EXPORT int MRIStepGetCurrentCoupling(void *arkode_mem,
                                               MRIStepCoupling *MRIC);
+SUNDIALS_EXPORT int MRIStepGetEstLocalErrors(void *arkode_mem,
+                                             N_Vector ele);
 SUNDIALS_EXPORT int MRIStepGetWorkSpace(void *arkode_mem,
                                         long int *lenrw,
                                         long int *leniw);
 SUNDIALS_EXPORT int MRIStepGetNumSteps(void *arkode_mem,
                                        long int *nssteps);
+SUNDIALS_EXPORT int MRIStepGetActualInitStep(void *arkode_mem,
+                                             realtype *hinused);
 SUNDIALS_EXPORT int MRIStepGetLastStep(void *arkode_mem,
                                        realtype *hlast);
+SUNDIALS_EXPORT int MRIStepGetCurrentStep(void *arkode_mem,
+                                          realtype *hcur);
 SUNDIALS_EXPORT int MRIStepGetCurrentTime(void *arkode_mem,
                                           realtype *tcur);
 SUNDIALS_EXPORT int MRIStepGetCurrentState(void *arkode_mem,
@@ -363,6 +399,8 @@ SUNDIALS_EXPORT int MRIStepGetNumGEvals(void *arkode_mem,
                                         long int *ngevals);
 SUNDIALS_EXPORT int MRIStepGetRootInfo(void *arkode_mem,
                                        int *rootsfound);
+/* SUNDIALS_EXPORT int MRIStepGetNumConstrFails(void *arkode_mem, */
+/*                                              long int *nconstrfails); */
 SUNDIALS_EXPORT int MRIStepGetLastInnerStepFlag(void *arkode_mem,
                                                 int *flag);
 SUNDIALS_EXPORT int MRIStepGetUserData(void *arkode_mem,
@@ -428,6 +466,10 @@ SUNDIALS_EXPORT void MRIStepFree(void **arkode_mem);
 
 /* Output the MRIStep memory structure (useful when debugging) */
 SUNDIALS_EXPORT void MRIStepPrintMem(void* arkode_mem, FILE* outfile);
+
+/* /\* Utility to wrap MRIStep itself as an MRIStepInnerStepper *\/ */
+/* SUNDIALS_EXPORT int MRIStepCreateMRIStepInnerStepper(void *arkode_mem, */
+/*                                                      MRIStepInnerStepper *stepper); */
 
 /* Custom inner stepper functions */
 SUNDIALS_EXPORT

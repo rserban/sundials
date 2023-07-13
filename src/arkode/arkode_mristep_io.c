@@ -63,7 +63,30 @@ int MRIStepSetPostprocessStepFn(void *arkode_mem,
 int MRIStepSetPostprocessStageFn(void *arkode_mem,
                                  ARKPostProcessFn ProcessStage) {
   return(arkSetPostprocessStageFn(arkode_mem, ProcessStage)); }
+int MRIStepSetMaxErrTestFails(void *arkode_mem, int maxnef) {
+  return(arkSetMaxErrTestFails(arkode_mem, maxnef)); }
+int MRIStepSetInitStep(void *arkode_mem, realtype hin) {
+  return(arkSetInitStep(arkode_mem, hin)); }
+int MRIStepSetMaxConvFails(void *arkode_mem, int maxncf) {
+  return(arkSetMaxConvFails(arkode_mem, maxncf)); }
+int MRIStepSetController(void *arkode_mem, SUNControl C) {
+  return(arkSetController(arkode_mem, C)); }
+int MRIStepSetHeuristics(void *arkode_mem, SUNHeuristics H) {
+  return(arkSetHeuristics(arkode_mem, H)); }
+/* int MRIStepSetConstraints(void *arkode_mem, N_Vector constraints) { */
+/*   return(arkSetConstraints(arkode_mem, constraints)); } */
+/* int MRIStepSetMaxNumConstrFails(void *arkode_mem, int maxfails) { */
+/*   return(arkSetMaxNumConstrFails(arkode_mem, maxfails)); } */
 
+/*---------------------------------------------------------------
+  Wrapper functions for accumulated temporal error estimation.
+  ---------------------------------------------------------------*/
+int MRIStepSetAccumulatedErrorType(void *arkode_mem, int accum_type) {
+  return(arkSetAccumulatedErrorType(arkode_mem, accum_type)); }
+int MRIStepResetAccumulatedError(void *arkode_mem) {
+  return(arkResetAccumulatedError(arkode_mem)); }
+int MRIStepGetAccumulatedError(void *arkode_mem, realtype* accum_error) {
+  return(arkGetAccumulatedError(arkode_mem, accum_error)); }
 
 /*---------------------------------------------------------------
   These wrappers for ARKLs module 'set' routines all are
@@ -120,6 +143,18 @@ int MRIStepGetUserData(void *arkode_mem, void** user_data) {
   return(arkGetUserData(arkode_mem, user_data)); }
 char *MRIStepGetReturnFlagName(long int flag) {
   return(arkGetReturnFlagName(flag)); }
+int MRIStepGetNumStepAttempts(void *arkode_mem, long int *nstep_attempts) {
+  return(arkGetNumStepAttempts(arkode_mem, nstep_attempts)); }
+int MRIStepGetNumErrTestFails(void *arkode_mem, long int *netfails) {
+  return(arkGetNumErrTestFails(arkode_mem, netfails)); }
+int MRIStepGetEstLocalErrors(void *arkode_mem, N_Vector ele) {
+  return(arkGetEstLocalErrors(arkode_mem, ele)); }
+int MRIStepGetActualInitStep(void *arkode_mem, realtype *hinused) {
+  return(arkGetActualInitStep(arkode_mem, hinused)); }
+int MRIStepGetCurrentStep(void *arkode_mem, realtype *hcur) {
+  return(arkGetCurrentStep(arkode_mem, hcur)); }
+/* int MRIStepGetNumConstrFails(void *arkode_mem, long int *nconstrfails) { */
+/*   return(arkGetNumConstrFails(arkode_mem, nconstrfails)); } */
 
 /*---------------------------------------------------------------
   These wrappers for ARKLs module 'get' routines all are
@@ -963,6 +998,52 @@ int MRIStepGetNonlinSolvStats(void *arkode_mem, long int *nniters,
   *nniters = step_mem->nls_iters;
   *nnfails = step_mem->nls_fails;
 
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  MRIStepGetNumExpSteps:
+
+  Returns the current number of stability-limited steps.
+
+  This is a convenience routine, that merely calls
+  SUNHeuristicsGetNumExpSteps for the result.
+  ---------------------------------------------------------------*/
+int MRIStepGetNumExpSteps(void *arkode_mem, long int *nsteps)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "MRIStep",
+                    "MRIStepGetNumExpSteps", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+  if (SUNHeuristicsGetNumExpSteps(ark_mem->hconstraints, nsteps)
+      != SUNHEURISTICS_SUCCESS) { return(ARK_HEURISTICS_ERR); }
+  return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  MRIStepGetNumAccSteps:
+
+  Returns the current number of accuracy-limited steps.
+
+  This is a convenience routine, that merely calls
+  SUNHeuristicsGetNumAccSteps for the result.
+  ---------------------------------------------------------------*/
+int MRIStepGetNumAccSteps(void *arkode_mem, long int *nsteps)
+{
+  ARKodeMem ark_mem;
+  if (arkode_mem==NULL) {
+    arkProcessError(NULL, ARK_MEM_NULL, "MRIStep",
+                    "MRIStepGetNumAccSteps", MSG_ARK_NO_MEM);
+    return(ARK_MEM_NULL);
+  }
+  ark_mem = (ARKodeMem) arkode_mem;
+  if (SUNHeuristicsGetNumAccSteps(ark_mem->hconstraints, nsteps)
+      != SUNHEURISTICS_SUCCESS) { return(ARK_HEURISTICS_ERR); }
   return(ARK_SUCCESS);
 }
 
