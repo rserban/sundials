@@ -69,8 +69,6 @@ int MRIStepSetInitStep(void *arkode_mem, realtype hin) {
   return(arkSetInitStep(arkode_mem, hin)); }
 int MRIStepSetMaxConvFails(void *arkode_mem, int maxncf) {
   return(arkSetMaxConvFails(arkode_mem, maxncf)); }
-int MRIStepSetController(void *arkode_mem, SUNControl C) {
-  return(arkSetController(arkode_mem, C)); }
 int MRIStepSetHeuristics(void *arkode_mem, SUNHeuristics H) {
   return(arkSetHeuristics(arkode_mem, H)); }
 int MRIStepSetConstraints(void *arkode_mem, N_Vector constraints) {
@@ -264,7 +262,7 @@ int MRIStepSetDefaults(void* arkode_mem)
   step_mem->jcur           = SUNFALSE;
   step_mem->convfail       = ARK_NO_FAILURES;
   step_mem->stage_predict  = NULL;           /* no user-supplied stage predictor */
-  step_mem->inner_hfactor  = ZERO;
+  step_mem->inner_hfactor  = -INNER_HFACTOR;
 
   return(ARK_SUCCESS);
 }
@@ -817,6 +815,33 @@ int MRIStepSetFastErrorStepFactor(void *arkode_mem, realtype hfactor)
   }
   step_mem->inner_hfactor = hfactor;
   return(ARK_SUCCESS);
+}
+
+
+/*---------------------------------------------------------------
+  MRIStepSetController:
+
+  Specifies a temporal adaptivity controller for MRIStep to use.
+  If a non-MRI controller is provided, this just passes that
+  through to arkSetController.  However, if an MRI controller is
+  provided, then this wraps that inside an "mriStepControl"
+  wrapper, which will properly retrieve the fast accumulatd
+  error estimate.
+  ---------------------------------------------------------------*/
+int MRIStepSetController(void *arkode_mem, SUNControl C) {
+
+  /* Retrieve the controller type */
+  SUNControl_ID ctype = SUNControlGetID(C);
+
+  /* If this does not have MRI type, then just pass to ARKODE */
+  if ((ctype != SUNDIALS_CONTROL_MRI_H) &&
+      (ctype != SUNDIALS_CONTROL_MRI_TOL)) {
+    return(arkSetController(arkode_mem, C));
+  }
+
+  /* Create the mriStepControl wrapper, and pass that to ARKODE */
+  SUNControl Cwrapper = mriStepControl(arkode_mem, C);
+  return(arkSetController(arkode_mem, Cwrapper));
 }
 
 

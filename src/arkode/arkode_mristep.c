@@ -1295,6 +1295,10 @@ int mriStep_Init(void* arkode_mem, int init_type)
       return (ARK_ILL_INPUT);
     }
 
+    /* If user has left inner_hfactor unset, reset to our default to indicate
+       that we **do not trust** fixed-stepsize fast error estimates. */
+    if (step_mem->inner_hfactor < ZERO) { step_mem->inner_hfactor = INNER_HFACTOR; }
+
     /* initialize fast stepper fixed step size (store in step_mem->inner_control) */
     if (step_mem->stepper->ops->fullrhs) {
       /* tempv1 = ffast(t0, y0) */
@@ -1318,6 +1322,22 @@ int mriStep_Init(void* arkode_mem, int init_type)
       /* set step_mem->inner_control to equal H/100 */
       step_mem->inner_control = SUN_RCONST(0.01) * ark_mem->hin;
     }
+    /* Pass fixed stepsize to inner stepper */
+    retval = mriStepInnerStepper_SetFixedStep(step_mem->stepper,
+                                              step_mem->inner_control);
+    if (retval != ARK_SUCCESS) {
+      arkProcessError(ark_mem, ARK_INNERSTEP_FAIL, "ARKODE::MRIStep", "mriStep_Init",
+                        "error setting fast fixed step");
+      return(ARK_INNERSTEP_FAIL);
+    }
+
+  } else {
+
+    /* If user has left inner_hfactor unset, reset to zero to indicate
+       either that we **trust** tolerance-based adaptive fast error
+       estimates, or that the method does not use fast error estimates. */
+    if (step_mem->inner_hfactor < ZERO) { step_mem->inner_hfactor = ZERO; }
+
   }
 
   /* Signal to shared arkode module that fullrhs is required after each step */
@@ -1609,6 +1629,14 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
     if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
   }
 
+  /* if any temporal adaptivity is enabled: reset the inner integrator
+     to the beginning of this step (in case of recomputation) */
+  if (adapt_type != SUNDIALS_CONTROL_NONE) {
+    retval = mriStepInnerStepper_Reset(step_mem->stepper,
+                                       ark_mem->tn, ark_mem->ycur);
+    if (retval != ARK_SUCCESS)  return(ARK_INNERSTEP_FAIL);
+  }
+
 #ifdef SUNDIALS_DEBUG
   printf("    MRIStep step %li,  stage 0,  h = %"RSYM",  t_n = %"RSYM"\n",
          ark_mem->nst, ark_mem->h, ark_mem->tcur);
@@ -1808,8 +1836,9 @@ int mriStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
     if (retval != ARK_SUCCESS)  return(retval);
 
     /* Compute temporal error estimate via difference between step
-       solution and embedding, and store in ark_mem->tempv1. */
+       solution and embedding, store in ark_mem->tempv1, and take norm. */
     N_VLinearSum(ONE, ark_mem->tempv4, -ONE, ark_mem->ycur, ark_mem->tempv1);
+    *dsmPtr = N_VWrmsNorm(ark_mem->tempv1, ark_mem->ewt);
 
     /* Swap back ark_mem->ycur with ark_mem->tempv4. */
     tmp = ark_mem->ycur;
@@ -2899,7 +2928,7 @@ int mriStep_Hin(ARKodeMem ark_mem, realtype tcur, realtype tout,
      include safeguard against "too-small" ||f(t0,y0)||: */
   fnorm = N_VWrmsNorm(fcur, ark_mem->ewt) / H0_BIAS;
   h0_inv = SUNMAX(ONE/H0_UBFACTOR/tdist, fnorm);
-  *h = sign * h0_inv;
+  *h = sign / h0_inv;
   return(ARK_SUCCESS);
 }
 

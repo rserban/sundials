@@ -83,6 +83,11 @@ sundials_add_library(sundials_arkode
     sundials_suncontrolimpgus_obj
     sundials_suncontrolpi_obj
     sundials_suncontrolimexgus_obj
+    sundials_suncontrolmricc_obj
+    sundials_suncontrolmrill_obj
+    sundials_suncontrolmripi_obj
+    sundials_suncontrolmripid_obj
+    sundials_suncontrolmrihtol_obj
     sundials_sunheuristicsdefault_obj
     sundials_sunheuristicsunconstrained_obj
     sundials_sunmatrixband_obj

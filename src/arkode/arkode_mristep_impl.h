@@ -37,6 +37,9 @@ extern "C" {
 #define MRISTAGE_DIRK_NOFAST 2
 #define MRISTAGE_DIRK_FAST   3
 
+/* Default inner_factor value */
+#define INNER_HFACTOR RCONST(2.0)
+
 /* Implicit solver constants (duplicate from arkode_arkstep_impl.h) */
 #define MAXCOR    3              /* max number of nonlinear iterations */
 #define CRDOWN    RCONST(0.3)    /* constant to estimate the convergence
