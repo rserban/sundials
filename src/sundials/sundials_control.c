@@ -155,7 +155,7 @@ int SUNControlEstimateMRISteps(SUNControl C, realtype H, realtype h,
   if (C == NULL) { return ier; }
   if (C->ops->estimatemristeps)
   {
-    ier = C->ops->estimatemristeps(C, H, DSM, dsm, h, Hnew, hnew);
+    ier = C->ops->estimatemristeps(C, H, h, DSM, dsm, Hnew, hnew);
   }
   return(ier);
 }
