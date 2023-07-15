@@ -660,22 +660,33 @@ int main(int argc, char *argv[])
   //
 
   // Get some slow integrator statistics
-  long int nsts, nfse, nfsi;
+  long int nsts, natts, netfs, nfse, nfsi;
   retval = MRIStepGetNumSteps(arkode_mem, &nsts);
   check_flag(retval, "MRIStepGetNumSteps");
+  retval = MRIStepGetNumStepAttempts(arkode_mem, &natts);
+  check_flag(retval, "MRIStepGetNumStepAttempts");
+  retval = MRIStepGetNumErrTestFails(arkode_mem, &netfs);
+  check_flag(retval, "MRIStepGetNumErrTestFails");
   retval = MRIStepGetNumRhsEvals(arkode_mem, &nfse, &nfsi);
   check_flag(retval, "MRIStepGetNumRhsEvals");
 
   // Get some fast integrator statistics
-  long int nstf, nffe, nffi;
+  long int nstf, nattf, netff, nffe, nffi;
   retval = ARKStepGetNumSteps(inner_arkode_mem, &nstf);
   check_flag(retval, "ARKStepGetNumSteps");
+  retval = ARKStepGetNumStepAttempts(inner_arkode_mem, &nattf);
+  check_flag(retval, "ARKStepGetNumStepAttempts");
+  retval = ARKStepGetNumErrTestFails(inner_arkode_mem, &netff);
+  check_flag(retval, "ARKStepGetNumErrTestFails");
   retval = ARKStepGetNumRhsEvals(inner_arkode_mem, &nffe, &nffi);
   check_flag(retval, "ARKStepGetNumRhsEvals");
 
   // Print some final statistics
   std::cout << "\nFinal Solver Statistics:\n";
-  std::cout << "   Steps: nsts = " << nsts << ", nstf = " << nstf << std::endl;
+  std::cout << "   Slow steps = " << nsts << "  (attempts = " << natts
+            << ",  fails = " << netfs << ")\n";
+  std::cout << "   Fast steps = " << nstf << "  (attempts = " << nattf
+            << ",  fails = " << netff << ")\n";
   std::cout << "   u error = " << uerrtot << ", v error = " << verrtot
             << ", total error = " << errtot << std::endl;
   std::cout << "   Total RHS evals:  Fse = " << nfse << ", Fsi = " << nfsi
