@@ -44,6 +44,7 @@ struct _SUNNonlinearSolverContent_Newton {
 
   /* nonlinear solver variables */
   N_Vector    delta;      /* Newton update vector                                   */
+  sunrealtype resnrm;     /* current residual norm */
   booleantype jcur;       /* Jacobian status, current = SUNTRUE / stale = SUNFALSE  */
   int         curiter;    /* current number of iterations in a solve attempt        */
   int         maxiters;   /* maximum number of iterations in a solve attempt        */
@@ -101,6 +102,9 @@ SUNDIALS_EXPORT int SUNNonlinSolSetMaxIters_Newton(SUNNonlinearSolver NLS,
                                                    int maxiters);
 
 /* get functions */
+SUNDIALS_EXPORT int SUNNonlinSolGetResNrm_Newton(SUNNonlinearSolver NLS,
+                                                 realtype *resnrm);
+
 SUNDIALS_EXPORT int SUNNonlinSolGetNumIters_Newton(SUNNonlinearSolver NLS,
                                                    long int *niters);
 

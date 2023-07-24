@@ -66,6 +66,7 @@ SUNNonlinearSolver SUNNonlinSol_Newton(N_Vector y, SUNContext sunctx)
   NLS->ops->setlsolvefn     = SUNNonlinSolSetLSolveFn_Newton;
   NLS->ops->setctestfn      = SUNNonlinSolSetConvTestFn_Newton;
   NLS->ops->setmaxiters     = SUNNonlinSolSetMaxIters_Newton;
+  NLS->ops->getresnrm       = SUNNonlinSolGetResNrm_Newton;
   NLS->ops->getnumiters     = SUNNonlinSolGetNumIters_Newton;
   NLS->ops->getcuriter      = SUNNonlinSolGetCurIter_Newton;
   NLS->ops->getnumconvfails = SUNNonlinSolGetNumConvFails_Newton;
@@ -310,6 +311,10 @@ int SUNNonlinSolSolve_Newton(SUNNonlinearSolver NLS,
       retval = NEWTON_CONTENT(NLS)->Sys(ycor, delta, mem);
       if (retval != SUN_NLS_SUCCESS) break;
 
+      /* compute the nonlinear residual norm so that it is available 
+         for the automatic newton/fixed-point switching algorithm */
+      NEWTON_CONTENT(NLS)->resnrm = N_VWrmsNorm(delta, w);
+
     } /* end of Newton iteration loop */
 
     /* all errors go here */
@@ -452,6 +457,17 @@ int SUNNonlinSolSetMaxIters_Newton(SUNNonlinearSolver NLS, int maxiters)
 /*==============================================================================
   Get functions
   ============================================================================*/
+
+int SUNNonlinSolGetResNrm_Newton(SUNNonlinearSolver NLS, sunrealtype* resnrm)
+{
+  /* check that the nonlinear solver is non-null */
+  if (NLS == NULL)
+    return(SUN_NLS_MEM_NULL);
+
+  /* return the number of nonlinear iterations in the last solve */
+  *resnrm = NEWTON_CONTENT(NLS)->resnrm;
+  return(SUN_NLS_SUCCESS);
+}
 
 int SUNNonlinSolGetNumIters_Newton(SUNNonlinearSolver NLS, long int *niters)
 {

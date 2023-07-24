@@ -14,8 +14,13 @@
  * This the implementation file for the CVODE nonlinear solver interface.
  * ---------------------------------------------------------------------------*/
 
+#include "cvode/cvode.h"
 #include "cvode_impl.h"
 #include "sundials/sundials_math.h"
+#include "sundials/sundials_nonlinearsolver.h"
+#include "sundials/sundials_nvector.h"
+#include "sundials/sundials_types.h"
+#include "sunnonlinsol/sunnonlinsol_newton.h"
 
 /* constant macros */
 #define ONE RCONST(1.0) /* real 1.0 */
@@ -206,6 +211,12 @@ int CVodeGetNonlinearSystemData(void *cvode_mem, realtype *tcur,
  * Private functions
  * ---------------------------------------------------------------------------*/
 
+int cvNlsSwitch(CVodeMem cv_mem, SUNNonlinearSolver NLS)
+{
+  cv_mem->ownNLS = SUNFALSE; // Hack to prevent freeing the NLS for now
+  CVodeSetNonlinearSolver(cv_mem, NLS);
+  return CV_SUCCESS;
+}
 
 int cvNlsInit(CVodeMem cvode_mem)
 {
@@ -243,6 +254,11 @@ int cvNlsInit(CVodeMem cvode_mem)
                    MSGCV_NLS_INIT_FAIL);
     return(CV_NLS_INIT_FAIL);
   }
+
+  /* initialize stiff parameters */
+  cvode_mem->cv_stifr = SUN_RCONST(1023.0);
+  // cvode_mem->cv_stifr = SUN_RCONST(0.0);
+  cvode_mem->cv_stiff = ONE;
 
   return(CV_SUCCESS);
 }
@@ -309,8 +325,9 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
 {
   CVodeMem cv_mem;
   int m, retval;
-  realtype del;
-  realtype dcon;
+  realtype del;    /* del = ||delta_m||_wrms */
+  realtype dcon;   /* dcon is just the scaled del for checking convergence */
+  realtype resnrm; /* resnrm = || F_m ||_wrms */
 
   if (cvode_mem == NULL) {
     cvProcessError(NULL, CV_MEM_NULL, "CVODE", "cvNlsConvTest", MSGCV_NO_MEM);
@@ -332,14 +349,25 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
   }
   dcon = del * SUNMIN(ONE, cv_mem->cv_crate) / tol;
 
-  if (dcon <= ONE) {
+  if (SUNNonlinSolGetType(NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
+    SUNNonlinSolGetResNrm(NLS, &resnrm);
+    if (del > SUN_UNIT_ROUNDOFF) {
+      cv_mem->cv_stiff = SUNMAX(cv_mem->cv_stiff, resnrm/del);
+    }
+  } else if (SUNNonlinSolGetType(NLS) == SUNNONLINEARSOLVER_FIXEDPOINT) {
+    cv_mem->cv_stiff = SUN_RCONST(1.0);
+  }
+
+  if (dcon <= ONE) {    
     cv_mem->cv_acnrm = (m==0) ? del : N_VWrmsNorm(ycor, ewt);
     cv_mem->cv_acnrmcur = SUNTRUE;
     return(CV_SUCCESS); /* Nonlinear system was solved successfully */
   }
 
   /* check if the iteration seems to be diverging */
-  if ((m >= 1) && (del > RDIV*cv_mem->cv_delp)) return(SUN_NLS_CONV_RECVR);
+  if ((m >= 1) && (del > RDIV*cv_mem->cv_delp)) {    
+    return(SUN_NLS_CONV_RECVR);
+  }
 
   /* Save norm of correction and loop again */
   cv_mem->cv_delp = del;
@@ -389,7 +417,7 @@ static int cvNlsResidual(N_Vector ycor, N_Vector res, void* cvode_mem)
 
 static int cvNlsFPFunction(N_Vector ycor, N_Vector res, void* cvode_mem)
 {
- CVodeMem cv_mem;
+  CVodeMem cv_mem;
   int retval;
 
   if (cvode_mem == NULL) {

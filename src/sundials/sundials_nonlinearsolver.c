@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <sundials/sundials_nonlinearsolver.h>
+#include "sundials/sundials_types.h"
 #include "sundials_context_impl.h"
 
 #if defined(SUNDIALS_BUILD_WITH_PROFILING)
@@ -201,6 +202,16 @@ int SUNNonlinSolSetMaxIters(SUNNonlinearSolver NLS, int maxiters)
 /* -----------------------------------------------------------------------------
  * get functions
  * ---------------------------------------------------------------------------*/
+
+int SUNNonlinSolGetResNrm(SUNNonlinearSolver NLS, sunrealtype* resnrm)
+{
+   if (NLS->ops->getnumiters) {
+    return((int) NLS->ops->getresnrm(NLS, resnrm));
+  } else {
+    *resnrm = SUN_BIG_REAL;
+    return(SUN_NLS_SUCCESS);
+  } 
+}
 
 /* get the total number on nonlinear iterations (optional) */
 int SUNNonlinSolGetNumIters(SUNNonlinearSolver NLS, long int *niters)

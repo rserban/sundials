@@ -23,6 +23,7 @@
 
 #include <cvode/cvode.h>
 #include "cvode_proj_impl.h"
+#include "sundials/sundials_nonlinearsolver.h"
 #include "sundials_context_impl.h"
 #include "sundials_logger_impl.h"
 #include "sundials/sundials_math.h"
@@ -291,6 +292,8 @@ typedef struct CVodeMemRec {
   realtype cv_gammap;          /* gamma at the last setup call                */
   realtype cv_gamrat;          /* gamma / gammap                              */
 
+  realtype cv_stiff;           /* stiffness estimate for nonlinear solver switching */
+  realtype cv_stifr;
   realtype cv_crate;           /* estimated corrector convergence rate        */
   realtype cv_delp;            /* norm of previous nonlinear solver update    */
   realtype cv_acnrm;           /* | acor |                                    */
@@ -360,10 +363,12 @@ typedef struct CVodeMemRec {
     ---------------------*/
 
   SUNNonlinearSolver NLS;      /* nonlinear solver object                   */
+  SUNNonlinearSolver NLS_newton;
+  SUNNonlinearSolver NLS_fixedpoint;
   booleantype ownNLS;          /* flag indicating NLS ownership             */
   CVRhsFn nls_f;               /* f(t,y(t)) used in the nonlinear solver    */
   int convfail;                /* flag to indicate when a Jacobian update may
-                                  be needed */
+                              static int cvNlsSwitch(CVodeMem cv_mem, SUNNonlinearSolver NLS)    be needed */
 
   /*------------------
     Linear Solver Data
@@ -631,6 +636,10 @@ void cvErrHandler(int error_code, const char *module, const char *function,
 /* Nonlinear solver initialization */
 
 int cvNlsInit(CVodeMem cv_mem);
+
+/* Nonlinear solver switching */
+
+int cvNlsSwitch(CVodeMem cv_mem, SUNNonlinearSolver NLS);
 
 /* Projection functions */
 
