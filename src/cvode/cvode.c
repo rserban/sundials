@@ -2838,16 +2838,30 @@ static int cvNls(CVodeMem cv_mem, int nflag)
     if (flag > 0) return(SUN_NLS_CONV_RECVR);
   }
 
+  /* reset stiff and nslow */
+  cv_mem->cv_stiff = SUN_RCONST(0.0);
+  cv_mem->cv_nslow = 0;
+
   /* solve the nonlinear system */
   flag = SUNNonlinSolSolve(cv_mem->NLS, cv_mem->cv_zn[0], cv_mem->cv_acor,
                            cv_mem->cv_ewt, cv_mem->cv_tq[4], callSetup, cv_mem);
 
-  /* increment counters */
+  /* increment CVODE counters that accumulate across the entire integration  */
   (void) SUNNonlinSolGetNumIters(cv_mem->NLS, &nni_inc);
   cv_mem->cv_nni += nni_inc;
 
   (void) SUNNonlinSolGetNumConvFails(cv_mem->NLS, &nnf_inc);
   cv_mem->cv_nnf += nnf_inc;
+
+  if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
+    cv_mem->cv_nnewton += nni_inc; 
+  }
+
+  if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_FIXEDPOINT) {
+    cv_mem->cv_nfixed += nni_inc; 
+  }
+
+  cv_mem->cv_nns += cv_mem->cv_nslow;
 
   /* if the solve failed return */
   if (flag != SUN_NLS_SUCCESS) return(flag);
@@ -2983,13 +2997,14 @@ static int cvHandleNFlag(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
                          int *ncfPtr)
 {
   int nflag;
+  sunbooleantype switch_to_newton;
 
   nflag = *nflagPtr;
 
   if (nflag == CV_SUCCESS) {
     if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
       cv_mem->cv_stifr = SUN_RCONST(0.5)*(cv_mem->cv_stifr + cv_mem->cv_stiff);
-      // fprintf(stderr, ">>> cv_stifr = %.16Le\n", cv_mem->cv_stifr);
+      // fprintf(stderr, ">>> cv_stiff = %.16Le, cv_stifr = %.16Le\n",  (long double) cv_mem->cv_stiff, (long double) cv_mem->cv_stifr);
     }
     return(DO_ERROR_TEST);
   }
@@ -3016,19 +3031,22 @@ static int cvHandleNFlag(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
   if ((SUNRabs(cv_mem->cv_h) <= cv_mem->cv_hmin*ONEPSM) ||
       (*ncfPtr == cv_mem->cv_maxncf)) {
     if (nflag == SUN_NLS_CONV_RECVR) return(CV_CONV_FAILURE);
+    if (nflag == SUN_NLS_DIVERGING)  return(CV_CONV_FAILURE);
     if (nflag == CONSTR_RECVR)       return(CV_CONSTR_FAIL);
     if (nflag == RHSFUNC_RECVR)      return(CV_REPTD_RHSFUNC_ERR);
   }
 
-  if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_FIXEDPOINT) {
-    
-      /* Since the corrector iteration failed to converge with fixed-point, we
-          witch to Newton. We set stifr to 1023 here. The value of 1023 is
-          ensures that switching back to fixed-point is not considered for at
-          least 10 steps through a interesting mathematical relation in Alan's
-          notes. */
+  switch_to_newton = (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_FIXEDPOINT) &&
+    (nflag == SUN_NLS_CONV_SLOW || nflag == SUN_NLS_DIVERGING);
+
+  if (switch_to_newton) {
+
+      /* Since the corrector iteration failed to converge (or was too slow) with
+         fixed-point, we switch to Newton. We set stifr to 1023 here. The value
+         of 1023 is ensures that switching back to fixed-point is not
+         considered for at least 10 steps through a interesting mathematical
+         relation in Alan's notes. */
       cv_mem->cv_stifr = SUN_RCONST(1023.0);
-      fprintf(stderr, ">>>> switch to Newton!\n");
       cvNlsSwitch(cv_mem, cv_mem->NLS_newton);
 
   }
@@ -3294,7 +3312,6 @@ static void cvPrepareNextStep(CVodeMem cv_mem, realtype dsm)
   /* See if we should switch to fixed-point from Newton */
   if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
     if (cv_mem->cv_stifr < SUN_RCONST(1.5)) {
-      fprintf(stderr, ">>>> switch to fixed-point!\n");
       cvNlsSwitch(cv_mem, cv_mem->NLS_fixedpoint);
     }
   }

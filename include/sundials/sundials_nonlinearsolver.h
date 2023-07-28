@@ -176,6 +176,8 @@ SUNDIALS_EXPORT int SUNNonlinSolGetNumConvFails(SUNNonlinearSolver NLS, long int
 /* Recoverable */
 #define SUN_NLS_CONTINUE   +901 /* not converged, keep iterating      */
 #define SUN_NLS_CONV_RECVR +902 /* convergece failure, try to recover */
+#define SUN_NLS_CONV_SLOW  +903 /* convergece is slow, consider switching to Newton, keep iterating */
+#define SUN_NLS_DIVERGING  +904 /* solver is diverging, consider switching to Newton, keep iterating */
 
 /* Unrecoverable */
 #define SUN_NLS_MEM_NULL     -901 /* memory argument is NULL            */

@@ -302,6 +302,14 @@ is not supplied, these products are computed as
 The increment :math:`\sigma` is :math:`1/\|v\|`, so that
 :math:`\sigma v` has norm 1.
 
+.. _CVODE.Mathematics.nls.switching:
+
+Automatic Switching between Newton and Fixed-point
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
 .. _CVODE.Mathematics.err_test:
 
 Local Error Test

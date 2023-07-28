@@ -29,10 +29,12 @@
      NLS_MAXCOR  maximum no. of corrector iterations for the nonlinear solver
      CRDOWN      constant used in the estimation of the convergence rate (crate)
                  of the iterates for the nonlinear equation
+     RSLOW       declare slow convergence if ratio del/delp > RSLOW
      RDIV        declare divergence if ratio del/delp > RDIV
  */
 #define NLS_MAXCOR 3
 #define CRDOWN     RCONST(0.3)
+#define RSLOW      RCONST(0.8)
 #define RDIV       RCONST(2.0)
 
 /* private functions */
@@ -255,10 +257,12 @@ int cvNlsInit(CVodeMem cvode_mem)
     return(CV_NLS_INIT_FAIL);
   }
 
-  /* initialize stiff parameters */
+  /* initialize stiff parameters
+     we set stifr to 1023 to begin with so that fixed point is not considered for 10 steps */
   cvode_mem->cv_stifr = SUN_RCONST(1023.0);
   // cvode_mem->cv_stifr = SUN_RCONST(0.0);
-  cvode_mem->cv_stiff = ONE;
+  cvode_mem->cv_stiff = SUN_RCONST(0.0);
+  cvode_mem->cv_nslow = 0;
 
   return(CV_SUCCESS);
 }
@@ -351,7 +355,7 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
 
   if (SUNNonlinSolGetType(NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
     SUNNonlinSolGetResNrm(NLS, &resnrm);
-    if (del > SUN_UNIT_ROUNDOFF) {
+    if (del > cv_mem->cv_uround) {
       cv_mem->cv_stiff = SUNMAX(cv_mem->cv_stiff, resnrm/del);
     }
   } else if (SUNNonlinSolGetType(NLS) == SUNNONLINEARSOLVER_FIXEDPOINT) {
@@ -364,9 +368,15 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
     return(CV_SUCCESS); /* Nonlinear system was solved successfully */
   }
 
+  /* check if the iterations seems to be converging slowly */
+  if ((m >= 1) && (del > RSLOW*cv_mem->cv_delp)) {
+    cv_mem->cv_nslow++; /* TODO(CJB): this should definitely move into the solver */
+    return(SUN_NLS_CONV_SLOW);
+  }
+
   /* check if the iteration seems to be diverging */
   if ((m >= 1) && (del > RDIV*cv_mem->cv_delp)) {    
-    return(SUN_NLS_CONV_RECVR);
+    return(SUN_NLS_DIVERGING);
   }
 
   /* Save norm of correction and loop again */

@@ -1641,12 +1641,15 @@ int CVodePrintAllStats(void *cvode_mem, FILE *outfile, SUNOutputFormat fmt)
 
     /* nonlinear solver stats */
     fprintf(outfile, "NLS iters                    = %ld\n", cv_mem->cv_nni);
+    fprintf(outfile, "NLS iters (newton)           = %ld\n", cv_mem->cv_nnewton);
+    fprintf(outfile, "NLS iters (fixedpoint)       = %ld\n", cv_mem->cv_nfixed);
     fprintf(outfile, "NLS fails                    = %ld\n", cv_mem->cv_nnf);
     if (cv_mem->cv_nst > 0)
     {
       fprintf(outfile, "NLS iters per step           = %"RSYM"\n",
               (realtype) cv_mem->cv_nni / (realtype) cv_mem->cv_nst);
     }
+    fprintf(outfile, "NLS slow                     = %ld\n", cv_mem->cv_nns);
 
     /* linear solver stats */
     fprintf(outfile, "LS setups                    = %ld\n", cv_mem->cv_nsetups);

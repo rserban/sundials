@@ -91,7 +91,6 @@ typedef struct {
 static void SetIC(N_Vector u, UserData data);
 static void PrintHeader(realtype reltol, realtype abstol, realtype umax);
 static void PrintOutput(realtype t, realtype umax, long int nst);
-static void PrintFinalStats(void *cvode_mem);
 
 /* Private function to check function return values */
 
@@ -216,7 +215,9 @@ int main(void)
     PrintOutput(t, umax, nst);
   }
   SUNDIALS_MARK_END(profobj, "Integration loop");
-  PrintFinalStats(cvode_mem);  /* Print some final statistics   */
+  
+  printf("\nFinal Statistics\n");
+  CVodePrintAllStats(cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
 
   N_VDestroy(u);          /* Free the u vector          */
   CVodeFree(&cvode_mem);  /* Free the integrator memory */
@@ -398,40 +399,6 @@ static void PrintOutput(realtype t, realtype umax, long int nst)
 #else
   printf("At t = %4.2f   max.norm(u) =%14.6e   nst = %4ld\n", t, umax, nst);
 #endif
-
-  return;
-}
-
-/* Get and print some final statistics */
-
-static void PrintFinalStats(void *cvode_mem)
-{
-  int retval;
-  long int nst, nfe, nsetups, netf, nni, ncfn, nje, nfeLS;
-
-  retval = CVodeGetNumSteps(cvode_mem, &nst);
-  check_retval(&retval, "CVodeGetNumSteps", 1);
-  retval = CVodeGetNumRhsEvals(cvode_mem, &nfe);
-  check_retval(&retval, "CVodeGetNumRhsEvals", 1);
-  retval = CVodeGetNumLinSolvSetups(cvode_mem, &nsetups);
-  check_retval(&retval, "CVodeGetNumLinSolvSetups", 1);
-  retval = CVodeGetNumErrTestFails(cvode_mem, &netf);
-  check_retval(&retval, "CVodeGetNumErrTestFails", 1);
-  retval = CVodeGetNumNonlinSolvIters(cvode_mem, &nni);
-  check_retval(&retval, "CVodeGetNumNonlinSolvIters", 1);
-  retval = CVodeGetNumNonlinSolvConvFails(cvode_mem, &ncfn);
-  check_retval(&retval, "CVodeGetNumNonlinSolvConvFails", 1);
-
-  retval = CVodeGetNumJacEvals(cvode_mem, &nje);
-  check_retval(&retval, "CVodeGetNumJacEvals", 1);
-  retval = CVodeGetNumLinRhsEvals(cvode_mem, &nfeLS);
-  check_retval(&retval, "CVodeGetNumLinRhsEvals", 1);
-
-  printf("\nFinal Statistics:\n");
-  printf("nst = %-6ld nfe  = %-6ld nsetups = %-6ld nfeLS = %-6ld nje = %ld\n",
-	 nst, nfe, nsetups, nfeLS, nje);
-  printf("nni = %-6ld ncfn = %-6ld netf = %ld\n",
-	 nni, ncfn, netf);
 
   return;
 }

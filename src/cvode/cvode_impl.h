@@ -271,6 +271,7 @@ typedef struct CVodeMemRec {
   int cv_qwait;                /* number of internal steps to wait before
                                   considering a change in q                   */
   int cv_L;                    /* L = q + 1                                   */
+  int cv_nslow;                /* number of nonlinear iterations (in current step) with slow convergence */
 
   realtype cv_hin;             /* initial step size                           */
   realtype cv_h;               /* current step size                           */
@@ -336,6 +337,9 @@ typedef struct CVodeMemRec {
   long int cv_ncfn;        /* number of corrector convergence failures        */
   long int cv_nni;         /* number of nonlinear iterations performed        */
   long int cv_nnf;         /* number of nonlinear convergence failures        */
+  long int cv_nnewton; 
+  long int cv_nfixed;
+  long int cv_nns;         /* number of iterations for which the nonlinear convergence was determined to be 'slow' */
   long int cv_netf;        /* number of error test failures                   */
   long int cv_nsetups;     /* number of setup calls                           */
   int cv_nhnil;            /* number of messages issued to the user that
