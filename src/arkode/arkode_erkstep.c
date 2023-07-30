@@ -646,6 +646,7 @@ int erkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
   case ARK_FULLRHS_START:
 
     /* call f */
+    fprintf(stderr, "call f, ARK_FULLRHS_START\n");
     retval = step_mem->f(t, y, step_mem->F[0], ark_mem->user_data);
     step_mem->nfe++;
     if (retval != 0) {
@@ -666,15 +667,23 @@ int erkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
      Copy the results to F[0] if the coefficients support it. */
   case ARK_FULLRHS_END:
 
-    /* determine if explicit RHS function needs to be recomputed */
+    // /* determine if explicit RHS function needs to be recomputed */
+    // recomputeRHS = SUNFALSE;
+    // if (SUNRabs(step_mem->B->c[step_mem->stages - 1] - ONE) > TINY) {
+    //   recomputeRHS = SUNTRUE;
+    // }
+
     recomputeRHS = SUNFALSE;
-    if (SUNRabs(step_mem->B->c[step_mem->stages - 1] - ONE) > TINY)
-      recomputeRHS = SUNTRUE;
+    int s = step_mem->B->stages;
+    for (int i=0; i<s; i++)
+      if (SUNRabs(step_mem->B->b[i] - step_mem->B->A[s-1][i])>TINY)
+        recomputeRHS = SUNTRUE;
 
     /* base RHS calls on recomputeRHS argument */
     if (recomputeRHS) {
 
       /* call f */
+      fprintf(stderr, "call f, recomputeRHS\n");
       retval = step_mem->f(t, y, step_mem->F[0], ark_mem->user_data);
       step_mem->nfe++;
       if (retval != 0) {
@@ -698,6 +707,7 @@ int erkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
   case ARK_FULLRHS_OTHER:
 
     /* call f */
+    fprintf(stderr, ">>> call f, ARK_FULLRHS_OTHER");
     retval = step_mem->f(t, y, f, ark_mem->user_data);
     step_mem->nfe++;
     if (retval != 0) {
@@ -820,6 +830,7 @@ int erkStep_TakeStep(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
     }
 
     /* compute updated RHS */
+    fprintf(stderr, "call f, takeStep\n");
     retval = step_mem->f(ark_mem->tcur, ark_mem->ycur,
                          step_mem->F[is], ark_mem->user_data);
     step_mem->nfe++;

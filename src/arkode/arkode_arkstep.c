@@ -1372,6 +1372,7 @@ int arkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
 
     /* call fe if the problem has an explicit component */
     if (step_mem->explicit) {
+      fprintf(stderr, "call fe, ARK_FULLRHS_START\n");
       retval = step_mem->fe(t, y, step_mem->Fe[0], ark_mem->user_data);
       step_mem->nfe++;
       if (retval != 0) {
@@ -1426,18 +1427,25 @@ int arkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
      Copy the results to Fe[0] and Fi[0] if the ARK coefficients support it. */
   case ARK_FULLRHS_END:
 
-    /* determine if explicit/implicit RHS functions need to be recomputed */
+    // /* determine if explicit/implicit RHS functions need to be recomputed */
+    // recomputeRHS = SUNFALSE;
+    // if ( step_mem->explicit && (SUNRabs(step_mem->Be->c[step_mem->stages-1]-ONE)>TINY) )
+    //   recomputeRHS = SUNTRUE;
+    // if ( step_mem->implicit && (SUNRabs(step_mem->Bi->c[step_mem->stages-1]-ONE)>TINY) )
+    //   recomputeRHS = SUNTRUE;
+
     recomputeRHS = SUNFALSE;
-    if ( step_mem->explicit && (SUNRabs(step_mem->Be->c[step_mem->stages-1]-ONE)>TINY) )
-      recomputeRHS = SUNTRUE;
-    if ( step_mem->implicit && (SUNRabs(step_mem->Bi->c[step_mem->stages-1]-ONE)>TINY) )
-      recomputeRHS = SUNTRUE;
+    int s = step_mem->Be->stages;
+    for (int i=0; i<s; i++)
+      if (SUNRabs(step_mem->Be->b[i] - step_mem->Be->A[s-1][i])>TINY)
+        recomputeRHS = SUNTRUE;
 
     /* base RHS calls on recomputeRHS argument */
     if (recomputeRHS) {
 
       /* call fe if the problem has an explicit component */
       if (step_mem->explicit) {
+        fprintf(stderr, "call fe, recomputeRHS\n");
         retval = step_mem->fe(t, y, step_mem->Fe[0], ark_mem->user_data);
         step_mem->nfe++;
         if (retval != 0) {
@@ -1498,6 +1506,7 @@ int arkStep_FullRHS(void* arkode_mem, realtype t, N_Vector y, N_Vector f,
 
     /* call fe if the problem has an explicit component (store in ark_tempv2) */
     if (step_mem->explicit) {
+      fprintf(stderr, "call fe, ARK_FULLRHS_OTHER\n");
       retval = step_mem->fe(t, y, ark_mem->tempv2, ark_mem->user_data);
       step_mem->nfe++;
       if (retval != 0) {
@@ -1802,6 +1811,7 @@ int arkStep_TakeStep_Z(void* arkode_mem, realtype *dsmPtr, int *nflagPtr)
 
     /*    store explicit RHS */
     if (step_mem->explicit) {
+        fprintf(stderr, "call fe, takeStep\n");
         retval = step_mem->fe(ark_mem->tn + step_mem->Be->c[is]*ark_mem->h,
                               ark_mem->ycur, step_mem->Fe[is], ark_mem->user_data);
         step_mem->nfe++;
