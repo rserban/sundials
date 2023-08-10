@@ -49,6 +49,7 @@ SUNDIALS_EXPORT int SUNLogger_SetInfoFilename(SUNLogger logger,
 SUNDIALS_EXPORT int SUNLogger_QueueMsg(SUNLogger logger, SUNLogLevel lvl,
                                        const char* scope, const char* label,
                                        const char* msg_txt, ...);
+SUNDIALS_EXPORT int SUNLogger_Break(SUNLogger logger, SUNLogLevel lvl);
 SUNDIALS_EXPORT int SUNLogger_Flush(SUNLogger logger, SUNLogLevel lvl);
 SUNDIALS_EXPORT int SUNLogger_GetOutputRank(SUNLogger logger, int* output_rank);
 SUNDIALS_EXPORT int SUNLogger_Destroy(SUNLogger* logger);

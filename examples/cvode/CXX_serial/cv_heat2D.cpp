@@ -52,6 +52,7 @@
 #include <nvector/nvector_serial.h>
 #include <sunlinsol/sunlinsol_pcg.h>
 #include <sunlinsol/sunlinsol_spgmr.h>
+#include "sundials/sundials_types.h"
 
 // -----------------------------------------------------------------------------
 // Functions provided to the SUNDIALS integrator
@@ -207,70 +208,16 @@ int main(int argc, char* argv[])
   // Final outputs
   // --------------
 
-  // Print integrator and solver stats
-  long int nst, netf, nf, nni, ncfn, nli, nlcf, nsetups, nf_ls, nJv;
-  flag = CVodeGetNumSteps(cvode_mem, &nst);
-  if (check_flag(flag, "CVodeGetNumSteps")) return -1;
-  flag = CVodeGetNumErrTestFails(cvode_mem, &netf);
-  if (check_flag(flag, "CVodeGetNumErrTestFails")) return -1;
-  flag = CVodeGetNumRhsEvals(cvode_mem, &nf);
-  if (check_flag(flag, "CVodeGetNumRhsEvals")) return -1;
-  flag = CVodeGetNumNonlinSolvIters(cvode_mem, &nni);
-  if (check_flag(flag, "CVodeGetNumNonlinSolvIters")) return -1;
-  flag = CVodeGetNumNonlinSolvConvFails(cvode_mem, &ncfn);
-  if (check_flag(flag, "CVodeGetNumNonlinSolvConvFails")) return -1;
-  flag = CVodeGetNumLinIters(cvode_mem, &nli);
-  if (check_flag(flag, "CVodeGetNumLinIters")) return -1;
-  flag = CVodeGetNumLinConvFails(cvode_mem, &nlcf);
-  if (check_flag(flag, "CVodeGetNumLinConvFails")) return -1;
-  flag = CVodeGetNumLinSolvSetups(cvode_mem, &nsetups);
-  if (check_flag(flag, "CVodeGetNumLinSolvSetups")) return -1;
-  flag = CVodeGetNumLinRhsEvals(cvode_mem, &nf_ls);
-  if (check_flag(flag, "CVodeGetNumLinRhsEvals")) return -1;
-  flag = CVodeGetNumJtimesEvals(cvode_mem, &nJv);
-  if (check_flag(flag, "CVodeGetNumJtimesEvals")) return -1;
-
-  std::cout << std::fixed << std::setprecision(6) << "Final integrator statistics:\n"
-            << "  Steps            = " << nst << "\n"
-            << "  Error test fails = " << netf << "\n"
-            << "  RHS evals        = " << nf << "\n"
-            << "  NLS iters        = " << nni << "\n"
-            << "  NLS fails        = " << ncfn << "\n"
-            << "  LS iters         = " << nli << "\n"
-            << "  LS fails         = " << nlcf << "\n"
-            << "  LS setups        = " << nsetups << "\n"
-            << "  LS RHS evals     = " << nf_ls << "\n"
-            << "  Jv products      = " << nJv << "\n"
-            << std::endl;
-
-  // Compute average nls iters per step attempt and ls iters per nls iter
-  auto avgnli = static_cast<sunrealtype>(nni) / static_cast<sunrealtype>(nst);
-  auto avgli  = static_cast<sunrealtype>(nli) / static_cast<sunrealtype>(nni);
-  std::cout << "  Avg NLS iters per step    = " << avgnli << "\n";
-  std::cout << "  Avg LS iters per NLS iter = " << avgli << "\n";
-  std::cout << std::endl;
-
-  // Get preconditioner stats
-  if (udata.prec) {
-    long int npe, nps;
-    flag = CVodeGetNumPrecEvals(cvode_mem, &npe);
-    if (check_flag(flag, "CVodeGetNumPrecEvals")) return -1;
-    flag = CVodeGetNumPrecSolves(cvode_mem, &nps);
-    if (check_flag(flag, "CVodeGetNumPrecSolves")) return -1;
-
-    std::cout << "  Preconditioner setups = " << npe << "\n";
-    std::cout << "  Preconditioner solves = " << nps << "\n";
-    std::cout << std::endl;
-  }
+  std::cout << std::fixed << std::setprecision(6) << "Final integrator statistics:\n";
+  CVodePrintAllStats(cvode_mem, stdout, SUN_OUTPUTFORMAT_TABLE);
 
   // Output final error
   flag = SolutionError(t, u, e, udata);
   if (check_flag(flag, "SolutionError")) return 1;
 
   sunrealtype maxerr = N_VMaxNorm(e);
-
   std::cout << std::scientific << std::setprecision(std::numeric_limits<sunrealtype>::digits10)
-            << "  Max error = " << maxerr << std::endl;
+            << "\nMax error = " << maxerr << std::endl;
 
   // --------------------
   // Clean up and return

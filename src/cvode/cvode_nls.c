@@ -14,6 +14,7 @@
  * This the implementation file for the CVODE nonlinear solver interface.
  * ---------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include "cvode/cvode.h"
 #include "cvode_impl.h"
 #include "sundials/sundials_math.h"
@@ -29,8 +30,8 @@
      NLS_MAXCOR  maximum no. of corrector iterations for the nonlinear solver
      CRDOWN      constant used in the estimation of the convergence rate (crate)
                  of the iterates for the nonlinear equation
-     RSLOW       declare slow convergence if ratio del/delp > RSLOW
-     RDIV        declare divergence if ratio del/delp > RDIV
+     RSLOW       declare slow convergence if ratio delnrm/delp > RSLOW
+     RDIV        declare divergence if ratio delnrm/delp > RDIV
  */
 #define NLS_MAXCOR 3
 #define CRDOWN     RCONST(0.3)
@@ -43,7 +44,7 @@ static int cvNlsFPFunction(N_Vector ycor, N_Vector res, void* cvode_mem);
 
 static int cvNlsLSetup(booleantype jbad, booleantype* jcur, void* cvode_mem);
 static int cvNlsLSolve(N_Vector delta, void* cvode_mem);
-static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector del,
+static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
                          realtype tol, N_Vector ewt, void* cvode_mem);
 
 #ifdef SUNDIALS_BUILD_PACKAGE_FUSED_KERNELS
@@ -259,8 +260,8 @@ int cvNlsInit(CVodeMem cvode_mem)
 
   /* initialize stiff parameters
      we set stifr to 1023 to begin with so that fixed point is not considered for 10 steps */
-  cvode_mem->cv_stifr = SUN_RCONST(1023.0);
-  // cvode_mem->cv_stifr = SUN_RCONST(0.0);
+  // cvode_mem->cv_stifr = SUN_RCONST(1023.0);
+  cvode_mem->cv_stifr = SUN_RCONST(0.0);
   cvode_mem->cv_stiff = SUN_RCONST(0.0);
   cvode_mem->cv_nslow = 0;
 
@@ -329,8 +330,8 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
 {
   CVodeMem cv_mem;
   int m, retval;
-  realtype del;    /* del = ||delta_m||_wrms */
-  realtype dcon;   /* dcon is just the scaled del for checking convergence */
+  realtype delnrm; /* delnrm = ||delta_m||_wrms */
+  realtype dcon;   /* dcon is just the scaled delnrm for checking convergence */
   realtype resnrm; /* resnrm = || F_m ||_wrms */
 
   if (cvode_mem == NULL) {
@@ -340,7 +341,7 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
   cv_mem = (CVodeMem) cvode_mem;
 
   /* compute the norm of the correction */
-  del = N_VWrmsNorm(delta, ewt);
+  delnrm = N_VWrmsNorm(delta, ewt);
 
   /* get the current nonlinear solver iteration count */
   retval = SUNNonlinSolGetCurIter(NLS, &m);
@@ -349,38 +350,51 @@ static int cvNlsConvTest(SUNNonlinearSolver NLS, N_Vector ycor, N_Vector delta,
   /* Test for convergence. If m > 0, an estimate of the convergence
      rate constant is stored in crate, and used in the test.        */
   if (m > 0) {
-    cv_mem->cv_crate = SUNMAX(CRDOWN * cv_mem->cv_crate, del/cv_mem->cv_delp);
+    cv_mem->cv_crate = SUNMAX(CRDOWN * cv_mem->cv_crate, delnrm/cv_mem->cv_delp);
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
+    "CVODE::cvNlsConvTest", "m > 0",
+    "crate = %.16g", cv_mem->cv_crate);
+#endif
   }
-  dcon = del * SUNMIN(ONE, cv_mem->cv_crate) / tol;
+  dcon = delnrm * SUNMIN(ONE, cv_mem->cv_crate) / tol;
 
   if (SUNNonlinSolGetType(NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
     SUNNonlinSolGetResNrm(NLS, &resnrm);
-    if (del > cv_mem->cv_uround) {
-      cv_mem->cv_stiff = SUNMAX(cv_mem->cv_stiff, resnrm/del);
+    if (delnrm > cv_mem->cv_uround) {
+      cv_mem->cv_stiff = SUNMAX(cv_mem->cv_stiff, resnrm/delnrm);
     }
   } else if (SUNNonlinSolGetType(NLS) == SUNNONLINEARSOLVER_FIXEDPOINT) {
     cv_mem->cv_stiff = SUN_RCONST(1.0);
   }
 
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
+    "CVODE::cvNlsConvTest", "pre-dcon-check",
+    "delnrm = %.16g, dcon = %.16g, stiff = %.16g", delnrm, dcon, cv_mem->cv_stiff);
+#endif
+
   if (dcon <= ONE) {    
-    cv_mem->cv_acnrm = (m==0) ? del : N_VWrmsNorm(ycor, ewt);
+    cv_mem->cv_acnrm = (m==0) ? delnrm : N_VWrmsNorm(ycor, ewt);
     cv_mem->cv_acnrmcur = SUNTRUE;
     return(CV_SUCCESS); /* Nonlinear system was solved successfully */
   }
 
   /* check if the iterations seems to be converging slowly */
-  if ((m >= 1) && (del > RSLOW*cv_mem->cv_delp)) {
+  if ((m >= 1) && (delnrm > RSLOW*cv_mem->cv_delp)) {
     cv_mem->cv_nslow++; /* TODO(CJB): this should definitely move into the solver */
-    return(SUN_NLS_CONV_SLOW);
+    if (cv_mem->cv_nslow > 1) { 
+      return(SUN_NLS_CONV_SLOW);
+    }
   }
 
   /* check if the iteration seems to be diverging */
-  if ((m >= 1) && (del > RDIV*cv_mem->cv_delp)) {    
+  if ((m >= 1) && (delnrm > RDIV*cv_mem->cv_delp)) {    
     return(SUN_NLS_DIVERGING);
   }
 
   /* Save norm of correction and loop again */
-  cv_mem->cv_delp = del;
+  cv_mem->cv_delp = delnrm;
 
   /* Not yet converged */
   return(SUN_NLS_CONTINUE);

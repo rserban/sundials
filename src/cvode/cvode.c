@@ -25,7 +25,9 @@
 #include <string.h>
 
 #include "cvode_impl.h"
+#include "sundials/sundials_logger.h"
 #include "sundials/sundials_nonlinearsolver.h"
+#include "sundials_logger_impl.h"
 #include <sundials/sundials_types.h>
 #include <sunnonlinsol/sunnonlinsol_newton.h>
 #include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
@@ -2203,8 +2205,8 @@ static int cvStep(CVodeMem cv_mem)
 
   for(;;) {
 
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-    SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+    SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
       "CVODE::cvStep", "enter-step-attempt-loop",
       "step = %li, h = %.16g, q = %d, t_n = %.16g",
       cv_mem->cv_nst, cv_mem->cv_next_h, cv_mem->cv_next_q, cv_mem->cv_tn);
@@ -3004,7 +3006,6 @@ static int cvHandleNFlag(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
   if (nflag == CV_SUCCESS) {
     if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
       cv_mem->cv_stifr = SUN_RCONST(0.5)*(cv_mem->cv_stifr + cv_mem->cv_stiff);
-      // fprintf(stderr, ">>> cv_stiff = %.16Le, cv_stifr = %.16Le\n",  (long double) cv_mem->cv_stiff, (long double) cv_mem->cv_stifr);
     }
     return(DO_ERROR_TEST);
   }
@@ -3047,6 +3048,11 @@ static int cvHandleNFlag(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
          considered for at least 10 steps through a interesting mathematical
          relation in Alan's notes. */
       cv_mem->cv_stifr = SUN_RCONST(1023.0);
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
+    "CVODE::cvPrepareNextStep", "switch-to-newt",
+    "switch to Newton, nflag = %d", nflag);
+#endif
       cvNlsSwitch(cv_mem, cv_mem->NLS_newton);
 
   }
@@ -3118,8 +3124,8 @@ static int cvDoErrorTest(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
 
   dsm = cv_mem->cv_acnrm * cv_mem->cv_tq[2];
 
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
     "CVODE::cvDoErrorTest", "error-test", "step = %li, h = %.16g, dsm = %.16g",
     cv_mem->cv_nst, cv_mem->cv_h, dsm);
 #endif
@@ -3153,8 +3159,8 @@ static int cvDoErrorTest(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
 
     cvRescale(cv_mem);
 
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-    SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+    SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
       "CVODE::cvDoErrorTest", "new-step-eta",
       "eta = %.16g", cv_mem->cv_eta);
 #endif
@@ -3171,8 +3177,8 @@ static int cvDoErrorTest(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
     cv_mem->cv_q--;
     cv_mem->cv_qwait = cv_mem->cv_L;
     cvRescale(cv_mem);
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-    SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+    SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
       "CVODE::cvDoErrorTest", "new-step-eta-mxnef1",
       "eta = %.16g", cv_mem->cv_eta);
 #endif
@@ -3197,8 +3203,8 @@ static int cvDoErrorTest(CVodeMem cv_mem, int *nflagPtr, realtype saved_t,
 
   N_VScale(cv_mem->cv_h, cv_mem->cv_tempv, cv_mem->cv_zn[1]);
 
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
     "CVODE::cvDoErrorTest", "new-step-eta-mxnef1-q1",
     "eta = %.16g", cv_mem->cv_eta);
 #endif
@@ -3264,10 +3270,11 @@ static void cvCompleteStep(CVodeMem cv_mem)
   }
 #endif
 
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
     "CVODE::cvCompleteStep", "return",
-    "nst = %d, nscon = %d", cv_mem->cv_nst, cv_mem->cv_nscon);
+    "t = %.16Lf, nst = %d, nscon = %d", cv_mem->cv_tn, cv_mem->cv_nst, cv_mem->cv_nscon);
+  SUNLogger_Break(CV_LOGGER, SUN_LOGLEVEL_INFO);
 #endif
 }
 
@@ -3311,16 +3318,26 @@ static void cvPrepareNextStep(CVodeMem cv_mem, realtype dsm)
 
   /* See if we should switch to fixed-point from Newton */
   if (SUNNonlinSolGetType(cv_mem->NLS) == SUNNONLINEARSOLVER_ROOTFIND) {
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
+    "CVODE::cvPrepareNextStep", "switch-to-fp",
+    "stifr = %.16g", cv_mem->cv_stifr);
+#endif
     if (cv_mem->cv_stifr < SUN_RCONST(1.5)) {
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
+    "CVODE::cvPrepareNextStep", "switch-to-fp",
+    "switch to fixed point", cv_mem->cv_stifr);
+#endif
       cvNlsSwitch(cv_mem, cv_mem->NLS_fixedpoint);
     }
   }
 
 
-#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_DEBUG
-  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_DEBUG,
+#if SUNDIALS_LOGGING_LEVEL >= SUNDIALS_LOGGING_INFO
+  SUNLogger_QueueMsg(CV_LOGGER, SUN_LOGLEVEL_INFO,
     "CVODE::cvPrepareNextStep", "return",
-    "eta = %.16g, hprime = %.16g, qprime = %d, qwait = %d\n",
+    "eta = %.16g, hprime = %.16g, qprime = %d, qwait = %d",
     cv_mem->cv_eta, cv_mem->cv_hprime, cv_mem->cv_qprime, cv_mem->cv_qwait);
 #endif
 }

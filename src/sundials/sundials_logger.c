@@ -475,6 +475,40 @@ int SUNLogger_QueueMsg(SUNLogger logger, SUNLogLevel lvl, const char* scope,
   return retval;
 }
 
+int SUNLogger_Break(SUNLogger logger, SUNLogLevel lvl)
+{
+  int retval = 0;
+  switch (lvl)
+  {
+    case (SUN_LOGLEVEL_DEBUG):
+      if (logger->debug_fp)
+      {
+        fprintf(logger->debug_fp, "%s", "----------------------------------------------------------\n");
+      }
+      break;
+    case (SUN_LOGLEVEL_WARNING):
+      if (logger->warning_fp)
+      {
+        fprintf(logger->warning_fp, "%s", "----------------------------------------------------------\n");
+      }
+      break;
+    case (SUN_LOGLEVEL_INFO):
+      if (logger->info_fp)
+      {
+        fprintf(logger->info_fp, "%s", "----------------------------------------------------------\n");
+      }
+      break;
+    case (SUN_LOGLEVEL_ERROR):
+      if (logger->error_fp)
+      {
+        fprintf(logger->error_fp, "%s", "----------------------------------------------------------\n");
+      }
+      break;
+    default:
+      retval = -1;
+  }
+}
+
 int SUNLogger_Flush(SUNLogger logger, SUNLogLevel lvl)
 {
   int retval = 0;
