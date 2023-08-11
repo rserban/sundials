@@ -136,6 +136,9 @@ Changes in vX.X.X
 Fixed a memory leak when destroying a CUDA, HIP, SYCL, or system SUNMemoryHelper
 object.
 
+Changed the SUNProfiler so that it does not rely on MPI_WTime in any case.
+This fixes `GitHub Issue #312 <https://github.com/LLNL/sundials/issues/312>`_. 
+
 Changes in v5.6.0
 -----------------
 
@@ -951,7 +954,6 @@ utilize a zero initial guess.
 
 A bug was fixed in the ARKODE stepper modules where the stop time may be passed
 after resetting the integrator.
-
 
 Changes in v4.7.0
 -----------------

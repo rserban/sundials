@@ -5,6 +5,9 @@
 Fixed a memory leak when destroying a CUDA, HIP, SYCL, or system SUNMemoryHelper
 object.
 
+Changed the SUNProfiler so that it does not rely on MPI_WTime in any case.
+This fixes https://github.com/LLNL/sundials/issues/312. 
+
 ## Changes to SUNDIALS in release 6.6.0
 
 A new time-stepping module, `SPRKStep`, was added to ARKODE. This time-stepper
